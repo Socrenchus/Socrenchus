@@ -111,7 +111,7 @@ class WikiPage(BaseRequestHandler):
 
     # Create or overwrite the page
     page = Page.load(page_name)
-    page.content = self.request.get('content')
+    page.content += self.request.get('content')
     page.save()
     self.redirect(page.view_url())
 

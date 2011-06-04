@@ -33,10 +33,11 @@
 {% endblock %}
 
 {% block body %}
+{{ page.wikified_content }}
   <form action="{{ page.edit_url|escape }}" method="post">
-    <div><textarea rows="10" cols="50" id="content" style="width: 100%; height: 400px" name="content">{{ page.content|escape }}</textarea></div>
+    <div><textarea rows="10" cols="50" id="content" style="width: 100%; height: 200px" name="content"></textarea></div>
     <div class="buttons">
-      <span class="item"><input style="font-weight: bold" type="submit" value="Save Changes"/></span>
+      <span class="item"><input style="font-weight: bold" type="submit" value="Post"/></span>
       <span class="item"><input type="button" onclick="location.href='{{ page.view_url|escape }}'" value="Cancel"/></span>
     </div>
   </form>
