@@ -76,19 +76,19 @@ class WikiPage(BaseRequestHandler):
     # Load the main page by default
     if not page_name:
       page_name = 'MainPage'
-    page = Page.load(page_name)
+    page = Question.load(page_name)
 
     # Default to edit for pages that do not yet exist
     if not page.entity:
       mode = 'edit'
     else:
-      modes = ['view', 'edit']
+      modes = ['view', 'edit', 'answer']
       mode = self.request.get('mode')
       if not mode in modes:
         mode = 'view'
 
     # User must be logged in to edit
-    if mode == 'edit' and not users.GetCurrentUser():
+    if (mode == 'edit' or mode == 'answer') and not users.GetCurrentUser():
       self.redirect(users.CreateLoginURL(self.request.uri))
       return
 
@@ -108,20 +108,30 @@ class WikiPage(BaseRequestHandler):
     # We need an explicit page name for editing
     if not page_name:
       self.redirect('/')
+      
+    modes = ['edit', 'answer']
+    mode = self.request.get('mode')
+    # We need to know the mode
+    if not mode in modes:
+      self.redirect(page.view_url())
 
-    # Create or overwrite the page
-    page = Page.load(page_name)
-    page.content += self.request.get('content')
+    page = Question.load(page_name)
+    if mode == 'edit':
+      # Create or overwrite the page
+      page.content = self.request.get('content')
+    elif mode == 'answer':
+      # Post the answer
+      page.content += self.request.get('content')
+      
     page.save()
     self.redirect(page.view_url())
 
+class Question(object):
+  """Abstraction for a Question.
 
-class Page(object):
-  """Our abstraction for a Wiki page.
-
-  We handle all datastore operations so that new pages are handled
-  seamlessly. To create OR edit a page, just create a Page instance and
-  clal save().
+  We handle all datastore operations so that new questions are handled
+  seamlessly. To create OR edit a question, just create a Question instance and
+  call save().
   """
   def __init__(self, name, entity=None):
     self.name = name
@@ -147,6 +157,9 @@ class Page(object):
 
   def edit_url(self):
     return '/' + self.name + '?mode=edit'
+    
+  def answer_url(self):
+    return '/' + self.name + '?mode=answer'
 
   def view_url(self):
     return '/' + self.name
@@ -173,7 +186,7 @@ class Page(object):
     if self.entity:
       entity = self.entity
     else:
-      entity = datastore.Entity('Page')
+      entity = datastore.Entity('Question')
       entity['name'] = self.name
       entity['created'] = now
     entity['content'] = datastore_types.Text(self.content)
@@ -190,22 +203,22 @@ class Page(object):
   def load(name):
     """Loads the page with the given name.
 
-    We always return a Page instance, even if the given name isn't yet in
-    the database. In that case, the Page object will be created when save()
+    We always return a Question instance, even if the given name isn't yet in
+    the database. In that case, the Question object will be created when save()
     is called.
     """
-    query = datastore.Query('Page')
+    query = datastore.Query('Question')
     query['name ='] = name
     entities = query.Get(1)
     if len(entities) < 1:
-      return Page(name)
+      return Question(name)
     else:
-      return Page(name, entities[0])
+      return Question(name, entities[0])
 
   @staticmethod
   def exists(name):
     """Returns true if the page with the given name exists in the datastore."""
-    return Page.load(name).entity
+    return Question.load(name).entity
 
 
 class Transform(object):
@@ -248,7 +261,7 @@ class WikiWords(Transform):
 
   def replace(self, match):
     wikiword = match.group(0)
-    if Page.exists(wikiword):
+    if Question.exists(wikiword):
       return '<a class="wikiword" href="/%s">%s</a>' % (wikiword, wikiword)
     else:
       return wikiword

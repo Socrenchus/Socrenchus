@@ -19,7 +19,10 @@
   </style>
 {% endblock %}
 
-{% block buttons %}<span class="item"><input type="button" onclick="location.href='{{ page.edit_url|escape }}'" value="Edit This Page"/></span>{% endblock %}
+{% block buttons %}
+<span class="item"><input type="button" onclick="location.href='{{ page.edit_url|escape }}'" value="Edit"/></span>
+<span class="item"><input type="button" onclick="location.href='{{ page.answer_url|escape }}'" value="Answer"/></span>
+{% endblock %}
 
 {% block body %}
   {{ page.wikified_content }}
