@@ -37,6 +37,7 @@ from google.appengine.api import datastore
 from google.appengine.api import datastore_types
 from google.appengine.api import users
 from google.appengine.ext import webapp
+from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 
 # Set to true if we want to have our webapp print stack traces, etc
@@ -62,7 +63,34 @@ class BaseRequestHandler(webapp.RequestHandler):
     path = os.path.join(directory, os.path.join('templates', template_name))
     self.response.out.write(template.render(path, values, debug=_DEBUG))
 
-class WikiPage(BaseRequestHandler):
+class CreateQuestion(BaseRequestHandler):
+  def get(self):
+
+    # User must be logged in to edit
+    if not users.GetCurrentUser():
+      self.redirect(users.CreateLoginURL(self.request.uri))
+      return
+
+    # Genertate the appropriate template
+    self.generate('create.html')
+    
+  def post(self):
+    # User must be logged in to edit
+    if not users.GetCurrentUser():
+      # The GET version of this URI is just the view/edit mode, which is a
+      # reasonable thing to redirect to
+      self.redirect(users.CreateLoginURL(self.request.uri))
+      return
+      
+    page = Question()
+      
+    # Create or overwrite the page
+    page.content = self.request.get('content')
+      
+    page.put()
+    self.redirect(page.view_url())
+
+class QuestionPage(BaseRequestHandler):
   """Our one and only request handler.
 
   We first determine which page we are editing, using "MainPage" if no
@@ -75,11 +103,12 @@ class WikiPage(BaseRequestHandler):
   def get(self, page_name):
     # Load the main page by default
     if not page_name:
-      page_name = 'MainPage'
-    page = Question.load(page_name)
+      page_name = '0'
+    
+    page = Question.get_by_id(int(page_name))
 
     # Default to edit for pages that do not yet exist
-    if not page.entity:
+    if not page:
       mode = 'edit'
     else:
       modes = ['view', 'edit', 'answer']
@@ -111,11 +140,14 @@ class WikiPage(BaseRequestHandler):
       
     modes = ['edit', 'answer']
     mode = self.request.get('mode')
-    # We need to know the mode
+    # Assume edit mode if not specified
     if not mode in modes:
-      self.redirect(page.view_url())
+      mode = 'edit'
 
-    page = Question.load(page_name)
+    page = Question.get_by_id(int(page_name))
+    if not page:
+      page = Question()
+      
     if mode == 'edit':
       # Create or overwrite the page
       page.content = self.request.get('content')
@@ -123,177 +155,33 @@ class WikiPage(BaseRequestHandler):
       # Post the answer
       page.content += self.request.get('content')
       
-    page.save()
+    page.put()
     self.redirect(page.view_url())
 
-class Question(object):
-  """Abstraction for a Question.
-
-  We handle all datastore operations so that new questions are handled
-  seamlessly. To create OR edit a question, just create a Question instance and
-  call save().
-  """
-  def __init__(self, name, entity=None):
-    self.name = name
-    self.entity = entity
-    if entity:
-      self.content = entity['content']
-      if entity.has_key('user'):
-        self.user = entity['user']
-      else:
-        self.user = None
-      self.created = entity['created']
-      self.modified = entity['modified']
-    else:
-      # New pages should start out with a simple title to get the user going
-      now = datetime.datetime.now()
-      self.content = '<h1>' + cgi.escape(name) + '</h1>'
-      self.user = None
-      self.created = now
-      self.modified = now
-
-  def entity(self):
-    return self.entity
+class Answer(db.Model):
+  """ Database model for an Answer """
+  content = db.StringProperty(required=True)
+  correctness = db.IntegerProperty()
+    
+class Question(db.Model):
+  """ Database model for an Question """
+  content = db.StringProperty()
+  answers = db.ListProperty(db.Key)
 
   def edit_url(self):
-    return '/' + self.name + '?mode=edit'
+    return '/' + str(self.key().id()) + '?mode=edit'
     
   def answer_url(self):
-    return '/' + self.name + '?mode=answer'
+    return '/' + str(self.key().id()) + '?mode=answer'
 
   def view_url(self):
-    return '/' + self.name
-
-  def wikified_content(self):
-    """Applies our wiki transforms to our content for HTML display.
-
-    We auto-link URLs, link WikiWords, and hide referers on links that
-    go outside of the Wiki.
-    """
-    transforms = [
-      AutoLink(),
-      WikiWords(),
-      HideReferers(),
-    ]
-    content = self.content
-    for transform in transforms:
-      content = transform.run(content)
-    return content
-
-  def save(self):
-    """Creates or edits this page in the datastore."""
-    now = datetime.datetime.now()
-    if self.entity:
-      entity = self.entity
-    else:
-      entity = datastore.Entity('Question')
-      entity['name'] = self.name
-      entity['created'] = now
-    entity['content'] = datastore_types.Text(self.content)
-    entity['modified'] = now
-
-    if users.GetCurrentUser():
-      entity['user'] = users.GetCurrentUser()
-    elif entity.has_key('user'):
-      del entity['user']
-
-    datastore.Put(entity)
-
-  @staticmethod
-  def load(name):
-    """Loads the page with the given name.
-
-    We always return a Question instance, even if the given name isn't yet in
-    the database. In that case, the Question object will be created when save()
-    is called.
-    """
-    query = datastore.Query('Question')
-    query['name ='] = name
-    entities = query.Get(1)
-    if len(entities) < 1:
-      return Question(name)
-    else:
-      return Question(name, entities[0])
-
-  @staticmethod
-  def exists(name):
-    """Returns true if the page with the given name exists in the datastore."""
-    return Question.load(name).entity
-
-
-class Transform(object):
-  """Abstraction for a regular expression transform.
-
-  Transform subclasses have two properties:
-     regexp: the regular expression defining what will be replaced
-     replace(MatchObject): returns a string replacement for a regexp match
-
-  We iterate over all matches for that regular expression, calling replace()
-  on the match to determine what text should replace the matched text.
-
-  The Transform class is more expressive than regular expression replacement
-  because the replace() method can execute arbitrary code to, e.g., look
-  up a WikiWord to see if the page exists before determining if the WikiWord
-  should be a link.
-  """
-  def run(self, content):
-    """Runs this transform over the given content.
-
-    We return a new string that is the result of this transform.
-    """
-    parts = []
-    offset = 0
-    for match in self.regexp.finditer(content):
-      parts.append(content[offset:match.start(0)])
-      parts.append(self.replace(match))
-      offset = match.end(0)
-    parts.append(content[offset:])
-    return ''.join(parts)
-
-
-class WikiWords(Transform):
-  """Translates WikiWords to links.
-
-  We look up all words, and we only link those words that currently exist.
-  """
-  def __init__(self):
-    self.regexp = re.compile(r'[A-Z][a-z]+([A-Z][a-z]+)+')
-
-  def replace(self, match):
-    wikiword = match.group(0)
-    if Question.exists(wikiword):
-      return '<a class="wikiword" href="/%s">%s</a>' % (wikiword, wikiword)
-    else:
-      return wikiword
-
-
-class AutoLink(Transform):
-  """A transform that auto-links URLs."""
-  def __init__(self):
-    self.regexp = re.compile(r'([^"])\b((http|https)://[^ \t\n\r<>\(\)&"]+' \
-                             r'[^ \t\n\r<>\(\)&"\.])')
-
-  def replace(self, match):
-    url = match.group(2)
-    return match.group(1) + '<a class="autourl" href="%s">%s</a>' % (url, url)
-
-
-class HideReferers(Transform):
-  """A transform that hides referers for external hyperlinks."""
-
-  def __init__(self):
-    self.regexp = re.compile(r'href="(http[^"]+)"')
-
-  def replace(self, match):
-    url = match.group(1)
-    scheme, host, path, parameters, query, fragment = urlparse.urlparse(url)
-    url = 'http://www.google.com/url?sa=D&amp;q=' + urllib.quote(url)
-    return 'href="' + url + '"'
+    return '/' + str(self.key().id())
 
 
 def main():
   application = webapp.WSGIApplication([
-    ('/(.*)', WikiPage),
+    ('/([0-9]*)', QuestionPage),
+    ('/new', CreateQuestion),
   ], debug=_DEBUG)
   wsgiref.handlers.CGIHandler().run(application)
 
