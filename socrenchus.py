@@ -63,49 +63,31 @@ class BaseRequestHandler(webapp.RequestHandler):
     path = os.path.join(directory, os.path.join('templates', template_name))
     self.response.out.write(template.render(path, values, debug=_DEBUG))
 
-class CreateQuestion(BaseRequestHandler):
-  def get(self):
-
-    # User must be logged in to edit
-    if not users.GetCurrentUser():
-      self.redirect(users.CreateLoginURL(self.request.uri))
-      return
-
-    # Genertate the appropriate template
-    self.generate('create.html')
+class Answer(db.Model):
+  """ Database model for an Answer """
+  content = db.StringProperty(required=True)
+  correctness = db.IntegerProperty()
     
-  def post(self):
-    # User must be logged in to edit
-    if not users.GetCurrentUser():
-      # The GET version of this URI is just the view/edit mode, which is a
-      # reasonable thing to redirect to
-      self.redirect(users.CreateLoginURL(self.request.uri))
-      return
-      
-    page = Question()
-      
-    # Create or overwrite the page
-    page.content = self.request.get('content')
-      
-    page.put()
-    self.redirect(page.view_url())
+class Question(db.Model,BaseRequestHandler):
+  """ Database model for an Question """
+  content = db.StringProperty()
+  answers = db.ListProperty(db.Key)
 
-class QuestionPage(BaseRequestHandler):
-  """Our one and only request handler.
-
-  We first determine which page we are editing, using "MainPage" if no
-  page is specified in the URI. We then determine the mode we are in (view
-  or edit), choosing "view" by default.
-
-  POST requests to this handler handle edit operations, writing the new page
-  to the datastore.
-  """
-  def get(self, page_name):
-    # Load the main page by default
-    if not page_name:
-      page_name = '0'
+  def edit_url(self):
+    return '/' + str(self.key().id()) + '?mode=edit'
     
-    page = Question.get_by_id(int(page_name))
+  def answer_url(self):
+    return '/' + str(self.key().id()) + '?mode=answer'
+
+  def view_url(self):
+    return '/' + str(self.key().id())
+    
+  def get(self, page_name=None):
+    
+    if page_name:
+      page = Question.get_by_id(int(page_name))
+    else:
+      page = None
 
     # Default to edit for pages that do not yet exist
     if not page:
@@ -125,18 +107,14 @@ class QuestionPage(BaseRequestHandler):
     self.generate(mode + '.html', {
       'page': page,
     })
-
-  def post(self, page_name):
+    
+  def post(self, page_name=None):
     # User must be logged in to edit
     if not users.GetCurrentUser():
       # The GET version of this URI is just the view/edit mode, which is a
       # reasonable thing to redirect to
       self.redirect(users.CreateLoginURL(self.request.uri))
       return
-
-    # We need an explicit page name for editing
-    if not page_name:
-      self.redirect('/')
       
     modes = ['edit', 'answer']
     mode = self.request.get('mode')
@@ -144,9 +122,12 @@ class QuestionPage(BaseRequestHandler):
     if not mode in modes:
       mode = 'edit'
 
-    page = Question.get_by_id(int(page_name))
-    if not page:
+    if not page_name:
       page = Question()
+    else:
+      page = Question.get_by_id(int(page_name))
+      if not page:
+        page = Question()
       
     if mode == 'edit':
       # Create or overwrite the page
@@ -158,30 +139,10 @@ class QuestionPage(BaseRequestHandler):
     page.put()
     self.redirect(page.view_url())
 
-class Answer(db.Model):
-  """ Database model for an Answer """
-  content = db.StringProperty(required=True)
-  correctness = db.IntegerProperty()
-    
-class Question(db.Model):
-  """ Database model for an Question """
-  content = db.StringProperty()
-  answers = db.ListProperty(db.Key)
-
-  def edit_url(self):
-    return '/' + str(self.key().id()) + '?mode=edit'
-    
-  def answer_url(self):
-    return '/' + str(self.key().id()) + '?mode=answer'
-
-  def view_url(self):
-    return '/' + str(self.key().id())
-
 
 def main():
   application = webapp.WSGIApplication([
-    ('/([0-9]*)', QuestionPage),
-    ('/new', CreateQuestion),
+    ('/(.*)', Question),
   ], debug=_DEBUG)
   wsgiref.handlers.CGIHandler().run(application)
 
