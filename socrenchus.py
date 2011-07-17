@@ -1,28 +1,16 @@
 #!/usr/bin/env python
 #
-# Copyright 2008 Google Inc.
+# Copyright 2011 Bryan Goldstein
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
-"""A simple Google App Engine wiki application.
+"""A crowd sourced system for directed learning
 
-The main distinguishing feature is that editing is in a WYSIWYG editor
-rather than a text editor with special syntax.  This application uses
-google.appengine.api.datastore to access the datastore.  This is a
-lower-level API on which google.appengine.ext.db depends.
+This tool is designed to be a one stop shop for discovering
+new and interesting topics, sharing knowledge, and learning
+at a cost much lower then at a university.
 """
 
-__author__ = 'Bret Taylor'
+__author__ = 'Bryan Goldstein'
 
 import cgi
 import datetime
@@ -93,19 +81,24 @@ class Question(db.Model,BaseRequestHandler):
     if not page:
       mode = 'edit'
     else:
-      modes = ['view', 'edit', 'answer']
+      modes = ['view', 'edit']
       mode = self.request.get('mode')
       if not mode in modes:
         mode = 'view'
 
     # User must be logged in to edit
-    if (mode == 'edit' or mode == 'answer') and not users.GetCurrentUser():
+    if mode == 'edit' and not users.GetCurrentUser():
       self.redirect(users.CreateLoginURL(self.request.uri))
       return
+	
+	# Format the answers
+    answers = [Answer.get(a).content for a in page.answers]
+    #answers = reduce(lambda a,b: a+b,answers)
 
     # Genertate the appropriate template
-    self.generate(mode + '.html', {
+    self.generate('question/'+mode + '.html', {
       'page': page,
+      'answers': answers,
     })
     
   def post(self, page_name=None):
@@ -134,7 +127,9 @@ class Question(db.Model,BaseRequestHandler):
       page.content = self.request.get('content')
     elif mode == 'answer':
       # Post the answer
-      page.content += self.request.get('content')
+      answer = Answer(content=self.request.get('content'),parent=page)
+      answer.put()
+      page.answers.append(answer.key())
       
     page.put()
     self.redirect(page.view_url())
