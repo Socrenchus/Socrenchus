@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Directed Learning</title>
+</head>
+<body>
+    <h1>Learn</h1>
+    {{ question_text }}
+	<form action="" method="post">
+	{% for answer in answers %}
+	    <input type="radio" name="answer" value="{{ answer }}" onclick="submit();"/> {{ answer }}<br />
+	{% endfor %}
+	</form>
+</body>
+</html>

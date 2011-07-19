@@ -15,4 +15,4 @@ handlers:
   static_dir: static
 
 - url: .*
-  script: socrenchus.py
+  script: main.py

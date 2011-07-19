@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Directed Learning</title>
+</head>
+<body>
+    <h1>Teach</h1>
+	<form action="/" method="post">
+	    <table class="question-table">
+            <tr>
+                <td class="question-cell-key">
+                    <label for="question">Question</label>
+                </td>
+                <td class="question-cell-value">
+                    <input id="question" name="question" type="text" maxlength="300" class="question-field" value="">                        
+                    <span class="edit-field-overlay">ask your student a question. keep it unambiguous</span>
+                </td>
+            </tr>
+        </table>
+        <div id="similar-questions"></div>
+        <table class="answer-table">
+            <tr>
+                <td>
+                    <label for="correct-answer">Correct Answer</label>
+                </td>
+                <td>
+                    <input id="correct-answer" name="correct-answer" type="text" maxlength="300">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="correct-answer-next">&#8627;Next Question</label>
+                </td>
+                <td>
+                    <input id="correct-answer-next" name="correct-answer-next" type="text" maxlength="300">
+                </td>
+                <td>
+                    <a href="">Find or Create One</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="incorrect-answer1">Incorrect Answer</label>
+                </td>
+                <td>
+                    <input id="incorrect-answer1" name="incorrect-answer1" type="text" maxlength="300">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="incorrect-answer1-help">&#8627;Help Question</label>
+                </td>
+                <td>
+                    <input id="incorrect-answer1-help" name="incorrect-answer1-help" type="text" maxlength="300">
+                </td>
+                <td>
+                    <a href="">Find or Create One</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="incorrect-answer2">Incorrect Answer</label>
+                </td>
+                <td>
+                    <input id="incorrect-answer2" name="incorrect-answer2" type="text" maxlength="300">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="incorrect-answer2-help">&#8627;Help Question</label>
+                </td>
+                <td>
+                    <input id="incorrect-answer2-help" name="incorrect-answer2-help" type="text" maxlength="300">
+                </td>
+                <td>
+                    <a href="">Find or Create One</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="incorrect-answer3">Incorrect Answer</label>
+                </td>
+                <td>
+                    <input id="incorrect-answer3" name="incorrect-answer3" type="text" maxlength="300">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="incorrect-answer3-help">&#8627;Help Question</label>
+                </td>
+                <td>
+                    <input id="incorrect-answer3-help" name="incorrect-answer3-help" type="text" maxlength="300">
+                </td>
+                <td>
+                    <a href="">Find or Create One</a>
+                </td>
+            </tr>
+        </table>
+	  <input type="submit" value="Create" />
+	</form>
+</body>
+</html>
