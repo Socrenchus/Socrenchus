@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Directed Learning</title>
+{% if url %}
+<meta http-equiv="refresh" content="2;url={{ url }}">
+{% endif %}
+</head>
+<body>
+    {% if correct %}
+    <h1>Correct</h1>
+    {% else %}
+    <h1>Wrong</h1>
+    {% endif %}
+</body>
+</html>

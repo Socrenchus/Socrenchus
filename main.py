@@ -50,7 +50,8 @@ class NewQuestionHandler(webapp.RequestHandler):
     if aURL is None:
       return None
     o = urlparse.urlparse(aURL)
-    return o.path.split('/')[0]
+    q = Question.get(o.path.split('/')[1])
+    return q
   def get(self):
     """Displays the new question form."""
     path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'NewQuestion.html'))
@@ -60,13 +61,21 @@ class NewQuestionHandler(webapp.RequestHandler):
     q = Question()
     q.value = self.request.get('question')
     q.correct = self.request.get('correct-answer')
-    #q.correct_next = self.parseRefUrl(self.request.get('correct-answer-next'))
+    correct_next_url = self.request.get('correct-answer-next')
+    if (correct_next_url):
+      q.correct_next = self.parseRefUrl(correct_next_url)
     q.incorrect1 = self.request.get('incorrect-answer1')
-    #q.incorrect1_help = self.parseRefUrl(self.request.get('incorrect-answer1-help'))
+    incorrect_answer1_help_url = self.request.get('incorrect-answer1-help')
+    if (incorrect_answer1_help_url):
+      q.incorrect1_help = self.parseRefUrl(incorrect_answer1_help_url)
     q.incorrect2 = self.request.get('incorrect-answer2')
-    #q.incorrect2_help = self.parseRefUrl(self.request.get('incorrect-answer2-help'))
+    incorrect_answer2_help_url = self.request.get('incorrect-answer2-help')
+    if (incorrect_answer2_help_url):
+      q.incorrect2_help = self.parseRefUrl(incorrect_answer2_help_url)
     q.incorrect3 = self.request.get('incorrect-answer3')
-    #q.incorrect3_help = self.parseRefUrl(self.request.get('incorrect-answer3-help'))
+    incorrect_answer3_help_url = self.request.get('incorrect-answer3-help')
+    if (incorrect_answer3_help_url):
+      q.incorrect3_help = self.parseRefUrl(incorrect_answer3_help_url)
     q.put()
     o = urlparse.urlparse(self.request.url)
     s = urlparse.urlunparse((o.scheme, o.netloc, '/'+str(q.key()), '', '', ''))
@@ -81,24 +90,33 @@ class AskQuestionHandler(webapp.RequestHandler):
       template_vars = {
         "question_text" : q.value,
         "answers" : answers,
-        "answered" : False
       }
       path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'AskQuestion.html'))
       self.response.out.write(template.render(path, template_vars, debug=_DEBUG))
     def post(self,key):
       """Grade the answer that has been chosen."""
+      ans = self.request.get('answer')
       q = Question.get(key)
+      o = urlparse.urlparse(self.request.url)
+      next_question = None
+      s = None
+      if ans == q.correct:
+        next_question = q.correct_next
+      elif ans == q.incorrect1:
+        next_question = q.incorrect1_help
+      elif ans == q.incorrect2:
+        next_question = q.incorrect2_help
+      elif ans == q.incorrect3:
+        next_question = q.incorrect3_help
+      if next_question:
+        s = urlparse.urlunparse((o.scheme, o.netloc, '/'+str(next_question.key()), '', '', ''))
       template_vars = {
-        "question_text" : q.value,
-        #TODO: respect order
-        "answers" : [q.correct, q.incorrect1, q.incorrect2, q.incorrect3],
-        "selected_answer" : self.request.get('answer'),
-        "correct_answer" : q.correct,
-        "answered" : True
+        "url" : s,
+        "correct" : q.correct == ans,
       }
-      path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'AskQuestion.html'))
+      path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'Response.html'))
       self.response.out.write(template.render(path, template_vars, debug=_DEBUG))
-      #TODO: respect order
+
 def main():
   application = webapp.WSGIApplication([
     (r'/(.+)', AskQuestionHandler),
