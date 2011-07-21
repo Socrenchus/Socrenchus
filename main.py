@@ -28,11 +28,12 @@ from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
+from search import *
 
 
 _DEBUG = True
 
-class Question(db.Model):
+class Question(Searchable,db.Model):
   value = db.TextProperty()
   correct = db.TextProperty()
   correct_next = db.SelfReferenceProperty(collection_name="next_questions")
@@ -42,7 +43,7 @@ class Question(db.Model):
   incorrect2_help = db.SelfReferenceProperty(collection_name="help_questions2")
   incorrect3 = db.TextProperty()
   incorrect3_help = db.SelfReferenceProperty(collection_name="help_questions3")
-  order = db.IntegerProperty()
+  INDEX_TITLE_FROM_PROP = 'value'
 
 class NewQuestionHandler(webapp.RequestHandler):
   def parseRefUrl(self, aURL):
@@ -76,10 +77,16 @@ class NewQuestionHandler(webapp.RequestHandler):
     incorrect_answer3_help_url = self.request.get('incorrect-answer3-help')
     if (incorrect_answer3_help_url):
       q.incorrect3_help = self.parseRefUrl(incorrect_answer3_help_url)
-    q.put()
-    o = urlparse.urlparse(self.request.url)
-    s = urlparse.urlunparse((o.scheme, o.netloc, '/'+str(q.key()), '', '', ''))
-    self.response.out.write(s)
+    # Search for existing entry
+    results = Question.search(q.value);
+    if len(results) == 0:
+      q.put()
+      q.index()
+      o = urlparse.urlparse(self.request.url)
+      s = urlparse.urlunparse((o.scheme, o.netloc, '/'+str(q.key()), '', '', ''))
+      self.response.out.write(s)
+    else:
+      self.response.out.write("found")
     
 class AskQuestionHandler(webapp.RequestHandler):
     def get(self,key):
