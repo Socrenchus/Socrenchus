@@ -2,22 +2,25 @@
 <html lang="en">
 <head>
 <title>Directed Learning</title>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="/static/javascript/instant.js"></script>
 </head>
 <body>
     <h1>Teach</h1>
-	<form action="/" method="post">
+	<form action="/new" method="post">
+	     
 	    <table class="question-table">
             <tr>
                 <td class="question-cell-key">
                     <label for="question">Question</label>
                 </td>
                 <td class="question-cell-value">
-                    <input id="question" name="question" type="text" maxlength="300" class="question-field" value="">                        
+                    <input id="question" name="question" type="text" maxlength="300" class="question-field" value="">                   
                     <span class="edit-field-overlay">ask your student a question. keep it unambiguous</span>
                 </td>
             </tr>
         </table>
-        <div id="similar-questions"></div>
+        <div id="results"></div>
         <table class="answer-table">
             <tr>
                 <td>
@@ -35,7 +38,7 @@
                     <input id="correct-answer-next" name="correct-answer-next" type="text" maxlength="300">
                 </td>
                 <td>
-                    <a href="">Find or Create One</a>
+                    <a href="/" target="_blank">Find One</a>
                 </td>
             </tr>
             <tr>
@@ -54,7 +57,7 @@
                     <input id="incorrect-answer1-help" name="incorrect-answer1-help" type="text" maxlength="300">
                 </td>
                 <td>
-                    <a href="">Find or Create One</a>
+                    <a href="/" target="_blank">Find One</a>
                 </td>
             </tr>
             <tr>
@@ -73,7 +76,7 @@
                     <input id="incorrect-answer2-help" name="incorrect-answer2-help" type="text" maxlength="300">
                 </td>
                 <td>
-                    <a href="">Find or Create One</a>
+                    <a href="/" target="_blank">Find One</a>
                 </td>
             </tr>
             <tr>
@@ -92,7 +95,7 @@
                     <input id="incorrect-answer3-help" name="incorrect-answer3-help" type="text" maxlength="300">
                 </td>
                 <td>
-                    <a href="">Find or Create One</a>
+                    <a href="/" target="_blank">Find One</a>
                 </td>
             </tr>
         </table>

@@ -44,6 +44,16 @@ class Question(Searchable,db.Model):
   incorrect3 = db.TextProperty()
   incorrect3_help = db.SelfReferenceProperty(collection_name="help_questions3")
   INDEX_TITLE_FROM_PROP = 'value'
+  
+class SearchHandler(webapp.RequestHandler):
+  def get(self):
+    # Search for existing entry
+    q = self.request.get('q')
+    results = None
+    if q:
+      results = Question.search(q)
+    path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'SearchQuestion.html'))
+    self.response.out.write(template.render(path, {"results":results,"query":q}, debug=_DEBUG))
 
 class NewQuestionHandler(webapp.RequestHandler):
   def parseRefUrl(self, aURL):
@@ -77,16 +87,14 @@ class NewQuestionHandler(webapp.RequestHandler):
     incorrect_answer3_help_url = self.request.get('incorrect-answer3-help')
     if (incorrect_answer3_help_url):
       q.incorrect3_help = self.parseRefUrl(incorrect_answer3_help_url)
-    # Search for existing entry
-    results = Question.search(q.value);
-    if len(results) == 0:
-      q.put()
-      q.index()
-      o = urlparse.urlparse(self.request.url)
-      s = urlparse.urlunparse((o.scheme, o.netloc, '/'+str(q.key()), '', '', ''))
-      self.response.out.write(s)
-    else:
-      self.response.out.write("found")
+    
+    q.put()
+    q.index()
+    o = urlparse.urlparse(self.request.url)
+    s = urlparse.urlunparse((o.scheme, o.netloc, '/'+str(q.key()), '', '', ''))
+    path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'LinkExplainer.html'))
+    self.response.out.write(template.render(path, {'link':s,'question':q.value}, debug=_DEBUG))
+
     
 class AskQuestionHandler(webapp.RequestHandler):
     def get(self,key):
@@ -126,8 +134,9 @@ class AskQuestionHandler(webapp.RequestHandler):
 
 def main():
   application = webapp.WSGIApplication([
+    ('/', SearchHandler),
+    ('/new', NewQuestionHandler),
     (r'/(.+)', AskQuestionHandler),
-    ('/', NewQuestionHandler),
   ], debug=_DEBUG)
   wsgiref.handlers.CGIHandler().run(application)
 
