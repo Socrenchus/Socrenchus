@@ -2,15 +2,43 @@
 <html lang="en">
 <head>
 <title>Directed Learning</title>
-{% if url %}
-<meta http-equiv="refresh" content="10;url={{ url }}">
+{% if next %}
+<meta http-equiv="refresh" content="10;url={{ next.0.key }}">
 {% endif %}
 </head>
 <body>
     {% if correct %}
     <h1>Correct</h1>
+    <!-- Place this tag where you want the +1 button to render -->
+    <g:plusone callback="plusOne"></g:plusone>
+
+    <!--  Place this tag after the last plusone tag -->
+    <script type="text/javascript">
+      function plusOne(test) {
+        console.log('hello');
+      }
+    
+      (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+      })();
+    </script>
     {% else %}
     <h1>Wrong</h1>
     {% endif %}
+    
+    {% if next %}
+    {% for q in next %}
+      <a href="{{ q.key }}">{{ q.value }}</a><br/>
+    {% endfor %}
+    {% else %}
+      {% if correct %}
+      write the next question
+      {% else %}
+      ask someone to write the next question
+      {% endif %}
+    {% endif %}
+
 </body>
 </html>
