@@ -8,6 +8,9 @@
 <body>
     <h1>Teach</h1>
 	<form action="/new" method="post">
+      {% for key, value in url_args.items %}
+      <input type="hidden" name="{{ key|escape }}" value="{{ value|escape }}"></input>
+      {% endfor %}
 	     
 	    <table class="question-table">
             <tr>
@@ -27,7 +30,7 @@
                     <label for="correct-answer">Correct Answer</label>
                 </td>
                 <td>
-                    <input id="correct-answer" name="correct-answer" type="text" maxlength="300">
+                    <input id="correct-answer" name="0-a" type="text" maxlength="300">
                 </td>
             </tr>
             <tr>
@@ -35,70 +38,35 @@
                     <label for="correct-answer-next">&#8627;Next Question</label>
                 </td>
                 <td>
-                    <input id="correct-answer-next" name="correct-answer-next" type="text" maxlength="300">
+                    <input id="correct-answer-next" name="0-n" type="text" maxlength="300">
                 </td>
                 <td>
                     <a href="/" target="_blank">Find One</a>
                 </td>
             </tr>
+            {% for i in '123'|make_list %}
             <tr>
                 <td>
-                    <label for="incorrect-answer1">Incorrect Answer</label>
+                    <label for="incorrect-answer{{ i }}">Incorrect Answer</label>
                 </td>
                 <td>
-                    <input id="incorrect-answer1" name="incorrect-answer1" type="text" maxlength="300">
+                    <input id="incorrect-answer{{ i }}" name="{{ i }}-a" type="text" maxlength="300">
                 </td>
             </tr>
             <tr>
                 <td>
-                    <label for="incorrect-answer1-help">&#8627;Help Question</label>
+                    <label for="incorrect-answer{{ i }}-help">&#8627;Help Question</label>
                 </td>
                 <td>
-                    <input id="incorrect-answer1-help" name="incorrect-answer1-help" type="text" maxlength="300">
+                    <input id="incorrect-answer{{ i }}-help" name="{{ i }}-n" type="text" maxlength="300">
                 </td>
                 <td>
                     <a href="/" target="_blank">Find One</a>
                 </td>
             </tr>
-            <tr>
-                <td>
-                    <label for="incorrect-answer2">Incorrect Answer</label>
-                </td>
-                <td>
-                    <input id="incorrect-answer2" name="incorrect-answer2" type="text" maxlength="300">
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="incorrect-answer2-help">&#8627;Help Question</label>
-                </td>
-                <td>
-                    <input id="incorrect-answer2-help" name="incorrect-answer2-help" type="text" maxlength="300">
-                </td>
-                <td>
-                    <a href="/" target="_blank">Find One</a>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="incorrect-answer3">Incorrect Answer</label>
-                </td>
-                <td>
-                    <input id="incorrect-answer3" name="incorrect-answer3" type="text" maxlength="300">
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="incorrect-answer3-help">&#8627;Help Question</label>
-                </td>
-                <td>
-                    <input id="incorrect-answer3-help" name="incorrect-answer3-help" type="text" maxlength="300">
-                </td>
-                <td>
-                    <a href="/" target="_blank">Find One</a>
-                </td>
-            </tr>
+            {% endfor %}
         </table>
+      
 	  <input type="submit" value="Create" />
 	</form>
 </body>

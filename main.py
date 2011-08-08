@@ -22,6 +22,11 @@ import urlparse
 import wsgiref.handlers
 import random
 
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+
+from google.appengine.dist import use_library
+use_library('django', '1.2')
+
 from google.appengine.api import datastore
 from google.appengine.api import datastore_types
 from google.appengine.api import users
@@ -30,24 +35,48 @@ from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from search import *
 
-
 _DEBUG = True
 
 class Question(Searchable,db.Model):
+  """
+  Model for a question object. Correct answer stored first.
+  """
   value = db.TextProperty()
-  correct = db.TextProperty()
-  correct_next = db.SelfReferenceProperty(collection_name="next_questions")
-  incorrect1 = db.TextProperty()
-  incorrect1_help = db.SelfReferenceProperty(collection_name="help_questions1")
-  incorrect2 = db.TextProperty()
-  incorrect2_help = db.SelfReferenceProperty(collection_name="help_questions2")
-  incorrect3 = db.TextProperty()
-  incorrect3_help = db.SelfReferenceProperty(collection_name="help_questions3")
   INDEX_TITLE_FROM_PROP = 'value'
   
+  @staticmethod
+  def parseRefUrl(aURL):
+    """
+    Turns a reference URL into a database object.
+    """
+    if not aURL:
+      return None
+    o = urlparse.urlparse(aURL)
+    q = Question.get(o.path.split('/')[1])
+    return q
+    
+class Answer(db.Model):
+  """
+  Holds an answer, along with its correctness and connections.
+  """
+  value = db.TextProperty()
+  correct = db.BooleanProperty()
+  question = db.ReferenceProperty(Question, collection_name="answers")
+  
+class Connection(db.Model):
+  """
+  Holds a directed connection from an answer to a question.
+  """
+  target = db.ReferenceProperty(Question)
+  weight = db.IntegerProperty()
+  answer = db.ReferenceProperty(Answer,collection_name="connections")
+  
 class SearchHandler(webapp.RequestHandler):
+  
   def get(self):
-    # Search for existing entry
+    """
+    Search for existing entry.
+    """
     q = self.request.get('q')
     results = None
     if q:
@@ -56,78 +85,100 @@ class SearchHandler(webapp.RequestHandler):
     self.response.out.write(template.render(path, {"results":results,"query":q}, debug=_DEBUG))
 
 class NewQuestionHandler(webapp.RequestHandler):
-  def parseRefUrl(self, aURL):
-    """Turns a reference URL into a database object."""
-    if aURL is None:
-      return None
-    o = urlparse.urlparse(aURL)
-    q = Question.get(o.path.split('/')[1])
-    return q
+  
   def get(self):
-    """Displays the new question form."""
+    """
+    Displays the new question form.
+    """
+    # grab the url arguments to put them into the form
+    url_args = {}
+    for a in self.request.arguments():
+      url_args[a] = self.request.get(a)
+      
+    # generate the template
     path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'NewQuestion.html'))
-    self.response.out.write(template.render(path, None, debug=_DEBUG))
+    self.response.out.write(template.render(path, {'url_args':url_args}, debug=_DEBUG))
+    
   def post(self):
-    """Stores a newly created question."""
+    """
+    Stores a newly created question.
+    """
+    # create the question
     q = Question()
     q.value = self.request.get('question')
-    q.correct = self.request.get('correct-answer')
-    correct_next_url = self.request.get('correct-answer-next')
-    if (correct_next_url):
-      q.correct_next = self.parseRefUrl(correct_next_url)
-    q.incorrect1 = self.request.get('incorrect-answer1')
-    incorrect_answer1_help_url = self.request.get('incorrect-answer1-help')
-    if (incorrect_answer1_help_url):
-      q.incorrect1_help = self.parseRefUrl(incorrect_answer1_help_url)
-    q.incorrect2 = self.request.get('incorrect-answer2')
-    incorrect_answer2_help_url = self.request.get('incorrect-answer2-help')
-    if (incorrect_answer2_help_url):
-      q.incorrect2_help = self.parseRefUrl(incorrect_answer2_help_url)
-    q.incorrect3 = self.request.get('incorrect-answer3')
-    incorrect_answer3_help_url = self.request.get('incorrect-answer3-help')
-    if (incorrect_answer3_help_url):
-      q.incorrect3_help = self.parseRefUrl(incorrect_answer3_help_url)
-    
     q.put()
+    
+    # loop through the four answers
+    for i in range(4):
+      # now create the answer
+      a = Answer()
+      a.value = self.request.get(str(i)+'-a')
+      a.correct = (i == 0)
+      a.question = q
+      a.put()
+      # create the connection if included
+      target = Question.parseRefUrl(self.request.get(str(i)+'-n'))
+      if (target):
+        c = Connection()
+        c.target = Question.get(target)
+        c.answer = a
+        c.put()
+      
+    # index question
     q.index()
+    
+    # build the question url
     o = urlparse.urlparse(self.request.url)
     s = urlparse.urlunparse((o.scheme, o.netloc, '/'+str(q.key()), '', '', ''))
+    # display it
     path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'LinkExplainer.html'))
     self.response.out.write(template.render(path, {'link':s,'question':q.value}, debug=_DEBUG))
 
     
 class AskQuestionHandler(webapp.RequestHandler):
+    
     def get(self,key):
-      """Display the specified question."""
+      """
+      Display the specified question.
+      """
+      
+      # fetch the question and shuffle answers
       q = Question.get(key)
-      answers = [q.correct, q.incorrect1, q.incorrect2, q.incorrect3]
+      answers = [a.value for a in q.answers]
       random.shuffle(answers)
+      
+      # create the template
       template_vars = {
         "question_text" : q.value,
         "answers" : answers,
       }
       path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'AskQuestion.html'))
       self.response.out.write(template.render(path, template_vars, debug=_DEBUG))
+    
     def post(self,key):
-      """Grade the answer that has been chosen."""
+      """
+      Grade the answer that has been chosen.
+      """
+      # obtain the submitted answer
       ans = self.request.get('answer')
-      q = Question.get(key)
+      
+      # fetch the answers to the current question
       o = urlparse.urlparse(self.request.url)
-      next_question = None
-      s = None
-      if ans == q.correct:
-        next_question = q.correct_next
-      elif ans == q.incorrect1:
-        next_question = q.incorrect1_help
-      elif ans == q.incorrect2:
-        next_question = q.incorrect2_help
-      elif ans == q.incorrect3:
-        next_question = q.incorrect3_help
-      if next_question:
-        s = urlparse.urlunparse((o.scheme, o.netloc, '/'+str(next_question.key()), '', '', ''))
+      q = Question.get(key)
+      answers = q.answers.fetch(4)
+      
+      # find the associated answer to get correctness and connections
+      correctness = False
+      next_questions = []
+      for a in answers:
+        if ans == a.value:
+          correctness = a.correct
+          next_questions = a.connections.order('weight').fetch(5)
+
+      # build the template
       template_vars = {
-        "url" : s,
-        "correct" : q.correct == ans,
+        "next" : next_questions,
+        "correct" : correctness,
       }
       path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'Response.html'))
       self.response.out.write(template.render(path, template_vars, debug=_DEBUG))
