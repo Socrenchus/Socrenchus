@@ -14,3 +14,8 @@ indexes:
   properties:
   - name: answer
   - name: weight
+
+- kind: Connection
+  properties:
+  - name: source
+  - name: weight

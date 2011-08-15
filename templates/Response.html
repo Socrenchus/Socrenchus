@@ -7,6 +7,10 @@
 {% endif %}
 </head>
 <body>
+    {% if answer_changed %}
+    Error: You may not change your answer, keep answering more questions to dilute this one in a sea of correct answers.
+    {% endif %}
+
     {% if correct %}
     <h1>Correct</h1>
     <!-- Place this tag where you want the +1 button to render -->
@@ -15,9 +19,9 @@
     <!--  Place this tag after the last plusone tag -->
     <script type="text/javascript">
       function plusOne(test) {
-        console.log('hello');
+        $.post('rate',{question_key:{{ current.key }}});
       }
-    
+
       (function() {
         var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
         po.src = 'https://apis.google.com/js/plusone.js';
