@@ -44,17 +44,109 @@ _DEBUG = True
 
 class Question(Searchable,db.Model):
   """
-  Model for a question object. Correct answer stored first.
+  Searchable db.Model for a question object
+  
+  Make sure the user is logged in, or set the user manually in this case:
+  >>> os.environ['USER_EMAIL'] = u'test@example.com'
+  
+  You can create a question with only question text:
+  >>> my_question = Question(value=u'What is your favorite color?')
+  
+  The author is set automatically:
+  >>> my_question.author
+  users.User(email='test@example.com')
+  
+  Store your question:
+  >>> key = my_question.put()
+  
+  You can retrieve it with a key:
+  >>> q = Question.get(key)
+  >>> q.value == my_question.value
+  True
+  
   """
   value = db.TextProperty()
   author = db.UserProperty(auto_current_user_add=True)
   liked = db.ListProperty(users.User)
   INDEX_TITLE_FROM_PROP = 'value'
 
+  def rate(self):
+    """
+    Rate the question and associate connection and store it.
+
+    Start with one question and ten answers that connect to it;
+    Only the odd answers were chosen by the user:
+    >>> os.environ['USER_EMAIL'] = u'test@example.com'
+    >>> question = Question(value=u'hi')
+    >>> question.put() # doctest: +IGNORE_RESULT
+    ...
+    >>> answers = []
+    >>> connections = []
+    >>> for i in range(10):
+    ...   answers.append(Answer(value=str(i)))
+    ...   answers[i].put() # doctest: +IGNORE_RESULT
+    ...   connections.append(Connection(source=answers[i],target=question))
+    ...   connections[i].put() # doctest: +IGNORE_RESULT
+    ...   if i % 2 == 1:
+    ...     answers[i].user.append(users.User())
+
+    Now the user can rate the question:
+    >>> question.rate()
+    
+    Now the even connections are ranked lower then odd ones:
+    >>> even = 0
+    >>> odd = 0
+    >>> for i in range(10):
+    ...   if i % 2 == 0:
+    ...     even += connections[i].weight
+    ...   else:
+    ...     odd += connections[i].weight
+    >>> even < odd
+    True
+    
+    We can also see that the user has been added to the question's liked list:
+    >>> users.User() in question.liked
+    True
+    """.replace('+IGNORE_RESULT', '+ELLIPSIS\n<...>')
+    
+    # get user (login is required in app.yaml)
+    u = users.User()
+
+    # get connections to adjust
+    connections = self.incoming.filter("source.user =", u)
+
+    # rate and adjust connection weights
+    if u in self.liked:
+      # unlike the question
+      self.liked.remove(u)
+      # decrease connection weights
+      for c in connections:
+        c.weight -= 1
+        c.put()
+    else:
+      # like the question
+      self.liked.append(u)
+      # increase connection weights
+      for c in connections:
+        c.weight += 1
+        c.put()
+    
+    # store the question
+    self.put()
+
   @staticmethod
   def parseRefUrl(aURL):
     """
-    Turns a reference URL into a database object.
+    Turns a reference URL:
+    
+    >>> key = Question(value=u'test').put()
+    >>> reference_url = 'http://www.example.com/'+str(key)
+    
+    Into a database object:
+    
+    >>> q = Question.parseRefUrl(reference_url)
+    >>> q.value
+    u'test'
     """
     if not aURL:
       return None
@@ -64,7 +156,33 @@ class Question(Searchable,db.Model):
 
 class Answer(db.Model):
   """
-  Holds an answer, along with its correctness and connections.
+  Holds an answer,
+  
+  >>> answer = Answer(value=u'world!')
+  
+  along with its question
+  
+  >>> answer.question = Question.get(Question(value=u'hello').put())
+  
+  and correctness
+  
+  >>> answer.correct = True
+  
+  >>> key = answer.put()
+  
+  and connections
+  
+  >>> connection_key = Connection(weight=5,source=answer).put()
+  
+  see
+  
+  >>> answer = Answer.get(key)
+  >>> answer.question.value
+  u'hello'
+  >>> answer.value
+  u'world!'
+  >>> answer.connections.fetch(1)[0].weight
+  5L
   """
   value = db.TextProperty()
   correct = db.BooleanProperty()
@@ -76,7 +194,7 @@ class Connection(db.Model):
   Holds a directed connection from an answer to a question.
   """
   target = db.ReferenceProperty(Question,collection_name="incoming")
-  weight = db.IntegerProperty()
+  weight = db.IntegerProperty(default=0)
   source = db.ReferenceProperty(Answer,collection_name="connections")
 
 #################################################################################
@@ -227,31 +345,9 @@ class RateQuestionHandler(webapp.RequestHandler):
     # get the question object
     question_key = self.request.get('question_key')
     q = Question.get(question_key)
-
-    # get user (login is required in app.yaml)
-    u = users.User()
-
-    # get connections to adjust
-    connections = q.incoming.all().filter("source.user =", u)
-
-    # rate and adjust connection weights
-    if u in q.liked:
-      # unlike the question
-      q.liked.remove(u)
-      # decrease connection weights
-      for c in connections:
-        c.weight -= 1
-        c.put()
-    else:
-      # like the question
-      q.liked.append(u)
-      # increase connection weights
-      for c in connections:
-        c.weight += 1
-        c.put()
-
-    # store the question
-    q.put()
+    
+    # rate the question and store it
+    q.rate()
 
 def main():
   application = webapp.WSGIApplication([
