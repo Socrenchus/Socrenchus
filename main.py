@@ -9,6 +9,9 @@ A crowd sourced system for directed learning
 This tool is designed to be a one stop shop for discovering
 new and interesting topics, sharing knowledge, and learning
 at a cost much lower then at a university.
+
+This line logs the user in for our unit tests:
+>>> os.environ['USER_EMAIL'] = u'test@example.com'
 """
 
 __author__ = 'Bryan Goldstein'
@@ -46,9 +49,6 @@ class Question(Searchable,db.Model):
   """
   Searchable db.Model for a question object
   
-  Make sure the user is logged in, or set the user manually in this case:
-  >>> os.environ['USER_EMAIL'] = u'test@example.com'
-  
   You can create a question with only question text:
   >>> my_question = Question(value=u'What is your favorite color?')
   
@@ -76,44 +76,45 @@ class Question(Searchable,db.Model):
 
     Start with one question and ten answers that connect to it;
     Only the odd answers were chosen by the user:
-    >>> os.environ['USER_EMAIL'] = u'test@example.com'
     >>> question = Question(value=u'hi')
-    >>> question.put() # doctest: +IGNORE_RESULT
-    ...
+    >>> key = question.put()
     >>> answers = []
     >>> connections = []
     >>> for i in range(10):
     ...   answers.append(Answer(value=str(i)))
-    ...   answers[i].put() # doctest: +IGNORE_RESULT
-    ...   connections.append(Connection(source=answers[i],target=question))
-    ...   connections[i].put() # doctest: +IGNORE_RESULT
+    ...   key = answers[i].put()
+    ...   connections.append(Connection(source=answers[i],target=question).put())
     ...   if i % 2 == 1:
     ...     answers[i].user.append(users.User())
+    ...   key = answers[i].put()
 
     Now the user can rate the question:
     >>> question.rate()
     
     Now the even connections are ranked lower then odd ones:
-    >>> even = 0
-    >>> odd = 0
+    >>> even = 0L
+    >>> odd = 0L
     >>> for i in range(10):
     ...   if i % 2 == 0:
-    ...     even += connections[i].weight
+    ...     even += Connection.get(connections[i]).weight
     ...   else:
-    ...     odd += connections[i].weight
+    ...     odd += Connection.get(connections[i]).weight
     >>> even < odd
     True
     
     We can also see that the user has been added to the question's liked list:
     >>> users.User() in question.liked
     True
-    """.replace('+IGNORE_RESULT', '+ELLIPSIS\n<...>')
+    """
     
     # get user (login is required in app.yaml)
     u = users.User()
+    
+    # get all the users answers
+    answers = list(Answer.all().filter("user =", u))
 
     # get connections to adjust
-    connections = self.incoming.filter("source.user =", u)
+    connections = self.incoming.filter("source in", answers)
 
     # rate and adjust connection weights
     if u in self.liked:
@@ -191,7 +192,29 @@ class Answer(db.Model):
 
 class Connection(db.Model):
   """
-  Holds a directed connection from an answer to a question.
+  Holds a directed connection
+  
+  >>> connection = Connection(weight=9000L)
+  
+  from an answer
+  
+  >>> connection.source = Answer(value="42").put()
+  
+  to a question.
+  
+  >>> connection.target = Question(value="What is the ultimate question?").put()
+  
+  >>> key = connection.put()
+  
+  see
+  
+  >>> connection = Connection.get(key)
+  >>> connection.source.value
+  u'42'
+  >>> connection.target.value
+  u'What is the ultimate question?'
+  >>> connection.weight
+  9000L
   """
   target = db.ReferenceProperty(Question,collection_name="incoming")
   weight = db.IntegerProperty(default=0)
@@ -233,21 +256,65 @@ class NewQuestionHandler(webapp.RequestHandler):
     """
     Stores a newly created question.
     """
+    question_text = self.request.get('question')
+    answers = [self.request.get(str(i)+'-a') for i in range(4)]
+    connection_urls = [Question.parseRefUrl(self.request.get(str(i)+'-n')) for i in range(4)]
+    
+    key = NewQuestionHandler.createNewQuestion(question_text,answers,connection_urls)
+    
+    # build the question url
+    o = urlparse.urlparse(self.request.url)
+    s = urlparse.urlunparse((o.scheme, o.netloc, '/'+str(key), '', '', ''))
+    
+    # display it
+    path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'LinkExplainer.html'))
+    self.response.out.write(template.render(path, {'link':s,'question':q.value}, debug=_DEBUG))
+  
+  @staticmethod
+  def createNewQuestion(question_text,answers,connection_urls):
+    """
+    Create the new Question, Answers, and Connections.
+    The first answer in the list is correct and the others are incorrect.
+    The connections match up their order with the answers.
+    
+    It will take the user specified question references:
+    >>> question_refs = []
+    >>> for i in range(4):
+    ...   question_refs.append(str(Question(value=str(i)).put()))
+    
+    Create a question with answers and connections returning only the question key:
+    >>> key = NewQuestionHandler.createNewQuestion("The number of the counting shall be?",["3","1","2","5"],question_refs)
+    
+    You can get the Question object with:
+    >>> q = Question.get(key)
+    
+    And make sure it is the one you meant to create:
+    >>> q.value
+    u'The number of the counting shall be?'
+    >>> for i in range(4):
+    ...   q.answers[i].value
+    u'3'
+    u'1'
+    u'2'
+    u'5'
+    >>> len(q.answers[0].connections.fetch(2))
+    1
+    """
     # create the question
     q = Question()
-    q.value = self.request.get('question')
+    q.value = question_text
     q.put()
 
     # loop through the four answers
-    for i in range(4):
+    for i in range(len(answers)):
       # now create the answer
       a = Answer()
-      a.value = self.request.get(str(i)+'-a')
+      a.value = answers[i]
       a.correct = (i == 0)
       a.question = q
       a.put()
       # create the connection if included
-      target = Question.parseRefUrl(self.request.get(str(i)+'-n'))
+      target = connection_urls[i]
       if (target):
         c = Connection()
         c.target = Question.get(target)
@@ -256,41 +323,56 @@ class NewQuestionHandler(webapp.RequestHandler):
 
     # index question
     q.index()
-
-    # build the question url
-    o = urlparse.urlparse(self.request.url)
-    s = urlparse.urlunparse((o.scheme, o.netloc, '/'+str(q.key()), '', '', ''))
-
-    # display it
-    path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'LinkExplainer.html'))
-    self.response.out.write(template.render(path, {'link':s,'question':q.value}, debug=_DEBUG))
-
-
+    
+    # return our key
+    return q.key()
+    
 class AskQuestionHandler(webapp.RequestHandler):
 
   def get(self,key):
     """
     Display the specified question.
     """
-    self.display(key)
-
+    self.response.out.write(self.display(key))
 
   def post(self,key):
     """
     Grade the answer that has been chosen.
     """
-    self.display(key)
-    
-  def display(self,key):
-    """
-    Either ask the question or show the result page.
-    """
-    # get the current question
-    o = urlparse.urlparse(self.request.url)
-    q = Question.get(key)
-
     # obtain the submitted answer
     ans = self.request.get('answer')
+    
+    self.response.out.write(self.display(key))
+    
+  @staticmethod
+  def display(key,ans=None):
+    """
+    >>> key = NewQuestionHandler.createNewQuestion("The number of the counting shall be?",["3","1","2","5"],["","","",""])
+    
+    Either ask the question 
+    
+    >>> output = AskQuestionHandler.display(key)
+    >>> "The number of the counting shall be?" in output
+    True
+    >>> "5" in output
+    True
+    
+    or after the user answers the question
+    
+    >>> output = AskQuestionHandler.display(key,"3")
+    >>> "Correct" in output
+    True
+    
+    show the result page.
+    
+    >>> refresh_output = AskQuestionHandler.display(key)
+    
+    >>> output == refresh_output
+    True
+    
+    """
+    # get the current question
+    q = Question.get(key)
 
     # check if it is being answered
     answered_now = bool(ans)
@@ -322,7 +404,7 @@ class AskQuestionHandler(webapp.RequestHandler):
         "answer_changed" : answered_now and answered_before,
       }
       path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'Response.html'))
-      self.response.out.write(template.render(path, template_vars, debug=_DEBUG))
+      return template.render(path, template_vars, debug=_DEBUG)
     else:
       answers = [a.value for a in q.answers]
       random.shuffle(answers)
@@ -333,7 +415,7 @@ class AskQuestionHandler(webapp.RequestHandler):
         "answers" : answers,
       }
       path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'AskQuestion.html'))
-      self.response.out.write(template.render(path, template_vars, debug=_DEBUG))
+      return template.render(path, template_vars, debug=_DEBUG)
     
     
 class RateQuestionHandler(webapp.RequestHandler):
