@@ -13,6 +13,7 @@ $(document).ready(function() {
   var reloadStream = function() { 
     $.get('/ajax/stream', function(data) {
       var data = eval('(' + data + ')');
+      window.history.pushState("object or string", "Title", "/q/" + data[0].assignment.question.id);
       $( "#assignments > div" ).remove();
       data.forEach( function( d ) {
         $( "#questionTemplate" ).tmpl( d ).appendTo( "#assignments" ).click(function() {
