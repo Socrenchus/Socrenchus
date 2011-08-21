@@ -10,6 +10,12 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: Assignment
+  properties:
+  - name: user
+  - name: time
+    direction: desc
+
 - kind: Connection
   properties:
   - name: answer

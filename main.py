@@ -25,6 +25,7 @@ import urllib
 import urlparse
 import wsgiref.handlers
 import random
+import json
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
@@ -45,7 +46,7 @@ _DEBUG = True
 ##  Database Models #############################################################
 #################################################################################
 
-class Question(Searchable,db.Model):
+class Question(Searchable, db.Model):
   """
   Searchable db.Model for a question object
   
@@ -66,10 +67,67 @@ class Question(Searchable,db.Model):
   
   """
   value = db.TextProperty()
-  author = db.UserProperty(auto_current_user_add=True)
+  author = db.UserProperty(auto_current_user_add = True)
   liked = db.ListProperty(users.User)
   INDEX_TITLE_FROM_PROP = 'value'
+  
+  @staticmethod
+  def createNewQuestion(question_text,answers,connection_urls):
+    """
+    Create the new Question, Answers, and Connections.
+    The first answer in the list is correct and the others are incorrect.
+    The connections match up their order with the answers.
+    
+    It will take the user specified question references:
+    >>> question_refs = []
+    >>> for i in range(4):
+    ...   question_refs.append(str(Question(value=str(i)).put()))
+    
+    Create a question with answers and connections returning only the question key:
+    >>> key = Question.createNewQuestion("The number of the counting shall be?",["3","1","2","5"],question_refs)
+    
+    You can get the Question object with:
+    >>> q = Question.get(key)
+    
+    And make sure it is the one you meant to create:
+    >>> q.value
+    u'The number of the counting shall be?'
+    >>> for i in range(4):
+    ...   q.answers[i].value
+    u'3'
+    u'1'
+    u'2'
+    u'5'
+    >>> len(q.answers[0].connections.fetch(2))
+    1
+    """
+    # create the question
+    q = Question()
+    q.value = question_text
+    q.put()
 
+    # loop through the four answers
+    for i in range(len(answers)):
+      # now create the answer
+      a = Answer()
+      a.value = answers[i]
+      a.correct = (i == 0)
+      a.question = q
+      a.put()
+      # create the connection if included
+      target = connection_urls[i]
+      if (target):
+        c = Connection()
+        c.target = Question.get(target)
+        c.source = a
+        c.put()
+
+    # index question
+    q.index()
+    
+    # return our key
+    return q.key()
+    
   def rate(self):
     """
     Rate the question and associate connection and store it.
@@ -219,6 +277,87 @@ class Connection(db.Model):
   target = db.ReferenceProperty(Question,collection_name="incoming")
   weight = db.IntegerProperty(default=0)
   source = db.ReferenceProperty(Answer,collection_name="connections")
+  
+class Assignment(db.Model):
+  """
+  Links a question to the current user.
+
+  >>> key = Assignment(question = Question(value = u'test').put()).put()
+  >>> a = Assignment.get(key)
+
+  >>> a.question.value
+  u'test'
+
+  >>> a.user.email()
+  u'test@example.com'
+
+  >>> a.time != None
+  True
+  """
+  question = db.ReferenceProperty(Question, collection_name = "assignments")
+  answer = db.ReferenceProperty(Answer)
+  time = db.DateTimeProperty(auto_now = True)
+  user = db.UserProperty(auto_current_user_add = True)
+
+  @staticmethod
+  def fromQuestion(qid):
+    """
+    Create an assignment 
+    
+    >>> q = Question(value=u'hello').put()
+    >>> key = Assignment.fromQuestion(q.id()).put()
+    
+    or get it back from a question id.
+    
+    >>> Assignment.fromQuestion(q.id()).key() == key
+    True
+    
+    """
+    q = Question.get_by_id(qid)
+    result = q.assignments.filter('user =', users.User()).get()
+    
+    if not result:
+      result = Assignment(question = q)
+      result.put()
+    
+    return result
+
+  def submitAnswer(self, answer_string):
+    """
+    Answers the question if it hasn't been answered.
+    
+    Create a two questions liked through an answer:
+    >>> first_question = Question(value=u'hello').put()
+    >>> answer = Answer(value=u'oooo!',question=first_question).put()
+    >>> next_question = Question(value=u'world').put()
+    >>> connection = Connection(source=answer,target=next_question).put()
+    
+    Try answering it:
+    >>> assignment1 = Assignment.fromQuestion(first_question.id())
+    >>> key = assignment1.put()
+    >>> assignment1.submitAnswer("oooo!")
+    True
+    
+    Find the assignment:
+    >>> Assignment.all().filter('question =', next_question).get() != None
+    True
+    
+    Try changing your answer:
+    >>> assignment1.submitAnswer("ahhhh!")
+    False
+    """
+    if self.answer:
+      return False
+    
+    for ans in self.question.answers:
+      if ans.value == answer_string:
+        self.answer = ans
+        self.put()
+        # assign the next questions
+        for q in self.answer.connections.fetch(5):
+          Assignment.fromQuestion(q.target.key().id()).put()
+    
+    return True
 
 #################################################################################
 ##  Request Handlers ############################################################
@@ -260,164 +399,49 @@ class NewQuestionHandler(webapp.RequestHandler):
     answers = [self.request.get(str(i)+'-a') for i in range(4)]
     connection_urls = [Question.parseRefUrl(self.request.get(str(i)+'-n')) for i in range(4)]
     
-    key = NewQuestionHandler.createNewQuestion(question_text,answers,connection_urls)
+    key = Question.createNewQuestion(question_text,answers,connection_urls)
+    
+    q = Question.get(key)
     
     # build the question url
     o = urlparse.urlparse(self.request.url)
-    s = urlparse.urlunparse((o.scheme, o.netloc, '/'+str(key), '', '', ''))
+    s = urlparse.urlunparse((o.scheme, o.netloc, '/q/'+str(key.id()), '', '', ''))
     
     # display it
     path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'LinkExplainer.html'))
     self.response.out.write(template.render(path, {'link':s,'question':q.value}, debug=_DEBUG))
-  
-  @staticmethod
-  def createNewQuestion(question_text,answers,connection_urls):
-    """
-    Create the new Question, Answers, and Connections.
-    The first answer in the list is correct and the others are incorrect.
-    The connections match up their order with the answers.
-    
-    It will take the user specified question references:
-    >>> question_refs = []
-    >>> for i in range(4):
-    ...   question_refs.append(str(Question(value=str(i)).put()))
-    
-    Create a question with answers and connections returning only the question key:
-    >>> key = NewQuestionHandler.createNewQuestion("The number of the counting shall be?",["3","1","2","5"],question_refs)
-    
-    You can get the Question object with:
-    >>> q = Question.get(key)
-    
-    And make sure it is the one you meant to create:
-    >>> q.value
-    u'The number of the counting shall be?'
-    >>> for i in range(4):
-    ...   q.answers[i].value
-    u'3'
-    u'1'
-    u'2'
-    u'5'
-    >>> len(q.answers[0].connections.fetch(2))
-    1
-    """
-    # create the question
-    q = Question()
-    q.value = question_text
-    q.put()
-
-    # loop through the four answers
-    for i in range(len(answers)):
-      # now create the answer
-      a = Answer()
-      a.value = answers[i]
-      a.correct = (i == 0)
-      a.question = q
-      a.put()
-      # create the connection if included
-      target = connection_urls[i]
-      if (target):
-        c = Connection()
-        c.target = Question.get(target)
-        c.source = a
-        c.put()
-
-    # index question
-    q.index()
-    
-    # return our key
-    return q.key()
     
 class AskQuestionHandler(webapp.RequestHandler):
 
-  def get(self,key):
+  def get(self):
     """
-    Display the specified question.
+    Assign the specified question.
     """
-    self.response.out.write(self.display(key))
+    # obtain the question
+    qid = self.request.get('question_id')
 
-  def post(self,key):
+    assignment = Assignment.fromQuestion(int(qid))
+    assignment.put()
+
+  def post(self):
     """
     Grade the answer that has been chosen.
     """
-    # obtain the submitted answer
+    # obtain the parameters
+    qid = self.request.get('question_id')
     ans = self.request.get('answer')
-    
-    self.response.out.write(self.display(key))
-    
-  @staticmethod
-  def display(key,ans=None):
-    """
-    >>> key = NewQuestionHandler.createNewQuestion("The number of the counting shall be?",["3","1","2","5"],["","","",""])
-    
-    Either ask the question 
-    
-    >>> output = AskQuestionHandler.display(key)
-    >>> "The number of the counting shall be?" in output
-    True
-    >>> "5" in output
-    True
-    
-    or after the user answers the question
-    
-    >>> output = AskQuestionHandler.display(key,"3")
-    >>> "Correct" in output
-    True
-    
-    show the result page.
-    
-    >>> refresh_output = AskQuestionHandler.display(key)
-    
-    >>> output == refresh_output
-    True
-    
-    """
-    # get the current question
-    q = Question.get(key)
 
-    # check if it is being answered
-    answered_now = bool(ans)
+    assignment = Assignment.fromQuestion(long(qid))
+    success = assignment.submitAnswer(ans)
 
-    # check if the user answered the question before
-    answered_before = False
-    for a in q.answers:
-      if users.User() in a.user:
-        ans = a.value
-        answered_before = True
+    if success:
+      assignment.put()
 
-    if answered_before or answered_now:
-      # find the associated answer to get correctness and connections
-      correctness = False
-      next_questions = []
-      for a in q.answers:
-        if ans == a.value:
-          correctness = a.correct
-          next_questions = a.connections.order('weight').fetch(5)
-          if not answered_before:
-            a.user.append(users.User())
-            a.put()
-        
-      # build the template
-      template_vars = {
-        "current" : q,
-        "next" : next_questions,
-        "correct" : correctness,
-        "answer_changed" : answered_now and answered_before,
-      }
-      path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'Response.html'))
-      return template.render(path, template_vars, debug=_DEBUG)
-    else:
-      answers = [a.value for a in q.answers]
-      random.shuffle(answers)
+    self.response.headers.add_header("Content-Type", 'application/json')
+    self.response.out.write(json.encode(success))
 
-      # create the template
-      template_vars = {
-        "question_text" : q.value,
-        "answers" : answers,
-      }
-      path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'AskQuestion.html'))
-      return template.render(path, template_vars, debug=_DEBUG)
-    
-    
+
+
 class RateQuestionHandler(webapp.RequestHandler):
 
   def post(self):
@@ -425,17 +449,39 @@ class RateQuestionHandler(webapp.RequestHandler):
     Handle the user rating the question.
     """
     # get the question object
-    question_key = self.request.get('question_key')
-    q = Question.get(question_key)
+    question_id = self.request.get('question_id')
+    q = Question.get(question_id)
     
     # rate the question and store it
     q.rate()
+    
+class StreamHandler(webapp.RequestHandler):
+  
+  def get(self):
+    """
+    Return the user's question stream.
+    """
+    q = Assignment.all()
+    q = q.filter('user =', users.User())
+    q = q.order('-time')
+    assignments = q.fetch(10)
+    
+    result = []
+    for a in assignments:
+      result.append({
+        'assignment': a,
+        'answers': a.question.answers.fetch(4)
+      })
+      
+    self.response.headers.add_header("Content-Type", 'application/json')
+    self.response.out.write(json.encode(result))
 
 def main():
   application = webapp.WSGIApplication([
-    ('/', SearchHandler),
+    ('/search', SearchHandler),
     ('/new', NewQuestionHandler),
-    (r'/(.+)', AskQuestionHandler),
+    ('/ajax/stream', StreamHandler),
+    (r'/ajax/ask', AskQuestionHandler),
   ], debug=_DEBUG)
   wsgiref.handlers.CGIHandler().run(application)
 
