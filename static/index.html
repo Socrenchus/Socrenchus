@@ -19,7 +19,12 @@
         <br/>
         {{each answers}}
         <option value="${$value.value}">${$value.value}</option>
-        <input type="radio" id="${$value.value}" name="${assignment.question.id}" value="${$value.value}" />
+        <input type="radio" 
+               id="${$value.value}"
+               name="${assignment.question.id}" 
+               value="${$value.value}" 
+               {{if assignment.answer && $value.id == assignment.answer.id}} checked {{/if}}
+               {{if assignment.answer}} disabled {{/if}}/>
         <label for="${$value.value}">${$value.value}</label>
         <br/>
         {{/each}}

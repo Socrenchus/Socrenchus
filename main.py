@@ -24,7 +24,7 @@ import sys
 import urllib
 import urlparse
 import wsgiref.handlers
-import random
+from random import shuffle
 import json
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
@@ -199,7 +199,7 @@ class Question(Searchable, db.Model):
     Turns a reference URL:
     
     >>> key = Question(value=u'test').put()
-    >>> reference_url = 'http://www.example.com/'+str(key)
+    >>> reference_url = 'http://www.example.com/q/'+str(key.id())
     
     Into a database object:
     
@@ -210,7 +210,7 @@ class Question(Searchable, db.Model):
     if not aURL:
       return None
     o = urlparse.urlparse(aURL)
-    q = Question.get(o.path.split('/')[1])
+    q = Question.get_by_id(long(o.path.split('/')[2]))
     return q
 
 class Answer(db.Model):
@@ -468,9 +468,11 @@ class StreamHandler(webapp.RequestHandler):
     
     result = []
     for a in assignments:
+      answers = a.question.answers.fetch(4)
+      shuffle(answers)
       result.append({
         'assignment': a,
-        'answers': a.question.answers.fetch(4)
+        'answers': answers
       })
       
     self.response.headers.add_header("Content-Type", 'application/json')

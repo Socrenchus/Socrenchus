@@ -10,14 +10,19 @@ $(document).ready(function() {
   if (urlParams['q'])
     $.get('/ajax/ask', {'question_id': urlParams['q']});
 
-  $.get('/ajax/stream', function(data) {
-    var data = eval('(' + data + ')');
-    data.forEach( function( d ) {
-      $( "#questionTemplate" ).tmpl( d ).appendTo( "#assignments" ).click(function() {
-        $.post('/ajax/ask', {'question_id': d.assignment.question.id, 'answer': $('input:radio[name='+d.assignment.question.id+']:checked').val()}, function(data) {
-          console.log(data);
+  var reloadStream = function() { 
+    $.get('/ajax/stream', function(data) {
+      var data = eval('(' + data + ')');
+      $( "#assignments > div" ).remove();
+      data.forEach( function( d ) {
+        $( "#questionTemplate" ).tmpl( d ).appendTo( "#assignments" ).click(function() {
+          $.post('/ajax/ask', {'question_id': d.assignment.question.id, 'answer': $('input:radio[name='+d.assignment.question.id+']:checked').val()}, function(data) {
+            if (data == "true")
+              reloadStream();
+          });
         });
       });
     });
-  });
+  }
+  reloadStream();
 });
