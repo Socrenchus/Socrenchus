@@ -1,5 +1,34 @@
-a {
-color: #36C;
-cursor: pointer;
-text-decoration: none;
+body {
+  font: normal 13px arial,sans-serif;
+}
+
+#assignments a {
+  color: #36C;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+#tabs {
+  width: 576px;
+  border: 1px solid #EBEBEB;
+  margin: auto;
+}
+
+.question {
+  border-top: 1px solid #EEE;
+  padding: 16px 21px;
+}
+
+.inner-question {
+  margin-left: 60px;
+  margin-right: 44px;
+}
+
+.avatar {
+  float:left;
+  margin-left:-60px
+}
+
+.mc-radio {
+  margin: 5px 5px;
 }

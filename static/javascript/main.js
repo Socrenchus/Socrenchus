@@ -11,8 +11,7 @@ $(document).ready(function() {
     $.get('/ajax/ask', {'question_id': urlParams['q']});
 
   var reloadStream = function() { 
-    $.get('/ajax/stream', function(data) {
-      var data = eval('(' + data + ')');
+    $.getJSON('/ajax/stream', function(data) {
       window.history.pushState("object or string", "Title", "/q/" + data[data.length-1].assignment.question.id);
       $( "#assignments > div" ).remove();
       data.forEach( function( d ) {
@@ -26,4 +25,8 @@ $(document).ready(function() {
     });
   }
   reloadStream();
+  
+  $(function() {
+    $( "#tabs" ).tabs();
+  });
 });
