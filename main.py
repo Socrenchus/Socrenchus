@@ -69,6 +69,7 @@ class Question(Searchable, db.Model):
   value = db.TextProperty()
   author = db.UserProperty(auto_current_user_add = True)
   liked = db.ListProperty(users.User)
+  time = db.DateTimeProperty(auto_now_add = True)
   INDEX_TITLE_FROM_PROP = 'value'
   
   @staticmethod
@@ -463,7 +464,7 @@ class StreamHandler(webapp.RequestHandler):
     """
     q = Assignment.all()
     q = q.filter('user =', users.User())
-    q = q.order('-time')
+    q = q.order('time')
     assignments = q.fetch(10)
     
     result = []

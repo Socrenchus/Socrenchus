@@ -13,10 +13,10 @@ $(document).ready(function() {
   var reloadStream = function() { 
     $.get('/ajax/stream', function(data) {
       var data = eval('(' + data + ')');
-      window.history.pushState("object or string", "Title", "/q/" + data[0].assignment.question.id);
+      window.history.pushState("object or string", "Title", "/q/" + data[data.length-1].assignment.question.id);
       $( "#assignments > div" ).remove();
       data.forEach( function( d ) {
-        $( "#questionTemplate" ).tmpl( d ).appendTo( "#assignments" ).click(function() {
+        $( "#questionTemplate" ).tmpl( d ).prependTo( "#assignments" ).click(function() {
           $.post('/ajax/ask', {'question_id': d.assignment.question.id, 'answer': $('input:radio[name='+d.assignment.question.id+']:checked').val()}, function(data) {
             if (data == "true")
               reloadStream();

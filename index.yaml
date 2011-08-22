@@ -12,9 +12,54 @@ indexes:
 
 - kind: Assignment
   properties:
+  - name: answer
   - name: user
   - name: time
     direction: desc
+
+- kind: Assignment
+  properties:
+  - name: user
+  - name: answer
+
+- kind: Assignment
+  properties:
+  - name: user
+  - name: answer
+  - name: DESC
+  - name: time
+    direction: desc
+
+- kind: Assignment
+  properties:
+  - name: user
+  - name: answer
+  - name: time
+
+- kind: Assignment
+  properties:
+  - name: user
+  - name: answer
+  - name: time
+    direction: desc
+
+- kind: Assignment
+  properties:
+  - name: user
+  - name: time
+
+- kind: Assignment
+  properties:
+  - name: user
+  - name: time
+    direction: desc
+
+- kind: Assignment
+  properties:
+  - name: user
+  - name: time
+    direction: desc
+  - name: answer
 
 - kind: Connection
   properties:
