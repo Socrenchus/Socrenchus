@@ -2,7 +2,13 @@ body {
   font: normal 13px arial,sans-serif;
 }
 
-#assignments a {
+a {
+  color: #36C;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+#teach a, #learn a {
   color: #36C;
   cursor: pointer;
   text-decoration: none;
@@ -14,9 +20,21 @@ body {
   margin: auto;
 }
 
+#logout {
+  float: right;
+  position: relative;
+  top: -20px;
+  right: 5px;
+}
+
+#newQuestion {
+  margin-right: 44px;
+}
+
 .question {
   border-top: 1px solid #EEE;
   padding: 16px 21px;
+  background-color:rgba(255,255,255,0.6);
 }
 
 .inner-question {
@@ -31,4 +49,34 @@ body {
 
 .mc-radio {
   margin: 5px 5px;
+}
+
+.defaultText {
+  width: 300px;
+}
+
+.defaultTextActive {
+  color: #a1a1a1; font-style: italic;
+}
+
+#assignments li, #toolbox li { 
+  margin: 0 5px 5px 5px;
+}
+
+.ui-state-hover {
+  opacity: 0.6;
+}
+
+.teachSortable {
+  padding: 16px 21px !important;
+}
+
+.questionTextBox, .answerTextBox {
+  margin-left: 21px;
+  margin-right: 21px;
+  width: 100%;
+}
+
+.answerTextBox {
+  height: 21px;
 }

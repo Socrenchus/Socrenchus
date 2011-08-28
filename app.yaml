@@ -13,15 +13,7 @@ handlers:
   upload: static/favicon.ico
 
 - url: /ajax/.*
-  script: main.py
-  login: required
-
-- url: /new
-  script: main.py
-  login: required
-  
-- url: /search
-  script: main.py
+  script: handlers.py
   login: required
   
 - url: /static
