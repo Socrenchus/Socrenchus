@@ -113,7 +113,9 @@ $(document).ready(function() {
       });
       
       $.getJSON('/ajax/new', values, function(data) {
-        loadQuestion( data );
+        $('#newQuestion :text,textarea').val('').blur();
+        $('#newQuestion > div > ul').empty();
+        reloadStream();
       });
     });
   });

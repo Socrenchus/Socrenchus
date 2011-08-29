@@ -54,7 +54,8 @@ class NewQuestionHandler(webapp.RequestHandler):
     
     key = Question.createNewQuestion(question_text,answers,connections)    
     assignment = Assignment.fromQuestion(key.id())
-    assignment.div = "toolbox"
+    assignment.list = 'toolbox'
+    assignment.put()
     
     json_response = json.encode(assignment)
     
@@ -101,10 +102,16 @@ class RateQuestionHandler(webapp.RequestHandler):
     """
     # get the question object
     question_id = self.request.get('question_id')
-    q = Question.get(question_id)
+    q = Question.get_by_id(long(float(question_id)))
     
     # rate the question and store it
     q.rate()
+    
+    result = Assignment.fromQuestion(long(float(question_id)))
+    json_response = json.encode(result)
+    
+    self.response.headers.add_header("Content-Type", 'application/json')
+    self.response.out.write(json_response)
     
 class StreamHandler(webapp.RequestHandler):
   
