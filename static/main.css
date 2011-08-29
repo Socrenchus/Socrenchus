@@ -80,3 +80,7 @@ a {
 .answerTextBox {
   height: 21px;
 }
+
+.dropLabel {
+  margin-left: 21px;
+}

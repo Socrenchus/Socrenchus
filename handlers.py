@@ -54,6 +54,7 @@ class NewQuestionHandler(webapp.RequestHandler):
     
     key = Question.createNewQuestion(question_text,answers,connections)    
     assignment = Assignment.fromQuestion(key.id())
+    assignment.div = "toolbox"
     
     json_response = json.encode(assignment)
     
@@ -68,25 +69,24 @@ class AnswerQuestionHandler(webapp.RequestHandler):
     """
     # obtain the question
     qid = self.request.get('question_id')
+    
+    # obtain the list its in
+    list = self.request.get('div')
 
     # obtain the answer
     ans = self.request.get('answer')
     
-    assignment = Assignment.fromQuestion(long(qid))
+    result = Assignment.fromQuestion(long(float(qid)))
     
-    assignment.put()
+    if list and result.answer and result.answer.correct:
+      result.list = list
     
-    if not ans:
-      return
-      
-    success = assignment.submitAnswer(ans)
+    result.put()
     
-    if not success:
-      return
-      
-    assignment.put()
+    if bool(ans) and ans != result.answer.value:
+      result = result.submitAnswer(ans)
     
-    json_response = json.encode(assignment)
+    json_response = json.encode(result)
     
     self.response.headers.add_header("Content-Type", 'application/json')
     self.response.out.write(json_response)

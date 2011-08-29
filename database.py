@@ -261,6 +261,7 @@ class Assignment(db.Model):
   question = db.ReferenceProperty(Question, collection_name = "assignments")
   answers = db.StringListProperty()
   answer = db.ReferenceProperty(Answer)
+  list = db.TextProperty(default="assignments")
   time = db.DateTimeProperty(auto_now = True)
   user = db.UserProperty(auto_current_user_add = True)
 
@@ -306,7 +307,7 @@ class Assignment(db.Model):
     Try answering it:
     >>> assignment1 = Assignment.fromQuestion(first_question.id())
     >>> key = assignment1.put()
-    >>> assignment1.submitAnswer("oooo!")
+    >>> len(assignment1.submitAnswer("oooo!")) == 2
     True
     
     Find the assignment:
@@ -320,12 +321,16 @@ class Assignment(db.Model):
     if self.answer:
       return False
     
+    result = []
     for ans in self.question.answers:
       if ans.value == answer_string:
         self.answer = ans
         self.put()
+        result.append(self)
         # assign the next questions
         for q in self.answer.connections.fetch(5):
-          Assignment.fromQuestion(q.target.key().id()).put()
+          tmp = Assignment.fromQuestion(q.target.key().id())
+          result.append(tmp)
+          tmp.put()
     
-    return True
+    return result

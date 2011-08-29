@@ -24,22 +24,27 @@ $(document).ready(function() {
   //
   // Load question stream
   //
-  var loadQuestion = function(d,div) {
-    $.tmpl( "questionTemplate", d ).prependTo( "#assignments" ).click(function() {
-          $.getJSON('/ajax/answer', {'question_id': d.question.id, 'answer': $('input:radio[name='+d.question.id+']:checked').val()}, function(data) {
-            $('#'+d.question.id).remove();
-            $.tmpl( "questionTemplate", data ).prependTo( div );
+  var loadQuestion = function(d) {
+    $.tmpl( "questionTemplate", d ).prependTo( '#'+d.list ).click(function() {
+          $.getJSON('/ajax/answer', {'question_id': d.question.id, 'answer': $('input:radio[name='+d.question.id+']:checked').val(),'div': d.list}, function(data) {
+            var len = data.length;
+            if (len) {
+              $('#'+d.question.id).remove();
+              window.history.pushState("object or string", "Title", "/q/" + data[len-1].question.id);
+            }
+            for ( var i=0; i<len; i++ ){
+              loadQuestion( data[i] );
+            }
           });
+        });
   }
   var reloadStream = function() { 
     $.getJSON('/ajax/stream', function(data) {
       if (data == '') return;
-      window.history.pushState("object or string", "Title", "/q/" + data[data.length-1].question.id);
       $( "#learn > div" ).remove();
       data.forEach( function( d ) {
           loadQuestion(d, "#assignments");
         });
-      });
     });
   }
   reloadStream();
@@ -53,7 +58,7 @@ $(document).ready(function() {
     var $tabs = $( "#tabs" ).tabs();
     
     var $tab_items = $( "ul:first li", $tabs ).droppable({
-      accept: ".teachLearnSortable li",
+      accept: ".correct",
       hoverClass: "ui-state-hover",
       tolerance: "pointer",
       drop: function( event, ui ) {
@@ -61,9 +66,10 @@ $(document).ready(function() {
         var $list = $( $item.find( "a" ).attr( "href" ) )
           .find( ".teachLearnSortable" );
           
-        ui.draggable.hide( "fast", function() {
-          $tabs.tabs( "select", $tab_items.index( $item ) );
-          $( this ).prependTo( $list ).show( "fast" );
+        ui.draggable.hide("fast", function() {
+          $.getJSON('/ajax/answer', {'question_id': $(this).attr('id'),'div':$list.attr('id')}, function(data) {
+            loadQuestion( data );
+          });
         });
       }
     });
@@ -107,7 +113,7 @@ $(document).ready(function() {
       });
       
       $.getJSON('/ajax/new', values, function(data) {
-        $.tmpl( "questionTemplate", data ).prependTo( "#toolbox" );
+        loadQuestion( data );
       });
     });
   });

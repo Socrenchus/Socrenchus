@@ -43,13 +43,13 @@
       <div id="learn">
         <ul id="assignments" class="teachLearnSortable ui-helper-reset">
         <script id="questionTemplate" type="text/x-jquery-tmpl">
-          <li id="${question.id}" class="question">
+          <li id="${question.id}" class="question {{if answer}}{{if answer.correct}}correct{{/if}}{{/if}}">
             <div class="inner-question">
               <br/>
               <img src="http://www.gravatar.com/avatar/{{html $.md5(question.author.email)}}?s=48&d=mm" class="avatar" />
               <a href=''>${question.author.nickname}</a> - 
               ${time.ctime /*fixme: this should be question creation time*/}
-              <br/><br>
+              <br/><br/>
               ${question.value}
               <br/><br/>
               {{each answers}}
@@ -99,8 +99,8 @@
             <br/>
               <textarea title="{{if i}}Incorrect{{else}}Correct{{/if}} Answer"
                      id="answer${ i }" name="${ i }-a" type="text" class="defaultText answerTextBox"></textarea>
+            <i class="defaultText dropLabel">&#8618;Drop follow up questions here...</i>
             <ul id="next${ i }" class="teachSortable ui-helper-reset">
-            <i class="defaultText">&#8618;Drop follow up questions here...</i>
             </ul>
           </script>
         </div>
