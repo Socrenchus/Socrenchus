@@ -87,7 +87,7 @@ $(document).ready(function() {
       drop: function( event, ui ) {
         var $item = $( this );
         var $list = $( $item.find( "a" ).attr( "href" ) )
-          .find( ".teachLearnSortable" );
+          .find( "#toolbox" );
           
         ui.draggable.hide("fast", function() {
           $.getJSON('/ajax/answer', {'question_id': $(this).attr('id'),'div':$list.attr('id')}, function(data) {
@@ -106,13 +106,14 @@ $(document).ready(function() {
       $.tmpl( "newAnswerTemplate", {'i': i} ).appendTo( "#answers" );
       
       $( "#next"+i ).sortable({
-        connectWith: ".teachSortable",
+        connectWith: ".sortable",
         tolerance: "pointer"
       }).disableSelection();
     });
     
-    $( "#incoming" ).sortable({connectWith: ".teachSortable",placeholder: "empty"}).disableSelection();
-    $( "#toolbox" ).sortable({connectWith: ".teachSortable"}).disableSelection();
+    $( "#incoming" ).sortable({connectWith: ".sortable",placeholder: "empty"}).disableSelection();
+    $( "#toolbox" ).sortable({connectWith: ".sortable"}).disableSelection();
+
     
     $("#newQuestionSubmit").click( function() {
       // get all the inputs into an array.

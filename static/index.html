@@ -41,7 +41,7 @@
       </ul><!-- TODO: Change logout url for launch -->
       <a id="logout" href="/_ah/login?continue=/&amp;action=Logout" name="logout">Logout</a>
       <div id="learn">
-        <ul id="assignments" class="teachLearnSortable ui-helper-reset">
+        <ul id="assignments" class="sortable ui-helper-reset">
         <script id="questionTemplate" type="text/x-jquery-tmpl">
           <li id="${question.id}" class="question {{if answer}}{{if answer.correct}}correct{{/if}}{{/if}}">
             <div class="inner-question">
@@ -91,7 +91,11 @@
       </div>
       <div id="teach">
         <div id="newQuestion">
-          <ul id="incoming" class="teachSortable ui-helper-reset">
+          <i class="defaultText dropLabel">
+            Drop questions you think should point to your question...(to be reviewed)
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8618;
+          </i>
+          <ul id="incoming" class="sortable ui-helper-reset">
           </ul>
           <textarea id="newQuestionTextArea" name="question" class="defaultText questionTextBox autoResizable" title="ask your student a question. keep it unambiguous"></textarea>
         <div id="answers">
@@ -100,13 +104,13 @@
               <textarea title="{{if i}}Incorrect{{else}}Correct{{/if}} Answer"
                      id="answer${ i }" name="${ i }-a" type="text" class="defaultText answerTextBox"></textarea>
             <i class="defaultText dropLabel">&#8618;Drop follow up questions here...</i>
-            <ul id="next${ i }" class="teachSortable ui-helper-reset">
+            <ul id="next${ i }" class="sortable ui-helper-reset">
             </ul>
           </script>
         </div>
         <button id="newQuestionSubmit" value="Create">Create</button>
         </div>
-        <ul id="toolbox" class="teachSortable teachLearnSortable ui-helper-reset">
+        <ul id="toolbox" class="sortable ui-helper-reset">
         </ul>
     </div>
     </div>
