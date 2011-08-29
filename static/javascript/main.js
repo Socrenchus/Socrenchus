@@ -22,10 +22,25 @@ $(document).ready(function() {
   $( "#newAnswerTemplate" ).template( "newAnswerTemplate" );
   
   //
-  // Load question stream
+  // Load a question array
   //
   var loadQuestion = function(d) {
-    $.tmpl( "questionTemplate", d ).prependTo( '#'+d.list ).click(function() {
+    $.tmpl( "questionTemplate", d ).prependTo( '#'+d.list ).click(function( eventObj ) {
+      scrollTo(0,0);
+      switch ( eventObj.target.id ) {
+        case 'rateButton':
+          //
+          // Like button clicked
+          //
+          $.getJSON('/ajax/rate', {'question_id': d.question.id}, function( data ) {
+            $('#'+data.question.id).remove();
+            loadQuestion( data );
+          });
+          break;
+        case 'answer':
+          //
+          // Question answered
+          //
           $.getJSON('/ajax/answer', {'question_id': d.question.id, 'answer': $('input:radio[name='+d.question.id+']:checked').val(),'div': d.list}, function(data) {
             var len = data.length;
             if (len) {
@@ -36,18 +51,26 @@ $(document).ready(function() {
               loadQuestion( data[i] );
             }
           });
-        });
+          break;
+      }
+    });
   }
+  
+  //
+  // Load the question stream
+  //
   var reloadStream = function() { 
     $.getJSON('/ajax/stream', function(data) {
       if (data == '') return;
       $( "#learn > div" ).remove();
       data.forEach( function( d ) {
-          loadQuestion(d, "#assignments");
+          loadQuestion( d );
         });
     });
   }
   reloadStream();
+  
+
   
   //
   // Set up draggable lists and droppable tabs

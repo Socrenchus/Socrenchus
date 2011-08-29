@@ -54,7 +54,7 @@
               <br/><br/>
               {{each answers}}
               <input type="radio" 
-                     id="${$value}"
+                     id="answer"
                      name="${question.id}" 
                      value="${$value}"
                      class="mc-radio"
@@ -82,7 +82,7 @@
               <a href=''>Mark Ambiguous</a> - 
               <a href=''>Skip</a> - 
               {{/if}}
-              <a href=''>Like</a>
+              <a id="rateButton">{{if liked}}Unlike{{else}}Like{{/if}}</a>
               </br></br>
             </div>
           </li>
@@ -93,7 +93,7 @@
         <div id="newQuestion">
           <ul id="incoming" class="teachSortable ui-helper-reset">
           </ul>
-          <textarea id="newQuestionTextArea" name="question" class="defaultText questionTextBox" title="ask your student a question. keep it unambiguous"></textarea>
+          <textarea id="newQuestionTextArea" name="question" class="defaultText questionTextBox autoResizable" title="ask your student a question. keep it unambiguous"></textarea>
         <div id="answers">
           <script id="newAnswerTemplate" type="text/x-jquery-tmpl">
             <br/>

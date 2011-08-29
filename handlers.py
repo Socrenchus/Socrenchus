@@ -96,18 +96,20 @@ class AnswerQuestionHandler(webapp.RequestHandler):
 
 class RateQuestionHandler(webapp.RequestHandler):
 
-  def post(self):
+  def get(self):
     """
     Handle the user rating the question.
     """
     # get the question object
     question_id = self.request.get('question_id')
-    q = Question.get_by_id(long(float(question_id)))
+    result = Assignment.fromQuestion(long(float(question_id)))
     
     # rate the question and store it
-    q.rate()
+    result.liked = result.question.rate()
     
-    result = Assignment.fromQuestion(long(float(question_id)))
+    result.question.put()
+    result.put()
+    
     json_response = json.encode(result)
     
     self.response.headers.add_header("Content-Type", 'application/json')
@@ -133,6 +135,7 @@ def main():
     ('/ajax/new', NewQuestionHandler),
     ('/ajax/stream', StreamHandler),
     (r'/ajax/answer', AnswerQuestionHandler),
+    ('/ajax/rate', RateQuestionHandler),
   ], debug=_DEBUG)
   wsgiref.handlers.CGIHandler().run(application)
 

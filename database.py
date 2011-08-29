@@ -132,6 +132,7 @@ class Question(Searchable, db.Model):
 
     Now the user can rate the question:
     >>> question.rate()
+    True
     
     Now the even connections are ranked lower then odd ones:
     >>> even = 0L
@@ -148,6 +149,7 @@ class Question(Searchable, db.Model):
     >>> users.User() in question.liked
     True
     """
+    result = False
     
     # get user (login is required in app.yaml)
     u = users.User()
@@ -160,13 +162,16 @@ class Question(Searchable, db.Model):
 
     # rate and adjust connection weights
     if u in self.liked:
+      result = False
       # unlike the question
       self.liked.remove(u)
       # decrease connection weights
       for c in connections:
         c.weight -= 1
         c.put()
+      
     else:
+      result = True
       # like the question
       self.liked.append(u)
       # increase connection weights
@@ -176,6 +181,7 @@ class Question(Searchable, db.Model):
     
     # store the question
     self.put()
+    return result
 
 class Answer(db.Model):
   """
@@ -263,6 +269,7 @@ class Assignment(db.Model):
   answer = db.ReferenceProperty(Answer)
   list = db.TextProperty(default="assignments")
   time = db.DateTimeProperty(auto_now = True)
+  liked = db.BooleanProperty(default = False)
   user = db.UserProperty(auto_current_user_add = True)
 
   @staticmethod
