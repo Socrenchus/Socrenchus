@@ -220,7 +220,7 @@ class Answer(db.Model):
 
 class Connection(db.Model):
   """
-  Holds a directed connection
+  Connects two database objects
   
   >>> connection = Connection(weight=9000L)
   
@@ -244,10 +244,18 @@ class Connection(db.Model):
   >>> connection.weight
   9000L
   """
-  target = db.ReferenceProperty(Question,collection_name="incoming")
+  target = db.ReferenceProperty(db.Model,collection_name="incoming")
   weight = db.IntegerProperty(default=0)
-  source = db.ReferenceProperty(Answer,collection_name="connections")
-  
+  source = db.ReferenceProperty(db.Model,collection_name="connections")
+
+class Topic(db.Model):
+  """
+  Stores a list of start and end questions.
+  """
+  title = db.StringProperty()
+  start = db.ListProperty(db.Key)
+  end = db.ListProperty(db.Key)
+
 class Assignment(db.Model):
   """
   Links a question to the current user.
