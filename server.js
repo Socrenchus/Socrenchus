@@ -1,7 +1,11 @@
 //setup Dependencies
-require(__dirname + "/lib/setup").ext( __dirname + "/lib").ext( __dirname + "/lib/express/support");
+require( __dirname + "/lib/setup" )
+   .ext( __dirname + "/lib/database" ))
+   .ext( __dirname + "/lib" )
+   .ext( __dirname + "/lib/express/support" );
 var connect = require('connect')
     , express = require('express')
+    , mongoose = require('mongoose')
     , sys = require('sys')
     , port = (process.env.PORT || 8081);
 
@@ -15,7 +19,7 @@ server.configure(function(){
 });
 
 //setup the errors
-server.error(function(err, req, res, next){
+server.error(function(err, req, res, next) {
     if (err instanceof NotFound) {
         res.render('404.ejs', { locals: { 
                   header: '#Header#'
@@ -44,9 +48,15 @@ server.listen( port);
 //              Routes                   //
 ///////////////////////////////////////////
 
-/////// ADD ALL YOUR ROUTES HERE  /////////
+server.get('/ajax/stream', function(req,res) {
+  
+});
 
-server.get('/', function(req,res){
+server.get('/ajax/new', function(req,res) {
+  
+});
+
+server.get('/', function(req,res) {
   res.render('index.ejs', {
     locals : { 
               header: '#Header#'
@@ -61,16 +71,16 @@ server.get('/', function(req,res){
 
 
 //A Route for Creating a 500 Error (Useful to keep around)
-server.get('/500', function(req, res){
+server.get('/500', function(req, res) {
     throw new Error('This is a 500 Error');
 });
 
 //The 404 Route (ALWAYS Keep this as the last route)
-server.get('/*', function(req, res){
+server.get('/*', function(req, res) {
     throw new NotFound;
 });
 
-function NotFound(msg){
+function NotFound(msg) {
     this.name = 'NotFound';
     Error.call(this, msg);
     Error.captureStackTrace(this, arguments.callee);
