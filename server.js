@@ -1,6 +1,6 @@
-//setup Dependencies
+// setup Dependencies
 require( __dirname + "/lib/setup" )
-   .ext( __dirname + "/lib/database" ))
+   .ext( __dirname + "/lib/database" )
    .ext( __dirname + "/lib" )
    .ext( __dirname + "/lib/express/support" );
 var connect = require('connect')
@@ -9,7 +9,7 @@ var connect = require('connect')
     , sys = require('sys')
     , port = (process.env.PORT || 8081);
 
-//Setup Express
+// Setup Express
 var server = express.createServer();
 server.configure(function(){
     server.set('views', __dirname + '/views');
@@ -18,7 +18,10 @@ server.configure(function(){
     server.use(server.router);
 });
 
-//setup the errors
+// Setup Mongoose
+mongoose.connect('mongodb://localhost/socrenchus');
+
+// setup the errors
 server.error(function(err, req, res, next) {
     if (err instanceof NotFound) {
         res.render('404.ejs', { locals: { 
@@ -41,7 +44,7 @@ server.error(function(err, req, res, next) {
                 },status: 500 });
     }
 });
-server.listen( port);
+server.listen( port );
 
 
 ///////////////////////////////////////////
@@ -53,7 +56,19 @@ server.get('/ajax/stream', function(req,res) {
 });
 
 server.get('/ajax/new', function(req,res) {
+  var q = new Question();
+  q.value = req.param('question');
+  for (var i = 0; i < 4; ++i) {
+    var a = new Answer();
+    a.value = req.param(i+'-a');
+    q.answers.push(a);
+    a.save();
+  }
   
+  var a = new Assignment();
+  a.question = q;
+  a.save();
+  q.save();
 });
 
 server.get('/', function(req,res) {
