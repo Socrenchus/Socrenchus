@@ -15,67 +15,18 @@ This is the database model and core logic.
 from google.appengine.ext import db
 
 ##########################
-##  App Engine Graph    ##
-##########################
-
-class Edge(db.Model):
-  """
-  Models a graph edge.
-  """
-  source = db.Key
-  target = db.Key
-  weight = db.IntegerProperty(default=0)
-  
-class Node(db.Model):
-  """
-  Models a graph node.
-  """
-  def connectTo(self, aNode):
-    """
-    Connects a node to another node.
-    """
-    if not isinstance(aNode, Node):
-      throw Exception('You can only connect to another node.')
-    
-    return Edge(source = self, target = aNode).put()
-    
-  
-  def _getConnections(self, self_type, num = 0):
-    """
-    Returns a list of nodes.
-    """
-    filter_string = self_type + " ="
-    query = Edge.all().filter(filter_string).order(weight)
-    
-    not_self_type = (self_type == "source") ? "target" : "source"
-    
-    i = 1
-    result = []
-    for q in query:
-      if i == num:
-        break
-      result += getattr(q, not_self_type)
-      
-    return db.get(result)
-    
-  def incoming(self, num = 0):
-    """
-    Get objects that point to this node.
-    """
-    return self._getConnections("target", num)
-    
-  
-  def outgoing(self, num = 0):
-    """
-    Get objects that this node points to.
-    """
-    return self._getConnections("source", num)
-
-##########################
 ## Core Model and Logic ##
 ##########################
 
-class Question(db.Model, Node):
+class Connection(db.Model):
+  """
+  Models a graph edge.
+  """
+  source = db.ReferenceProperty(db.Model, collection_name="outgoing")
+  target = db.ReferenceProperty(db.Model, collection_name="incoming")
+  weight = db.IntegerProperty(default=0)
+
+class Question(Searchable, db.Model):
   """
   Models a question.
   """
@@ -83,11 +34,77 @@ class Question(db.Model, Node):
   title = db.StringProperty()
   body = db.TextProperty()
 # answers = db.Query(Answer)
-# incoming(num) = [Answer]
-# outgoing(num) = [Lesson]
+# incoming = db.Query(Connection<Answer>)
+# outgoing = db.Query(Connection<Lesson>)
 # assignments = db.Query(aQuestion)
+
+  def rate(self):
+    """
+    Rate the question and associated connections and store it.
+    """
+    result = False
   
-class Answer(db.Model, Node):
+    # get user (login is required in app.yaml)
+    u = users.User()
+  
+    # get all the users answers
+    answers = list(Answer.all().filter("user =", u))
+
+    # get connections to adjust
+    connections = self.incoming.filter("source in", answers)
+
+    # rate and adjust connection weights
+    if u in self.liked:
+      result = False
+      # unlike the question
+      self.liked.remove(u)
+      # decrease connection weights
+      for c in connections:
+        c.weight -= 1
+        c.put()
+    
+    else:
+      result = True
+      # like the question
+      self.liked.append(u)
+      # increase connection weights
+      for c in connections:
+        c.weight += 1
+        c.put()
+  
+    # store the question
+    self.put()
+    return result
+  
+  def getAnswer(myAnswer):
+    """
+    Returns an answer object from a string.
+    """
+    for ans in self.question.answers:
+      if ans.value == answer_string:
+          return ans
+          
+    # returns None if answer isn't found
+    return None
+  
+class MultiplePickQuestion(Question):
+  """
+  Handles questions that have more than one correct answer.
+  """
+class MultipleChoiceQuestion(MultiplePickQuestion):
+  """
+  Handles multiple choice questions.
+  """
+class SortAnswerQuestion(Question):
+  """
+  Handles short answer questions.
+  """
+class BuilderQuestion(SortAnswerQuestion):
+  """
+  Handles questions that are made to generate content.
+  """
+  
+class Answer(db.Model):
   """
   Models an answer.
   """
@@ -96,16 +113,16 @@ class Answer(db.Model, Node):
   text = db.TextProperty()
   correctness = db.FloatProperty()
   confidence = db.FloatProperty()
-# outgoing(num) = [Question]
+# outgoing = [db.Query(Connection<Question>)]
   
-class Lesson(db.Model, Node):
+class Lesson(db.Model):
   """
   Models a lesson.
   """
   author = db.UserProperty(auto_current_user_add = True)
   title = db.StringProperty()
-# incoming(num) = [Question]
-  
+# incoming = [db.Query(Connection<Question>)]
+
 ##########################
 ## User Model and Logic ##
 ##########################
@@ -115,27 +132,51 @@ class Assignment(db.Model):
   Models a generic assignment
   """
   def __new__(cls, assignedModel):
-    db.all().ancestor(assignedModel).filter('user =', users.User())
+    instance = db.all().ancestor(assignedModel)
+                       .filter('user =', users.User())
+                       .get()
     
-    if not cls._instance:
-        cls._instance = super(Singleton, cls).__new__(
-                            cls, *args, **kwargs)
-    return cls._instance
+    if not instance:
+        instance = super(Assignment, cls).__new__(
+                         cls, *args, **kwargs)
+    return instance
     
   def __init__(self, assignedModel):
     pass
 
-class aLesson(db.Model, Assignment):
+  user = db.UserProperty(auto_current_user = True)
+  time = db.DateTimeProperty(auto_now = True)
+# parent = db.ReferenceProperty(db.Model)
+
+class aLesson(Assignment):
   """
   Models user specific lesson data.
   """
-  user = db.UserProperty(auto_current_user = True)
+# user = db.UserProperty(auto_current_user = True)
 # parent = db.ReferenceProperty(Lesson)
 # assigned_questions = db.Query(aQuestion)
 
-class aQuestion(db.Model, Assignment):
+class aQuestion(Assignment):
   """
   Models user specific question data.
   """
-  user = db.UserProperty(auto_current_user = True)
+  answers = db.StringListProperty()
+  answer = db.ReferenceProperty(Answer)
+  liked = db.BooleanProperty(default = False)
+# user = db.UserProperty(auto_current_user = True)
 # parent = db.ReferenceProperty(Question)
+
+  def submitAnswer(self, answer_string):
+    """
+    Answers the question if it hasn't been answered.
+    """
+    if self.answer:
+      return False
+
+    self.answer = self.question.getAnswer(answer_string)
+    self.put()
+    # assign the next questions
+    for q in self.answer.outgoing.fetch(5):
+      aQuestion(q.target).put()
+
+      return result
