@@ -1,118 +1,62 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
-<html lang="en">
-  <head>
+<!doctype html>
+<!-- The DOCTYPE declaration above will set the    -->
+<!-- browser's rendering engine into               -->
+<!-- "Standards Mode". Replacing this declaration  -->
+<!-- with a "Quirks Mode" doctype may lead to some -->
+<!-- differences in layout.                        -->
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" type="text/javascript">
-</script>
-    <script src="//ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js" type="text/javascript">
-</script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js" type="text/javascript">
-</script>
-    <script type="text/javascript" src="/static/javascript/jquery.md5.js">
-</script>
-    <script type="text/javascript" src="/static/javascript/autoresize.jquery.min.js">
-</script>
-    <script type="text/javascript" src="/static/javascript/main.js">
-</script>
-    <link href="/static/main.css" type="text/css" rel="stylesheet">
-    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/flick/jquery-ui.css" type="text/css" rel="stylesheet">
-    <title>
-      Directed Learning
-    </title>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    <!--                                                               -->
+    <!-- Consider inlining CSS to reduce the number of requested files -->
+    <!--                                                               -->
+    <link type="text/css" rel="stylesheet" href="static/Announcement.css">
+
+    <!--                                           -->
+    <!-- Any title is fine                         -->
+    <!--                                           -->
+    <title>Socrenchus</title>
+    
+    <!--                                           -->
+    <!-- This script loads your compiled module.   -->
+    <!-- If you add any GWT meta tags, they must   -->
+    <!-- be added before this line.                -->
+    <!--                                           -->
+    <script type="text/javascript" language="javascript" src="announcement/announcement.nocache.js"></script>
   </head>
-  <body>
-    <div id="tabs">
-      <ul>
-        <li>
-          <a href="#learn">Learn</a>
-        </li>
-        <li>
-          <a href="#teach">Teach</a>
-        </li>
-        <li>
-          <a href="">Collaborate</a>
-        </li>
-        <li>
-          <a href="">Reflect</a>
-        </li>
-        <li>
-          <a href="">Plan</a>
-        </li>
-      </ul><!-- TODO: Change logout url for launch -->
-      <a id="logout" href="/_ah/login?continue=/&amp;action=Logout" name="logout">Logout</a>
-      <div id="learn">
-        <ul id="assignments" class="sortable ui-helper-reset">
-        <script id="questionTemplate" type="text/x-jquery-tmpl">
-          <li id="${question.id}" class="question {{if answer}}{{if answer.correct}}correct{{/if}}{{/if}}">
-            <div class="inner-question">
-              <br/>
-              <img src="http://www.gravatar.com/avatar/{{html $.md5(question.author.email)}}?s=48&d=mm" class="avatar" />
-              <a href=''>${question.author.nickname}</a> - 
-              ${time.ctime /*fixme: this should be question creation time*/}
-              <br/><br/>
-              ${question.value}
-              <br/><br/>
-              {{each answers}}
-              <input type="radio" 
-                     id="answer"
-                     name="${question.id}" 
-                     value="${$value}"
-                     class="mc-radio"
-                     {{if answer}}
-                      disabled
-                        {{if $value == answer.value}} checked/>
-                          {{if answer.correct}}
-                          &#10004;
-                          {{else}}
-                          &#10008;
-                          {{/if}}
-                        {{/if}}
-                     {{/if}}
-              <label for="${$value}">${$value}</label>
-              <br/>
-              {{/each}}
-              <br/>
-              {{if answer}}
-              {{if answer.correct}}
-              <a href=''>Review</a> - 
-              {{else}}
-              <a href=''>Mark as Learned</a> - 
-              {{/if}}
-              {{else}}
-              <a href=''>Mark Ambiguous</a> - 
-              <a href=''>Skip</a> - 
-              {{/if}}
-              <a id="rateButton">{{if liked}}Unlike{{else}}Like{{/if}}</a>
-              </br></br>
-            </div>
-          </li>
-        </script>
-        </ul>
+
+  <!--                                           -->
+  <!-- The body can have arbitrary html, or      -->
+  <!-- you can leave the body empty if you want  -->
+  <!-- to create a completely dynamic UI.        -->
+  <!--                                           -->
+  <body style="background-color:yellow;">
+
+    <!-- OPTIONAL: include this if you want history support -->
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+    
+    <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+    <noscript>
+      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
       </div>
-      <div id="teach">
-        <div id="newQuestion">
-          <i class="defaultText dropLabel">
-            Drop questions you think should point to your question...(to be reviewed)
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8618;
-          </i>
-          <ul id="incoming" class="sortable ui-helper-reset">
-          </ul>
-          <textarea id="newQuestionTextArea" name="question" class="defaultText questionTextBox autoResizable" title="ask your student a question. keep it unambiguous"></textarea>
-        <div id="answers">
-          <script id="newAnswerTemplate" type="text/x-jquery-tmpl">
-            <br/>
-              <textarea title="{{if i}}Incorrect{{else}}Correct{{/if}} Answer"
-                     id="answer${ i }" name="${ i }-a" type="text" class="defaultText answerTextBox"></textarea>
-            <i class="defaultText dropLabel">&#8618;Drop follow up questions here...</i>
-            <ul id="next${ i }" class="sortable ui-helper-reset">
-            </ul>
-          </script>
-        </div>
-        <button id="newQuestionSubmit" value="Create">Create</button>
-        </div>
-        <ul id="toolbox" class="sortable ui-helper-reset">
-        </ul>
-    </div>
-    </div>
+    </noscript>
+
+    <h1 class="education">EDUCATION</h1><h1 class="ona">ON A</h1><h1 class="whole">WHOLE</h1><h1 class="new">NEW</h1><h1 class="scale">SCALE</h1>
+    <table class="emailform" align="center">
+      <tr>
+        <td colspan="2" style="font-weight:bold;">Are you ready?</td>        
+      </tr>
+      <tr>
+        <td id="nameFieldContainer"><textarea id="email"></textarea></td>
+        <td id="sendButtonContainer"><button id="submit">Submit</button></td>
+      </tr>
+      <tr>
+        <td colspan="2" style="color:red;" id="errorLabelContainer"></td>
+      </tr>
+    </table>
   </body>
 </html>

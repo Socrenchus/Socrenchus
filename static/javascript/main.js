@@ -18,9 +18,7 @@ $(document).ready(function() {
   //
   // Compile templates
   //
-  $( "#questionTemplate" ).template( "questionTemplate" );
-  $( "#newAnswerTemplate" ).template( "newAnswerTemplate" );
-  
+  $( "#questionTemplate" ).template( "questionTemplate" );  
   //
   // Load a question array
   //
@@ -69,80 +67,6 @@ $(document).ready(function() {
     });
   }
   reloadStream();
-  
-
-  
-  //
-  // Set up draggable lists and droppable tabs
-  //
-  $(function() {
-    $( "#assignments, #toolbox" ).sortable().disableSelection();
-    
-    var $tabs = $( "#tabs" ).tabs();
-    
-    var $tab_items = $( "ul:first li", $tabs ).droppable({
-      accept: ".correct",
-      hoverClass: "ui-state-hover",
-      tolerance: "pointer",
-      drop: function( event, ui ) {
-        var $item = $( this );
-        var $list = $( $item.find( "a" ).attr( "href" ) )
-          .find( "#toolbox" );
-          
-        ui.draggable.hide("fast", function() {
-          $.getJSON('/ajax/answer', {'question_id': $(this).attr('id'),'div':$list.attr('id')}, function(data) {
-            loadQuestion( data );
-          });
-        });
-      }
-    });
-  });
-  
-  //
-  // Create new question form
-  //
-  $(function() {
-    [0, 1, 2, 3].forEach( function( i ) {
-      $.tmpl( "newAnswerTemplate", {'i': i} ).appendTo( "#answers" );
-      
-      $( "#next"+i ).sortable({
-        connectWith: ".sortable",
-        tolerance: "pointer"
-      }).disableSelection();
-    });
-    
-    $( "#incoming" ).sortable({connectWith: ".sortable",placeholder: "empty"}).disableSelection();
-    $( "#toolbox" ).sortable({connectWith: ".sortable"}).disableSelection();
-
-    
-    $("#newQuestionSubmit").click( function() {
-      // get all the inputs into an array.
-      var $inputs = $('#newQuestion :text,textarea');
-      
-      // get an associative array of just the values.
-      var values = {};
-      $inputs.each(function() {
-        values[this.name] = $(this).val();
-      });
-      
-      // get question links
-      [0, 1, 2, 3].forEach( function( i ) {
-        var next_questions = $('#next'+i).children().map(function() {
-          return $(this).attr("id");
-        }).get();
-        
-        if (next_questions.length > 0)
-          values[i+'-n'] = next_questions;
-        
-      });
-      
-      $.getJSON('/ajax/new', values, function(data) {
-        $('#newQuestion :text,textarea').val('').blur();
-        $('#newQuestion > div > ul').empty();
-        reloadStream();
-      });
-    });
-  });
   
   //
   // Set up autoresizing text areas

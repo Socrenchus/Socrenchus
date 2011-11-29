@@ -18,8 +18,17 @@ handlers:
   
 - url: /static
   static_dir: static
+  
+- url: /experiments/1
+  static_files: static/experiment1.html
+  upload: static/experiment1.html
+  login: required
+  
+- url: /q/.*
+  static_files: static/stream.html
+  upload: static/stream.html
+  login: required
 
 - url: .*
   static_files: static/index.html
   upload: static/index.html
-  login: required

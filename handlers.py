@@ -52,15 +52,72 @@ class NewQuestionHandler(webapp.RequestHandler):
     answers = [self.request.get(str(i)+'-a') for i in range(4)]
     connections = [self.request.get_all(str(i)+'-n[]') for i in range(4)]
     
-    key = Question.createNewQuestion(question_text,answers,connections)    
-    assignment = Assignment.fromQuestion(key.id())
-    assignment.list = 'toolbox'
-    assignment.put()
-    
-    json_response = json.encode(assignment)
-    
+    q = Question()
+    q.value = self.request.get('question') # the question text
+    key = q.put()
+    a = Answer()
+    a.value = self.request.get('correct1') # the first correct answer
+    a.confidence = 1.0
+    a.correctness = 1.0
+    a.question = q
+    a.put()
+    a = Answer()
+    a.value = self.request.get('correct2') # the second correct answer
+    a.confidence = 1.0
+    a.correctness = 1.0
+    a.question = q
+    a.put()
+    a = Answer()
+    a.value = self.request.get('correct3') # the third correct answer
+    a.confidence = 1.0
+    a.correctness = 1.0
+    a.question = q
+    a.put()
+    a = Answer()
+    a.value = self.request.get('correct4') # the fourth correct answer
+    a.confidence = 1.0
+    a.correctness = 1.0
+    a.question = q
+    a.put()
+    a = Answer()
+    a.value = self.request.get('correct5') # the fifth correct answer
+    a.confidence = 1.0
+    a.correctness = 1.0
+    a.question = q
+    a.put()
+    a = Answer()
+    a.value = self.request.get('incorrect1') # the first incorrect answer
+    a.confidence = 1.0
+    a.correctness = 0.0
+    a.question = q
+    a.put()
+    a = Answer()
+    a.value = self.request.get('incorrect2') # the second incorrect answer
+    a.confidence = 1.0
+    a.correctness = 0.0
+    a.question = q
+    a.put()
+    a = Answer()
+    a.value = self.request.get('incorrect3') # the third incorrect answer
+    a.confidence = 1.0
+    a.correctness = 0.0
+    a.question = q
+    a.put()
+    a = Answer()
+    a.value = self.request.get('incorrect4') # the fourth incorrect answer
+    a.confidence = 1.0
+    a.correctness = 0.0
+    a.question = q
+    a.put()
+    a = Answer()
+    a.value = self.request.get('incorrect5') # the fifth incorrect answer
+    a.confidence = 1.0
+    a.correctness = 0.0
+    a.question = q
+    a.put()
+        
     self.response.headers.add_header("Content-Type", 'application/json')
-    self.response.out.write(json_response)
+    self.response.out.write(json.encode({'id':key.id()}))
     
 class AnswerQuestionHandler(webapp.RequestHandler):
 
@@ -70,17 +127,11 @@ class AnswerQuestionHandler(webapp.RequestHandler):
     """
     # obtain the question
     qid = self.request.get('question_id')
-    
-    # obtain the list its in
-    list = self.request.get('div')
 
     # obtain the answer
     ans = self.request.get('answer')
     
-    result = Assignment.fromQuestion(long(float(qid)))
-    
-    if list and result.answer and result.answer.correct:
-      result.list = list
+    result = Assignment.assign(Question.get_by_id(long(float(qid))))
     
     result.put()
     
@@ -91,8 +142,6 @@ class AnswerQuestionHandler(webapp.RequestHandler):
     
     self.response.headers.add_header("Content-Type", 'application/json')
     self.response.out.write(json_response)
-
-        
 
 class RateQuestionHandler(webapp.RequestHandler):
 

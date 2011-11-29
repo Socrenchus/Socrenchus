@@ -8,6 +8,15 @@ a {
   text-decoration: none;
 }
 
+h1 {
+  text-align: right;
+}
+
+h2 {
+  padding-top:4px;
+  text-align: left;
+}
+
 #teach a, #learn a {
   color: #36C;
   cursor: pointer;
@@ -17,18 +26,29 @@ a {
 #tabs {
   width: 576px;
   border: 1px solid #EBEBEB;
+  -moz-border-radius-bottomright: 10px;
+  -webkit-border-bottom-right-radius: 10px;
+  -moz-border-radius-bottomleft: 10px;
+  -webkit-border-bottom-left-radius: 10px;
   margin: auto;
 }
 
 #logout {
   float: right;
   position: relative;
-  top: -20px;
+  top: -5px;
   right: 5px;
 }
 
 #newQuestion {
   margin-right: 44px;
+}
+
+#table-top {
+  width: 576px;
+  background-color: #ffffc0;
+  position: absolute;
+  overflow: hidden;
 }
 
 .question {
@@ -52,7 +72,7 @@ a {
 }
 
 .defaultText {
-  width: 300px;
+  width: 100%;
 }
 
 .defaultTextActive {

@@ -1,0 +1,64 @@
+h1 {
+font-size: 100px;
+line-height: 10px;
+text-shadow: -3px 0 4px #006;
+}
+  
+.education {
+font-size: 170px;
+}
+.ona {
+font-size: 90px;
+color: #888;
+}
+.whole {
+display: block;
+position: absolute;
+left: 105px;
+top: 330px;
+-webkit-transform: rotate(90deg);
+-moz-transform: rotate(90deg);
+}
+.new {
+position: absolute;
+left: 370px;
+font-size: 120px;
+top: 320px;
+color: #666;
+}
+.scale {
+position: absolute;
+left: 370px;
+top: 435px;
+font-size: 140px;
+color: #333;
+}
+
+.emailform {
+position: absolute;
+top: 240px;
+left: 370px;
+}
+	
+.sendButton {
+  display: block;
+  font-size: 16pt;
+}
+
+/** Most GWT widgets already have a style name defined */
+.gwt-DialogBox {
+  width: 400px;
+}
+
+.dialogVPanel {
+  margin: 5px;
+}
+
+.serverResponseLabelError {
+  color: red;
+}
+
+/** Set ids using widget.getElement().setId("idOfElement") */
+#closeButton {
+  margin: 15px 6px 6px;
+}

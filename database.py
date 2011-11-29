@@ -13,6 +13,8 @@ This is the database model and core logic.
 """
 
 from google.appengine.ext import db
+from google.appengine.api import users
+from search import *
 
 ##########################
 ## Core Model and Logic ##
@@ -31,8 +33,7 @@ class Question(Searchable, db.Model):
   Models a question.
   """
   author = db.UserProperty(auto_current_user_add = True)
-  title = db.StringProperty()
-  body = db.TextProperty()
+  value = db.TextProperty()
 # answers = db.Query(Answer)
 # incoming = db.Query(Connection<Answer>)
 # outgoing = db.Query(Connection<Lesson>)
@@ -91,18 +92,22 @@ class MultiplePickQuestion(Question):
   """
   Handles questions that have more than one correct answer.
   """
+  pass
 class MultipleChoiceQuestion(MultiplePickQuestion):
   """
   Handles multiple choice questions.
   """
+  pass
 class SortAnswerQuestion(Question):
   """
   Handles short answer questions.
   """
+  pass
 class BuilderQuestion(SortAnswerQuestion):
   """
   Handles questions that are made to generate content.
   """
+  pass
   
 class Answer(db.Model):
   """
@@ -110,7 +115,7 @@ class Answer(db.Model):
   """
   author = db.UserProperty(auto_current_user_add = True)
   question = db.ReferenceProperty(Question, collection_name="answers")
-  text = db.TextProperty()
+  value = db.TextProperty()
   correctness = db.FloatProperty()
   confidence = db.FloatProperty()
 # outgoing = [db.Query(Connection<Question>)]
@@ -131,18 +136,16 @@ class Assignment(db.Model):
   """
   Models a generic assignment
   """
-  def __new__(cls, assignedModel):
-    instance = db.all().ancestor(assignedModel)
-                       .filter('user =', users.User())
-                       .get()
-    
-    if not instance:
-        instance = super(Assignment, cls).__new__(
-                         cls, *args, **kwargs)
-    return instance
-    
-  def __init__(self, assignedModel):
-    pass
+  @staticmethod
+  def assign(question):
+    assignmentClass = eval('a'+question.__class__.__name__)
+    instance = assignmentClass.all()
+    instance = instance.ancestor(question)
+    instance = instance.filter('user =', users.User()).get()
+    if instance:
+      return instance
+    else:
+      return assignmentClass(parent=question)
 
   user = db.UserProperty(auto_current_user = True)
   time = db.DateTimeProperty(auto_now = True)

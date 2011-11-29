@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+  <head>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js" type="text/javascript">
+</script>
+    <script src="//ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js" type="text/javascript">
+</script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js" type="text/javascript">
+</script>
+    <script type="text/javascript" src="/static/javascript/jquery.md5.js">
+</script>
+    <script type="text/javascript" src="/static/javascript/autoresize.jquery.min.js">
+</script>
+    <script type="text/javascript" src="/static/javascript/main.js">
+</script>
+    <link href="/static/main.css" type="text/css" rel="stylesheet">
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/flick/jquery-ui.css" type="text/css" rel="stylesheet">
+    <title>
+      Directed Learning
+    </title>
+  </head>
+  <body>
+    <div id="tabs">
+      <table id="table-top">
+      <tr>
+        <td>
+          <h1>Socrenchus&nbsp;</h1>
+        </td>
+        <td>
+          <h2><i>> Online Learning Experiment</i></h2>
+        </td>
+      </tr>
+      <table>
+      <div style="height:54px;"></div>
+      <!-- TODO: Change logout url for launch -->
+      <a id="logout" href="/_ah/login?continue=/&amp;action=Logout" name="logout">Logout</a>
+      <div id="learn">
+        <ul id="assignments" class="sortable ui-helper-reset">
+        <script id="questionTemplate" type="text/x-jquery-tmpl">
+          <li id="${question.id}" class="question {{if answer}}{{if answer.correct}}correct{{/if}}{{/if}}">
+            <div class="inner-question">
+              <br/>
+              <img src="http://www.gravatar.com/avatar/{{html $.md5(question.author.email)}}?s=48&d=mm" class="avatar" />
+              <a href=''>${question.author.nickname}</a> - 
+              ${time.ctime /*fixme: this should be question creation time*/}
+              <br/><br/>
+              ${question.value}
+              <br/><br/>
+              {{each answers}}
+              <input type="radio" 
+                     id="answer"
+                     name="${question.id}" 
+                     value="${$value}"
+                     class="mc-radio"
+                     {{if answer}}
+                      disabled
+                        {{if $value == answer.value}} checked/>
+                          {{if answer.correct}}
+                          &#10004;
+                          {{else}}
+                          &#10008;
+                          {{/if}}
+                        {{/if}}
+                     {{/if}}
+              <label for="${$value}">${$value}</label>
+              <br/>
+              {{/each}}
+              <br/>
+              {{if answer}}
+              {{if answer.correct}}
+              <a href=''>Review</a> - 
+              {{else}}
+              <a href=''>Mark as Learned</a> - 
+              {{/if}}
+              {{else}}
+              <a href=''>Mark Ambiguous</a> - 
+              <a href=''>Skip</a> - 
+              {{/if}}
+              <a id="rateButton">{{if liked}}Unlike{{else}}Like{{/if}}</a>
+              </br></br>
+            </div>
+          </li>
+        </script>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
