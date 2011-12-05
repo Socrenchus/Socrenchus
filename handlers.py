@@ -52,7 +52,7 @@ class NewQuestionHandler(webapp.RequestHandler):
     answers = [self.request.get(str(i)+'-a') for i in range(4)]
     connections = [self.request.get_all(str(i)+'-n[]') for i in range(4)]
     
-    q = Question()
+    q = ShortAnswerQuestion()
     q.value = self.request.get('question') # the question text
     key = q.put()
     a = Answer()
@@ -132,11 +132,11 @@ class AnswerQuestionHandler(webapp.RequestHandler):
     ans = self.request.get('answer')
     
     result = Assignment.assign(Question.get_by_id(long(float(qid))))
+        
+    if bool(ans) and not result.answer:
+      result = result.submitAnswer(ans)
     
     result.put()
-    
-    if bool(ans) and ans != result.answer.value:
-      result = result.submitAnswer(ans)
     
     json_response = json.encode(result)
     
@@ -170,11 +170,11 @@ class StreamHandler(webapp.RequestHandler):
     """
     Return the user's question stream.
     """
-    q = Assignment.all()
+    q = aQuestion.all()
     q = q.filter('user =', users.User())
     q = q.order('time')
     assignments = q.fetch(10)
-      
+
     self.response.headers.add_header("Content-Type", 'application/json')
     self.response.out.write(json.encode(assignments))
 

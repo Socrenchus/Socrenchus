@@ -19,6 +19,12 @@ indexes:
 
 - kind: Assignment
   properties:
+  - name: class
+  - name: user
+  - name: time
+
+- kind: Assignment
+  properties:
   - name: user
   - name: answer
 
@@ -70,3 +76,8 @@ indexes:
   properties:
   - name: source
   - name: weight
+
+- kind: aQuestion
+  properties:
+  - name: user
+  - name: time

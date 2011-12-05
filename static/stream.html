@@ -47,8 +47,16 @@
               <br/><br/>
               ${question.value}
               <br/><br/>
+              {{if 'aShortAnswerQuestion' in _class}}
+              <textarea id="answer" class="defaultText autoResizable" title="enter your answer here"></textarea>
+              {{/if}}
               {{each answers}}
-              <input type="radio" 
+              <input type=
+              {{if 'aMultipleChoiceQuestion' in _class}}
+              "radio"
+              {{else}}
+              "checkbox"
+              {{/if}} 
                      id="answer"
                      name="${question.id}" 
                      value="${$value}"
@@ -66,6 +74,8 @@
               <label for="${$value}">${$value}</label>
               <br/>
               {{/each}}
+              <button id="submit" value="submit">Submit</button>
+              <!--
               <br/>
               {{if answer}}
               {{if answer.correct}}
@@ -77,7 +87,7 @@
               <a href=''>Mark Ambiguous</a> - 
               <a href=''>Skip</a> - 
               {{/if}}
-              <a id="rateButton">{{if liked}}Unlike{{else}}Like{{/if}}</a>
+              <a id="rateButton">{{if liked}}Unlike{{else}}Like{{/if}}</a>-->
               </br></br>
             </div>
           </li>

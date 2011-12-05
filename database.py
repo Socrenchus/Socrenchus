@@ -14,7 +14,9 @@ This is the database model and core logic.
 
 from google.appengine.ext import db
 from google.appengine.api import users
+from google.appengine.ext.db import polymodel
 from search import *
+from random import shuffle
 
 ##########################
 ## Core Model and Logic ##
@@ -28,7 +30,7 @@ class Connection(db.Model):
   target = db.ReferenceProperty(db.Model, collection_name="incoming")
   weight = db.IntegerProperty(default=0)
 
-class Question(Searchable, db.Model):
+class Question(Searchable, polymodel.PolyModel):
   """
   Models a question.
   """
@@ -36,7 +38,7 @@ class Question(Searchable, db.Model):
   value = db.TextProperty()
 # answers = db.Query(Answer)
 # incoming = db.Query(Connection<Answer>)
-# outgoing = db.Query(Connection<Lesson>)
+# outgoing = db.Query(Connection<Question>)
 # assignments = db.Query(aQuestion)
 
   def rate(self):
@@ -77,33 +79,66 @@ class Question(Searchable, db.Model):
     self.put()
     return result
   
-  def getAnswer(myAnswer):
+  def getAnswer(self, myAnswer):
     """
     Returns an answer object from a string.
     """
-    for ans in self.question.answers:
-      if ans.value == answer_string:
+    for ans in self.answers:
+      if ans.value == myAnswer:
           return ans
           
     # returns None if answer isn't found
     return None
-  
-class MultiplePickQuestion(Question):
+
+class MultipleAnswerQuestion(Question):
   """
   Handles questions that have more than one correct answer.
   """
   pass
-class MultipleChoiceQuestion(MultiplePickQuestion):
+class MultipleChoiceQuestion(MultipleAnswerQuestion):
   """
   Handles multiple choice questions.
   """
   pass
-class SortAnswerQuestion(Question):
+class ShortAnswerQuestion(Question):
   """
   Handles short answer questions.
   """
-  pass
-class BuilderQuestion(SortAnswerQuestion):
+  def getAnswer(self, myAnswer):
+    """
+    Returns an answer object from a string.
+    Generates grading questions.
+    """
+    result = None
+    answers = []
+    for ans in self.answers:
+      answers.append(ans)
+      if ans.value == myAnswer:
+          result = ans
+    
+    if not result:
+      result = Answer(question=self,value=myAnswer)
+      result.put()
+    
+    # get user (login is required in app.yaml)
+    u = users.User()
+    
+    # Generate the assesment question
+    txt = "Check all the answers you believe to be correct."
+    q = MultipleAnswerQuestion(value=txt)
+    q.put()
+    
+    shuffle(answers)
+    # Add the answers to the question
+    for i in range(5):
+      answers[i].question = q
+      answers[i].put()
+    # Attach the question to the answer
+    Connection(source=result, target=q).put()
+    
+    return result
+
+class BuilderQuestion(ShortAnswerQuestion):
   """
   Handles questions that are made to generate content.
   """
@@ -132,23 +167,26 @@ class Lesson(db.Model):
 ## User Model and Logic ##
 ##########################
 
-class Assignment(db.Model):
+class Assignment(polymodel.PolyModel):
   """
   Models a generic assignment
   """
   @staticmethod
-  def assign(question):
-    assignmentClass = eval('a'+question.__class__.__name__)
+  def assign(item):
+    assignmentClass = eval('a'+item.__class__.__name__)
     instance = assignmentClass.all()
-    instance = instance.ancestor(question)
+    instance = instance.ancestor(item)
     instance = instance.filter('user =', users.User()).get()
-    if instance:
-      return instance
-    else:
-      return assignmentClass(parent=question)
+    if not instance:
+      instance = assignmentClass(parent=item)
+    instance.prepare()
+    return instance
+  
+  def prepare(self):
+    pass
 
   user = db.UserProperty(auto_current_user = True)
-  time = db.DateTimeProperty(auto_now = True)
+  time = db.DateTimeProperty(auto_now_add = True)
 # parent = db.ReferenceProperty(db.Model)
 
 class aLesson(Assignment):
@@ -168,7 +206,7 @@ class aQuestion(Assignment):
   liked = db.BooleanProperty(default = False)
 # user = db.UserProperty(auto_current_user = True)
 # parent = db.ReferenceProperty(Question)
-
+  
   def submitAnswer(self, answer_string):
     """
     Answers the question if it hasn't been answered.
@@ -176,10 +214,25 @@ class aQuestion(Assignment):
     if self.answer:
       return False
 
-    self.answer = self.question.getAnswer(answer_string)
-    self.put()
-    # assign the next questions
-    for q in self.answer.outgoing.fetch(5):
-      aQuestion(q.target).put()
+    self.answer = self.parent().getAnswer(answer_string)
 
-      return result
+    self.put()
+    
+    # assign the next questions
+    for q in self.answer.outgoing.fetch(1):
+      return Assignment.assign(q.target)
+      
+class aShortAnswerQuestion(aQuestion):
+  pass
+  
+class aMultipleAnswerQuestion(aQuestion):
+  def prepare(self):
+    """
+    Assigns the answers from the question.
+    """
+    myAnswers = []
+    for i in self.parent().answers:
+      myAnswers += i.value
+    shuffle(myAnswers)
+    self.answers = myAnswers
+    self.put()

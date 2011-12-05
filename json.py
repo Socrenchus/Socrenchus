@@ -56,6 +56,8 @@ class GqlEncoder(simplejson.JSONEncoder):
       for field, value in properties:
         output[field] = getattr(obj, field)
       output['id'] = obj.key().id()
+      if obj.parent():
+        output['question'] = obj.parent()
       return output
 
     elif isinstance(obj, datetime.datetime):
