@@ -48,46 +48,45 @@
               ${question.value}
               <br/><br/>
               {{if 'aShortAnswerQuestion' in _class}}
-              <textarea id="answer" class="defaultText autoResizable" title="enter your answer here"></textarea>
+              <textarea id="answer" class="defaultText autoResizable" title="enter your answer here" {{if answer}}disabled{{/if}}>{{if answer}}${answer.value}{{/if}}</textarea>
               {{/if}}
               {{each answers}}
-              <input type=
               {{if 'aMultipleChoiceQuestion' in _class}}
-              "radio"
-              {{else}}
-              "checkbox"
-              {{/if}} 
+              <input type="radio"
                      id="answer"
                      name="${question.id}" 
                      value="${$value}"
                      class="mc-radio"
-                     {{if answer}}
+                     {{if answer.length > 0}}
                       disabled
-                        {{if $value == answer.value}} checked/>
+                        {{if $value == answer.value}} checked
                           {{if answer.correct}}
                           &#10004;
                           {{else}}
                           &#10008;
                           {{/if}}
                         {{/if}}
-                     {{/if}}
+                     {{/if}}/>
               <label for="${$value}">${$value}</label>
               <br/>
-              {{/each}}
-              <button id="submit" value="submit">Submit</button>
-              <!--
+              {{else}}
+              <input type="checkbox"
+                     id="answer"
+                     name="${question.id}" 
+                     value="${$value}"
+                     class="mc-radio"
+                     {{if answer}}
+                      disabled
+                        {{if $value in answer}} checked {{/if}}
+                     {{/if}}/>
+              <label for="${$value}">${$value}</label>
               <br/>
-              {{if answer}}
-              {{if answer.correct}}
-              <a href=''>Review</a> - 
-              {{else}}
-              <a href=''>Mark as Learned</a> - 
               {{/if}}
-              {{else}}
-              <a href=''>Mark Ambiguous</a> - 
-              <a href=''>Skip</a> - 
+              {{/each}}
+              {{if !answer || answer.length == 0}}
+              </br>
+              <button id="submit" value="submit">Submit</button>
               {{/if}}
-              <a id="rateButton">{{if liked}}Unlike{{else}}Like{{/if}}</a>-->
               </br></br>
             </div>
           </li>

@@ -82,6 +82,9 @@ class GqlEncoder(simplejson.JSONEncoder):
       for method in methods:
         output[method] = getattr(obj, method)()
       return output
+      
+    elif isinstance(obj, db.Key):
+      return db.get(obj)
 
     return simplejson.JSONEncoder.default(self, obj)
 

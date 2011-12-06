@@ -129,15 +129,15 @@ class AnswerQuestionHandler(webapp.RequestHandler):
     qid = self.request.get('question_id')
 
     # obtain the answer
-    ans = self.request.get('answer')
-    
+    ans = self.request.get_all('answer[]')
+    if not ans:
+      ans = self.request.get('answer')
+
     result = Assignment.assign(Question.get_by_id(long(float(qid))))
-        
+    
     if bool(ans) and not result.answer:
       result = result.submitAnswer(ans)
-    
-    result.put()
-    
+        
     json_response = json.encode(result)
     
     self.response.headers.add_header("Content-Type", 'application/json')

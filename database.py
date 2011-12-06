@@ -107,34 +107,15 @@ class ShortAnswerQuestion(Question):
   def getAnswer(self, myAnswer):
     """
     Returns an answer object from a string.
-    Generates grading questions.
     """
     result = None
-    answers = []
     for ans in self.answers:
-      answers.append(ans)
       if ans.value == myAnswer:
           result = ans
     
     if not result:
       result = Answer(question=self,value=myAnswer)
       result.put()
-    
-    # get user (login is required in app.yaml)
-    u = users.User()
-    
-    # Generate the assesment question
-    txt = "Check all the answers you believe to be correct."
-    q = MultipleAnswerQuestion(value=txt)
-    q.put()
-    
-    shuffle(answers)
-    # Add the answers to the question
-    for i in range(5):
-      answers[i].question = q
-      answers[i].put()
-    # Attach the question to the answer
-    Connection(source=result, target=q).put()
     
     return result
 
@@ -151,8 +132,8 @@ class Answer(db.Model):
   author = db.UserProperty(auto_current_user_add = True)
   question = db.ReferenceProperty(Question, collection_name="answers")
   value = db.TextProperty()
-  correctness = db.FloatProperty()
-  confidence = db.FloatProperty()
+  correctness = db.FloatProperty() # probability of answer being correct
+  confidence = db.FloatProperty()  # probability of grading being correct
 # outgoing = [db.Query(Connection<Question>)]
   
 class Lesson(db.Model):
@@ -180,6 +161,7 @@ class Assignment(polymodel.PolyModel):
     if not instance:
       instance = assignmentClass(parent=item)
     instance.prepare()
+    instance.put()
     return instance
   
   def prepare(self):
@@ -201,38 +183,75 @@ class aQuestion(Assignment):
   """
   Models user specific question data.
   """
-  answers = db.StringListProperty()
-  answer = db.ReferenceProperty(Answer)
   liked = db.BooleanProperty(default = False)
 # user = db.UserProperty(auto_current_user = True)
 # parent = db.ReferenceProperty(Question)
-  
-  def submitAnswer(self, answer_string):
+      
+class aShortAnswerQuestion(aQuestion):
+  answer = db.ReferenceProperty(Answer)
+  def submitAnswer(self, answer):
     """
     Answers the question if it hasn't been answered.
     """
     if self.answer:
-      return False
-
-    self.answer = self.parent().getAnswer(answer_string)
+      return False    
+    # get user (login is required in app.yaml)
+    u = users.User()
+    
+    answers = []
+    for ans in self.parent().answers:
+      answers.append(ans)
+    
+    # Generate the assesment question
+    txt = "Check all the answers you believe correctly answer the question. "
+    txt += "(" + self.parent().value + ")"
+    q = MultipleAnswerQuestion(value=txt)
+    q.put()
+    
+    shuffle(answers)
+    # Add the answers to the question
+    for i in range(5):
+      answers[i].question = q
+      answers[i].put()
+      
+    # Get/create the user's answer
+    self.answer = self.parent().getAnswer(answer)
+    
+    # Attach the question to the answer
+    Connection(source=self.answer, target=q).put()
 
     self.put()
     
-    # assign the next questions
-    for q in self.answer.outgoing.fetch(1):
-      return Assignment.assign(q.target)
-      
-class aShortAnswerQuestion(aQuestion):
-  pass
+    # assign the grading question
+    return [self,Assignment.assign(self.answer.outgoing.get().target)]
   
 class aMultipleAnswerQuestion(aQuestion):
+  answers = db.StringListProperty()
+  answer = db.ListProperty(db.Key)
   def prepare(self):
     """
     Assigns the answers from the question.
     """
     myAnswers = []
     for i in self.parent().answers:
-      myAnswers += i.value
+      myAnswers.append(i.value)
+      
     shuffle(myAnswers)
     self.answers = myAnswers
     self.put()
+    
+  def submitAnswer(self, answer):
+    """
+    Answers the question if it hasn't been answered.
+    """
+    if self.answer:
+      return False
+
+    self.answer = []
+    for a in answer:
+      self.answer.append(self.parent().getAnswer(a).key())
+
+    self.put()
+
+    # TODO: Assign next questions
+    return None

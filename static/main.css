@@ -51,6 +51,10 @@ h2 {
   overflow: hidden;
 }
 
+#submit {
+  float: right;
+}
+
 .question {
   border-top: 1px solid #EEE;
   padding: 16px 21px;

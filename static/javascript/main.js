@@ -19,7 +19,10 @@ $(document).ready(function() {
     {
       o[a[i]]='';
     }
-    return o;
+    if (a.length == 0)
+      return null;
+    else
+      return o;
   }
       
   //
@@ -37,24 +40,38 @@ $(document).ready(function() {
   //
   var loadQuestion = function(d) {
     d._class = oc(d._class);
+    var tmp = d.answer
+    if (tmp && tmp.length >= 0) {
+      $.each(tmp, function(key, object) { d.answer.push(object.value) });
+      d.answer = oc(d.answer);
+    }
     $.tmpl( "questionTemplate", d ).prependTo( '#assignments' ).click(function( eventObj ) {
-      scrollTo(0,0);
-      var messageObj = {'question_id': d.question.id }
-      if ('aShortAnswerQuestion' in d._class)
-        messageObj.answer = $('#'+d.question.id+' #answer').val();
-      else
-        messageObj.answer = $('input:radio[name='+d.question.id+']:checked').val();
-        
-      $.getJSON('/ajax/answer', messageObj, function(data) {
-        var len = data.length;
-        if (len) {
-          $('#'+d.question.id).remove();
-          window.history.pushState("object or string", "Title", "/q/" + data[len-1].question.id);
+      if (eventObj.target.id == 'submit') {
+        scrollTo(0,0);
+        var messageObj = {'question_id': d.question.id, 'answer': [] }
+        if ('aShortAnswerQuestion' in d._class)
+          messageObj.answer = $('#'+d.question.id+' #answer').val();
+        else if ('aMultipleChoiceQuestion' in d._class)
+          messageObj.answer = $('input:radio[name='+d.question.id+']:checked').val();
+        else if ('aMultipleAnswerQuestion' in d._class) {
+          var data = $('input:checkbox[name='+d.question.id+']:checked');
+          $.each(data, function(key, object) {
+            messageObj.answer.push($(this).val());
+          });
         }
-        for ( var i=0; i<len; i++ ){
-          loadQuestion( data[i] );
-        }
-      });
+        $.getJSON('/ajax/answer', messageObj, function(data) {
+          if (data) {
+            var len = data.length;
+            if (len) {
+              $('#'+d.question.id).remove();
+              window.history.pushState("object or string", "Title", "/q/" + data[len-1].question.id);
+            }
+            for ( var i=0; i<len; i++ ){
+              loadQuestion( data[i] );
+            }
+          }
+        });
+      }
     });
   }
   
@@ -68,7 +85,7 @@ $(document).ready(function() {
       data.forEach( function( d ) {
           loadQuestion( d );
         });
-         //
+          //
           // Set up autoresizing text areas
           //
           $('.autoResizable').autoResize({
