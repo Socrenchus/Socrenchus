@@ -95,6 +95,11 @@ class MultipleAnswerQuestion(Question):
   Handles questions that have more than one correct answer.
   """
   pass
+class GraderQuestion(MultipleAnswerQuestion):
+  """
+  Handles the grading of short answer questions.
+  """
+  pass
 class MultipleChoiceQuestion(MultipleAnswerQuestion):
   """
   Handles multiple choice questions.
@@ -205,7 +210,7 @@ class aShortAnswerQuestion(aQuestion):
     # Generate the assesment question
     txt = "Check all the answers you believe correctly answer the question. "
     txt += "(" + self.parent().value + ")"
-    q = MultipleAnswerQuestion(value=txt)
+    q = GraderQuestion(value=txt)
     q.put()
     
     shuffle(answers)
@@ -255,3 +260,30 @@ class aMultipleAnswerQuestion(aQuestion):
 
     # TODO: Assign next questions
     return None
+    
+class aGraderQuestion(aMultipleAnswerQuestion):
+  def submitAnswer(self, answer):
+    """
+    Runs the grading algorithm after answer is submitted.
+    """
+    if self.answer:
+      return False
+    
+    # gather probabilities
+    confidence = 0
+    normalizer = 0
+    answers = []
+    for a in self.answers:
+      ans = self.parent().getAnswer(a)
+      answers.append(ans)
+      normalizer += 1
+      confidence += ((ans.correctness > 0.5) && (a in answer)) * ans.confidence
+    confidence /= normalizer
+    
+    # grade with new found confidence
+    for a in answers:
+      a.confidence = (confidence + a.confidence) / 2
+      a.correctness = (((a.confidence*a.correctness)+(confidence*(a.value in answer))) / (confidence + a.confidence))
+        
+    # submit the answer like normal
+    return aMultipleAnswerQuestion.submitAnswer(self, answer)
