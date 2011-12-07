@@ -53,71 +53,22 @@ class NewQuestionHandler(webapp.RequestHandler):
     connections = [self.request.get_all(str(i)+'-n[]') for i in range(4)]
     
     q = ShortAnswerQuestion()
-    q.value = self.request.get('question') # the question text
-    key = q.put()
-    a = Answer()
-    a.value = self.request.get('correct1') # the first correct answer
-    a.confidence = 1.0
-    a.correctness = 1.0
-    a.question = q
-    a.put()
-    a = Answer()
-    a.value = self.request.get('correct2') # the second correct answer
-    a.confidence = 1.0
-    a.correctness = 1.0
-    a.question = q
-    a.put()
-    a = Answer()
-    a.value = self.request.get('correct3') # the third correct answer
-    a.confidence = 1.0
-    a.correctness = 1.0
-    a.question = q
-    a.put()
-    a = Answer()
-    a.value = self.request.get('correct4') # the fourth correct answer
-    a.confidence = 1.0
-    a.correctness = 1.0
-    a.question = q
-    a.put()
-    a = Answer()
-    a.value = self.request.get('correct5') # the fifth correct answer
-    a.confidence = 1.0
-    a.correctness = 1.0
-    a.question = q
-    a.put()
-    a = Answer()
-    a.value = self.request.get('incorrect1') # the first incorrect answer
-    a.confidence = 1.0
-    a.correctness = 0.0
-    a.question = q
-    a.put()
-    a = Answer()
-    a.value = self.request.get('incorrect2') # the second incorrect answer
-    a.confidence = 1.0
-    a.correctness = 0.0
-    a.question = q
-    a.put()
-    a = Answer()
-    a.value = self.request.get('incorrect3') # the third incorrect answer
-    a.confidence = 1.0
-    a.correctness = 0.0
-    a.question = q
-    a.put()
-    a = Answer()
-    a.value = self.request.get('incorrect4') # the fourth incorrect answer
-    a.confidence = 1.0
-    a.correctness = 0.0
-    a.question = q
-    a.put()
-    a = Answer()
-    a.value = self.request.get('incorrect5') # the fifth incorrect answer
-    a.confidence = 1.0
-    a.correctness = 0.0
-    a.question = q
-    a.put()
+    q.value = self.request.get('question')
+    for i in range(5):
+      a = Answer()
+      a.value = self.request.get('correct'+str(i+1))
+      a.confidence = 1.0
+      a.correctness = 1.0
+      q.answers.append(a.put())
+      a = Answer()
+      a.value = self.request.get('incorrect'+str(i+1))
+      a.confidence = 1.0
+      a.correctness = 0.0
+      q.answers.append(a.put())
+    q.put()
         
     self.response.headers.add_header("Content-Type", 'application/json')
-    self.response.out.write(json.encode({'id':key.id()}))
+    self.response.out.write(json.encode({'id':q.key().id()}))
     
 class AnswerQuestionHandler(webapp.RequestHandler):
 

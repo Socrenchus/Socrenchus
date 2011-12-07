@@ -36,65 +36,15 @@ class Question(Searchable, polymodel.PolyModel):
   """
   author = db.UserProperty(auto_current_user_add = True)
   value = db.TextProperty()
-# answers = db.Query(Answer)
+  answers = db.ListProperty(db.Key)
 # incoming = db.Query(Connection<Answer>)
 # outgoing = db.Query(Connection<Question>)
 # assignments = db.Query(aQuestion)
 
-  def rate(self):
-    """
-    Rate the question and associated connections and store it.
-    """
-    result = False
-  
-    # get user (login is required in app.yaml)
-    u = users.User()
-  
-    # get all the users answers
-    answers = list(Answer.all().filter("user =", u))
-
-    # get connections to adjust
-    connections = self.incoming.filter("source in", answers)
-
-    # rate and adjust connection weights
-    if u in self.liked:
-      result = False
-      # unlike the question
-      self.liked.remove(u)
-      # decrease connection weights
-      for c in connections:
-        c.weight -= 1
-        c.put()
-    
-    else:
-      result = True
-      # like the question
-      self.liked.append(u)
-      # increase connection weights
-      for c in connections:
-        c.weight += 1
-        c.put()
-  
-    # store the question
-    self.put()
-    return result
-  
-  def getAnswer(self, myAnswer):
-    """
-    Returns an answer object from a string.
-    """
-    for ans in self.answers:
-      if ans.value == myAnswer:
-          return ans
-          
-    # returns None if answer isn't found
-    return None
-
 class MultipleAnswerQuestion(Question):
   """
-  Handles questions that have more than one correct answer.
+  Handles questions that involve selecting the correct answer(s).
   """
-  pass
 class GraderQuestion(MultipleAnswerQuestion):
   """
   Handles the grading of short answer questions.
@@ -109,20 +59,7 @@ class ShortAnswerQuestion(Question):
   """
   Handles short answer questions.
   """
-  def getAnswer(self, myAnswer):
-    """
-    Returns an answer object from a string.
-    """
-    result = None
-    for ans in self.answers:
-      if ans.value == myAnswer:
-          result = ans
-    
-    if not result:
-      result = Answer(question=self,value=myAnswer)
-      result.put()
-    
-    return result
+  pass
 
 class BuilderQuestion(ShortAnswerQuestion):
   """
@@ -135,19 +72,10 @@ class Answer(db.Model):
   Models an answer.
   """
   author = db.UserProperty(auto_current_user_add = True)
-  question = db.ReferenceProperty(Question, collection_name="answers")
-  value = db.TextProperty()
+  value = db.StringProperty()
   correctness = db.FloatProperty() # probability of answer being correct
   confidence = db.FloatProperty()  # probability of grading being correct
 # outgoing = [db.Query(Connection<Question>)]
-  
-class Lesson(db.Model):
-  """
-  Models a lesson.
-  """
-  author = db.UserProperty(auto_current_user_add = True)
-  title = db.StringProperty()
-# incoming = [db.Query(Connection<Question>)]
 
 ##########################
 ## User Model and Logic ##
@@ -176,14 +104,6 @@ class Assignment(polymodel.PolyModel):
   time = db.DateTimeProperty(auto_now_add = True)
 # parent = db.ReferenceProperty(db.Model)
 
-class aLesson(Assignment):
-  """
-  Models user specific lesson data.
-  """
-# user = db.UserProperty(auto_current_user = True)
-# parent = db.ReferenceProperty(Lesson)
-# assigned_questions = db.Query(aQuestion)
-
 class aQuestion(Assignment):
   """
   Models user specific question data.
@@ -194,7 +114,7 @@ class aQuestion(Assignment):
       
 class aShortAnswerQuestion(aQuestion):
   answer = db.ReferenceProperty(Answer)
-  def submitAnswer(self, answer):
+  def submitAnswer(self, myAnswer):
     """
     Answers the question if it hasn't been answered.
     """
@@ -205,22 +125,24 @@ class aShortAnswerQuestion(aQuestion):
     
     answers = []
     for ans in self.parent().answers:
-      answers.append(ans)
+      answers.append(Answer.get(ans))
     
     # Generate the assesment question
     txt = "Check all the answers you believe correctly answer the question. "
     txt += "(" + self.parent().value + ")"
     q = GraderQuestion(value=txt)
-    q.put()
+    q.author = users.User('grader@socrench.us')
     
     shuffle(answers)
     # Add the answers to the question
     for i in range(5):
-      answers[i].question = q
-      answers[i].put()
+      q.answers.append(answers[i].key())
       
-    # Get/create the user's answer
-    self.answer = self.parent().getAnswer(answer)
+    q.put()
+      
+    # Create the user's answer
+    self.answer = Answer(value=myAnswer).put()
+    self.parent().answers.append(self.answer.key())
     
     # Attach the question to the answer
     Connection(source=self.answer, target=q).put()
@@ -231,7 +153,7 @@ class aShortAnswerQuestion(aQuestion):
     return [self,Assignment.assign(self.answer.outgoing.get().target)]
   
 class aMultipleAnswerQuestion(aQuestion):
-  answers = db.StringListProperty()
+  answers = db.ListProperty(db.Key)
   answer = db.ListProperty(db.Key)
   def prepare(self):
     """
@@ -239,7 +161,7 @@ class aMultipleAnswerQuestion(aQuestion):
     """
     myAnswers = []
     for i in self.parent().answers:
-      myAnswers.append(i.value)
+      myAnswers.append(i)
       
     shuffle(myAnswers)
     self.answers = myAnswers
@@ -253,15 +175,19 @@ class aMultipleAnswerQuestion(aQuestion):
       return False
 
     self.answer = []
-    for a in answer:
-      self.answer.append(self.parent().getAnswer(a).key())
+    for a in self.answers:
+      ans = Answer.get(a)
+      if ans.value in answer:
+        self.answer.append(a)
 
     self.put()
 
-    # TODO: Assign next questions
-    return None
+    return [self]
     
 class aGraderQuestion(aMultipleAnswerQuestion):
+  """
+  Used to grade short answer questions. Cannot be assigned manually.
+  """
   def submitAnswer(self, answer):
     """
     Runs the grading algorithm after answer is submitted.
@@ -274,10 +200,10 @@ class aGraderQuestion(aMultipleAnswerQuestion):
     normalizer = 0
     answers = []
     for a in self.answers:
-      ans = self.parent().getAnswer(a)
+      ans = Answer.get(a)
       answers.append(ans)
       normalizer += 1
-      confidence += ((ans.correctness > 0.5) && (a in answer)) * ans.confidence
+      confidence += ((ans.correctness > 0.5) and (a in answer)) * ans.confidence
     confidence /= normalizer
     
     # grade with new found confidence

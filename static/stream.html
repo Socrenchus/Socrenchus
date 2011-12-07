@@ -52,34 +52,17 @@
               {{/if}}
               {{each answers}}
               {{if 'aMultipleChoiceQuestion' in _class}}
-              <input type="radio"
-                     id="answer"
-                     name="${question.id}" 
-                     value="${$value}"
-                     class="mc-radio"
-                     {{if answer.length > 0}}
-                      disabled
-                        {{if $value == answer.value}} checked
-                          {{if answer.correct}}
-                          &#10004;
-                          {{else}}
-                          &#10008;
-                          {{/if}}
-                        {{/if}}
-                     {{/if}}/>
-              <label for="${$value}">${$value}</label>
-              <br/>
               {{else}}
               <input type="checkbox"
                      id="answer"
                      name="${question.id}" 
-                     value="${$value}"
+                     value="${$value.value}"
                      class="mc-radio"
                      {{if answer}}
                       disabled
-                        {{if $value in answer}} checked {{/if}}
+                        {{if $value.value in answer}} checked {{/if}}
                      {{/if}}/>
-              <label for="${$value}">${$value}</label>
+              <label for="${$value.value}">${$value.value}</label>
               <br/>
               {{/if}}
               {{/each}}
