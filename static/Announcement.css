@@ -4,10 +4,10 @@ line-height: 45px;
 text-shadow: -3px 0 4px #006;
 }
 
-.smallText {
-  vertical-align: text-top;
+h2 {
   font-size: 30px;
-  line-height: 45px;
+  line-height: 0px;
+  text-shadow: -3px 0 4px #006;
 }
 
 .largeText {
