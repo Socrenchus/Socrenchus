@@ -13,6 +13,7 @@ h2 {
 .largeText {
   font-size: 70px;
   line-height: 60px;
+  text-shadow: 3px 0 4px #006;
 }
 
 /****/
