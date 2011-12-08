@@ -79,6 +79,9 @@ class Answer(db.Model):
   graders = db.ListProperty(users.User)
 # outgoing = [db.Query(Connection<Question>)]
 
+  def __json__(self):
+    return {'value':self.value,'corectness':self.correctness}
+
 ##########################
 ## User Model and Logic ##
 ##########################
@@ -113,6 +116,16 @@ class aQuestion(Assignment):
   liked = db.BooleanProperty(default = False)
 # user = db.UserProperty(auto_current_user = True)
 # parent = db.ReferenceProperty(Question)
+
+  def __json__(self):
+    properties = self.properties().items()
+    output = {}
+    for field, value in properties:
+      output[field] = getattr(self, field)
+    output['id'] = self.key().id()
+    if self.parent():
+      output['question'] = self.parent()
+    return output
       
 class aShortAnswerQuestion(aQuestion):
   answer = db.ReferenceProperty(Answer)
