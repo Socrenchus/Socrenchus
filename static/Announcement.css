@@ -1,9 +1,21 @@
 h1 {
-font-size: 100px;
-line-height: 10px;
+font-size: 50px;
+line-height: 45px;
 text-shadow: -3px 0 4px #006;
 }
-  
+
+.smallText {
+  vertical-align: text-top;
+  font-size: 30px;
+  line-height: 45px;
+}
+
+.largeText {
+  font-size: 70px;
+  line-height: 60px;
+}
+
+/****/
 .education {
 font-size: 170px;
 }
