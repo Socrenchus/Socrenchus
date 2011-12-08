@@ -3,24 +3,20 @@ body {
 }
 
 a {
-  color: #36C;
+  color: #B3B3B3;
   cursor: pointer;
   text-decoration: none;
 }
 
 h1 {
   text-align: right;
+  color: #FFFFFF;
 }
 
 h2 {
   padding-top:4px;
   text-align: left;
-}
-
-#teach a, #learn a {
-  color: #36C;
-  cursor: pointer;
-  text-decoration: none;
+  color: #FFFFFF;
 }
 
 #tabs {
@@ -36,7 +32,8 @@ h2 {
 #logout {
   float: right;
   position: relative;
-  top: -5px;
+  color: #EBEBEB;
+  top: 0px;
   right: 5px;
 }
 
@@ -46,7 +43,7 @@ h2 {
 
 #table-top {
   width: 576px;
-  background-color: #ffffc0;
+  background-color: #C4C4C4;
   position: absolute;
   overflow: hidden;
 }

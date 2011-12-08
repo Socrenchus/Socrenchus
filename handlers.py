@@ -54,16 +54,21 @@ class NewQuestionHandler(webapp.RequestHandler):
     
     q = ShortAnswerQuestion()
     q.value = self.request.get('question')
+    q.put()
     for i in range(5):
       a = Answer()
       a.value = self.request.get('correct'+str(i+1))
       a.confidence = 1.0
       a.correctness = 1.0
+      a.graders.append(users.User())
+      a.questions.append(q.key())
       q.answers.append(a.put())
       a = Answer()
       a.value = self.request.get('incorrect'+str(i+1))
       a.confidence = 1.0
       a.correctness = 0.0
+      a.graders.append(users.User())
+      a.questions.append(q.key())
       q.answers.append(a.put())
     q.put()
         

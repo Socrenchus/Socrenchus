@@ -73,8 +73,10 @@ class Answer(db.Model):
   """
   author = db.UserProperty(auto_current_user_add = True)
   value = db.StringProperty()
-  correctness = db.FloatProperty() # probability of answer being correct
-  confidence = db.FloatProperty()  # probability of grading being correct
+  correctness = db.FloatProperty(default=0.0) # probability of answer being correct
+  confidence = db.FloatProperty(default=0.0)  # probability of grading being correct
+  questions = db.ListProperty(db.Key)
+  graders = db.ListProperty(users.User)
 # outgoing = [db.Query(Connection<Question>)]
 
 ##########################
@@ -132,11 +134,36 @@ class aShortAnswerQuestion(aQuestion):
     txt += "(" + self.parent().value + ")"
     q = GraderQuestion(value=txt)
     q.author = users.User('grader@socrench.us')
+    q.put()
     
     shuffle(answers)
+    
+    # Find min questions per answer
+    countByQPA = {}
+    for a in answers:
+      i = len(a.questions)
+      if i in countByQPA.keys():
+        countByQPA[i] += 1
+      else:
+        countByQPA[i] = 1
+    
+    # Find out how many QPA to accept and still have enough
+    targetQPA = min(countByQPA.keys())
+    i = countByQPA[targetQPA]
+    while i < 10:
+      targetQPA = countByQPA.keys()[countByQPA.keys().index(targetQPA)+1]
+      i += countByQPA[targetQPA]
+    
     # Add the answers to the question
-    for i in range(5):
-      q.answers.append(answers[i].key())
+    i = 0
+    for a in answers:
+      if i >= 5:
+        break
+      if len(a.questions) <= targetQPA:
+        q.answers.append(a.key())
+        a.questions.append(q.key())
+        a.put()
+        i += 1
       
     q.put()
       
@@ -196,20 +223,32 @@ class aGraderQuestion(aMultipleAnswerQuestion):
       return False
     
     # gather probabilities
-    confidence = 0
-    normalizer = 0
+    confidence = 0.0
+    normalizer = 0.0
     answers = []
     for a in self.answers:
       ans = Answer.get(a)
       answers.append(ans)
-      normalizer += 1
-      confidence += ((ans.correctness > 0.5) and (a in answer)) * ans.confidence
-    confidence /= normalizer
+      normalizer += ans.confidence
+      markedCorrect = (ans.value in answer)
+      answerCorrect = (ans.correctness > 0.5)
+      if markedCorrect == answerCorrect:
+        confidence += ans.confidence
+    if normalizer != 0:
+      confidence /= float(normalizer)
     
     # grade with new found confidence
     for a in answers:
-      a.confidence = (confidence + a.confidence) / 2
-      a.correctness = (((a.confidence*a.correctness)+(confidence*(a.value in answer))) / (confidence + a.confidence))
-        
+      markedCorrect = (a.value in answer)
+      numGraders = len(a.graders)
+      tmp = numGraders*(a.confidence * a.correctness)
+      tmp += confidence * float(markedCorrect)
+      if (confidence + numGraders*a.confidence) != 0:
+        tmp /= (confidence + numGraders*a.confidence)
+      a.correctness = tmp
+      a.confidence = (confidence + (a.confidence * numGraders)) / (1 + numGraders)
+      a.graders.append(users.User())
+      a.put()
+
     # submit the answer like normal
     return aMultipleAnswerQuestion.submitAnswer(self, answer)
