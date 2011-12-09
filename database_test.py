@@ -68,7 +68,6 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
   def testGradeDistribution(self):
     # create the question
     self.testAnswerQuestion()
-    saq = Question.all().get()
 
     # have the users grade eachother's answer
     query = db.Query(Answer,keys_only=True)
@@ -76,7 +75,7 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
     self.assertEqual(len(correct), 5)
     for i in range(30):
       os.environ['USER_EMAIL'] = 'test'+str(i)+'@example.com'
-      a = aShortAnswerQuestion.assign(saq)
+      a = aShortAnswerQuestion.all().filter('user =', users.User()).get()
       q = aGraderQuestion.all().filter('user =', users.User()).get()
       smart = random.random() < 0.9
       if smart:
@@ -109,6 +108,6 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
     
     expectedClassAverage = 0.8
     message = 'The class average '+str(correct)+' was too far off from the expected average of '+str(expectedClassAverage)+'.'
-    self.assertTrue((expectedClassAverage - 0.1) < correct, msg=message)
-    self.assertTrue((expectedClassAverage + 0.1) > correct, msg=message)
+    self.assertTrue((expectedClassAverage - 0.15) < correct, msg=message)
+    self.assertTrue((expectedClassAverage + 0.15) > correct, msg=message)
       
