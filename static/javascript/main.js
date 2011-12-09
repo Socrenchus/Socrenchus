@@ -48,7 +48,7 @@ $(document).ready(function() {
     $.tmpl( "questionTemplate", d ).prependTo( '#assignments' ).click(function( eventObj ) {
       if (eventObj.target.id == 'submit') {
         scrollTo(0,0);
-        var messageObj = {'question_id': d.question.id, 'answer': [] }
+        var messageObj = {'question_id': d.question.id, 'answer': [], 'class': d._class }
         if ('aShortAnswerQuestion' in d._class)
           messageObj.answer = $('#'+d.question.id+' #answer').val();
         else if ('aMultipleChoiceQuestion' in d._class)

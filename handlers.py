@@ -12,9 +12,6 @@ at a cost much lower then at a university.
 
 This file contains all of the request handlers required to
 serve json to the client.
-
-This line logs the user in for our unit tests:
->>> os.environ['USER_EMAIL'] = u'test@example.com'
 """
 
 __author__ = 'Bryan Goldstein'
@@ -88,8 +85,14 @@ class AnswerQuestionHandler(webapp.RequestHandler):
     ans = self.request.get_all('answer[]')
     if not ans:
       ans = self.request.get('answer')
+    
+    args = self.request.arguments()
+    if 'class[aGraderQuestion]' in args:
+      theClass = aGraderQuestion
+    else:
+      theClass = aShortAnswerQuestion
 
-    result = Assignment.assign(Question.get_by_id(long(float(qid))))
+    result = theClass.assign(Question.get_by_id(long(float(qid))))
     
     if bool(ans) and not result.answer:
       result = result.submitAnswer(ans)

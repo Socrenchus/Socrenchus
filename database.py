@@ -74,7 +74,7 @@ class Assignment(polymodel.PolyModel):
     if not instance:
       instance = cls(parent=item)
       instance.user = user
-    instance.prepare()
+      instance.prepare()
     instance.put()
     return instance
   
@@ -189,9 +189,6 @@ class aGraderQuestion(aMultipleAnswerQuestion):
     """
     Assigns the answers from the question.
     """
-    #txt = "Check all the answers you believe correctly answer the question. "
-    #txt += "(" + question.value + ")"
-    
     answers = []
     for ans in self.parent().answers:
       answers.append(ans)
