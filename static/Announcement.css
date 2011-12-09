@@ -1,77 +1,67 @@
+body {
+  font: normal 13px arial,sans-serif;
+}
+
+a {
+  color: #B3B3B3;
+  cursor: pointer;
+  text-decoration: none;
+}
+
 h1 {
-font-size: 50px;
-line-height: 45px;
-text-shadow: -3px 0 4px #006;
+  text-align: right;
+  color: #EBEBEB;
 }
 
 h2 {
-  font-size: 30px;
-  line-height: 0px;
-  text-shadow: -3px 0 4px #006;
+  padding-top:4px;
+  text-align: left;
+  color: #EBEBEB;
+}
+
+.mediumText {
+  text-align: left;
+  font-size: 35px;
+  line-height: 45px;
+  color: #000000;
 }
 
 .largeText {
-  font-size: 70px;
+  font-size: 45px;
   line-height: 60px;
-  text-shadow: 3px 0 4px #006;
 }
 
-/****/
-.education {
-font-size: 170px;
-}
-.ona {
-font-size: 90px;
-color: #888;
-}
-.whole {
-display: block;
-position: absolute;
-left: 105px;
-top: 330px;
--webkit-transform: rotate(90deg);
--moz-transform: rotate(90deg);
-}
-.new {
-position: absolute;
-left: 370px;
-font-size: 120px;
-top: 320px;
-color: #666;
-}
-.scale {
-position: absolute;
-left: 370px;
-top: 435px;
-font-size: 140px;
-color: #333;
+#main {
+  background-color:yellow;
+  width: 576px;
+  border: 1px solid #EBEBEB;
+  -moz-border-radius-bottomright: 10px;
+  -webkit-border-bottom-right-radius: 10px;
+  -moz-border-radius-bottomleft: 10px;
+  -webkit-border-bottom-left-radius: 10px;
+  margin: auto;
 }
 
-.emailform {
-position: absolute;
-top: 240px;
-left: 370px;
-}
-	
-.sendButton {
-  display: block;
-  font-size: 16pt;
+#logout {
+  float: right;
+  position: relative;
+  color: #EBEBEB;
+  top: 0px;
+  right: 5px;
 }
 
-/** Most GWT widgets already have a style name defined */
-.gwt-DialogBox {
-  width: 400px;
+#table-top {
+  width: 576px;
+  background-color: #000000;
+  position: absolute;
+  overflow: hidden;
 }
 
-.dialogVPanel {
-  margin: 5px;
+#hello {
+  text-align: right;
+  font-size: 20px;
 }
 
-.serverResponseLabelError {
-  color: red;
-}
-
-/** Set ids using widget.getElement().setId("idOfElement") */
-#closeButton {
-  margin: 15px 6px 6px;
+#learn {
+  margin: 0 20px 5px 20px;
 }
