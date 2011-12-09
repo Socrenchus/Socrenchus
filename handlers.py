@@ -52,7 +52,7 @@ class NewQuestionHandler(webapp.RequestHandler):
     answers = [self.request.get(str(i)+'-a') for i in range(4)]
     connections = [self.request.get_all(str(i)+'-n[]') for i in range(4)]
     
-    q = ShortAnswerQuestion()
+    q = Question()
     q.value = self.request.get('question')
     q.put()
     for i in range(5):
@@ -61,14 +61,14 @@ class NewQuestionHandler(webapp.RequestHandler):
       a.confidence = 1.0
       a.correctness = 1.0
       a.graders.append(users.User())
-      a.questions.append(q.key())
+      a.question = q.key()
       q.answers.append(a.put())
       a = Answer()
       a.value = self.request.get('incorrect'+str(i+1))
       a.confidence = 1.0
       a.correctness = 0.0
       a.graders.append(users.User())
-      a.questions.append(q.key())
+      a.question = q.key()
       q.answers.append(a.put())
     q.put()
         
@@ -99,27 +99,6 @@ class AnswerQuestionHandler(webapp.RequestHandler):
     self.response.headers.add_header("Content-Type", 'application/json')
     self.response.out.write(json_response)
 
-class RateQuestionHandler(webapp.RequestHandler):
-
-  def get(self):
-    """
-    Handle the user rating the question.
-    """
-    # get the question object
-    question_id = self.request.get('question_id')
-    result = Assignment.fromQuestion(long(float(question_id)))
-    
-    # rate the question and store it
-    result.liked = result.question.rate()
-    
-    result.question.put()
-    result.put()
-    
-    json_response = json.encode(result)
-    
-    self.response.headers.add_header("Content-Type", 'application/json')
-    self.response.out.write(json_response)
-    
 class StreamHandler(webapp.RequestHandler):
   
   def get(self):
@@ -140,7 +119,6 @@ def main():
     ('/ajax/new', NewQuestionHandler),
     ('/ajax/stream', StreamHandler),
     (r'/ajax/answer', AnswerQuestionHandler),
-    ('/ajax/rate', RateQuestionHandler),
   ], debug=_DEBUG)
   wsgiref.handlers.CGIHandler().run(application)
 

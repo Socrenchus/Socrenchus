@@ -32,7 +32,7 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
     
   def testCreateQuestion(self):
     os.environ['USER_EMAIL'] = 'teacher@example.com'
-    q = ShortAnswerQuestion()
+    q = Question()
     q.value = 'question'
     q.put()
     for i in range(5):
@@ -41,14 +41,14 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
       a.confidence = 1.0
       a.correctness = 1.0
       a.graders.append(users.User())
-      a.questions.append(q.key())
+      a.question = q.key()
       q.answers.append(a.put())
       a = Answer()
       a.value = str(i-5)
       a.confidence = 1.0
       a.correctness = 0.0
       a.graders.append(users.User())
-      a.questions.append(q.key())
+      a.question = q.key()
       q.answers.append(a.put())
     q.put()
     self.assertEqual(10, len(Answer.all().fetch(11)))
@@ -57,18 +57,18 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
   def testAnswerQuestion(self):
     # create the question
     self.testCreateQuestion()
-    q = ShortAnswerQuestion.all().get()
+    q = Question.all().get()
     
     # have users answer the question
     for i in range(30):
       os.environ['USER_EMAIL'] = 'test'+str(i)+'@example.com'
-      a = Assignment.assign(q)
+      a = aShortAnswerQuestion.assign(q)
       a.submitAnswer(str(i))
   
   def testGradeDistribution(self):
     # create the question
     self.testAnswerQuestion()
-    saq = ShortAnswerQuestion.all().get()
+    saq = Question.all().get()
 
     # have the users grade eachother's answer
     query = db.Query(Answer,keys_only=True)
@@ -76,7 +76,7 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
     self.assertEqual(len(correct), 5)
     for i in range(30):
       os.environ['USER_EMAIL'] = 'test'+str(i)+'@example.com'
-      a = Assignment.assign(saq)
+      a = aShortAnswerQuestion.assign(saq)
       q = aGraderQuestion.all().filter('user =', users.User()).get()
       smart = random.random() < 0.9
       if smart:
@@ -98,7 +98,7 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
     n = 0.0
     for a in Answer.all().fetch(110):
       n += 1.0
-      # print a.correctness
+      #print a.correctness
       if n <= 10:
         startAnswerTest = float(int(n) % 2)
         message = 'The grade '+str(a.correctness)+' for one of the example answers exceeded acceptable error margin.'
