@@ -52,6 +52,7 @@ class NewQuestionHandler(webapp.RequestHandler):
     q = Question()
     q.value = self.request.get('question')
     q.put()
+    """
     for i in range(5):
       a = Answer()
       a.value = self.request.get('correct'+str(i+1))
@@ -68,7 +69,7 @@ class NewQuestionHandler(webapp.RequestHandler):
       a.question = q.key()
       q.answers.append(a.put())
     q.put()
-        
+    """
     self.response.headers.add_header("Content-Type", 'application/json')
     self.response.out.write(json.encode({'id':q.key().id()}))
     
@@ -87,13 +88,14 @@ class AnswerQuestionHandler(webapp.RequestHandler):
       ans = self.request.get('answer')
     
     args = self.request.arguments()
+    theClass = aShortAnswerQuestion
     if 'class[aGraderQuestion]' in args:
       theClass = aGraderQuestion
-    else:
-      theClass = aShortAnswerQuestion
 
-    result = theClass.assign(Question.get_by_id(long(float(qid))))
-    
+    result = db.get(qid)
+    if isinstance(result,Question):
+      result = theClass.assign(result)
+
     if bool(ans) and not result.answer:
       result = result.submitAnswer(ans)
         

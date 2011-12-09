@@ -54,7 +54,12 @@ class Answer(db.Model):
 # outgoing = [db.Query(Connection<Question>)]
 
   def __json__(self):
-    return {'value':self.value,'corectness':self.correctness}
+    properties = self.properties().items()
+    output = {}
+    for field, value in properties:
+      if field in ['value', 'correctness', 'author']:
+        output[field] = getattr(self, field)
+    return output
 
 ##########################
 ## User Model and Logic ##
@@ -75,7 +80,7 @@ class Assignment(polymodel.PolyModel):
       instance = cls(parent=item)
       instance.user = user
       instance.prepare()
-    instance.put()
+      instance.put()
     return instance
   
   def prepare(self):
@@ -99,7 +104,7 @@ class aQuestion(Assignment):
     output = {}
     for field, value in properties:
       output[field] = getattr(self, field)
-    output['id'] = self.key().id()
+    output['key'] = str(self.key())
     if self.parent():
       output['question'] = self.parent()
     return output
@@ -127,7 +132,7 @@ class aShortAnswerQuestion(aQuestion):
     if len(self.parent().answers) >= 5: 
       q = aGraderQuestion.assign(self.parent())
     else:
-      teacherQ = aConfidentGraderQuestion.all().filter('user =', self.parent().author).ancestor(self.parent()).get()
+      teacherQ = aConfidentGraderQuestion.all().filter('user =', self.parent().author).ancestor(self.parent()).filter('answer =',None).get()
         
     # Create the user's answer
     self.answer = Answer(value=myAnswer).put()
@@ -180,7 +185,10 @@ class aMultipleAnswerQuestion(aQuestion):
     self.put()
 
     return [self]
-    
+
+class aMultipleChoiceQuestion(aMultipleAnswerQuestion):
+  pass
+
 class aGraderQuestion(aMultipleAnswerQuestion):
   """
   Used to grade short answer questions.
@@ -271,24 +279,37 @@ class aGraderQuestion(aMultipleAnswerQuestion):
     self.score = confidence
     self.put()
     
-class aConfidentGraderQuestion(aNumericAnswerQuestion):
+class aConfidentGraderQuestion(aMultipleChoiceQuestion):
   """
   Allows the creator of a short answer question to set the baseline.
   """
+  answerInQuestion = db.ReferenceProperty(Answer)
   def prepare(self):
     """
     Chooses the lowest confidence answer to grade.
     """
-    minAns = {'confidence':1}
+    minAns = Answer()
+    minAns.confidence = 1.0
     for ans in self.parent().answers:
       a = Answer.get(ans)
       if a.confidence < minAns.confidence:
         minAns = a
-      if minAns.confidence == 0:
+      if minAns.confidence == 0.0:
         break
     
-    # add the answer
-    self.answers.append(minAns)
+    # add the answer in question
+    self.answerInQuestion = minAns.key()
+    
+    # add the answers
+    answers = [
+      'Definetly Correct',
+      'Not Completely Correct',
+      'Not Completely Wrong',
+      'Definetly Wrong',
+    ]
+    for gradingAnswer in answers:
+      self.answers.append(Answer(value=gradingAnswer).put())
+      
     self.put()
 
   def submitAnswer(self, answer):
@@ -296,4 +317,28 @@ class aConfidentGraderQuestion(aNumericAnswerQuestion):
     Submits the grade, regrades neighbors, and assigns 
     next ConfidentGraderQuestion.
     """
-    pass
+    
+    # submit the grade
+    a = Answer.get(self.answers[0])
+    a.correctness = {
+      'Definetly Correct': 1.0,
+      'Not Completely Correct': 0.75,
+      'Not Completely Wrong': 0.5,
+      'Definetly Wrong': 0.0,
+    }[answer]
+    a.confidence = 1.0
+    a.put()
+    
+    # TODO: fix
+    self.answer.append(Answer(value=answer).put())
+    self.put()
+    
+    # find neighbors
+    # TODO: Go out a certain radius
+    query = aGraderQuestion.all().ancestor(self.parent()).filter('answers =',a.key())
+    for q in query:
+      q.grade()
+      
+    # assign next ConfidentGraderQuestion
+    # TODO: Fix this design problem
+    return [self, aConfidentGraderQuestion.assign(self.parent())]

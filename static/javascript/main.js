@@ -45,16 +45,19 @@ $(document).ready(function() {
       $.each(tmp, function(key, object) { d.answer.push(object.value) });
       d.answer = oc(d.answer);
     }
+    if ('aConfidentGraderQuestion' in d._class) {
+      d.question.author = d.answerInQuestion.author;
+    }
     $.tmpl( "questionTemplate", d ).prependTo( '#assignments' ).click(function( eventObj ) {
       if (eventObj.target.id == 'submit') {
         scrollTo(0,0);
-        var messageObj = {'question_id': d.question.id, 'answer': [], 'class': d._class }
+        var messageObj = {'question_id': d.key, 'answer': [], 'class': d._class }
         if ('aShortAnswerQuestion' in d._class)
-          messageObj.answer = $('#'+d.question.id+' #answer').val();
+          messageObj.answer = $('#'+d.key+' #answer').val();
         else if ('aMultipleChoiceQuestion' in d._class)
-          messageObj.answer = $('input:radio[name='+d.question.id+']:checked').val();
+          messageObj.answer = $('input:radio[name='+d.key+']:checked').val();
         else if ('aMultipleAnswerQuestion' in d._class) {
-          var data = $('input:checkbox[name='+d.question.id+']:checked');
+          var data = $('input:checkbox[name='+d.key+']:checked');
           $.each(data, function(key, object) {
             messageObj.answer.push($(this).val());
           });
@@ -63,8 +66,8 @@ $(document).ready(function() {
           if (data) {
             var len = data.length;
             if (len) {
-              $('#'+d.question.id).remove();
-              window.history.pushState("object or string", "Title", "/q/" + data[len-1].question.id);
+              $('#'+d.key).remove();
+              //window.history.pushState("object or string", "Title", "/q/" + data[len-1].question.id);
             }
             for ( var i=0; i<len; i++ ){
               loadQuestion( data[i] );
