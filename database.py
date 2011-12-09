@@ -75,7 +75,7 @@ class Assignment(polymodel.PolyModel):
       user = users.User()
     instance = cls.all()
     instance = instance.ancestor(item)
-    instance = instance.filter('user =', user).get()
+    instance = instance.filter('user =', user).filter('answer =',None).get()
     if not instance:
       instance = cls(parent=item)
       instance.user = user
@@ -329,7 +329,6 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
     a.confidence = 1.0
     a.put()
     
-    # TODO: fix
     self.answer.append(Answer(value=answer).put())
     self.put()
     
@@ -340,5 +339,5 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
       q.grade()
       
     # assign next ConfidentGraderQuestion
-    # TODO: Fix this design problem
+
     return [self, aConfidentGraderQuestion.assign(self.parent())]
