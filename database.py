@@ -30,6 +30,21 @@ class Connection(db.Model):
   target = db.ReferenceProperty(db.Model, collection_name="incoming")
   weight = db.IntegerProperty(default=0)
 
+class Answer(polymodel.PolyModel):
+  """
+  Models an answer.
+  """
+  author = db.UserProperty(auto_current_user_add = True)
+  value = db.StringProperty()
+  correctness = db.FloatProperty(default=0.0) # probability of answer being correct
+  confidence = db.FloatProperty(default=0.0)  # probability of grading being correct
+  questions = db.ListProperty(db.Key)
+  graders = db.ListProperty(users.User) # FIXME: seems out of place
+# outgoing = [db.Query(Connection<Question>)]
+
+  def __json__(self):
+    return {'value':self.value,'corectness':self.correctness}
+
 class Question(Searchable, polymodel.PolyModel):
   """
   Models a question.
@@ -49,7 +64,53 @@ class GraderQuestion(MultipleAnswerQuestion):
   """
   Handles the grading of short answer questions.
   """
-  pass
+  @staticmethod
+  def newFrom(question):
+    """
+    Creates a new GraderQuestion from a ShortAnswerQuestion.
+    """
+    txt = "Check all the answers you believe correctly answer the question. "
+    txt += "(" + question.value + ")"
+    q = GraderQuestion(value=txt)
+    q.author = users.User('grader@socrench.us')
+    q.put()
+    
+    answers = []
+    for ans in question.answers:
+      answers.append(Answer.get(ans))
+    
+    shuffle(answers)
+    
+    # Find min questions per answer
+    countByQPA = {}
+    for a in answers:
+      i = len(a.questions)
+      if i in countByQPA.keys():
+        countByQPA[i] += 1
+      else:
+        countByQPA[i] = 1
+    
+    # Find out how many QPA to accept and still have enough
+    targetQPA = min(countByQPA.keys())
+    i = countByQPA[targetQPA]
+    while i < 5:
+      targetQPA = countByQPA.keys()[countByQPA.keys().index(targetQPA)+1]
+      i += countByQPA[targetQPA]
+    
+    # Add the answers to the question
+    i = 0
+    for a in answers:
+      if i >= 5:
+        break
+      if len(a.questions) <= targetQPA:
+        q.answers.append(a.key())
+        a.questions.append(q.key())
+        a.put()
+        i += 1
+      
+    q.put()
+    return q
+    
 class MultipleChoiceQuestion(MultipleAnswerQuestion):
   """
   Handles multiple choice questions.
@@ -60,27 +121,29 @@ class ShortAnswerQuestion(Question):
   Handles short answer questions.
   """
   pass
-
-class BuilderQuestion(ShortAnswerQuestion):
+  
+class NumericAnswerQuestion(Question):
   """
-  Handles questions that are made to generate content.
+  Handles short answer questions that evaluate numerically.
   """
   pass
-  
-class Answer(db.Model):
+class ConfidentGraderQuestion(NumericAnswerQuestion):
   """
-  Models an answer.
+  Sets the baseline for the grading of short answer questions.
   """
-  author = db.UserProperty(auto_current_user_add = True)
-  value = db.StringProperty()
-  correctness = db.FloatProperty(default=0.0) # probability of answer being correct
-  confidence = db.FloatProperty(default=0.0)  # probability of grading being correct
-  questions = db.ListProperty(db.Key)
-  graders = db.ListProperty(users.User)
-# outgoing = [db.Query(Connection<Question>)]
-
-  def __json__(self):
-    return {'value':self.value,'corectness':self.correctness}
+  question = db.ReferenceProperty(Question)
+  answer = db.ReferenceProperty(Answer)
+  @staticmethod
+  def newFrom(question, answer):
+    """
+    Creates a new ConfidentGraderQuestion from a ShortAnswerQuestion
+    and an answer.
+    """
+    q = ConfidentGraderQuestion()
+    q.question = quesiton
+    q.answer = answer
+    q.put()
+    return q
 
 ##########################
 ## User Model and Logic ##
@@ -91,13 +154,16 @@ class Assignment(polymodel.PolyModel):
   Models a generic assignment
   """
   @staticmethod
-  def assign(item):
+  def assign(item, user=None):
+    if not user:
+      user = users.User()
     assignmentClass = eval('a'+item.__class__.__name__)
     instance = assignmentClass.all()
     instance = instance.ancestor(item)
-    instance = instance.filter('user =', users.User()).get()
+    instance = instance.filter('user =', user).get()
     if not instance:
       instance = assignmentClass(parent=item)
+      instance.user = user
     instance.prepare()
     instance.put()
     return instance
@@ -114,6 +180,7 @@ class aQuestion(Assignment):
   Models user specific question data.
   """
   liked = db.BooleanProperty(default = False)
+  score = db.FloatProperty(default=0.0)
 # user = db.UserProperty(auto_current_user = True)
 # parent = db.ReferenceProperty(Question)
 
@@ -126,7 +193,13 @@ class aQuestion(Assignment):
     if self.parent():
       output['question'] = self.parent()
     return output
-      
+
+class aNumericAnswerQuestion(aQuestion):
+  """
+  Handles questions that evaluate numerically.
+  """
+  pass
+
 class aShortAnswerQuestion(aQuestion):
   answer = db.ReferenceProperty(Answer)
   def submitAnswer(self, myAnswer):
@@ -138,60 +211,33 @@ class aShortAnswerQuestion(aQuestion):
     # get user (login is required in app.yaml)
     u = users.User()
     
-    answers = []
-    for ans in self.parent().answers:
-      answers.append(Answer.get(ans))
-    
     # Generate the assesment question
-    txt = "Check all the answers you believe correctly answer the question. "
-    txt += "(" + self.parent().value + ")"
-    q = GraderQuestion(value=txt)
-    q.author = users.User('grader@socrench.us')
-    q.put()
-    
-    shuffle(answers)
-    
-    # Find min questions per answer
-    countByQPA = {}
-    for a in answers:
-      i = len(a.questions)
-      if i in countByQPA.keys():
-        countByQPA[i] += 1
-      else:
-        countByQPA[i] = 1
-    
-    # Find out how many QPA to accept and still have enough
-    targetQPA = min(countByQPA.keys())
-    i = countByQPA[targetQPA]
-    while i < 10:
-      targetQPA = countByQPA.keys()[countByQPA.keys().index(targetQPA)+1]
-      i += countByQPA[targetQPA]
-    
-    # Add the answers to the question
-    i = 0
-    for a in answers:
-      if i >= 5:
-        break
-      if len(a.questions) <= targetQPA:
-        q.answers.append(a.key())
-        a.questions.append(q.key())
-        a.put()
-        i += 1
-      
-    q.put()
-      
+    q = None
+    if len(self.parent().answers) >= 5: 
+      q = GraderQuestion.newFrom(self.parent())
+    else:
+      sample = aConfidentGraderQuestion.all().filter('user =', self.parent().author).filter('question =', self).get()
+      if not sample:
+        # Assign the teacher to grade
+        cgq = ConfidentGraderQuestion.newFrom(self.parent())
+        Assignments.assign(cgq, self.parent().author)
+        
     # Create the user's answer
     self.answer = Answer(value=myAnswer).put()
     self.parent().answers.append(self.answer.key())
     
-    # Attach the question to the answer
-    Connection(source=self.answer, target=q).put()
+    result = [self]
+    
+    if q:
+      # Attach the question to the answer
+      Connection(source=self.answer, target=q).put()
+      result.append(Assignment.assign(q))
 
     self.put()
     
     # assign the grading question
-    return [self,Assignment.assign(self.answer.outgoing.get().target)]
-  
+    return result
+    
 class aMultipleAnswerQuestion(aQuestion):
   answers = db.ListProperty(db.Key)
   answer = db.ListProperty(db.Key)
@@ -234,8 +280,16 @@ class aGraderQuestion(aMultipleAnswerQuestion):
     """
     if self.answer:
       return False
+
+    # submit the answer like normal
+    tmp = aMultipleAnswerQuestion.submitAnswer(self, answer)
     
-    # gather probabilities
+    # grade
+    self.grade()
+    
+    return tmp
+    
+  def grade(self):
     confidence = 0.0
     normalizer = 0.0
     answers = []
@@ -243,8 +297,8 @@ class aGraderQuestion(aMultipleAnswerQuestion):
       ans = Answer.get(a)
       answers.append(ans)
       normalizer += ans.confidence
-      markedCorrect = (ans.value in answer)
-      answerCorrect = (ans.correctness > 0.5)
+      markedCorrect = (ans.key() in self.answer)
+      answerCorrect = (ans.correctness > 0.65)
       if markedCorrect == answerCorrect:
         confidence += ans.confidence
     if normalizer != 0:
@@ -252,7 +306,7 @@ class aGraderQuestion(aMultipleAnswerQuestion):
     
     # grade with new found confidence
     for a in answers:
-      markedCorrect = (a.value in answer)
+      markedCorrect = (a.key() in self.answer)
       numGraders = len(a.graders)
       tmp = numGraders*(a.confidence * a.correctness)
       tmp += confidence * float(markedCorrect)
@@ -262,6 +316,17 @@ class aGraderQuestion(aMultipleAnswerQuestion):
       a.confidence = (confidence + (a.confidence * numGraders)) / (1 + numGraders)
       a.graders.append(users.User())
       a.put()
-
-    # submit the answer like normal
-    return aMultipleAnswerQuestion.submitAnswer(self, answer)
+    
+    self.score = confidence
+    self.put()
+    
+class aConfidentGraderQuestion(aNumericAnswerQuestion):
+  """
+  Allows the creator of a short answer question to set the baseline.
+  """
+  def submitAnswer(self, answer):
+    """
+    Submits the grade, regrades neighbors, and assigns 
+    next ConfidentGraderQuestion.
+    """
+    pass
