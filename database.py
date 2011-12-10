@@ -71,22 +71,32 @@ class Assignment(polymodel.PolyModel):
   """
   @classmethod
   def assign(cls, item, user=None):
+    """
+    Assign an object if it isn't already assigned
+    """
     if not user:
       user = users.User()
-    instance = cls.all()
-    instance = instance.ancestor(item)
-    instance = instance.filter('user =', user).filter('answer =',None).get()
+    instance = cls.getInstance(item, user)
     if not instance:
       instance = cls(parent=item)
       instance.user = user
-      instance.prepare()
       instance.put()
+      instance.prepare()
     return instance
+    
+  @classmethod
+  def getInstance(cls, item, user=None):
+    """
+    Get an instance from the assigned object.
+    """
+    q = cls.all()
+    q = q.ancestor(item)
+    return q.filter('user =', user).get()
   
   def prepare(self):
-    pass
+    self.put()
 
-  user = db.UserProperty(auto_current_user = True)
+  user = db.UserProperty(auto_current_user_add = True)
   time = db.DateTimeProperty(auto_now_add = True)
 # parent = db.ReferenceProperty(db.Model)
 
@@ -132,11 +142,15 @@ class aShortAnswerQuestion(aQuestion):
     if len(self.parent().answers) >= 5: 
       q = aGraderQuestion.assign(self.parent())
     else:
-      teacherQ = aConfidentGraderQuestion.all().filter('user =', self.parent().author).ancestor(self.parent()).filter('answer =',None).get()
+      teacherQ = None
+      for cgq in aConfidentGraderQuestion.all().filter('user =', self.parent().author).ancestor(self.parent()):
+        if not cgq.answer:
+          teacherQ = cgq
         
     # Create the user's answer
     self.answer = Answer(value=myAnswer).put()
     self.parent().answers.append(self.answer.key())
+    self.parent().put()
     
     # Assign the teacher to grade
     if not teacherQ:
@@ -147,7 +161,7 @@ class aShortAnswerQuestion(aQuestion):
     if q:
       # Attach the question to the answer
       Connection(source=self.answer, target=q).put()
-      result.append(Assignment.assign(q))
+      result.append(q)
 
     self.put()
     
@@ -284,6 +298,15 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
   Allows the creator of a short answer question to set the baseline.
   """
   answerInQuestion = db.ReferenceProperty(Answer)
+  @classmethod
+  def getInstance(cls, item, user=None):
+    """
+    Get an instance from the assigned question.
+    """
+    q = cls.all()
+    q = q.ancestor(item)
+    return q.filter('user =', user).filter('answer =',None).get()
+  
   def prepare(self):
     """
     Chooses the lowest confidence answer to grade.
@@ -296,6 +319,10 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
         minAns = a
       if minAns.confidence == 0.0:
         break
+        
+    if not minAns.value:
+      self.delete()
+      return None
     
     # add the answer in question
     self.answerInQuestion = minAns.key()
@@ -339,5 +366,9 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
       q.grade()
       
     # assign next ConfidentGraderQuestion
+    result = [self]
+    next = aConfidentGraderQuestion.assign(self.parent(), self.parent().author)
+    if next.answerInQuestion:
+      result.append(next)
 
-    return [self, aConfidentGraderQuestion.assign(self.parent())]
+    return result
