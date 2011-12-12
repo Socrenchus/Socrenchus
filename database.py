@@ -81,7 +81,7 @@ class Assignment(polymodel.PolyModel):
       instance = cls(parent=item)
       instance.user = user
       instance.put()
-      instance.prepare()
+      instance = instance.prepare()
     return instance
     
   @classmethod
@@ -95,6 +95,7 @@ class Assignment(polymodel.PolyModel):
   
   def prepare(self):
     self.put()
+    return self
 
   user = db.UserProperty(auto_current_user_add = True)
   time = db.DateTimeProperty(auto_now_add = True)
@@ -182,6 +183,7 @@ class aMultipleAnswerQuestion(aQuestion):
     shuffle(myAnswers)
     self.answers = myAnswers
     self.put()
+    return self
     
   def submitAnswer(self, answer):
     """
@@ -246,6 +248,7 @@ class aGraderQuestion(aMultipleAnswerQuestion):
         i += 1
       
     self.put()
+    return self
   
   def submitAnswer(self, answer):
     """
@@ -320,7 +323,7 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
       if minAns.confidence == 0.0:
         break
         
-    if not minAns.value:
+    if minAns.confidence == 1.0:
       self.delete()
       return None
     
@@ -338,6 +341,7 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
       self.answers.append(Answer(value=gradingAnswer).put())
       
     self.put()
+    return self
 
   def submitAnswer(self, answer):
     """
@@ -346,7 +350,7 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
     """
     
     # submit the grade
-    a = Answer.get(self.answers[0])
+    a = self.answerInQuestion
     a.correctness = {
       'Definetly Correct': 1.0,
       'Not Completely Correct': 0.75,
@@ -368,7 +372,7 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
     # assign next ConfidentGraderQuestion
     result = [self]
     next = aConfidentGraderQuestion.assign(self.parent(), self.parent().author)
-    if next.answerInQuestion:
+    if next:
       result.append(next)
 
     return result
