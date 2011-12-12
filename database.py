@@ -274,9 +274,12 @@ class aGraderQuestion(aMultipleAnswerQuestion):
       answers.append(ans)
       normalizer += ans.confidence
       markedCorrect = (ans.key() in self.answer)
-      answerCorrect = (ans.correctness > 0.65)
-      if markedCorrect == answerCorrect:
-        confidence += ans.confidence
+      match = ans.correctness
+      if not markedCorrect:
+        match = 1.0 - ans.correctness
+        
+      confidence += match * ans.confidence
+      
     if normalizer != 0:
       confidence /= float(normalizer)
     
@@ -289,9 +292,17 @@ class aGraderQuestion(aMultipleAnswerQuestion):
       if (confidence + numGraders*a.confidence) != 0:
         tmp /= (confidence + numGraders*a.confidence)
       a.correctness = tmp
+      beforeConfidence = a.confidence
       a.confidence = (confidence + (a.confidence * numGraders)) / (1 + numGraders)
       a.graders.append(users.User())
       a.put()
+      
+      # recurse if condition is met
+      # TODO: fiddle with condition
+      if a.confidence >= 0.9 and beforeConfidence < 0.9:
+        query = aGraderQuestion.all().ancestor(self.parent()).filter('answers =',a.key())
+        for q in query:
+          q.grade()
     
     self.score = confidence
     self.put()
@@ -364,7 +375,6 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
     self.put()
     
     # find neighbors
-    # TODO: Go out a certain radius
     query = aGraderQuestion.all().ancestor(self.parent()).filter('answers =',a.key())
     for q in query:
       q.grade()
