@@ -61,6 +61,8 @@ $(document).ready(function() {
           $.each(data, function(key, object) {
             messageObj.answer.push($(this).val());
           });
+          if (messageObj.answer.length == 0)
+            messageObj.answer.push('None of the above');
         }
         $.getJSON('/ajax/answer', messageObj, function(data) {
           if (data) {

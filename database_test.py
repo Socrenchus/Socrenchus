@@ -90,6 +90,10 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
         else:
           if not a.key() in correct:
             myAnswer.append(a.value)
+            
+      if len(myAnswer) == 0:
+        myAnswer += 'None of the above'
+      
       q.submitAnswer(myAnswer)
       
     # print the grades

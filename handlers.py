@@ -95,8 +95,7 @@ class AnswerQuestionHandler(webapp.RequestHandler):
     result = db.get(qid)
     if isinstance(result,Question):
       result = theClass.assign(result)
-
-    if bool(ans) and not result.answer:
+    elif bool(ans) and not result.answer:
       result = result.submitAnswer(ans)
         
     json_response = json.encode(result)

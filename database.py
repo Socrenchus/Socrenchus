@@ -197,10 +197,24 @@ class aMultipleAnswerQuestion(aQuestion):
       ans = Answer.get(a)
       if ans.value in answer:
         self.answer.append(a)
+    
+    # None of the above case
+    if len(answer) == 1 and answer[0] == 'None of the above':
+      a = Answer.all().filter('value =', 'None of the above').get()
+      if not a:
+        a = Answer(value='None of the above').put()
+      else:
+        a = a.key()
+      self.answer.append(a)
 
     self.put()
 
     return [self]
+    
+  def score(self):
+    self.score = answer.correctness
+    self.put()
+    return self.score
 
 class aMultipleChoiceQuestion(aMultipleAnswerQuestion):
   pass
@@ -266,22 +280,33 @@ class aGraderQuestion(aMultipleAnswerQuestion):
     return tmp
     
   def grade(self):
-    confidence = 0.0
-    normalizer = 0.0
+    confidenceSum = 0.0
+    maxPossibleConfidenceSum = 0.0
     answers = []
     for a in self.answers:
+      # get and store the answer
       ans = Answer.get(a)
       answers.append(ans)
-      normalizer += ans.confidence
-      markedCorrect = (ans.key() in self.answer)
-      match = ans.correctness
-      if not markedCorrect:
-        match = 1.0 - ans.correctness
-        
-      confidence += match * ans.confidence
       
-    if normalizer != 0:
-      confidence /= float(normalizer)
+      # answer's current marks with grader's
+      match = ans.correctness
+      if not (ans.key() in self.answer):
+        match = 1.0 - ans.correctness
+      
+      # give the grader some of the answer's confidence
+      confidenceSum += match * ans.confidence
+      
+      # get the normalizer for the score
+      if match < 0.5:
+        match = 1 - match
+      maxPossibleConfidenceSum += match * ans.confidence
+      
+    # error check
+    if len(self.answers) == 0:
+      return
+      
+    # normalize confidence (if no error)
+    confidence = confidenceSum / float(len(self.answers))
     
     # grade with new found confidence
     for a in answers:
@@ -304,7 +329,8 @@ class aGraderQuestion(aMultipleAnswerQuestion):
         for q in query:
           q.grade()
     
-    self.score = confidence
+    # calculate score (confidence normalized by maximum)
+    self.score = (confidence / maxPossibleConfidenceSum)
     self.put()
     
 class aConfidentGraderQuestion(aMultipleChoiceQuestion):
