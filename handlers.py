@@ -19,6 +19,7 @@ __author__ = 'Bryan Goldstein'
 import wsgiref.handlers
 import json
 import os
+from google.appengine.ext.webapp import template
 
 from google.appengine.ext import webapp
 from google.appengine.api import users
@@ -39,39 +40,17 @@ class SearchHandler(webapp.RequestHandler):
     path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'SearchQuestion.html'))
     self.response.out.write(template.render(path, {"results":results,"query":q}, debug=_DEBUG))
 
-class NewQuestionHandler(webapp.RequestHandler):
+class ExperimentOneHandler(webapp.RequestHandler):
 
   def get(self):
     """
-    Stores a newly created question.
+    Assigns the builder question, serves stream.html.
     """
-    question_text = self.request.get('question')
-    answers = [self.request.get(str(i)+'-a') for i in range(4)]
-    connections = [self.request.get_all(str(i)+'-n[]') for i in range(4)]
     
-    q = Question()
-    q.value = self.request.get('question')
-    q.put()
-    """
-    for i in range(5):
-      a = Answer()
-      a.value = self.request.get('correct'+str(i+1))
-      a.confidence = 1.0
-      a.correctness = 1.0
-      a.graders.append(users.User())
-      a.question = q.key()
-      q.answers.append(a.put())
-      a = Answer()
-      a.value = self.request.get('incorrect'+str(i+1))
-      a.confidence = 1.0
-      a.correctness = 0.0
-      a.graders.append(users.User())
-      a.question = q.key()
-      q.answers.append(a.put())
-    q.put()
-    """
-    self.response.headers.add_header("Content-Type", 'application/json')
-    self.response.out.write(json.encode({'id':q.key().id()}))
+    aBuilderQuestion.assign()
+
+    path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'stream.html'))
+    self.response.out.write(open(path).read())
     
 class AnswerQuestionHandler(webapp.RequestHandler):
 
@@ -120,9 +99,9 @@ class StreamHandler(webapp.RequestHandler):
 def main():
   application = webapp.WSGIApplication([
     ('/ajax/search', SearchHandler),
-    ('/ajax/new', NewQuestionHandler),
     ('/ajax/stream', StreamHandler),
     (r'/ajax/answer', AnswerQuestionHandler),
+    ('/experiments/1', ExperimentOneHandler),
   ], debug=_DEBUG)
   wsgiref.handlers.CGIHandler().run(application)
 

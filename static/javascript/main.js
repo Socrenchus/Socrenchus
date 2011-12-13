@@ -34,12 +34,14 @@ $(document).ready(function() {
   //
   // Compile templates
   //
-  $( "#questionTemplate" ).template( "questionTemplate" );  
+  $( "#questionTemplate" ).template( "questionTemplate" ); 
+  $( "#questionStatsTemplate" ).template( "questionStatsTemplate" );  
   //
   // Load a question array
   //
   var loadQuestion = function(d) {
     d._class = oc(d._class);
+    d.confident = true;
     var tmp = d.answer
     if (tmp && tmp.length >= 0) {
       $.each(tmp, function(key, object) { d.answer.push(object.value) });
@@ -47,12 +49,25 @@ $(document).ready(function() {
     }
     if ('aConfidentGraderQuestion' in d._class) {
       d.question.author = d.answerInQuestion.author;
+    } else if ('aShortAnswerQuestion' in d._class) {
+      d.confident = d.answer && (d.answer.confidence >= 0.5);
+      if (d.answer)
+        d.score = d.answer.correctness;
     }
+    if ('aBuilderQuestion' in d._class && d.answer) {
+      $('#'+d.key).remove();
+      $.tmpl( "questionStatsTemplate", d ).prependTo( '#assignments' );
+      var plot1 = [];
+      var plot2 = [];
+      $.each(d.estimatedGrades, function(key, object) { plot1.push([key,object]) });
+      $.each(d.confidentGrades, function(key, object) { plot2.push([key,object]) });
+      $.plot($("#chart_"+d.key), [ plot1, plot2 ], { yaxis: { max: 1 } });
+    } else {
     $.tmpl( "questionTemplate", d ).prependTo( '#assignments' ).click(function( eventObj ) {
       if (eventObj.target.id == 'submit') {
         scrollTo(0,0);
         var messageObj = {'question_id': d.key, 'answer': [], 'class': d._class }
-        if ('aShortAnswerQuestion' in d._class)
+        if ('aShortAnswerQuestion' in d._class || 'aBuilderQuestion' in d._class)
           messageObj.answer = $('#'+d.key+' #answer').val();
         else if ('aMultipleChoiceQuestion' in d._class)
           messageObj.answer = $('input:radio[name='+d.key+']:checked').val();
@@ -78,6 +93,7 @@ $(document).ready(function() {
         });
       }
     });
+  }
   }
   
   //

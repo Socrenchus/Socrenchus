@@ -57,7 +57,7 @@ class Answer(db.Model):
     properties = self.properties().items()
     output = {}
     for field, value in properties:
-      if field in ['value', 'correctness', 'author']:
+      if field in ['value', 'correctness', 'confidence', 'author']:
         output[field] = getattr(self, field)
     return output
 
@@ -70,12 +70,14 @@ class Assignment(polymodel.PolyModel):
   Models a generic assignment
   """
   @classmethod
-  def assign(cls, item, user=None):
+  def assign(cls, item=None, user=None):
     """
     Assign an object if it isn't already assigned
     """
     if not user:
       user = users.User()
+    if not item:
+      item = cls.getItem()
     instance = cls.getInstance(item, user)
     if not instance:
       instance = cls(parent=item)
@@ -120,12 +122,6 @@ class aQuestion(Assignment):
       output['question'] = self.parent()
     return output
 
-class aNumericAnswerQuestion(aQuestion):
-  """
-  Handles questions that evaluate numerically.
-  """
-  pass
-
 class aShortAnswerQuestion(aQuestion):
   answer = db.ReferenceProperty(Answer)
   def submitAnswer(self, myAnswer):
@@ -140,13 +136,13 @@ class aShortAnswerQuestion(aQuestion):
     # Generate the assesment question
     q = None
     teacherQ = True
-    if len(self.parent().answers) >= 5: 
+    if len(self.parent().answers) >= 5:
       q = aGraderQuestion.assign(self.parent())
-    else:
-      teacherQ = None
-      for cgq in aConfidentGraderQuestion.all().filter('user =', self.parent().author).ancestor(self.parent()):
-        if not cgq.answer:
-          teacherQ = cgq
+    
+    teacherQ = None
+    for cgq in aConfidentGraderQuestion.all().filter('user =', self.parent().author).ancestor(self.parent()):
+      if not cgq.answer:
+        teacherQ = cgq
         
     # Create the user's answer
     self.answer = Answer(value=myAnswer).put()
@@ -168,6 +164,18 @@ class aShortAnswerQuestion(aQuestion):
     
     # assign the grading question
     return result
+    
+  def __json__(self):
+    properties = self.properties().items()
+    output = {}
+    for field, value in properties:
+      output[field] = getattr(self, field)
+    output['key'] = str(self.key())
+    if self.parent():
+      output['question'] = self.parent()
+    if self.answer:
+      output['score'] = self.answer.correctness
+    return output
     
 class aMultipleAnswerQuestion(aQuestion):
   answers = db.ListProperty(db.Key)
@@ -200,21 +208,12 @@ class aMultipleAnswerQuestion(aQuestion):
     
     # None of the above case
     if len(answer) == 1 and answer[0] == 'None of the above':
-      a = Answer.all().filter('value =', 'None of the above').get()
-      if not a:
-        a = Answer(value='None of the above').put()
-      else:
-        a = a.key()
+      a = Answer.get_or_insert('none', value="None of the above")
       self.answer.append(a)
 
     self.put()
 
     return [self]
-    
-  def score(self):
-    self.score = answer.correctness
-    self.put()
-    return self.score
 
 class aMultipleChoiceQuestion(aMultipleAnswerQuestion):
   pass
@@ -310,27 +309,30 @@ class aGraderQuestion(aMultipleAnswerQuestion):
     
     # grade with new found confidence
     for a in answers:
-      markedCorrect = (a.key() in self.answer)
-      numGraders = len(a.graders)
-      tmp = numGraders*(a.confidence * a.correctness)
-      tmp += confidence * float(markedCorrect)
-      if (confidence + numGraders*a.confidence) != 0:
-        tmp /= (confidence + numGraders*a.confidence)
-      a.correctness = tmp
-      beforeConfidence = a.confidence
-      a.confidence = (confidence + (a.confidence * numGraders)) / (1 + numGraders)
-      a.graders.append(users.User())
-      a.put()
+      cgq = aConfidentGraderQuestion.all().filter('answerInQuestion =',a).get()
+      if (not cgq) or (not cgq.answer):
+        markedCorrect = (a.key() in self.answer)
+        numGraders = len(a.graders)
+        tmp = numGraders*(a.confidence * a.correctness)
+        tmp += confidence * float(markedCorrect)
+        if (confidence + numGraders*a.confidence) != 0:
+          tmp /= (confidence + numGraders*a.confidence)
+        a.correctness = tmp
+        beforeConfidence = a.confidence
+        a.confidence = (confidence + (a.confidence * numGraders)) / (1 + numGraders)
+        a.graders.append(users.User())
+        a.put()
       
-      # recurse if condition is met
-      # TODO: fiddle with condition
-      if a.confidence >= 0.9 and beforeConfidence < 0.9:
-        query = aGraderQuestion.all().ancestor(self.parent()).filter('answers =',a.key())
-        for q in query:
-          q.grade()
+        # recurse if condition is met
+        # TODO: fiddle with condition
+        if a.confidence - beforeConfidence > 0.3:
+          query = aGraderQuestion.all().ancestor(self.parent()).filter('answers =',a.key())
+          for q in query:
+            q.grade()
     
     # calculate score (confidence normalized by maximum)
-    self.score = (confidence / maxPossibleConfidenceSum)
+    if maxPossibleConfidenceSum != 0:
+      self.score = (confidenceSum / maxPossibleConfidenceSum)
     self.put()
     
 class aConfidentGraderQuestion(aMultipleChoiceQuestion):
@@ -369,13 +371,13 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
     
     # add the answers
     answers = [
-      'Definetly Correct',
+      'Definitely Correct',
       'Not Completely Correct',
       'Not Completely Wrong',
-      'Definetly Wrong',
+      'Definitely Wrong',
     ]
     for gradingAnswer in answers:
-      self.answers.append(Answer(value=gradingAnswer).put())
+      self.answers.append(Answer.get_or_insert(gradingAnswer,value=gradingAnswer).key())
       
     self.put()
     return self
@@ -386,18 +388,25 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
     next ConfidentGraderQuestion.
     """
     
+    # get the builder question
+    builder = aBuilderQuestion.all().filter('answer =',self.parent()).get()    
+    
     # submit the grade
     a = self.answerInQuestion
+    builder.estimatedGrades.append(a.correctness) # add the prior to the chart
     a.correctness = {
-      'Definetly Correct': 1.0,
+      'Definitely Correct': 1.0,
       'Not Completely Correct': 0.75,
       'Not Completely Wrong': 0.5,
-      'Definetly Wrong': 0.0,
+      'Definitely Wrong': 0.0,
     }[answer]
+    builder.confidentGrades.append(a.correctness) # add the post to the chart
+    builder.put()
     a.confidence = 1.0
     a.put()
     
     self.answer.append(Answer(value=answer).put())
+    self.score = a.correctness
     self.put()
     
     # find neighbors
@@ -406,9 +415,41 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
       q.grade()
       
     # assign next ConfidentGraderQuestion
-    result = [self]
+    result = [self, aBuilderQuestion.all().filter('answer =',self.parent()).get()]
     next = aConfidentGraderQuestion.assign(self.parent(), self.parent().author)
     if next:
       result.append(next)
 
     return result
+    
+class aBuilderQuestion(aQuestion):
+  """
+  Creates a short answer question and tracks class progress.
+  """
+  answer = db.ReferenceProperty(Question)
+  estimatedGrades = db.ListProperty(float)
+  confidentGrades = db.ListProperty(float)
+  @classmethod
+  def getItem(cls):
+    """
+    Get the builder question.
+    """
+    txt = 'Think of a short answer question that you would ask your students...'
+    return Question.get_or_insert('builderQuestion', value=txt, author=users.User('Personal Assistant'))
+  
+  @classmethod
+  def getInstance(cls, item, user=None):
+    """
+    Get an instance from the assigned object.
+    """
+    q = cls.all()
+    q = q.ancestor(item)
+    return q.filter('user =', user).filter('answer =',None).get()
+  
+  def submitAnswer(self, answer):
+    """
+    Create the short answer question.
+    """
+    self.answer = Question(value=answer).put()
+    self.put()
+    return [self]
