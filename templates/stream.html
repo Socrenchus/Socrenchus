@@ -37,7 +37,7 @@
       <table>
       <div style="height:54px;"></div>
       <!-- TODO: Change logout url for launch -->
-      <a id="logout" href="/_ah/login?continue=/&amp;action=Logout" name="logout">Logout</a>
+      <a id="logout" name="logout">Logout</a>
       <div id="learn">
         <ul id="assignments" class="sortable ui-helper-reset">
         <script id="questionTemplate" type="text/x-jquery-tmpl">
@@ -87,12 +87,13 @@
               <br/>
               <img src="http://www.gravatar.com/avatar/{{html $.md5(question.author.email)}}?s=48&d=mm" class="avatar" />
               <a href=''>${question.author.nickname}</a>
+              <a href='/${answer.key}/report.csv'>- Download Grade Report</a>
               <br/><br/>
               ${answer.value}
               <br/><br/>
               Share this link with your students:
               <br/>
-              <input type='textbox' value='http://${window.location.host}/q/${answer.key}' style='text-align:left;width:100%;' disabled />
+              <input type='textbox' value='http://${window.location.host}/${answer.key}' style='text-align:left;width:100%;' disabled />
               </br></br>
               <div id='chart_${key}' style="width:100%;height:200px"></div>
             </div>

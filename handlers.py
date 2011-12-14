@@ -19,7 +19,6 @@ __author__ = 'Bryan Goldstein'
 import wsgiref.handlers
 import json
 import os
-from google.appengine.ext.webapp import template
 
 from google.appengine.ext import webapp
 from google.appengine.api import users
@@ -36,8 +35,7 @@ class ExperimentOneHandler(webapp.RequestHandler):
     
     aBuilderQuestion.assign()
 
-    path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'stream.html'))
-    self.response.out.write(open(path).read())
+    self.redirect('/')
     
 class TestDataHandler(webapp.RequestHandler):
   def get(self):
@@ -100,8 +98,7 @@ class TestDataHandler(webapp.RequestHandler):
 
         q.submitAnswer(myAnswer)
 
-    path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'stream.html'))
-    self.response.out.write(open(path).read())
+    self.redirect('/')
     
 class AnswerQuestionHandler(webapp.RequestHandler):
 
@@ -145,7 +142,7 @@ class StreamHandler(webapp.RequestHandler):
     assignments = q.fetch(10)
 
     self.response.headers.add_header("Content-Type", 'application/json')
-    self.response.out.write(json.encode(assignments))
+    self.response.out.write(json.encode({'logout': users.create_logout_url( "/" ), 'assignments':assignments}))
     
 class GradeReport(webapp.RequestHandler):
   """
@@ -177,6 +174,7 @@ class StaticPageServer(webapp.RequestHandler):
       path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'stream.html'))
     else:
       path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'index.html'))
+    
     self.response.out.write(open(path).read())
     
 class LoginHander(webapp.RequestHandler):

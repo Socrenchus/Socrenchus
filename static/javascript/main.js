@@ -2,6 +2,7 @@ $(document).ready(function() {
   //
   // Get URL parameters
   //
+  
   var urlParams = {}
   var urlPathString = decodeURI(window.location.pathname);
   var urlPathArray = urlPathString.split('/');
@@ -28,8 +29,8 @@ $(document).ready(function() {
   //
   // Check for certain parameters
   //
-  if (urlParams['q'])
-    $.get('/ajax/answer', {'question_id': urlParams['q']});
+  if (urlPathArray.length == 2 )
+    $.get('/ajax/answer', {'question_id': urlPathArray[1]});
     
   //
   // Compile templates
@@ -61,10 +62,17 @@ $(document).ready(function() {
       var plot2 = [];
       $.each(d.estimatedGrades, function(key, object) { plot1.push([key,object]) });
       $.each(d.confidentGrades, function(key, object) { plot2.push([key,object]) });
-      $.plot($("#chart_"+d.key), [ plot1, plot2 ], { yaxis: { max: 1 } });
+      $.plot($("#chart_"+d.key), [ {
+        label: "Grading Algorithm",
+        data: plot1
+      },   {
+          label: "Your Grading",
+          data: plot2
+        } ], { yaxis: { max: 1 } });
     } else {
     $.tmpl( "questionTemplate", d ).prependTo( '#assignments' ).click(function( eventObj ) {
       if (eventObj.target.id == 'submit') {
+        window.history.pushState("object or string", "Title", '/');
         scrollTo(0,0);
         var messageObj = {'question_id': d.key, 'answer': [], 'class': d._class }
         if ('aShortAnswerQuestion' in d._class || 'aBuilderQuestion' in d._class)
@@ -84,7 +92,6 @@ $(document).ready(function() {
             var len = data.length;
             if (len) {
               $('#'+d.key).remove();
-              //window.history.pushState("object or string", "Title", "/q/" + data[len-1].question.id);
             }
             for ( var i=0; i<len; i++ ){
               loadQuestion( data[i] );
@@ -103,7 +110,8 @@ $(document).ready(function() {
     $.getJSON('/ajax/stream', function(data) {
       if (data == '') return;
       $( "#learn > div" ).remove();
-      data.forEach( function( d ) {
+      $( "#logout" ).attr("href", data.logout);
+      data.assignments.forEach( function( d ) {
           loadQuestion( d );
         });
           //
