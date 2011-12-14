@@ -17,6 +17,8 @@ from google.appengine.api import users
 from google.appengine.ext.db import polymodel
 from search import *
 from random import shuffle
+import random
+
 
 ##########################
 ## Core Model and Logic ##
@@ -310,7 +312,7 @@ class aGraderQuestion(aMultipleAnswerQuestion):
     # grade with new found confidence
     for a in answers:
       cgq = aConfidentGraderQuestion.all().filter('answerInQuestion =',a).get()
-      if (not cgq) or (not cgq.answer):
+      if not cgq or not cgq.answer:
         markedCorrect = (a.key() in self.answer)
         numGraders = len(a.graders)
         tmp = numGraders*(a.confidence * a.correctness)
@@ -325,7 +327,7 @@ class aGraderQuestion(aMultipleAnswerQuestion):
       
         # recurse if condition is met
         # TODO: fiddle with condition
-        if a.confidence - beforeConfidence > 0.3:
+        if a.confidence - beforeConfidence > 0.1:
           query = aGraderQuestion.all().ancestor(self.parent()).filter('answers =',a.key())
           for q in query:
             q.grade()
@@ -397,7 +399,7 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
     a.correctness = {
       'Definitely Correct': 1.0,
       'Not Completely Correct': 0.75,
-      'Not Completely Wrong': 0.5,
+      'Not Completely Wrong': 0.25,
       'Definitely Wrong': 0.0,
     }[answer]
     builder.confidentGrades.append(a.correctness) # add the post to the chart

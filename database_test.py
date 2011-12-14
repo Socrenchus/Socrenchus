@@ -32,86 +32,96 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
     
   def testCreateQuestion(self):
     os.environ['USER_EMAIL'] = 'teacher@example.com'
-    q = Question()
-    q.value = 'question'
-    q.put()
-    for i in range(5):
-      a = Answer()
-      a.value = str(i+100)
-      a.confidence = 1.0
-      a.correctness = 1.0
-      a.graders.append(users.User())
-      a.question = q.key()
-      q.answers.append(a.put())
-      a = Answer()
-      a.value = str(i-5)
-      a.confidence = 1.0
-      a.correctness = 0.0
-      a.graders.append(users.User())
-      a.question = q.key()
-      q.answers.append(a.put())
-    q.put()
-    self.assertEqual(10, len(Answer.all().fetch(11)))
-    self.assertEqual(1, len(Question.all().fetch(2)))
+    a = aBuilderQuestion.assign()
+    a.submitAnswer('question')
+    
+    self.assertEqual(2, len(Question.all().fetch(3)))
     
   def testAnswerQuestion(self):
     # create the question
     self.testCreateQuestion()
-    q = Question.all().get()
-    
+    q = aBuilderQuestion.all().get().answer
+        
     # have users answer the question
     for i in range(30):
       os.environ['USER_EMAIL'] = 'test'+str(i)+'@example.com'
       a = aShortAnswerQuestion.assign(q)
       a.submitAnswer(str(i))
+      
+    # confidently grade some answers
+    os.environ['USER_EMAIL'] = 'teacher@example.com'
+    answers = [
+      'Definitely Correct',
+      'Not Completely Correct',
+      'Not Completely Wrong',
+      'Definitely Wrong',
+    ]
+    a = aConfidentGraderQuestion.assign(q)
+    for i in range(5):
+      a = a.submitAnswer(answers[int(a.answerInQuestion.value)%4])[2]
   
   def testGradeDistribution(self):
-    # create the question
-    self.testAnswerQuestion()
-
+    os.environ['USER_EMAIL'] = 'teacher@example.com'
+    a = aBuilderQuestion.assign()
+    a.submitAnswer('Name a number that is divisible by four.')
+    q = a.answer
+  
+    answers = [
+      'Definitely Correct',
+      'Not Completely Correct',
+      'Not Completely Wrong',
+      'Definitely Wrong',
+    ]
+    
+    scores = [
+    1.0,
+    0.75,
+    0.25,
+    0.0,
+    ]
+      
+    # have users answer the question
+    for i in range(30):
+      os.environ['USER_EMAIL'] = 'test'+str(i)+'@example.com'
+      a = aShortAnswerQuestion.assign(q)
+      a.submitAnswer(str(i))
+    
+    # confidently grade some answers
+    os.environ['USER_EMAIL'] = 'teacher@example.com'
+    a = aConfidentGraderQuestion.assign(q)
+    for i in range(5):
+      a = a.submitAnswer(answers[int(a.answerInQuestion.value)%4])[2]
+      
     # have the users grade eachother's answer
     query = db.Query(Answer,keys_only=True)
-    correct = query.filter('correctness =', 1.0).fetch(15)
-    self.assertEqual(len(correct), 5)
-    for i in range(30):
+    for i in range(5,30):
       os.environ['USER_EMAIL'] = 'test'+str(i)+'@example.com'
       a = aShortAnswerQuestion.all().filter('user =', users.User()).get()
       q = aGraderQuestion.all().filter('user =', users.User()).get()
-      smart = random.random() < 0.9
-      if smart:
-        correct.append(a.answer.key())
       myAnswer = []
+      agree = random.random() < (0.9 * scores[int(a.answer.value)%4])
       for a in q.answers:
         a = Answer.get(a)
-        r = random.random()
-        if smart:
-          if a.key() in correct:
+        if scores[int(a.value)%4] > 0.5:
+          if agree:
             myAnswer.append(a.value)
         else:
-          if not a.key() in correct:
+          if not agree:
             myAnswer.append(a.value)
-            
+
       if len(myAnswer) == 0:
         myAnswer += 'None of the above'
-      
+
       q.submitAnswer(myAnswer)
       
     # print the grades
     correct = 0.0
     n = 0.0
     for a in Answer.all().fetch(110):
-      n += 1.0
-      #print a.correctness
-      if n <= 10:
-        startAnswerTest = float(int(n) % 2)
-        message = 'The grade '+str(a.correctness)+' for one of the example answers exceeded acceptable error margin.'
-        self.assertTrue((startAnswerTest - 0.15) < a.correctness, msg=message)
-        self.assertTrue((startAnswerTest + 0.15) > a.correctness, msg=message)
-      correct += a.correctness
+      if not a.value in answers:
+        n += 1.0
+        correct += scores[int(a.value)%4] - a.correctness
     correct /= n
     
-    expectedClassAverage = 0.8
-    message = 'The class average '+str(correct)+' was too far off from the expected average of '+str(expectedClassAverage)+'.'
-    self.assertTrue((expectedClassAverage - 0.15) < correct, msg=message)
-    self.assertTrue((expectedClassAverage + 0.15) > correct, msg=message)
+    print 'Average error was: '+str(correct)
       

@@ -25,14 +25,12 @@ handlers:
 
 - url: /
   static_files: static/index.html
-  upload: static/index.html
+  upload: templates/index.html
   
-- url: /stream/
-  static_files: static/stream.html
-  upload: static/stream.html
+- url: /stream
+  script: handlers.py
   login: required
-  
+
 - url: /.*
-  static_files: static/stream.html
-  upload: static/stream.html
+  script: handlers.py
   login: required
