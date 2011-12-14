@@ -357,9 +357,10 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
     """
     minAns = Answer()
     minAns.confidence = 1.0
+    existing = [x for x in aConfidentGraderQuestion.all().ancestor(self.parent())]
     for ans in self.parent().answers:
       a = Answer.get(ans)
-      if a.confidence < minAns.confidence:
+      if a.confidence < minAns.confidence and not a in existing:
         minAns = a
       if minAns.confidence == 0.0:
         break

@@ -47,18 +47,6 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
       os.environ['USER_EMAIL'] = 'test'+str(i)+'@example.com'
       a = aShortAnswerQuestion.assign(q)
       a.submitAnswer(str(i))
-      
-    # confidently grade some answers
-    os.environ['USER_EMAIL'] = 'teacher@example.com'
-    answers = [
-      'Definitely Correct',
-      'Not Completely Correct',
-      'Not Completely Wrong',
-      'Definitely Wrong',
-    ]
-    a = aConfidentGraderQuestion.assign(q)
-    for i in range(5):
-      a = a.submitAnswer(answers[int(a.answerInQuestion.value)%4])[2]
   
   def testGradeDistribution(self):
     os.environ['USER_EMAIL'] = 'teacher@example.com'
@@ -88,7 +76,7 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
     
     # confidently grade some answers
     os.environ['USER_EMAIL'] = 'teacher@example.com'
-    a = aConfidentGraderQuestion.assign(q)
+    a = aConfidentGraderQuestion.all().filter('user =', users.User('teacher@example.com')).get()
     for i in range(5):
       a = a.submitAnswer(answers[int(a.answerInQuestion.value)%4])[2]
       

@@ -27,19 +27,6 @@ from database import *
 
 _DEBUG = True
 
-class SearchHandler(webapp.RequestHandler):
-
-  def get(self):
-    """
-    Search for existing entry.
-    """
-    q = self.request.get('q')
-    results = None
-    if q:
-      results = Question.search(q)
-    path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'SearchQuestion.html'))
-    self.response.out.write(template.render(path, {"results":results,"query":q}, debug=_DEBUG))
-
 class ExperimentOneHandler(webapp.RequestHandler):
 
   def get(self):
@@ -87,7 +74,7 @@ class TestDataHandler(webapp.RequestHandler):
       
       # confidently grade some answers
       os.environ['USER_EMAIL'] = 'teacher@example.com'
-      a = aConfidentGraderQuestion.assign(q)
+      a = aConfidentGraderQuestion.all().filter('user =', users.User('teacher@example.com')).get()
       for i in range(5):
         a = a.submitAnswer(answers[int(a.answerInQuestion.value)%4])[2]
         
@@ -160,21 +147,62 @@ class StreamHandler(webapp.RequestHandler):
     self.response.headers.add_header("Content-Type", 'application/json')
     self.response.out.write(json.encode(assignments))
     
+class GradeReport(webapp.RequestHandler):
+  """
+  Downloads a csv grade report.
+  """
+  def get(self, param):
+    q = Question.get(param)
+    if q and q.author == users.User():
+      output = 'email, answer, grade, secondary grade\n'
+      for a in q.answers:
+        a = Answer.get(a)
+        output += a.author.email()+', '
+        output += a.value+', '
+        output += str(a.correctness)+', '
+        gq = aGraderQuestion.all().filter('user =', a.author).ancestor(q).get()
+        if gq:
+          output += str(gq.score)
+        output += '\n'
+        
+      self.response.headers.add_header("Content-Type", 'text/csv')
+      self.response.out.write(output)
+    
 class StaticPageServer(webapp.RequestHandler):
-  
+  """
+  Serves the static pages after determining login status.
+  """
   def get(self):
-    path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'stream.html'))
+    if users.get_current_user():
+      path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'stream.html'))
+    else:
+      path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'index.html'))
     self.response.out.write(open(path).read())
+    
+class LoginHander(webapp.RequestHandler):
+  """
+  Logs the user in and redirects.
+  """
+  def get(self):
+    if users.get_current_user():
+      self.redirect('/')
+    else:
+      self.redirect(users.create_login_url(self.request.uri))
 
 def main():
-  application = webapp.WSGIApplication([
-    ('/ajax/search', SearchHandler),
+  options = [
     ('/ajax/stream', StreamHandler),
     (r'/ajax/answer', AnswerQuestionHandler),
     ('/experiments/1', ExperimentOneHandler),
-    ('/experiments/test', TestDataHandler),
+    (r'/(.*)/report.csv', GradeReport),
+    ('/login', LoginHander),
     ('/.*', StaticPageServer),
-  ], debug=_DEBUG)
+  ]
+  if _DEBUG:
+    options = [
+      ('/experiments/test', TestDataHandler),
+    ] + options
+  application = webapp.WSGIApplication(options, debug=_DEBUG)
   wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__':
