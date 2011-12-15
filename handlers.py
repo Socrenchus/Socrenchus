@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
-# Copyright 2011 Bryan Goldstein
+# Copyright 2011 Bryan Goldstein.
+# All rights reserved.
 #
 
 """
@@ -74,7 +75,7 @@ class TestDataHandler(webapp.RequestHandler):
       os.environ['USER_EMAIL'] = 'teacher@example.com'
       a = aConfidentGraderQuestion.all().filter('user =', users.User('teacher@example.com')).get()
       for i in range(5):
-        a = a.submitAnswer(answers[int(a.answerInQuestion.value)%4])[2]
+        a = a.submitAnswer(answers[int(a.answerInQuestion.value)%4])[1]
         
       # have the users grade eachother's answer
       query = db.Query(Answer,keys_only=True)

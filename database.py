@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
-# Copyright 2011 Bryan Goldstein
+# Copyright 2011 Bryan Goldstein.
+# All rights reserved.
 #
 
 """
@@ -15,8 +16,7 @@ This is the database model and core logic.
 from google.appengine.ext import db
 from google.appengine.api import users
 from google.appengine.ext.db import polymodel
-from search import *
-from random import shuffle
+
 import random
 
 
@@ -32,7 +32,7 @@ class Connection(db.Model):
   target = db.ReferenceProperty(db.Model, collection_name="incoming")
   weight = db.IntegerProperty(default=0)
 
-class Question(Searchable, db.Model):
+class Question(db.Model):
   """
   Models a question.
   """
@@ -48,7 +48,7 @@ class Answer(db.Model):
   Models an answer.
   """
   author = db.UserProperty(auto_current_user_add = True)
-  value = db.StringProperty()
+  value = db.StringProperty(multiline=True)
   correctness = db.FloatProperty(default=0.0) # probability of answer being correct
   confidence = db.FloatProperty(default=0.0)  # probability of grading being correct
   question = db.ReferenceProperty(Question)
@@ -190,7 +190,7 @@ class aMultipleAnswerQuestion(aQuestion):
     for i in self.parent().answers:
       myAnswers.append(i)
       
-    shuffle(myAnswers)
+    random.shuffle(myAnswers)
     self.answers = myAnswers
     self.put()
     return self
@@ -232,7 +232,7 @@ class aGraderQuestion(aMultipleAnswerQuestion):
     for ans in self.parent().answers:
       answers.append(ans)
     
-    shuffle(answers)
+    random.shuffle(answers)
     
     # All answers waiting to be graded by count
     answerCount = {}
@@ -418,10 +418,11 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
       q.grade()
       
     # assign next ConfidentGraderQuestion
-    result = [self, aBuilderQuestion.all().filter('answer =',self.parent()).get()]
+    result = [self]
     next = aConfidentGraderQuestion.assign(self.parent(), self.parent().author)
     if next:
       result.append(next)
+    result.append(aBuilderQuestion.all().filter('answer =',self.parent()).get())
 
     return result
     

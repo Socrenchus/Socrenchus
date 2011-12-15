@@ -1,3 +1,8 @@
+//
+// Copyright 2011 Bryan Goldstein.
+// All rights reserved.
+//
+
 $(document).ready(function() {
   //
   // Get URL parameters
@@ -29,7 +34,7 @@ $(document).ready(function() {
   //
   // Check for certain parameters
   //
-  if (urlPathArray.length == 2 )
+  if (urlPathArray.length == 2 && urlPathArray[1])
     $.get('/ajax/answer', {'question_id': urlPathArray[1]});
     
   //
@@ -68,7 +73,7 @@ $(document).ready(function() {
       },   {
           label: "Your Grading",
           data: plot2
-        } ], { yaxis: { max: 1 } });
+        } ], { yaxis: { max: 1, show: false }, xaxis: {show: false} } );
     } else {
     $.tmpl( "questionTemplate", d ).prependTo( '#assignments' ).click(function( eventObj ) {
       if (eventObj.target.id == 'submit') {

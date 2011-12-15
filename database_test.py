@@ -11,6 +11,12 @@ import unittest
 import os
 import random
 from google.appengine.ext import db
+#!/usr/bin/env python
+#
+# Copyright 2011 Bryan Goldstein.
+# All rights reserved.
+#
+
 from google.appengine.ext import testbed
 from google.appengine.datastore import datastore_stub_util
 from database import *
