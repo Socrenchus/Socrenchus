@@ -52,6 +52,8 @@ $(document).ready(function() {
     if (tmp && tmp.length >= 0) {
       $.each(tmp, function(key, object) { d.answer.push(object.value) });
       d.answer = oc(d.answer);
+    } else if (!tmp) {
+      d.answer = null;
     }
     if ('aConfidentGraderQuestion' in d._class) {
       d.question.author = d.answerInQuestion.author;
@@ -65,15 +67,17 @@ $(document).ready(function() {
       $.tmpl( "questionStatsTemplate", d ).prependTo( '#assignments' );
       var plot1 = [];
       var plot2 = [];
-      $.each(d.estimatedGrades, function(key, object) { plot1.push([key,object]) });
-      $.each(d.confidentGrades, function(key, object) { plot2.push([key,object]) });
-      $.plot($("#chart_"+d.key), [ {
-        label: "Grading Algorithm",
-        data: plot1
-      },   {
-          label: "Your Grading",
-          data: plot2
+      if (d.hasOwnProperty('estimatedGrades')) {
+        $.each(d.estimatedGrades, function(key, object) { plot1.push([key,object]) });
+        $.each(d.confidentGrades, function(key, object) { plot2.push([key,object]) });
+        $.plot($("#chart_"+d.key), [ {
+          label: "Grading Algorithm",
+          data: plot1
+        },   {
+            label: "Your Grading",
+            data: plot2
         } ], { yaxis: { max: 1, show: false }, xaxis: {show: false} } );
+      }
     } else {
     $.tmpl( "questionTemplate", d ).prependTo( '#assignments' ).click(function( eventObj ) {
       if (eventObj.target.id == 'submit') {

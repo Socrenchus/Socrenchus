@@ -23,6 +23,7 @@ import os
 
 from google.appengine.ext import webapp
 from google.appengine.api import users
+from ndb import context
 from database import *
 
 _DEBUG = True
@@ -44,49 +45,48 @@ class TestDataHandler(webapp.RequestHandler):
     Generates test data, serves stream.html.
     """
     
-    if not Question.all().get():
+    if not Question.query().count(1):
     
       os.environ['USER_EMAIL'] = 'teacher@example.com'
       a = aBuilderQuestion.assign()
       a.submitAnswer('Name a number that is divisible by four.')
-      q = a.answer
-    
+      question = a.answer
+
       answers = [
         'Definitely Correct',
         'Not Completely Correct',
         'Not Completely Wrong',
         'Definitely Wrong',
       ]
-      
+
       scores = [
       1.0,
       0.75,
       0.25,
       0.0,
       ]
-        
+
       # have users answer the question
       for i in range(30):
         os.environ['USER_EMAIL'] = 'test'+str(i)+'@example.com'
-        a = aShortAnswerQuestion.assign(q)
+        a = aShortAnswerQuestion.assign(question)
         a.submitAnswer(str(i))
-      
+
       # confidently grade some answers
       os.environ['USER_EMAIL'] = 'teacher@example.com'
-      a = aConfidentGraderQuestion.all().filter('user =', users.User('teacher@example.com')).get()
+      a = aConfidentGraderQuestion.query(Assignment.user == users.User('teacher@example.com')).get()
       for i in range(5):
-        a = a.submitAnswer(answers[int(a.answerInQuestion.value)%4])[1]
-        
+        a = a.submitAnswer(answers[int(a.answerInQuestion.get().value)%4])[1]
+      
       # have the users grade eachother's answer
-      query = db.Query(Answer,keys_only=True)
       for i in range(5,30):
         os.environ['USER_EMAIL'] = 'test'+str(i)+'@example.com'
-        a = aShortAnswerQuestion.all().filter('user =', users.User()).get()
-        q = aGraderQuestion.all().filter('user =', users.User()).get()
+        a = aShortAnswerQuestion.query(Assignment.user == users.User()).get()
+        q = aGraderQuestion.query(Assignment.user == users.User()).get()
         myAnswer = []
-        agree = random.random() < (0.9 * scores[int(a.answer.value)%4])
+        agree = random.random() < (0.9 * scores[int(a.answer.get().value)%4])
         for a in q.answers:
-          a = Answer.get(a)
+          a = a.get()
           if scores[int(a.value)%4] > 0.5:
             if agree:
               myAnswer.append(a.value)
@@ -120,9 +120,9 @@ class AnswerQuestionHandler(webapp.RequestHandler):
     if 'class[aGraderQuestion]' in args:
       theClass = aGraderQuestion
 
-    result = db.get(qid)
+    result = model.Key(urlsafe=qid).get()
     if isinstance(result,Question):
-      result = theClass.assign(result)
+      result = theClass.assign(result.key)
     elif bool(ans) and not result.answer:
       result = result.submitAnswer(ans)
         
@@ -137,11 +137,11 @@ class StreamHandler(webapp.RequestHandler):
     """
     Return the user's question stream.
     """
-    q = aQuestion.all()
-    q = q.filter('user =', users.User())
-    q = q.order('time')
-    assignments = q.fetch(10)
-
+    
+    ud = UserData.get_or_insert(str(users.get_current_user().user_id()))
+    
+    assignments = model.get_multi(ud.assignments)
+    
     self.response.headers.add_header("Content-Type", 'application/json')
     self.response.out.write(json.encode({'logout': users.create_logout_url( "/" ), 'assignments':assignments}))
     
@@ -202,6 +202,7 @@ def main():
       ('/experiments/test', TestDataHandler),
     ] + options
   application = webapp.WSGIApplication(options, debug=_DEBUG)
+  application = context.toplevel(application.__call__)
   wsgiref.handlers.CGIHandler().run(application)
 
 if __name__ == '__main__':

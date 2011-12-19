@@ -13,9 +13,8 @@ need work.
 This is the database model and core logic.
 """
 
-from google.appengine.ext import db
+from ndb import model, polymodel
 from google.appengine.api import users
-from google.appengine.ext.db import polymodel
 
 import random
 
@@ -24,42 +23,39 @@ import random
 ## Core Model and Logic ##
 ##########################
 
-class Connection(db.Model):
+class Connection(model.Model):
   """
   Models a graph edge.
   """
-  source = db.ReferenceProperty(db.Model, collection_name="outgoing")
-  target = db.ReferenceProperty(db.Model, collection_name="incoming")
-  weight = db.IntegerProperty(default=0)
+  source = model.KeyProperty()
+  target = model.KeyProperty()
+  weight = model.IntegerProperty(default=0)
 
-class Question(db.Model):
+class Question(model.Model):
   """
   Models a question.
   """
-  author = db.UserProperty(auto_current_user_add = True)
-  value = db.TextProperty()
-  answers = db.ListProperty(db.Key)
-# incoming = db.Query(Connection<Answer>)
-# outgoing = db.Query(Connection<Question>)
-# assignments = db.Query(aQuestion)
+  author = model.UserProperty(auto_current_user_add=True)
+  value = model.TextProperty()
+  answers = model.KeyProperty(repeated=True)
+# assignments = model.Query(aQuestion)
 
-class Answer(db.Model):
+class Answer(model.Model):
   """
   Models an answer.
   """
-  author = db.UserProperty(auto_current_user_add = True)
-  value = db.StringProperty(multiline=True)
-  correctness = db.FloatProperty(default=0.0) # probability of answer being correct
-  confidence = db.FloatProperty(default=0.0)  # probability of grading being correct
-  question = db.ReferenceProperty(Question)
-  graders = db.ListProperty(users.User) # FIXME: seems out of place
-# outgoing = [db.Query(Connection<Question>)]
+  author = model.UserProperty(auto_current_user_add = True)
+  value = model.StringProperty()
+  correctness = model.FloatProperty(default=0.0) # probability of answer being correct
+  confidence = model.FloatProperty(default=0.0)  # probability of grading being correct
+  graders = model.UserProperty(repeated=True) # FIXME: seems out of place
+# parent = Question
 
   def __json__(self):
-    properties = self.properties().items()
+    properties = self._properties.items()
     output = {}
     for field, value in properties:
-      if field in ['value', 'correctness', 'confidence', 'author']:
+      if hasattr(self, field) and field in ['value', 'correctness', 'confidence', 'author']:
         output[field] = getattr(self, field)
     return output
 
@@ -67,25 +63,37 @@ class Answer(db.Model):
 ## User Model and Logic ##
 ##########################
 
+class UserData(model.Model):
+  """
+  Stores data specific to a user.
+  """
+  assignments = model.KeyProperty(repeated=True)
+
 class Assignment(polymodel.PolyModel):
   """
   Models a generic assignment
   """
+  user = model.UserProperty(auto_current_user_add = True)
+  time = model.DateTimeProperty(auto_now_add = True)
+# parent = assigned item
+  
   @classmethod
   def assign(cls, item=None, user=None):
     """
-    Assign an object if it isn't already assigned
+    Assign an object (key) if it isn't already assigned
     """
     if not user:
-      user = users.User()
+      user = users.get_current_user()
     if not item:
       item = cls.getItem()
     instance = cls.getInstance(item, user)
     if not instance:
       instance = cls(parent=item)
       instance.user = user
-      instance.put()
       instance = instance.prepare()
+      ud = UserData.get_or_insert(str(user.user_id()))
+      ud.assignments.append(instance.key)
+      ud.put()
     return instance
     
   @classmethod
@@ -93,39 +101,38 @@ class Assignment(polymodel.PolyModel):
     """
     Get an instance from the assigned object.
     """
-    q = cls.all()
-    q = q.ancestor(item)
-    return q.filter('user =', user).get()
+    return cls.query(cls.user==user, ancestor=item).get()
   
   def prepare(self):
+    """
+    After initializing, prepare sets up and stores the assignment.
+    """
     self.put()
     return self
-
-  user = db.UserProperty(auto_current_user_add = True)
-  time = db.DateTimeProperty(auto_now_add = True)
-# parent = db.ReferenceProperty(db.Model)
 
 class aQuestion(Assignment):
   """
   Models user specific question data.
   """
-  liked = db.BooleanProperty(default = False)
-  score = db.FloatProperty(default=0.0)
-# user = db.UserProperty(auto_current_user = True)
-# parent = db.ReferenceProperty(Question)
+  liked = model.BooleanProperty(default=False)
+  score = model.FloatProperty(default=0.0)
+# user = model.UserProperty(auto_current_user = True)
+# parent = question
 
   def __json__(self):
-    properties = self.properties().items()
+    properties = self._properties.items()
     output = {}
     for field, value in properties:
-      output[field] = getattr(self, field)
-    output['key'] = str(self.key())
-    if self.parent():
-      output['question'] = self.parent()
+      if hasattr(self, field):
+        output[field] = getattr(self, field)
+    output['key'] = self.key.urlsafe()
+    if self.key.parent():
+      output['question'] = self.key.parent().get()
+    output['_class'] = self.class_
     return output
 
 class aShortAnswerQuestion(aQuestion):
-  answer = db.ReferenceProperty(Answer)
+  answer = model.KeyProperty()
   def submitAnswer(self, myAnswer):
     """
     Answers the question if it hasn't been answered.
@@ -138,28 +145,26 @@ class aShortAnswerQuestion(aQuestion):
     # Generate the assesment question
     q = None
     teacherQ = True
-    if len(self.parent().answers) >= 5:
-      q = aGraderQuestion.assign(self.parent())
+    parent = self.key.parent().get()
+    if len(parent.answers) >= 5:
+      q = aGraderQuestion.assign(parent.key)
     
-    teacherQ = None
-    for cgq in aConfidentGraderQuestion.all().filter('user =', self.parent().author).ancestor(self.parent()):
-      if not cgq.answer:
-        teacherQ = cgq
+    teacherQ = aConfidentGraderQuestion.isGradingQuestion(parent.key)
         
     # Create the user's answer
-    self.answer = Answer(value=myAnswer).put()
-    self.parent().answers.append(self.answer.key())
-    self.parent().put()
+    self.answer = Answer(value=myAnswer, parent=parent.key).put()
+    parent.answers.append(self.answer)
+    parent.put()
     
     # Assign the teacher to grade
     if not teacherQ:
-      aConfidentGraderQuestion.assign(self.parent(), self.parent().author)
+      aConfidentGraderQuestion.assign(parent.key, parent.author)
     
     result = [self]
     
     if q:
       # Attach the question to the answer
-      Connection(source=self.answer, target=q).put()
+      Connection(source=self.answer, target=q.key).put()
       result.append(q)
 
     self.put()
@@ -168,26 +173,29 @@ class aShortAnswerQuestion(aQuestion):
     return result
     
   def __json__(self):
-    properties = self.properties().items()
+    properties = self._properties.items()
     output = {}
     for field, value in properties:
-      output[field] = getattr(self, field)
-    output['key'] = str(self.key())
-    if self.parent():
-      output['question'] = self.parent()
+      if hasattr(self, field):
+        output[field] = getattr(self, field)
+    output['key'] = self.key.urlsafe()
+    if self.key.parent():
+      output['question'] = self.key.parent().get()
     if self.answer:
-      output['score'] = self.answer.correctness
+      output['score'] = self.answer.get().correctness
+    output['_class'] = self.class_
     return output
     
 class aMultipleAnswerQuestion(aQuestion):
-  answers = db.ListProperty(db.Key)
-  answer = db.ListProperty(db.Key)
+  answers = model.KeyProperty(repeated=True)
+  answer = model.KeyProperty(repeated=True)
   def prepare(self):
     """
     Assigns the answers from the question.
     """
     myAnswers = []
-    for i in self.parent().answers:
+    parent = self.key.parent().get()
+    for i in parent.answers:
       myAnswers.append(i)
       
     random.shuffle(myAnswers)
@@ -204,7 +212,7 @@ class aMultipleAnswerQuestion(aQuestion):
 
     self.answer = []
     for a in self.answers:
-      ans = Answer.get(a)
+      ans = a.get()
       if ans.value in answer:
         self.answer.append(a)
     
@@ -224,19 +232,27 @@ class aGraderQuestion(aMultipleAnswerQuestion):
   """
   Used to grade short answer questions.
   """
+  @classmethod
+  def gradedAnswer(cls, answer):
+    """
+    Returns a query for assignments that graded any given answer.
+    """
+    return aGraderQuestion.query(cls.answers==answer, ancestor=answer.parent())
+  
   def prepare(self):
     """
     Assigns the answers from the question.
     """
     answers = []
-    for ans in self.parent().answers:
+    parent = self.key.parent().get()
+    for ans in parent.answers:
       answers.append(ans)
     
     random.shuffle(answers)
     
     # All answers waiting to be graded by count
     answerCount = {}
-    query = aGraderQuestion.all().ancestor(self.parent())
+    query = aGraderQuestion.query(ancestor=self.key.parent())
     for a in answers:
       answerCount[a] = 0
     for g in query:
@@ -286,12 +302,12 @@ class aGraderQuestion(aMultipleAnswerQuestion):
     answers = []
     for a in self.answers:
       # get and store the answer
-      ans = Answer.get(a)
+      ans = a.get()
       answers.append(ans)
       
       # answer's current marks with grader's
       match = ans.correctness
-      if not (ans.key() in self.answer):
+      if not (ans.key in self.answer):
         match = 1.0 - ans.correctness
       
       # give the grader some of the answer's confidence
@@ -310,10 +326,10 @@ class aGraderQuestion(aMultipleAnswerQuestion):
     confidence = confidenceSum / float(len(self.answers))
     
     # grade with new found confidence
+    answersToRegrade = []
     for a in answers:
-      cgq = aConfidentGraderQuestion.all().filter('answerInQuestion =',a).get()
-      if not cgq or not cgq.answer:
-        markedCorrect = (a.key() in self.answer)
+      if not aConfidentGraderQuestion.hasGradedAnswer(a.key):
+        markedCorrect = (a.key in self.answer)
         numGraders = len(a.graders)
         tmp = numGraders*(a.confidence * a.correctness)
         tmp += confidence * float(markedCorrect)
@@ -328,9 +344,13 @@ class aGraderQuestion(aMultipleAnswerQuestion):
         # recurse if condition is met
         # TODO: fiddle with condition
         if a.confidence - beforeConfidence > 0.1:
-          query = aGraderQuestion.all().ancestor(self.parent()).filter('answers =',a.key())
-          for q in query:
-            q.grade()
+          answersToRegrade.append(a)
+    
+    # recurse
+    for a in answersToRegrade:
+      query = aGraderQuestion.gradedAnswer(a.key)
+      for q in query:
+        q.grade()
     
     # calculate score (confidence normalized by maximum)
     if maxPossibleConfidenceSum != 0:
@@ -341,15 +361,31 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
   """
   Allows the creator of a short answer question to set the baseline.
   """
-  answerInQuestion = db.ReferenceProperty(Answer)
+  answerInQuestion = model.KeyProperty()
   @classmethod
   def getInstance(cls, item, user=None):
     """
     Get an instance from the assigned question.
     """
-    q = cls.all()
-    q = q.ancestor(item)
-    return q.filter('user =', user).filter('answer =',None).get()
+    user = item.get().author
+    q = cls.query(ancestor=item)
+    # TODO: fix none query
+    return q.filter(cls.user==user,cls.answer==None).get()
+  
+  @classmethod
+  def isGradingQuestion(cls, question_key):
+    """
+    True if the question is being graded
+    """
+    return bool(cls.getInstance(question_key))
+    
+  @classmethod
+  def hasGradedAnswer(cls, answer):
+    """
+    True if the answer has been graded
+    """
+    q = cls.query(cls.answerInQuestion==answer, ancestor=answer.parent())
+    return (q.count(1) > 0)
   
   def prepare(self):
     """
@@ -357,9 +393,10 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
     """
     minAns = Answer()
     minAns.confidence = 1.0
-    existing = [x for x in aConfidentGraderQuestion.all().ancestor(self.parent())]
-    for ans in self.parent().answers:
-      a = Answer.get(ans)
+    existing = [x for x in aConfidentGraderQuestion.query(ancestor=self.key.parent())]
+    parent = self.key.parent().get()
+    for ans in parent.answers:
+      a = ans.get()
       if a.confidence < minAns.confidence and not a in existing:
         minAns = a
       if minAns.confidence == 0.0:
@@ -370,7 +407,7 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
       return None
     
     # add the answer in question
-    self.answerInQuestion = minAns.key()
+    self.answerInQuestion = minAns.key
     
     # add the answers
     answers = [
@@ -379,8 +416,10 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
       'Not Completely Wrong',
       'Definitely Wrong',
     ]
+    if not self.answers:
+      self.answers = []
     for gradingAnswer in answers:
-      self.answers.append(Answer.get_or_insert(gradingAnswer,value=gradingAnswer).key())
+      self.answers.append(Answer.get_or_insert(gradingAnswer,value=gradingAnswer).key)
       
     self.put()
     return self
@@ -392,10 +431,10 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
     """
     
     # get the builder question
-    builder = aBuilderQuestion.all().filter('answer =',self.parent()).get()    
+    builder = aBuilderQuestion.builderForQuestion(self.key.parent())
     
     # submit the grade
-    a = self.answerInQuestion
+    a = self.answerInQuestion.get()
     builder.estimatedGrades.append(a.correctness) # add the prior to the chart
     a.correctness = {
       'Definitely Correct': 1.0,
@@ -408,21 +447,22 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
     a.confidence = 1.0
     a.put()
     
-    self.answer.append(Answer(value=answer).put())
+    self.answer.append(Answer(value=answer, parent=self.key.parent()).put())
     self.score = a.correctness
     self.put()
     
     # find neighbors
-    query = aGraderQuestion.all().ancestor(self.parent()).filter('answers =',a.key())
+    query = aGraderQuestion.gradedAnswer(a.key)
     for q in query:
       q.grade()
       
     # assign next ConfidentGraderQuestion
     result = [self]
-    next = aConfidentGraderQuestion.assign(self.parent(), self.parent().author)
+    parent = self.key.parent().get()
+    next = aConfidentGraderQuestion.assign(parent.key, parent.author)
     if next:
       result.append(next)
-    result.append(aBuilderQuestion.all().filter('answer =',self.parent()).get())
+    result.append(builder)
 
     return result
     
@@ -430,25 +470,29 @@ class aBuilderQuestion(aQuestion):
   """
   Creates a short answer question and tracks class progress.
   """
-  answer = db.ReferenceProperty(Question)
-  estimatedGrades = db.ListProperty(float)
-  confidentGrades = db.ListProperty(float)
+  answer = model.KeyProperty() # Question
+  estimatedGrades = model.FloatProperty(repeated=True)
+  confidentGrades = model.FloatProperty(repeated=True)
   @classmethod
   def getItem(cls):
     """
     Get the builder question.
     """
     txt = 'Think of a short answer question that you would ask your students...'
-    return Question.get_or_insert('builderQuestion', value=txt, author=users.User('Personal Assistant'))
+    return Question.get_or_insert('builderQuestion', value=txt, author=users.User('Personal Assistant')).key
   
   @classmethod
   def getInstance(cls, item, user=None):
     """
     Get an instance from the assigned object.
     """
-    q = cls.all()
-    q = q.ancestor(item)
-    return q.filter('user =', user).filter('answer =',None).get()
+    q = cls.query(ancestor=item)
+    # TODO: fix none query
+    return q.filter(cls.user==user,cls.answer==None).get()
+  
+  @classmethod
+  def builderForQuestion(cls, question_key):
+    return cls.query(cls.answer==question_key, ancestor=aBuilderQuestion.getItem()).get()  
   
   def submitAnswer(self, answer):
     """

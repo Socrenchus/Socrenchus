@@ -10,7 +10,7 @@ Test file for the database model and core logic.
 import unittest
 import os
 import random
-from google.appengine.ext import db
+from ndb import model, polymodel
 #!/usr/bin/env python
 #
 # Copyright 2011 Bryan Goldstein.
@@ -31,34 +31,28 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
     self.policy = datastore_stub_util.PseudoRandomHRConsistencyPolicy(probability=1)
     # Initialize the datastore stub with this policy.
     self.testbed.init_datastore_v3_stub(consistency_policy=self.policy)
+    self.testbed.init_memcache_stub()
     self.testbed.init_user_stub()
     
   def teardown(self):
     self.testbed.deactivate()
-    
-  def testCreateQuestion(self):
-    os.environ['USER_EMAIL'] = 'teacher@example.com'
-    a = aBuilderQuestion.assign()
-    a.submitAnswer('question')
-    
-    self.assertEqual(2, len(Question.all().fetch(3)))
-    
-  def testAnswerQuestion(self):
-    # create the question
-    self.testCreateQuestion()
-    q = aBuilderQuestion.all().get().answer
-        
-    # have users answer the question
-    for i in range(30):
-      os.environ['USER_EMAIL'] = 'test'+str(i)+'@example.com'
-      a = aShortAnswerQuestion.assign(q)
-      a.submitAnswer(str(i))
+
+  def testNoneQuery(self):
+    Question(answers=[Answer(value="yay").put()]).put()
+    Question().put()
+    self.assertEqual(Question.query(Question.answers == None).count(2), 1)
   
+  def testUserSwitching(self):
+    os.environ['USER_EMAIL'] = 'test1@example.com'
+    self.assertEqual(users.get_current_user().email(), 'test1@example.com')
+    os.environ['USER_EMAIL'] = 'test2@example.com'
+    self.assertEqual(users.get_current_user().email(), 'test2@example.com')
+
   def testGradeDistribution(self):
     os.environ['USER_EMAIL'] = 'teacher@example.com'
     a = aBuilderQuestion.assign()
     a.submitAnswer('Name a number that is divisible by four.')
-    q = a.answer
+    question = a.answer
   
     answers = [
       'Definitely Correct',
@@ -77,25 +71,24 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
     # have users answer the question
     for i in range(30):
       os.environ['USER_EMAIL'] = 'test'+str(i)+'@example.com'
-      a = aShortAnswerQuestion.assign(q)
+      a = aShortAnswerQuestion.assign(question)
       a.submitAnswer(str(i))
     
     # confidently grade some answers
     os.environ['USER_EMAIL'] = 'teacher@example.com'
-    a = aConfidentGraderQuestion.all().filter('user =', users.User('teacher@example.com')).get()
+    a = aConfidentGraderQuestion.query(Assignment.user == users.User('teacher@example.com')).get()
     for i in range(5):
-      a = a.submitAnswer(answers[int(a.answerInQuestion.value)%4])[2]
+      a = a.submitAnswer(answers[int(a.answerInQuestion.get().value)%4])[1]
       
     # have the users grade eachother's answer
-    query = db.Query(Answer,keys_only=True)
     for i in range(5,30):
       os.environ['USER_EMAIL'] = 'test'+str(i)+'@example.com'
-      a = aShortAnswerQuestion.all().filter('user =', users.User()).get()
-      q = aGraderQuestion.all().filter('user =', users.User()).get()
+      a = aShortAnswerQuestion.query(Assignment.user == users.User()).get()
+      q = aGraderQuestion.query(Assignment.user == users.User()).get()
       myAnswer = []
-      agree = random.random() < (0.9 * scores[int(a.answer.value)%4])
+      agree = random.random() < (0.9 * scores[int(a.answer.get().value)%4])
       for a in q.answers:
-        a = Answer.get(a)
+        a = a.get()
         if scores[int(a.value)%4] > 0.5:
           if agree:
             myAnswer.append(a.value)
@@ -107,11 +100,12 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
         myAnswer += 'None of the above'
 
       q.submitAnswer(myAnswer)
-      
+    
     # print the grades
     correct = 0.0
     n = 0.0
-    for a in Answer.all().fetch(110):
+    for a in question.get().answers:
+      a = a.get()
       if not a.value in answers:
         n += 1.0
         correct += scores[int(a.value)%4] - a.correctness

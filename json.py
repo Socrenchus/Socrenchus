@@ -27,7 +27,7 @@ import simplejson
 import time
 
 from google.appengine.api import users
-from google.appengine.ext import db
+from ndb import model, polymodel, query
 
 
 class GqlEncoder(simplejson.JSONEncoder):
@@ -47,15 +47,16 @@ class GqlEncoder(simplejson.JSONEncoder):
     if hasattr(obj, '__json__'):
       return getattr(obj, '__json__')()
 
-    if isinstance(obj, db.GqlQuery):
+    if isinstance(obj, query.Query):
       return list(obj)
 
-    elif isinstance(obj, db.Model):
-      properties = obj.properties().items()
+    elif isinstance(obj, model.Model) or isinstance(obj, polymodel.PolyModel):
+      properties = obj._properties.items()
       output = {}
       for field, value in properties:
-        output[field] = getattr(obj, field)
-      output['key'] = str(obj.key())
+        if hasattr(obj, field):
+          output[field] = getattr(obj, field)
+      output['key'] = obj.key.urlsafe()
       return output
 
     elif isinstance(obj, datetime.datetime):
@@ -81,8 +82,8 @@ class GqlEncoder(simplejson.JSONEncoder):
         output[method] = getattr(obj, method)()
       return output
       
-    elif isinstance(obj, db.Key):
-      return db.get(obj)
+    elif isinstance(obj, model.Key):
+      return obj.get()
 
     return simplejson.JSONEncoder.default(self, obj)
 
