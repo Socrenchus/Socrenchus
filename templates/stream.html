@@ -82,6 +82,63 @@
             </div>
           </li>
         </script>
+        <script id="shortAnswerQuestionTemplate" type="text/x-jquery-tmpl">
+          <li id="${key}" class="question">
+            <div class="inner-question">
+              <br/>
+              <img src="http://www.gravatar.com/avatar/{{html $.md5(question.author.email)}}?s=48&d=mm" class="avatar" />
+              <a href='mailto:${question.author.email}'>${question.author.nickname}</a>
+              <br/><br/>
+              ${question.value}
+              <br/><br/>
+
+              <textarea id="answer" class="defaultText autoResizable" title="enter your response here" {{if answer}}disabled{{/if}}>{{if answer}}${answer.value}{{/if}}</textarea>
+
+              </br>
+              {{if !answer || answer.length == 0}}
+              <button id="submit" value="submit">Submit</button>
+              {{else confident}}
+              <a>Score: ${score*100}%</a>
+              {{else}}
+              <a>Please check back later to see your score.</a>
+              {{/if}}
+              </br></br>
+            </div>
+          </li>
+        </script>
+        <script id="confidentGraderQuestionTemplate" type="text/x-jquery-tmpl">
+          <li id="${key}" class="question">
+            <div class="inner-question">
+              <br/>
+              <img src="http://www.gravatar.com/avatar/{{html $.md5(question.author.email)}}?s=48&d=mm" class="avatar" />
+              <a href='mailto:${question.author.email}'>${question.author.nickname}</a>
+              <br/><br/>
+              ${question.value}
+              
+              <textarea id="answer" class="defaultText autoResizable" disabled>${answerInQuestion.value}</textarea>
+              
+              <br/><br/>
+              {{each answers}}
+              <input type="radio"
+                     id="answer"
+                     name="${key}" 
+                     value="${$value.value}"
+                     class="mc-radio"
+                     {{if answer}}
+                      disabled
+                        {{if $value.value == answer.value}} checked {{/if}}
+                     {{/if}}/>
+              <label for="${$value.value}">${$value.value}</label>
+              <br/>
+              {{/each}}
+              </br>
+              {{if !answer }}
+              <button id="submit" value="submit">Submit</button>
+              {{/if}}
+              </br></br>
+            </div>
+          </li>
+        </script>
         <script id="questionStatsTemplate" type="text/x-jquery-tmpl">
           <li id="${key}" class="question">
             <div class="inner-question">

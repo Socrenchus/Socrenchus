@@ -51,7 +51,17 @@ class Answer(model.Model):
   graders = model.UserProperty(repeated=True) # FIXME: seems out of place
 # parent = Question
 
+  def canShowScore(self):
+    """
+    Determines if it is safe to show the user the score.
+    """
+    # TODO: implement a real check
+    return self.author == users.get_current_user()
+
   def __json__(self):
+    prop_filter = ['value', 'author']
+    if self.canShowScore():
+      prop_filter += ['correctness', 'confidence']
     properties = self._properties.items()
     output = {}
     for field, value in properties:

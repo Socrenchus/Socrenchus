@@ -36,67 +36,52 @@ $(document).ready(function() {
   //
   if (urlPathArray.length == 2 && urlPathArray[1])
     $.get('/ajax/answer', {'question_id': urlPathArray[1]});
-    
   //
   // Compile templates
   //
-  $( "#questionTemplate" ).template( "questionTemplate" ); 
-  $( "#questionStatsTemplate" ).template( "questionStatsTemplate" );  
+  var templates = [
+  'questionTemplate',
+  'questionStatsTemplate',
+  'confidentGraderQuestionTemplate',
+  'shortAnswerQuestionTemplate'
+  ]; 
+  $.each(templates, function(key, object) { $( '#'+object ).template( object ) });
+  
   //
   // Load a question array
   //
   var loadQuestion = function(d) {
-    d._class = oc(d._class);
-    d.confident = true;
-    var tmp = d.answer
-    if (tmp && tmp.length >= 0) {
-      $.each(tmp, function(key, object) { d.answer.push(object.value) });
-      d.answer = oc(d.answer);
-    } else if (!tmp) {
-      d.answer = null;
-    }
-    if ('aConfidentGraderQuestion' in d._class) {
-      d.question.author = d.answerInQuestion.author;
-    } else if ('aShortAnswerQuestion' in d._class) {
-      d.confident = d.answer && (d.answer.confidence >= 0.5);
-      if (d.answer)
-        d.score = d.answer.correctness;
-    }
-    if ('aBuilderQuestion' in d._class && d.answer) {
-      $('#'+d.key).remove();
-      $.tmpl( "questionStatsTemplate", d ).prependTo( '#assignments' );
-      var plot1 = [];
-      var plot2 = [];
-      if (d.hasOwnProperty('estimatedGrades')) {
-        $.each(d.estimatedGrades, function(key, object) { plot1.push([key,object]) });
-        $.each(d.confidentGrades, function(key, object) { plot2.push([key,object]) });
-        $.plot($("#chart_"+d.key), [ {
-          label: "Grading Algorithm",
-          data: plot1
-        },   {
-            label: "Your Grading",
-            data: plot2
-        } ], { yaxis: { max: 1, show: false }, xaxis: {show: false} } );
-      }
-    } else {
-    $.tmpl( "questionTemplate", d ).prependTo( '#assignments' ).click(function( eventObj ) {
-      if (eventObj.target.id == 'submit') {
-        window.history.pushState("object or string", "Title", '/');
-        scrollTo(0,0);
-        var messageObj = {'question_id': d.key, 'answer': [], 'class': d._class }
-        if ('aShortAnswerQuestion' in d._class || 'aBuilderQuestion' in d._class)
+    
+    // Define message objects by class
+    var createMessageObject = function() {
+      var messageObj = {'question_id': d.key, 'answer': [], 'class': d._class }
+      switch ( d._class ) {
+        case 'aBuilderQuestion':
+        case 'aShortAnswerQuestion':
           messageObj.answer = $('#'+d.key+' #answer').val();
-        else if ('aMultipleChoiceQuestion' in d._class)
+          break;
+        case 'aMultipleChoiceQuestion':
           messageObj.answer = $('input:radio[name='+d.key+']:checked').val();
-        else if ('aMultipleAnswerQuestion' in d._class) {
+          break;
+        case 'aMultipleAnswerQuestion':
           var data = $('input:checkbox[name='+d.key+']:checked');
           $.each(data, function(key, object) {
             messageObj.answer.push($(this).val());
           });
           if (messageObj.answer.length == 0)
             messageObj.answer.push('None of the above');
-        }
-        $.getJSON('/ajax/answer', messageObj, function(data) {
+          break;
+      }
+      return messageObj;
+    }
+    
+    // Answer the question (on submit)
+    var answerQuestion = function( eventObj ) {
+      if (eventObj.target.id == 'submit') {
+        window.history.pushState("object or string", "Title", '/');
+        scrollTo(0,0);
+        
+        $.getJSON('/ajax/answer', createMessageObject(), function(data) {
           if (data) {
             var len = data.length;
             if (len) {
@@ -108,8 +93,74 @@ $(document).ready(function() {
           }
         });
       }
+    }
+    
+    // Define pre-display functions by class
+    var getQuestionTemplate = {
+      'aMultipleAnswerQuestion' : function() {
+        var tmp = d.answer
+        if (tmp && tmp.length >= 0) {
+          d.answer = [];
+          $.each(tmp, function(key, object) { d.answer.push(object.value) });
+          d.answer = oc(d.answer);
+        }
+        return 'questionTemplate';
+      },
+      'aShortAnswerQuestion' : function() {
+        d.confident = d.answer && (d.answer.confidence >= 0.5);
+        if (d.answer)
+          d.score = d.answer.correctness;
+        return 'shortAnswerQuestionTemplate';
+      },
+      'aConfidentGraderQuestion' : function() {
+        d.question.author = d.answerInQuestion.author;
+        return 'confidentGraderQuestionTemplate';
+      },
+      'aBuilderQuestion' : function() {
+        if (d.answer) {
+          return 'questionStatsTemplate';
+        }
+        return 'questionTemplate';
+      }
+    };
+    
+    // Called just after display, by class
+    var postDisplay = {
+      'aConfidentGraderQuestion' : function() {
+        if (d.answer) {
+          var plot1 = [];
+          var plot2 = [];
+          if (d.hasOwnProperty('estimatedGrades')) {
+            $.each(d.estimatedGrades, function(key, object) { plot1.push([key,object]) });
+            $.each(d.confidentGrades, function(key, object) { plot2.push([key,object]) });
+            $.plot($("#chart_"+d.key), [ {
+              label: "Grading Algorithm",
+              data: plot1
+            },   {
+                label: "Your Grading",
+                data: plot2
+            } ], { yaxis: { max: 1, show: false }, xaxis: {show: false} } );
+          }
+        }
+      }
+    }
+    
+    // Execute preparation by class
+    var questionTemplate = 'questionTemplate';
+    $.each(d._class, function(key, object) {
+      var tmp = getQuestionTemplate[object];
+      if (tmp) questionTemplate = tmp();
     });
-  }
+    
+    // Render template
+    $.tmpl( questionTemplate, d ).prependTo( '#assignments' ).click(answerQuestion);
+    
+    // Handle post-display stuff
+    $.each(d._class, function(key, object) {
+      var tmp = postDisplay[object];
+      if (tmp) tmp();
+    });
+    
   }
   
   //
