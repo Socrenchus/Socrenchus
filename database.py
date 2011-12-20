@@ -199,7 +199,7 @@ class aShortAnswerQuestion(aQuestion):
     
 class aMultipleAnswerQuestion(aQuestion):
   answers = model.KeyProperty(repeated=True)
-  answerList = model.KeyProperty(repeated=True)
+  answer = model.KeyProperty(repeated=True)
   def prepare(self):
     """
     Assigns the answers from the question.
@@ -218,7 +218,7 @@ class aMultipleAnswerQuestion(aQuestion):
     """
     Answers the question if it hasn't been answered.
     """
-    if self.answerList:
+    if self.answer:
       return False
       
     myAnswers = []
@@ -232,7 +232,7 @@ class aMultipleAnswerQuestion(aQuestion):
       a = Answer.get_or_insert('none', value="None of the above")
       myAnswers.append(a)
 
-    self.answerList = myAnswers
+    self.answer = myAnswers
     self.put()
     return [self]
 
@@ -327,7 +327,7 @@ class aGraderQuestion(aMultipleAnswerQuestion):
     """
     Runs the grading algorithm after answer is submitted.
     """
-    if self.answerList:
+    if self.answer:
       return False
 
     # submit the answer like normal
@@ -349,7 +349,7 @@ class aGraderQuestion(aMultipleAnswerQuestion):
       
       # answer's current marks with grader's
       match = ans.correctness
-      if not (ans.key in self.answerList):
+      if not (ans.key in self.answer):
         match = 1.0 - ans.correctness
       
       # give the grader some of the answer's confidence
@@ -371,7 +371,7 @@ class aGraderQuestion(aMultipleAnswerQuestion):
     answersToRegrade = []
     for a in answers:
       if not aConfidentGraderQuestion.hasGradedAnswer(a.key):
-        markedCorrect = (a.key in self.answerList)
+        markedCorrect = (a.key in self.answer)
         numGraders = len(a.graders)
         tmp = numGraders*(a.confidence * a.correctness)
         tmp += confidence * float(markedCorrect)
