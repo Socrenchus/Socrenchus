@@ -123,7 +123,7 @@ class AnswerQuestionHandler(webapp.RequestHandler):
     result = model.Key(urlsafe=qid).get()
     if isinstance(result,Question):
       result = theClass.assign(result.key)
-    elif bool(ans) and not result.answer:
+    elif bool(ans):
       result = result.submitAnswer(ans)
         
     json_response = json.encode(result)

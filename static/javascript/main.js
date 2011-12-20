@@ -101,6 +101,8 @@ $(document).ready(function() {
     if (d.answer == undefined) d.answer = null;
     var getQuestionTemplate = {
       'aMultipleAnswerQuestion' : function() {
+        d.answer = d.answerList;
+        if (d.answer == undefined) d.answer = null;
         var tmp = d.answer
         if (tmp && tmp.length >= 0) {
           d.answer = [];
