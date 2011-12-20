@@ -101,9 +101,10 @@ class Assignment(polymodel.PolyModel):
       instance = cls(parent=item)
       instance.user = user
       instance = instance.prepare()
-      ud = UserData.get_or_insert(str(user.user_id()))
-      ud.assignments.append(instance.key)
-      ud.put()
+      if instance:
+        ud = UserData.get_or_insert(str(user.user_id()))
+        ud.assignments.append(instance.key)
+        ud.put()
     return instance
     
   @classmethod
@@ -219,24 +220,55 @@ class aMultipleAnswerQuestion(aQuestion):
     """
     if self.answer:
       return False
-
-    self.answer = []
+      
+    myAnswers = []
     for a in self.answers:
       ans = a.get()
       if ans.value in answer:
-        self.answer.append(a)
+        myAnswers.append(a)
     
     # None of the above case
     if len(answer) == 1 and answer[0] == 'None of the above':
       a = Answer.get_or_insert('none', value="None of the above")
-      self.answer.append(a)
+      myAnswers.append(a)
+
+    self.answer = myAnswers
+    self.put()
+    return [self]
+
+class aMultipleChoiceQuestion(aQuestion):
+  answers = model.KeyProperty(repeated=True)
+  answer = model.KeyProperty()
+  def prepare(self):
+    """
+    Assigns the answers from the question.
+    """
+    myAnswers = []
+    parent = self.key.parent().get()
+    for i in parent.answers:
+      myAnswers.append(i)
+      
+    random.shuffle(myAnswers)
+    self.answers = myAnswers
+    self.put()
+    return self
+    
+  def submitAnswer(self, answer):
+    """
+    Answers the question if it hasn't been answered.
+    """
+    if self.answer:
+      return False
+
+    self.answer = None
+    for a in self.answers:
+      ans = a.get()
+      if ans.value in answer:
+        self.answer = a
 
     self.put()
 
     return [self]
-
-class aMultipleChoiceQuestion(aMultipleAnswerQuestion):
-  pass
 
 class aGraderQuestion(aMultipleAnswerQuestion):
   """
@@ -379,8 +411,14 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
     """
     user = item.get().author
     q = cls.query(ancestor=item)
+    
     # TODO: fix none query
-    return q.filter(cls.user==user,cls.answer==None).get()
+    q.filter(cls.user==user)
+    for i in q.iter():
+      if not i.answer:
+        return i
+      
+    return None
   
   @classmethod
   def isGradingQuestion(cls, question_key):
@@ -413,7 +451,7 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
         break
         
     if minAns.confidence == 1.0:
-      self.delete()
+      self.key.delete()
       return None
     
     # add the answer in question
@@ -456,8 +494,8 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
     builder.put()
     a.confidence = 1.0
     a.put()
-    
-    self.answer.append(Answer(value=answer, parent=self.key.parent()).put())
+
+    self.answer = Answer.get_or_insert(answer,value=answer).key
     self.score = a.correctness
     self.put()
     
@@ -498,7 +536,11 @@ class aBuilderQuestion(aQuestion):
     """
     q = cls.query(ancestor=item)
     # TODO: fix none query
-    return q.filter(cls.user==user,cls.answer==None).get()
+    for i in q.filter(cls.user==user,cls.answer==None):
+      if not i.answer:
+        return i
+        
+    return None
   
   @classmethod
   def builderForQuestion(cls, question_key):

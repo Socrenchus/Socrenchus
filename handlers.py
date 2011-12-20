@@ -44,11 +44,11 @@ class TestDataHandler(webapp.RequestHandler):
     """
     Generates test data, serves stream.html.
     """
-    
+    # FIXME: os.environ['USER_EMAIL'] doesn't work outside testbed
     if not Question.query().count(1):
     
       os.environ['USER_EMAIL'] = 'teacher@example.com'
-      a = aBuilderQuestion.assign()
+      a = aBuilderQuestion.assign(None, users.User('teacher@example.com'))
       a.submitAnswer('Name a number that is divisible by four.')
       question = a.answer
 
@@ -69,7 +69,7 @@ class TestDataHandler(webapp.RequestHandler):
       # have users answer the question
       for i in range(30):
         os.environ['USER_EMAIL'] = 'test'+str(i)+'@example.com'
-        a = aShortAnswerQuestion.assign(question)
+        a = aShortAnswerQuestion.assign(question, users.User('test'+str(i)+'@example.com'))
         a.submitAnswer(str(i))
 
       # confidently grade some answers

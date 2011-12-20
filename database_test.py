@@ -37,17 +37,6 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
   def teardown(self):
     self.testbed.deactivate()
 
-  def testNoneQuery(self):
-    Question(answers=[Answer(value="yay").put()]).put()
-    Question().put()
-    self.assertEqual(Question.query(Question.answers == None).count(2), 1)
-  
-  def testUserSwitching(self):
-    os.environ['USER_EMAIL'] = 'test1@example.com'
-    self.assertEqual(users.get_current_user().email(), 'test1@example.com')
-    os.environ['USER_EMAIL'] = 'test2@example.com'
-    self.assertEqual(users.get_current_user().email(), 'test2@example.com')
-
   def testGradeDistribution(self):
     os.environ['USER_EMAIL'] = 'teacher@example.com'
     a = aBuilderQuestion.assign()
@@ -110,6 +99,8 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
         n += 1.0
         correct += scores[int(a.value)%4] - a.correctness
     correct /= n
+    
+    self.assertEqual(Assignment.query(Assignment.user == users.User('teacher@example.com')).count(10), 7)
     
     print 'Average error was: '+str(correct)
       

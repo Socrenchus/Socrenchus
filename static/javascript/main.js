@@ -40,7 +40,7 @@ $(document).ready(function() {
   // Compile templates
   //
   var templates = [
-  'questionTemplate',
+  'multipleAnswerQuestionTemplate',
   'questionStatsTemplate',
   'confidentGraderQuestionTemplate',
   'shortAnswerQuestionTemplate'
@@ -55,23 +55,25 @@ $(document).ready(function() {
     // Define message objects by class
     var createMessageObject = function() {
       var messageObj = {'question_id': d.key, 'answer': [], 'class': d._class }
-      switch ( d._class ) {
-        case 'aBuilderQuestion':
-        case 'aShortAnswerQuestion':
-          messageObj.answer = $('#'+d.key+' #answer').val();
-          break;
-        case 'aMultipleChoiceQuestion':
-          messageObj.answer = $('input:radio[name='+d.key+']:checked').val();
-          break;
-        case 'aMultipleAnswerQuestion':
-          var data = $('input:checkbox[name='+d.key+']:checked');
-          $.each(data, function(key, object) {
-            messageObj.answer.push($(this).val());
-          });
-          if (messageObj.answer.length == 0)
-            messageObj.answer.push('None of the above');
-          break;
-      }
+      $.each(d._class, function(key, object) {
+        switch ( object ) {
+          case 'aBuilderQuestion':
+          case 'aShortAnswerQuestion':
+            messageObj.answer = $('#'+d.key+' #answer').val();
+            break;
+          case 'aMultipleChoiceQuestion':
+            messageObj.answer = $('input:radio[name='+d.key+']:checked').val();
+            break;
+          case 'aMultipleAnswerQuestion':
+            var data = $('input:checkbox[name='+d.key+']:checked');
+            $.each(data, function(key, object) {
+              messageObj.answer.push($(this).val());
+            });
+            if (messageObj.answer.length == 0)
+              messageObj.answer.push('None of the above');
+            break;
+        }
+      });
       return messageObj;
     }
     
@@ -96,6 +98,7 @@ $(document).ready(function() {
     }
     
     // Define pre-display functions by class
+    if (d.answer == undefined) d.answer = null;
     var getQuestionTemplate = {
       'aMultipleAnswerQuestion' : function() {
         var tmp = d.answer
@@ -104,7 +107,7 @@ $(document).ready(function() {
           $.each(tmp, function(key, object) { d.answer.push(object.value) });
           d.answer = oc(d.answer);
         }
-        return 'questionTemplate';
+        return 'multipleAnswerQuestionTemplate';
       },
       'aShortAnswerQuestion' : function() {
         d.confident = d.answer && (d.answer.confidence >= 0.5);
@@ -120,7 +123,7 @@ $(document).ready(function() {
         if (d.answer) {
           return 'questionStatsTemplate';
         }
-        return 'questionTemplate';
+        return 'shortAnswerQuestionTemplate';
       }
     };
     
@@ -146,7 +149,7 @@ $(document).ready(function() {
     }
     
     // Execute preparation by class
-    var questionTemplate = 'questionTemplate';
+    var questionTemplate = 'errorTemplate';
     $.each(d._class, function(key, object) {
       var tmp = getQuestionTemplate[object];
       if (tmp) questionTemplate = tmp();

@@ -41,7 +41,7 @@
       <a id="logout" name="logout">Logout</a>
       <div id="learn">
         <ul id="assignments" class="sortable ui-helper-reset">
-        <script id="questionTemplate" type="text/x-jquery-tmpl">
+        <script id="multipleAnswerQuestionTemplate" type="text/x-jquery-tmpl">
           <li id="${key}" class="question">
             <div class="inner-question">
               <br/>
@@ -49,14 +49,7 @@
               <a href='mailto:${question.author.email}'>${question.author.nickname}</a>
               <br/><br/>
               ${question.value}
-              {{if 'aConfidentGraderQuestion' in _class}}
-              
-              <textarea id="answer" class="defaultText autoResizable" disabled>${answerInQuestion.value}</textarea>
-              {{/if}}
               <br/><br/>
-              {{if 'aShortAnswerQuestion' in _class || 'aBuilderQuestion' in _class}}
-              <textarea id="answer" class="defaultText autoResizable" title="enter your response here" {{if answer}}disabled{{/if}}>{{if answer}}${answer.value}{{/if}}</textarea>
-              {{/if}}
               {{each answers}}
               <input type={{if 'aMultipleChoiceQuestion' in _class}}"radio"{{else}}"checkbox"{{/if}}
                      id="answer"
@@ -73,10 +66,6 @@
               </br>
               {{if !answer || answer.length == 0}}
               <button id="submit" value="submit">Submit</button>
-              {{else confident}}
-              <a>Score: ${score*100}%</a>
-              {{else}}
-              <a>Please check back later to see your score.</a>
               {{/if}}
               </br></br>
             </div>
