@@ -23,14 +23,6 @@ import random
 ## Core Model and Logic ##
 ##########################
 
-class Connection(model.Model):
-  """
-  Models a graph edge.
-  """
-  source = model.KeyProperty()
-  target = model.KeyProperty()
-  weight = model.IntegerProperty(default=0)
-
 class Question(model.Model):
   """
   Models a question.
@@ -48,7 +40,6 @@ class Answer(model.Model):
   value = model.StringProperty()
   correctness = model.FloatProperty(default=0.0) # probability of answer being correct
   confidence = model.FloatProperty(default=0.0)  # probability of grading being correct
-  graders = model.UserProperty(repeated=True) # FIXME: seems out of place
 # parent = Question
 
   def canShowScore(self):
@@ -56,16 +47,16 @@ class Answer(model.Model):
     Determines if it is safe to show the user the score.
     """
     # TODO: implement a real check
-    return self.author == users.get_current_user()
+    return (self.author == users.get_current_user())
 
   def __json__(self):
-    prop_filter = ['value', 'author']
+    prop_filter = ['value']
     if self.canShowScore():
-      prop_filter += ['correctness', 'confidence']
+      prop_filter += ['correctness', 'confidence', 'author']
     properties = self._properties.items()
     output = {}
     for field, value in properties:
-      if hasattr(self, field) and field in ['value', 'correctness', 'confidence', 'author']:
+      if hasattr(self, field) and field in prop_filter:
         output[field] = getattr(self, field)
     return output
 
@@ -157,7 +148,7 @@ class aShortAnswerQuestion(aQuestion):
     q = None
     teacherQ = True
     parent = self.key.parent().get()
-    if len(parent.answers) >= 5:
+    if len(parent.answers) >= 1:
       q = aGraderQuestion.assign(parent.key)
     
     teacherQ = aConfidentGraderQuestion.isGradingQuestion(parent.key)
@@ -175,7 +166,6 @@ class aShortAnswerQuestion(aQuestion):
     
     if q:
       # Attach the question to the answer
-      Connection(source=self.answer, target=q.key).put()
       result.append(q)
 
     self.put()
@@ -196,91 +186,60 @@ class aShortAnswerQuestion(aQuestion):
       output['score'] = self.answer.get().correctness
     output['_class'] = self.class_
     return output
-    
-class aMultipleAnswerQuestion(aQuestion):
-  answers = model.KeyProperty(repeated=True)
-  answer = model.KeyProperty(repeated=True)
-  def prepare(self):
-    """
-    Assigns the answers from the question.
-    """
-    myAnswers = []
-    parent = self.key.parent().get()
-    for i in parent.answers:
-      myAnswers.append(i)
-      
-    random.shuffle(myAnswers)
-    self.answers = myAnswers
-    self.put()
-    return self
-    
-  def submitAnswer(self, answer):
-    """
-    Answers the question if it hasn't been answered.
-    """
-    if self.answer:
-      return False
-      
-    myAnswers = []
-    for a in self.answers:
-      ans = a.get()
-      if ans.value in answer:
-        myAnswers.append(a)
-    
-    # None of the above case
-    if len(answer) == 1 and answer[0] == 'None of the above':
-      a = Answer.get_or_insert('none', value="None of the above")
-      myAnswers.append(a)
 
-    self.answer = myAnswers
-    self.put()
-    return [self]
+class aNumericAnswerQuestion(aQuestion):
+  """
+  Models a question where a numeric response is required.
+  """
+  answer = model.FloatProperty()
 
-class aMultipleChoiceQuestion(aQuestion):
-  answers = model.KeyProperty(repeated=True)
-  answer = model.KeyProperty()
-  def prepare(self):
-    """
-    Assigns the answers from the question.
-    """
-    myAnswers = []
-    parent = self.key.parent().get()
-    for i in parent.answers:
-      myAnswers.append(i)
-      
-    random.shuffle(myAnswers)
-    self.answers = myAnswers
-    self.put()
-    return self
-    
-  def submitAnswer(self, answer):
-    """
-    Answers the question if it hasn't been answered.
-    """
-    if self.answer:
-      return False
-
-    self.answer = None
-    for a in self.answers:
-      ans = a.get()
-      if ans.value in answer:
-        self.answer = a
-
-    self.put()
-
-    return [self]
-
-class aGraderQuestion(aMultipleAnswerQuestion):
+class aGraderQuestion(aNumericAnswerQuestion):
   """
   Used to grade short answer questions.
   """
+  answerInQuestion = model.KeyProperty()
   @classmethod
   def gradedAnswer(cls, answer):
     """
     Returns a query for assignments that graded any given answer.
     """
-    return aGraderQuestion.query(cls.answers==answer, ancestor=answer.parent())
+    return cls.query(cls.answerInQuestion==answer, ancestor=answer.parent())
+    
+  @classmethod
+  def userGradedAnswer(cls, answer, user=None):
+    """
+    Returns a query for an assignment graded by a user.
+    """
+    if not user:
+      user = users.get_current_user()
+    return cls.gradedAnswer(answer).filter(cls.user==user)
+    
+  @classmethod
+  def userGradesForQuestion(cls, question, user=None):
+    """
+    Returns all of a users grading for the current question.
+    """
+    if not user:
+      user = users.get_current_user()
+    return cls.query(cls.user==user, ancestor=question)
+    
+  @classmethod
+  def regradeAnswer(cls, answer):
+    """
+    Regrade the given answer key.
+    """      
+    # find neighbors
+    query = aGraderQuestion.gradedAnswer(answer)
+    for q in query:
+      q.grade()
   
+  @classmethod
+  def getInstance(cls, item, user=None):
+    """
+    Get an instance from the assigned object.
+    """
+    return None
+
   def prepare(self):
     """
     Assigns the answers from the question.
@@ -294,93 +253,104 @@ class aGraderQuestion(aMultipleAnswerQuestion):
     
     # All answers waiting to be graded by count
     answerCount = {}
-    query = aGraderQuestion.query(ancestor=self.key.parent())
     for a in answers:
-      answerCount[a] = 0
-    for g in query:
-      for a in g.answers:
-        if a in answerCount.keys():
-          answerCount[a] += 1
-        else:
-          answerCount[a] = 1
+      count = aGraderQuestion.gradedAnswer(a).count()
+      if count in answerCount.keys():
+        answerCount[count].append(a)
+      else:
+        answerCount[count] = [a]
+        
+        
+    gradedAnswers = [g.answerInQuestion for g in aGraderQuestion.userGradesForQuestion(self.key.parent())]
     
-    # Find out how many assignments per answer to accept and still have enough
-    target = min(answerCount.values())
-    i = answerCount.values().count(target)
-    while i < 5:
-      target += 1
-      i += answerCount.values().count(target)
-    
-    # Assign the answers
-    i = 0
-    for a in answers:
-      if i >= 5:
+    # Assign the answer
+    for count in answerCount.keys():
+      if self.answerInQuestion:
         break
-      if answerCount[a] <= target:
-        self.answers.append(a)
-        i += 1
-      
+      for a in answerCount[count]:
+        if not a in gradedAnswers and a.get().author != self.user:
+          self.answerInQuestion = a
+          break
+    
+    # Check that there was enough
+    if not self.answerInQuestion:
+      return None
+    
     self.put()
     return self
-  
+
   def submitAnswer(self, answer):
     """
-    Runs the grading algorithm after answer is submitted.
+    Submits the answer.
     """
-    if self.answer:
-      return False
 
-    # submit the answer like normal
-    tmp = aMultipleAnswerQuestion.submitAnswer(self, answer)
+    self.answer = float(answer)
+    self.put()
     
-    # grade
     self.grade()
-    
-    return tmp
-    
-  def grade(self):
+
+    # assign next GraderQuestion
+    result = [self]
+    next = aGraderQuestion.assign(self.key.parent())
+    if next:
+      result.append(next)
+
+    return result
+  
+  def getConfidence(self):
+    """
+    Gets the confidence in the current user's grading of the question.
+    """
     confidenceSum = 0.0
-    maxPossibleConfidenceSum = 0.0
-    answers = []
-    for a in self.answers:
+    confidenceSumMax = 0.0
+    normalizer = 0
+    myAnswer = (self.answer/100.0)
+    for g in aGraderQuestion.userGradesForQuestion(self.key.parent()):
       # get and store the answer
+      a = g.answerInQuestion
       ans = a.get()
-      answers.append(ans)
-      
+            
       # answer's current marks with grader's
-      match = ans.correctness
-      if not (ans.key in self.answer):
-        match = 1.0 - ans.correctness
+      match = abs(myAnswer - ans.correctness)
       
       # give the grader some of the answer's confidence
       confidenceSum += match * ans.confidence
       
-      # get the normalizer for the score
-      if match < 0.5:
-        match = 1 - match
-      maxPossibleConfidenceSum += match * ans.confidence
+      # increment normalizer
+      normalizer += 1
+      confidenceSumMax += ans.confidence
       
     # error check
-    if len(self.answers) == 0:
+    if normalizer == 0:
       return
       
+    # calculate score (confidence normalized by maximum)
+    if confidenceSumMax != 0:
+      self.score = (confidenceSum / confidenceSumMax)
+    self.put()
+      
     # normalize confidence (if no error)
-    confidence = confidenceSum / float(len(self.answers))
-    
+    return (confidenceSum / float(normalizer))
+  
+  def grade(self):
+    """
+    Apply grading relevent to aGraderQuestion
+    """
     # grade with new found confidence
     answersToRegrade = []
-    for a in answers:
+    myAnswer = (self.answer/100.0)
+    confidence = self.getConfidence()
+    for g in aGraderQuestion.userGradesForQuestion(self.key.parent()):
+      a = g.answerInQuestion.get()
       if not aConfidentGraderQuestion.hasGradedAnswer(a.key):
-        markedCorrect = (a.key in self.answer)
-        numGraders = len(a.graders)
+        numGraders = aGraderQuestion.gradedAnswer(a.key).count()
         tmp = numGraders*(a.confidence * a.correctness)
-        tmp += confidence * float(markedCorrect)
+        tmp += confidence * myAnswer
         if (confidence + numGraders*a.confidence) != 0:
           tmp /= (confidence + numGraders*a.confidence)
         a.correctness = tmp
         beforeConfidence = a.confidence
         a.confidence = (confidence + (a.confidence * numGraders)) / (1 + numGraders)
-        a.graders.append(users.User())
         a.put()
       
         # recurse if condition is met
@@ -390,20 +360,12 @@ class aGraderQuestion(aMultipleAnswerQuestion):
     
     # recurse
     for a in answersToRegrade:
-      query = aGraderQuestion.gradedAnswer(a.key)
-      for q in query:
-        q.grade()
-    
-    # calculate score (confidence normalized by maximum)
-    if maxPossibleConfidenceSum != 0:
-      self.score = (confidenceSum / maxPossibleConfidenceSum)
-    self.put()
-    
-class aConfidentGraderQuestion(aMultipleChoiceQuestion):
+      aGraderQuestion.regradeAnswer(a.key)
+
+class aConfidentGraderQuestion(aGraderQuestion):
   """
   Allows the creator of a short answer question to set the baseline.
   """
-  answerInQuestion = model.KeyProperty()
   @classmethod
   def getInstance(cls, item, user=None):
     """
@@ -451,24 +413,11 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
         break
         
     if minAns.confidence == 1.0:
-      self.key.delete()
       return None
     
     # add the answer in question
     self.answerInQuestion = minAns.key
     
-    # add the answers
-    answers = [
-      'Definitely Correct',
-      'Not Completely Correct',
-      'Not Completely Wrong',
-      'Definitely Wrong',
-    ]
-    if not self.answers:
-      self.answers = []
-    for gradingAnswer in answers:
-      self.answers.append(Answer.get_or_insert(gradingAnswer,value=gradingAnswer).key)
-      
     self.put()
     return self
 
@@ -477,40 +426,26 @@ class aConfidentGraderQuestion(aMultipleChoiceQuestion):
     Submits the grade, regrades neighbors, and assigns 
     next ConfidentGraderQuestion.
     """
-    
-    # get the builder question
-    builder = aBuilderQuestion.builderForQuestion(self.key.parent())
-    
+
     # submit the grade
     a = self.answerInQuestion.get()
-    builder.estimatedGrades.append(a.correctness) # add the prior to the chart
-    a.correctness = {
-      'Definitely Correct': 1.0,
-      'Not Completely Correct': 0.75,
-      'Not Completely Wrong': 0.25,
-      'Definitely Wrong': 0.0,
-    }[answer]
-    builder.confidentGrades.append(a.correctness) # add the post to the chart
-    builder.put()
+    a.correctness = float(float(answer)/100.0)
     a.confidence = 1.0
     a.put()
 
-    self.answer = Answer.get_or_insert(answer,value=answer).key
+    self.answer = float(answer)
     self.score = a.correctness
     self.put()
     
-    # find neighbors
-    query = aGraderQuestion.gradedAnswer(a.key)
-    for q in query:
-      q.grade()
-      
+    # regrade the answer
+    aGraderQuestion.regradeAnswer(a.key)
+
     # assign next ConfidentGraderQuestion
-    result = [self]
+    result = [self, aBuilderQuestion.builderForQuestion(self.key.parent())]
     parent = self.key.parent().get()
     next = aConfidentGraderQuestion.assign(parent.key, parent.author)
     if next:
       result.append(next)
-    result.append(builder)
 
     return result
     
@@ -519,8 +454,6 @@ class aBuilderQuestion(aQuestion):
   Creates a short answer question and tracks class progress.
   """
   answer = model.KeyProperty() # Question
-  estimatedGrades = model.FloatProperty(repeated=True)
-  confidentGrades = model.FloatProperty(repeated=True)
   @classmethod
   def getItem(cls):
     """
@@ -551,5 +484,60 @@ class aBuilderQuestion(aQuestion):
     Create the short answer question.
     """
     self.answer = Question(value=answer).put()
+    self.put()
+    return [self]
+    
+  def __json__(self):
+    output = aQuestion.__json__(self)
+    output['gradeDistribution'] = [0 for i in range(11)]
+    output['confidentGradeDistribution'] = [0 for i in range(11)]
+    if self.answer:
+      for a in self.answer.get().answers:
+        ans = a.get()
+        d = int(round(ans.correctness*10.0))
+        if d and ans.confidence != 0:
+          if aConfidentGraderQuestion.hasGradedAnswer(a):
+            output['confidentGradeDistribution'][d] += 1
+          else:
+            output['gradeDistribution'][d] += 1
+
+    return output
+    
+class aMultipleAnswerQuestion(aQuestion):
+  answers = model.KeyProperty(repeated=True)
+  answer = model.KeyProperty(repeated=True)
+  def prepare(self):
+    """
+    Assigns the answers from the question.
+    """
+    myAnswers = []
+    parent = self.key.parent().get()
+    for i in parent.answers:
+      myAnswers.append(i)
+
+    random.shuffle(myAnswers)
+    self.answers = myAnswers
+    self.put()
+    return self
+
+  def submitAnswer(self, answer):
+    """
+    Answers the question if it hasn't been answered.
+    """
+    if self.answer:
+      return False
+
+    myAnswers = []
+    for a in self.answers:
+      ans = a.get()
+      if ans.value in answer:
+        myAnswers.append(a)
+
+    # None of the above case
+    if len(answer) == 1 and answer[0] == 'None of the above':
+      a = Answer.get_or_insert('none', value="None of the above")
+      myAnswers.append(a)
+
+    self.answer = myAnswers
     self.put()
     return [self]

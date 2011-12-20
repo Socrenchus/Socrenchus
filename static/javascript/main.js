@@ -42,7 +42,7 @@ $(document).ready(function() {
   var templates = [
   'multipleAnswerQuestionTemplate',
   'questionStatsTemplate',
-  'confidentGraderQuestionTemplate',
+  'graderQuestionTemplate',
   'shortAnswerQuestionTemplate'
   ]; 
   $.each(templates, function(key, object) { $( '#'+object ).template( object ) });
@@ -57,6 +57,10 @@ $(document).ready(function() {
       var messageObj = {'question_id': d.key, 'answer': [], 'class': d._class }
       $.each(d._class, function(key, object) {
         switch ( object ) {
+          case 'aConfidentGraderQuestion':
+          case 'aGraderQuestion':
+            messageObj.answer = $('#'+d.key+' #answer').text();
+            break;
           case 'aBuilderQuestion':
           case 'aShortAnswerQuestion':
             messageObj.answer = $('#'+d.key+' #answer').val();
@@ -85,11 +89,8 @@ $(document).ready(function() {
         
         $.getJSON('/ajax/answer', createMessageObject(), function(data) {
           if (data) {
-            var len = data.length;
-            if (len) {
-              $('#'+d.key).remove();
-            }
-            for ( var i=0; i<len; i++ ){
+            for ( var i=0; i<data.length; i++ ){
+              $('#'+data[i].key).remove();
               loadQuestion( data[i] );
             }
           }
@@ -115,9 +116,9 @@ $(document).ready(function() {
           d.score = d.answer.correctness;
         return 'shortAnswerQuestionTemplate';
       },
-      'aConfidentGraderQuestion' : function() {
-        d.question.author = d.answerInQuestion.author;
-        return 'confidentGraderQuestionTemplate';
+      'aGraderQuestion' : function() {
+        d.question.author = {'nickname':'Personal Assistant'};
+        return 'graderQuestionTemplate';
       },
       'aBuilderQuestion' : function() {
         if (d.answer) {
@@ -129,20 +130,37 @@ $(document).ready(function() {
     
     // Called just after display, by class
     var postDisplay = {
-      'aConfidentGraderQuestion' : function() {
+      'aGraderQuestion' : function() {
+        var options = {
+            'slide': function( event, ui ) {
+              $('#'+d.key+' #answer').text(ui.value);
+            }
+        };
+        if (d.answer) {
+          options['disabled'] = true;
+          options['value'] = d.answer;
+          $('#'+d.key+' #answer').text(d.answer);
+        }
+        $( '#slider' ).slider(options);
+      },
+      'aBuilderQuestion' : function() {
         if (d.answer) {
           var plot1 = [];
           var plot2 = [];
-          if (d.hasOwnProperty('estimatedGrades')) {
-            $.each(d.estimatedGrades, function(key, object) { plot1.push([key,object]) });
-            $.each(d.confidentGrades, function(key, object) { plot2.push([key,object]) });
-            $.plot($("#chart_"+d.key), [ {
-              label: "Grading Algorithm",
-              data: plot1
+          if (d.hasOwnProperty('gradeDistribution')) {
+            $.each(d.gradeDistribution, function(key, object) { plot1.push([key*10,object]) });
+            $.each(d.confidentGradeDistribution, function(key, object) { plot2.push([key*10,object]) });
+            $.plot($('#'+d.key+' #chart'), [ {
+              label: "Graded by Algorithm",
+              data: plot1,
+              bars: {show: true, barWidth: 10, align:'center'},
+              stack: true
             },   {
-                label: "Your Grading",
-                data: plot2
-            } ], { yaxis: { max: 1, show: false }, xaxis: {show: false} } );
+                label: "Graded by You",
+                data: plot2,
+                bars: {show: true, barWidth: 10, align:'center'},
+                stack: true
+            } ], { yaxis: { show: true }, xaxis: { show: true } } );
           }
         }
       }

@@ -48,23 +48,9 @@ class TestDataHandler(webapp.RequestHandler):
     if not Question.query().count(1):
     
       os.environ['USER_EMAIL'] = 'teacher@example.com'
-      a = aBuilderQuestion.assign(None, users.User('teacher@example.com'))
-      a.submitAnswer('Name a number that is divisible by four.')
-      question = a.answer
-
-      answers = [
-        'Definitely Correct',
-        'Not Completely Correct',
-        'Not Completely Wrong',
-        'Definitely Wrong',
-      ]
-
-      scores = [
-      1.0,
-      0.75,
-      0.25,
-      0.0,
-      ]
+      ab = aBuilderQuestion.assign()
+      ab.submitAnswer('Name a number that is divisible by four.')
+      question = ab.answer
 
       # have users answer the question
       for i in range(30):
@@ -76,7 +62,7 @@ class TestDataHandler(webapp.RequestHandler):
       os.environ['USER_EMAIL'] = 'teacher@example.com'
       a = aConfidentGraderQuestion.query(Assignment.user == users.User('teacher@example.com')).get()
       for i in range(5):
-        a = a.submitAnswer(answers[int(a.answerInQuestion.get().value)%4])[1]
+        a = a.submitAnswer(1.0-float(int(a.answers[0].get().value)%4/4))[2]
       
       # have the users grade eachother's answer
       for i in range(5,30):
@@ -84,18 +70,15 @@ class TestDataHandler(webapp.RequestHandler):
         a = aShortAnswerQuestion.query(Assignment.user == users.User()).get()
         q = aGraderQuestion.query(Assignment.user == users.User()).get()
         myAnswer = []
-        agree = random.random() < (0.9 * scores[int(a.answer.get().value)%4])
+        agree = random.random() < (0.9 * (1.0-float(int(a.answer.get().value)%4/4)))
         for a in q.answers:
           a = a.get()
-          if scores[int(a.value)%4] > 0.5:
+          if (1.0-float(int(a.value)%4/4)) > 0.5:
             if agree:
               myAnswer.append(a.value)
           else:
             if not agree:
               myAnswer.append(a.value)
-
-        if len(myAnswer) == 0:
-          myAnswer += 'None of the above'
 
         q.submitAnswer(myAnswer)
 
@@ -120,11 +103,12 @@ class AnswerQuestionHandler(webapp.RequestHandler):
     if 'class[aGraderQuestion]' in args:
       theClass = aGraderQuestion
 
-    result = model.Key(urlsafe=qid).get()
-    if isinstance(result,Question):
-      result = theClass.assign(result.key)
+    q = model.Key(urlsafe=qid).get()
+    result = None
+    if isinstance(q,Question):
+      result = theClass.assign(q.key)
     elif bool(ans):
-      result = result.submitAnswer(ans)
+      result = q.submitAnswer(ans)
         
     json_response = json.encode(result)
     
