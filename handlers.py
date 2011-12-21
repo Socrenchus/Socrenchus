@@ -38,6 +38,16 @@ class ExperimentOneHandler(webapp.RequestHandler):
     aBuilderQuestion.assign()
 
     self.redirect('/')
+
+class ClearDataHandler(webapp.RequestHandler):
+  def get(self):
+    """
+    Erases all the data in the datastore and memcache.
+    """
+    model.delete_multi([a.key for a in Assignment.query()])
+    model.delete_multi([a.key for a in UserData.query()])
+    model.delete_multi([a.key for a in Question.query()])
+    model.delete_multi([a.key for a in Answer.query()])
     
 class TestDataHandler(webapp.RequestHandler):
   def get(self):
@@ -184,6 +194,7 @@ def main():
   if _DEBUG:
     options = [
       ('/experiments/test', TestDataHandler),
+      ('/experiments/deleteall', ClearDataHandler),
     ] + options
   application = webapp.WSGIApplication(options, debug=_DEBUG)
   application = context.toplevel(application.__call__)
