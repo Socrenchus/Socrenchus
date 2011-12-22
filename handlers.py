@@ -144,18 +144,13 @@ class GradeReport(webapp.RequestHandler):
   Downloads a csv grade report.
   """
   def get(self, param):
-    q = Question.get(param)
+    q = model.Key(urlsafe=param).get().answer.get()
     if q and q.author == users.User():
-      output = 'email, answer, grade, secondary grade\n'
+      output = 'email, grade\n'
       for a in q.answers:
-        a = Answer.get(a)
+        a = a.get()
         output += a.author.email()+', '
-        output += a.value+', '
-        output += str(a.correctness)+', '
-        gq = aGraderQuestion.all().filter('user =', a.author).ancestor(q).get()
-        if gq:
-          output += str(gq.score)
-        output += '\n'
+        output += str(a.correctness*100)+'%\n'
         
       self.response.headers.add_header("Content-Type", 'text/csv')
       self.response.out.write(output)
