@@ -11,6 +11,7 @@ import unittest
 import os
 import random
 from ndb import model, polymodel
+from google.appengine.ext import db
 #!/usr/bin/env python
 #
 # Copyright 2011 Bryan Goldstein.
@@ -20,6 +21,13 @@ from ndb import model, polymodel
 from google.appengine.ext import testbed
 from google.appengine.datastore import datastore_stub_util
 from database import *
+
+class TestNoneQueryNDB(model.Model):
+  numbers = model.IntegerProperty(repeated=True)
+  
+class TestNoneQueryHRD(db.Model):
+  value = db.IntegerProperty(default=0)
+  numbers = db.ListProperty(int)
 
 class ShortAnswerGradingTestCase(unittest.TestCase):
   
@@ -36,8 +44,21 @@ class ShortAnswerGradingTestCase(unittest.TestCase):
     
   def teardown(self):
     self.testbed.deactivate()
+    
+  def testNoneQueryNDB(self):
+    
+    TestNoneQueryNDB(numbers=[1,2,3]).put()
+    TestNoneQueryNDB().put()
+    self.assertEqual(TestNoneQueryNDB.query(TestNoneQueryNDB.numbers==None).count(3), 1)
+  
+  def testNoneQueryHRD(self):
+    
+    TestNoneQueryHRD(numbers=[1,2,3]).put()
+    TestNoneQueryHRD().put()
+    self.assertEqual(TestNoneQueryHRD.all().filter('value =', 0).filter('numbers =', None).count(3), 1)
+    
 
-  def testGradeDistribution(self):
+  def tesGradeDistribution(self):
     os.environ['USER_EMAIL'] = 'teacher@example.com'
     a = aBuilderQuestion.assign()
     a.submitAnswer('Name a number that is divisible by four.')

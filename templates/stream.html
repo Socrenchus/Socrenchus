@@ -39,17 +39,19 @@
       </tr>
       <table>
       <div style="height:54px;"></div>
-      <!-- TODO: Change logout url for launch -->
       <a id="logout" name="logout">Logout</a>
       <div id="learn">
         <ul id="assignments" class="sortable ui-helper-reset">
+        <script id="badgeTemplate" type="text/x-jquery-tmpl">
+        <br/>
+        <a href='http://www.gravatar.com'><img src="http://www.gravatar.com/avatar/{{html $.md5(question.author.email)}}?s=48&d=mm" class="avatar" /></a>
+        <a href='mailto:${question.author.email}'>${question.author.nickname}</a>
+        <br/><br/>
+        </script>
         <script id="multipleAnswerQuestionTemplate" type="text/x-jquery-tmpl">
           <li id="${key}" class="question">
             <div class="inner-question">
-              <br/>
-              <img src="http://www.gravatar.com/avatar/{{html $.md5(question.author.email)}}?s=48&d=mm" class="avatar" />
-              <a href='mailto:${question.author.email}'>${question.author.nickname}</a>
-              <br/><br/>
+              <div id='badge' name=${key}></div>
               ${question.value}
               <br/><br/>
               {{each answers}}
@@ -76,12 +78,8 @@
         <script id="shortAnswerQuestionTemplate" type="text/x-jquery-tmpl">
           <li id="${key}" class="question">
             <div class="inner-question">
-              <br/>
-              <img src="http://www.gravatar.com/avatar/{{html $.md5(question.author.email)}}?s=48&d=mm" class="avatar" />
-              <a href='mailto:${question.author.email}'>${question.author.nickname}</a>
-              <br/><br/>
-              ${question.value}
-              <br/><br/>
+              <div id='badge' name=${key}></div>
+              <textarea id='question-text' name=${key} disabled></textarea> 
 
               <textarea id="answer" class="defaultText autoResizable" title="enter your response here" {{if answer}}disabled{{/if}}>{{if answer}}${answer.value}{{/if}}</textarea>
 
@@ -100,11 +98,8 @@
         <script id="graderQuestionTemplate" type="text/x-jquery-tmpl">
           <li id="${key}" class="question">
             <div class="inner-question">
-              <br/>
-              <img src="http://www.gravatar.com/avatar/{{html $.md5(question.author.email)}}?s=48&d=mm" class="avatar" />
-              <a href='mailto:${question.author.email}'>${question.author.nickname}</a>
-              <br/><br/>
-              ${question.value}
+              <div id='badge' name=${key}></div>
+              <textarea id='question-text' name=${key} disabled></textarea> 
               
               <textarea id="answerInQuestion" class="defaultText autoResizable" disabled>${answerInQuestion.value}</textarea>
               
@@ -124,12 +119,8 @@
         <script id="questionStatsTemplate" type="text/x-jquery-tmpl">
           <li id="${key}" class="question">
             <div class="inner-question">
-              <br/>
-              <img src="http://www.gravatar.com/avatar/{{html $.md5(question.author.email)}}?s=48&d=mm" class="avatar" />
-              <a href='mailto:${question.author.email}'>${question.author.nickname}</a>
-              <a href='/${answer.key}/report.csv'>- Download Grade Report</a>
-              <br/><br/>
-              ${answer.value}
+              <div id='badge' name=${key}></div>
+              <textarea id='question-text' name=${key} disabled></textarea> 
               <br/><br/>
               Share this link with your students:
               <br/>

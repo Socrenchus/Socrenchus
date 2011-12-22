@@ -36,6 +36,7 @@ $(document).ready(function() {
   //
   if (urlPathArray.length == 2 && urlPathArray[1])
     $.get('/ajax/answer', {'question_id': urlPathArray[1]});
+  
   //
   // Compile templates
   //
@@ -43,7 +44,8 @@ $(document).ready(function() {
   'multipleAnswerQuestionTemplate',
   'questionStatsTemplate',
   'graderQuestionTemplate',
-  'shortAnswerQuestionTemplate'
+  'shortAnswerQuestionTemplate',
+  'badgeTemplate'
   ]; 
   $.each(templates, function(key, object) { $( '#'+object ).template( object ) });
   
@@ -144,7 +146,9 @@ $(document).ready(function() {
         $( '#slider' ).slider(options);
       },
       'aBuilderQuestion' : function() {
+        
         if (d.answer) {
+          $( '#'+d.key+' #question-text' ).text( d.answer.value ).autoResize().trigger('keydown');
           var plot1 = [];
           var plot2 = [];
           if (d.hasOwnProperty('gradeDistribution')) {
@@ -175,6 +179,8 @@ $(document).ready(function() {
     
     // Render template
     $.tmpl( questionTemplate, d ).prependTo( '#assignments' ).click(answerQuestion);
+    $.tmpl( 'badgeTemplate', d ).prependTo( '#'+d.key+' #badge' );
+    $( '#'+d.key+' #question-text' ).text( d.question.value ).autoResize().trigger('keydown');
     
     // Handle post-display stuff
     $.each(d._class, function(key, object) {
@@ -209,9 +215,7 @@ $(document).ready(function() {
               },
               // Quite slow animation:
               animateDuration : 300,
-              // More extra space:
-              extraSpace : 40
-          });
+          }).trigger('keydown');
 
           //
           // Set up default text construct

@@ -52,6 +52,13 @@ h2 {
   float: right;
 }
 
+#question-text {
+  border: none;
+  width: 100%;
+  overflow: hidden;
+  resize: none;
+}
+
 .question {
   border-top: 1px solid #EEE;
   padding: 16px 21px;
@@ -61,6 +68,10 @@ h2 {
 .inner-question {
   margin-left: 60px;
   margin-right: 44px;
+}
+
+.template {
+  display: none;
 }
 
 .avatar {
