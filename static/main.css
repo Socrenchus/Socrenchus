@@ -2,8 +2,12 @@ body {
   font: normal 13px arial,sans-serif;
 }
 
+textarea {
+  font-color: #000;
+}
+
 a {
-  color: #B3B3B3;
+  color: #000;
   cursor: pointer;
   text-decoration: none;
 }
@@ -11,6 +15,11 @@ a {
 h1 {
   text-align: right;
   color: #FFFFFF;
+}
+
+#logo {
+  height: 100px;
+  margin-left: 35px;
 }
 
 h2 {
@@ -21,7 +30,7 @@ h2 {
 
 #tabs {
   width: 576px;
-  border: 1px solid #EBEBEB;
+  border: 1px solid #0bebeb;
   -moz-border-radius-bottomright: 10px;
   -webkit-border-bottom-right-radius: 10px;
   -moz-border-radius-bottomleft: 10px;
@@ -32,24 +41,22 @@ h2 {
 #logout {
   float: right;
   position: relative;
-  color: #EBEBEB;
+  color: #0bebeb;
   top: 0px;
   right: 5px;
 }
 
-#newQuestion {
-  margin-right: 44px;
-}
-
 #table-top {
   width: 576px;
-  background-color: #C4C4C4;
+  background-color: #FFFFFF;
   position: absolute;
   overflow: hidden;
 }
 
 #submit {
   float: right;
+  margin-top: -37px;
+  margin-right: 12px;
 }
 
 #question-text {
@@ -60,13 +67,12 @@ h2 {
 }
 
 .question {
-  border-top: 1px solid #EEE;
+  border-top: 1px solid #ebebeb;
   padding: 16px 21px;
-  background-color:rgba(255,255,255,0.6);
 }
 
 .inner-question {
-  margin-left: 60px;
+  margin-left: 44px;
   margin-right: 44px;
 }
 
@@ -75,8 +81,14 @@ h2 {
 }
 
 .avatar {
-  float:left;
-  margin-left:-60px
+  margin-left:-18px;
+}
+
+#badge {
+  margin-left:18px;
+  float: left;
+  width: 100%;
+  text-align: left;
 }
 
 .mc-radio {
@@ -91,16 +103,12 @@ h2 {
   color: #a1a1a1; font-style: italic;
 }
 
-#assignments li, #toolbox li { 
-  margin: 0 5px 5px 5px;
+#assignments li { 
+  margin: 44px 5px 44px 5px;
 }
 
 .ui-state-hover {
   opacity: 0.6;
-}
-
-.sortable {
-  padding: 16px 21px !important;
 }
 
 .questionTextBox, .answerTextBox {
@@ -111,8 +119,4 @@ h2 {
 
 .answerTextBox {
   height: 21px;
-}
-
-.dropLabel {
-  margin-left: 21px;
 }

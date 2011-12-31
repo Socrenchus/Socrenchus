@@ -148,7 +148,7 @@ $(document).ready(function() {
       'aBuilderQuestion' : function() {
         
         if (d.answer) {
-          $( '#'+d.key+' #question-text' ).text( d.answer.value ).autoResize().trigger('keydown');
+          $( '#'+d.key+' #question-text' ).text( d.answer.value ).trigger('keydown');
           var plot1 = [];
           var plot2 = [];
           if (d.hasOwnProperty('gradeDistribution')) {
@@ -180,7 +180,7 @@ $(document).ready(function() {
     // Render template
     $.tmpl( questionTemplate, d ).prependTo( '#assignments' ).click(answerQuestion);
     $.tmpl( 'badgeTemplate', d ).prependTo( '#'+d.key+' #badge' );
-    $( '#'+d.key+' #question-text' ).text( d.question.value ).autoResize().trigger('keydown');
+    $( '#'+d.key+' #question-text' ).text( d.question.value ).autoResize({extraSpace : 0}).trigger('keydown');
     
     // Handle post-display stuff
     $.each(d._class, function(key, object) {
@@ -215,6 +215,8 @@ $(document).ready(function() {
               },
               // Quite slow animation:
               animateDuration : 300,
+              // More extra space:
+              extraSpace : 10
           }).trigger('keydown');
 
           //

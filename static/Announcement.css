@@ -10,31 +10,35 @@ a {
 
 h1 {
   text-align: right;
-  color: #EBEBEB;
 }
+
+#logo {
+  height: 100px;
+}
+
 
 h2 {
   padding-top:4px;
   text-align: left;
-  color: #EBEBEB;
 }
 
 .mediumText {
   text-align: left;
   font-size: 35px;
   line-height: 45px;
-  color: #000000;
+  color: #E0B91B;
 }
 
 .largeText {
   font-size: 45px;
   line-height: 60px;
+  color: #D0B91B;
 }
 
 #main {
-  background-color:yellow;
+  background-color: #FFFFFF;
   width: 576px;
-  border: 1px solid #EBEBEB;
+  border: 1px solid #0bebeb;
   -moz-border-radius-bottomright: 10px;
   -webkit-border-bottom-right-radius: 10px;
   -moz-border-radius-bottomleft: 10px;
@@ -45,16 +49,17 @@ h2 {
 #logout {
   float: right;
   position: relative;
-  color: #EBEBEB;
+  color: #0bebeb;
   top: 0px;
   right: 5px;
 }
 
 #table-top {
-  width: 576px;
-  background-color: #000000;
+  width: 556px;
+  background-color: #FFFFFF;
   position: absolute;
   overflow: hidden;
+  padding-left: 20px;
 }
 
 #hello {
@@ -63,5 +68,5 @@ h2 {
 }
 
 #learn {
-  margin: 0 20px 5px 20px;
+  margin: 50px 20px 5px 20px;
 }

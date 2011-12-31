@@ -28,30 +28,33 @@
   </head>
   <body>
     <div id="tabs">
-      <table id="table-top">
+      <div id="table-top">
+        <a id="logout" name="logout">Logout</a>
+        <img id='logo' src='/static/logo.jpg'>
+      </div>
+      <!--<table id="table-top">
       <tr>
         <td>
           <h1>Socrenchus&nbsp;</h1>
+          
         </td>
         <td>
           <h2>> Online Learning Experiment</h2>
         </td>
       </tr>
-      <table>
+      <table>-->
       <div style="height:54px;"></div>
-      <a id="logout" name="logout">Logout</a>
       <div id="learn">
         <ul id="assignments" class="sortable ui-helper-reset">
         <script id="badgeTemplate" type="text/x-jquery-tmpl">
         <br/>
-        <a href='http://www.gravatar.com'><img src="http://www.gravatar.com/avatar/{{html $.md5(question.author.email)}}?s=48&d=mm" class="avatar" /></a>
+        <a href='http://www.gravatar.com'><img src="http://www.gravatar.com/avatar/{{html $.md5(question.author.email)}}?s=16" class="avatar" /></a>
         <a href='mailto:${question.author.email}'>${question.author.nickname}</a>
         <br/><br/>
         </script>
         <script id="multipleAnswerQuestionTemplate" type="text/x-jquery-tmpl">
           <li id="${key}" class="question">
             <div class="inner-question">
-              <div id='badge' name=${key}></div>
               ${question.value}
               <br/><br/>
               {{each answers}}
@@ -71,6 +74,8 @@
               {{if !answer || answer.length == 0}}
               <button id="submit" value="submit">Submit</button>
               {{/if}}
+              <div id='badge' name=${key}></div>
+              
               </br></br>
             </div>
           </li>
@@ -78,19 +83,19 @@
         <script id="shortAnswerQuestionTemplate" type="text/x-jquery-tmpl">
           <li id="${key}" class="question">
             <div class="inner-question">
-              <div id='badge' name=${key}></div>
               <textarea id='question-text' name=${key} disabled></textarea> 
 
               <textarea id="answer" class="defaultText autoResizable" title="enter your response here" {{if answer}}disabled{{/if}}>{{if answer}}${answer.value}{{/if}}</textarea>
 
               </br>
+              <div id='badge' name=${key}>
               {{if !answer || answer.length == 0}}
               <button id="submit" value="submit">Submit</button>
               {{else confident}}
-              <a>Score: ${score*100}%</a>
-              {{else}}
-              <a>Please check back later to see your score.</a>
+              <a id="submit">Score: ${score*100}%</a>
               {{/if}}
+              </div>
+              
               </br></br>
             </div>
           </li>
@@ -98,7 +103,6 @@
         <script id="graderQuestionTemplate" type="text/x-jquery-tmpl">
           <li id="${key}" class="question">
             <div class="inner-question">
-              <div id='badge' name=${key}></div>
               <textarea id='question-text' name=${key} disabled></textarea> 
               
               <textarea id="answerInQuestion" class="defaultText autoResizable" disabled>${answerInQuestion.value}</textarea>
@@ -108,10 +112,11 @@
               <br/>
               You give this answer <span id="answer" name="${key}">0</span> out of 100.
               <br/>
-              </br>
               {{if !answer }}
               <button id="submit" value="submit">Submit</button>
               {{/if}}
+              <div id='badge' name=${key}></div>
+              
               </br></br>
             </div>
           </li>
@@ -119,15 +124,15 @@
         <script id="questionStatsTemplate" type="text/x-jquery-tmpl">
           <li id="${key}" class="question">
             <div class="inner-question">
-              <div id='badge' name=${key}></div>
               <textarea id='question-text' name=${key} disabled></textarea> 
-              <br/><br/>
               Share this link with your students:
               <br/>
               <input type='textbox' value='http://${window.location.host}/${answer.key}' style='text-align:left;width:100%;' disabled />
+              <a href='/${key}/report.csv'>Download Report</a>
+              
               </br></br>
               <div id='chart' name='${key}' style="width:100%;height:200px"></div>
-              <a href='/${key}/report.csv'>Download Report</a>
+              <div id='badge' name=${key}></div>
             </div>
           </li>
         </script>
