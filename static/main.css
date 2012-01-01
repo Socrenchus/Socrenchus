@@ -37,10 +37,12 @@ h2 {
 }
 
 #share {
-  background-color: orange;
-  border: 5px solid purple;
+  background-color: #DC8D31;
+  border: 5px solid #1D6DB6;
   padding: 10px;
   padding-right: 15px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
 }
 
 #logout {
