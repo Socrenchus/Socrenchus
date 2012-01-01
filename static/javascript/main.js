@@ -149,6 +149,7 @@ $(document).ready(function() {
         
         if (d.answer) {
           $( '#'+d.key+' #question-text' ).text( d.answer.value ).trigger('keydown');
+          addthis.toolbox('.addthis_toolbox');
           var plot1 = [];
           var plot2 = [];
           if (d.hasOwnProperty('gradeDistribution')) {

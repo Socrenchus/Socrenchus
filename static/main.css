@@ -20,6 +20,7 @@ h1 {
 #logo {
   height: 100px;
   margin-left: 35px;
+  margin-top: 15px;
 }
 
 h2 {
@@ -53,7 +54,7 @@ h2 {
   overflow: hidden;
 }
 
-#submit {
+.submitArea {
   float: right;
   margin-top: -37px;
   margin-right: 12px;
@@ -104,7 +105,7 @@ h2 {
 }
 
 #assignments li { 
-  margin: 44px 5px 44px 5px;
+  margin: 60px 5px 44px 5px;
 }
 
 .ui-state-hover {
