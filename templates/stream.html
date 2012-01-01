@@ -142,7 +142,8 @@
           <li id="${key}" class="question">
             <div class="inner-question">
               <textarea id='question-text' name=${key} disabled></textarea> 
-              Share this link with your students:
+              <div id="share">
+              <b>Share this link with your students:</b>
               <br/>
               <input type='textbox' value='http://${window.location.host}/${answer.key}' style='text-align:left;width:100%;float:left;' disabled />
               <span class="addthis_toolbox addthis_default_style" addthis:url='http://${window.location.host}/${answer.key}'>
@@ -152,7 +153,8 @@
               <a class="addthis_button_preferred_4"></a>
               <a class="addthis_button_compact"></a>
               </span>
-              </br></br>
+              </div>
+              </br>
               <div id='chart' name='${key}' style="width:100%;height:200px"></div>
               <div id='badge' name=${key}>
                     <a class="submitArea" href='/${key}/report.csv'>Download Report</a>

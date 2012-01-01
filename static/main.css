@@ -1,9 +1,6 @@
 body {
-  font: normal 13px arial,sans-serif;
-}
-
-textarea {
-  font-color: #000;
+  font-size: 11px;
+  font-family: 'Lucida Grande';
 }
 
 a {
@@ -37,6 +34,13 @@ h2 {
   -moz-border-radius-bottomleft: 10px;
   -webkit-border-bottom-left-radius: 10px;
   margin: auto;
+}
+
+#share {
+  background-color: orange;
+  border: 5px solid purple;
+  padding: 10px;
+  padding-right: 15px;
 }
 
 #logout {
