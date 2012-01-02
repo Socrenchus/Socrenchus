@@ -138,7 +138,7 @@ $(document).ready(function() {
               $('#'+d.key+' #answer').text(ui.value);
             }
         };
-        if (d.answer) {
+        if (d.answer || d.answer == 0) {
           options['disabled'] = true;
           options['value'] = d.answer;
           $('#'+d.key+' #answer').text(d.answer);

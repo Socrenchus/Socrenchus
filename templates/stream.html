@@ -129,7 +129,7 @@
               You give this answer <span id="answer" name="${key}">0</span> out of 100.
               <br/>
               <div id='badge' name=${key}>
-              {{if !answer }}
+              {{if !answer && answer != 0 }}
               <button id="submit" class="submitArea" value="submit">Submit</button>
               {{/if}}
               </div>
