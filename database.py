@@ -407,7 +407,7 @@ class aConfidentGraderQuestion(aGraderQuestion):
     parent = self.key.parent().get()
     for ans in parent.answers:
       a = ans.get()
-      if a.confidence < minAns.confidence and not a in existing:
+      if a.confidence < minAns.confidence and not (a in existing):
         minAns = a
       if minAns.confidence == 0.0:
         break
