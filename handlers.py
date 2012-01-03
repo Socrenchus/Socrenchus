@@ -152,7 +152,7 @@ class GradeReport(webapp.RequestHandler):
         output += a.author.email()+', '
         output += str(a.correctness*100)+'%\n'
         
-      self.response.headers.add_header("Content-Type", 'text/csv')
+      self.response.headers["Content-Type"] = "text/csv"
       self.response.out.write(output)
     
 class StaticPageServer(webapp.RequestHandler):
