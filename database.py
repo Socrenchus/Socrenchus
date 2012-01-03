@@ -165,7 +165,6 @@ class aShortAnswerQuestion(aQuestion):
     result = [self]
     
     if q:
-      # Attach the question to the answer
       result.append(q)
 
     self.put()
@@ -231,7 +230,8 @@ class aGraderQuestion(aNumericAnswerQuestion):
     # find neighbors
     query = aGraderQuestion.gradedAnswer(answer)
     for q in query:
-      q.grade()
+      if q.answer != None:
+        q.grade()
   
   @classmethod
   def getInstance(cls, item, user=None):
@@ -264,6 +264,7 @@ class aGraderQuestion(aNumericAnswerQuestion):
     gradedAnswers = [g.answerInQuestion for g in aGraderQuestion.userGradesForQuestion(self.key.parent())]
     
     # Assign the answer
+    self.answerInQuestion = None
     for count in answerCount.keys():
       if self.answerInQuestion:
         break
@@ -374,10 +375,9 @@ class aConfidentGraderQuestion(aGraderQuestion):
     user = item.get().author
     q = cls.query(ancestor=item)
     
-    # TODO: fix none query
     q.filter(cls.user==user)
     for i in q.iter():
-      if not i.answer:
+      if i.answer == None:
         return i
       
     return None
