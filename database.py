@@ -37,7 +37,7 @@ class Answer(model.Model):
   Models an answer.
   """
   author = model.UserProperty(auto_current_user_add = True)
-  value = model.StringProperty()
+  value = model.TextProperty()
   correctness = model.FloatProperty(default=0.0) # probability of answer being correct
   confidence = model.FloatProperty(default=0.0)  # probability of grading being correct
 # parent = Question
