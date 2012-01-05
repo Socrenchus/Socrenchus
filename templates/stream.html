@@ -55,7 +55,7 @@
               <br/>
               <div id='badge'>
               <a href='http://www.gravatar.com'><img src="http://www.gravatar.com/avatar/4948cf6a15fb7092ccaca08204494913?s=16" class="avatar" /></a>
-              <a href='mailto:bryan.goldstein@socrench.us'>Bryan Goldstein</a>
+              <a href='mailto:bryan.goldstein@socrench.us'>Bryan</a>
               </div>
               <br/><br/>
               
@@ -64,37 +64,10 @@
           </li>
         <script id="badgeTemplate" type="text/x-jquery-tmpl">
         <br/>
-        <a href='http://www.gravatar.com'><img src="http://www.gravatar.com/avatar/{{html $.md5(question.author.email)}}?s=16" class="avatar" /></a>
-        <a href='mailto:${question.author.email}'>${question.author.nickname}</a>
+        <!--<a href='http://www.gravatar.com'><img src="http://www.gravatar.com/avatar/{{html $.md5(question.author.email)}}?s=16" class="avatar" /></a>
+        <a href='mailto:${question.author.email}'>${question.author.nickname}</a>-->
+        <br/>
         <br/><br/>
-        </script>
-        <script id="multipleAnswerQuestionTemplate" type="text/x-jquery-tmpl">
-          <li id="${key}" class="question">
-            <div class="inner-question">
-              ${question.value}
-              <br/><br/>
-              {{each answers}}
-              <input type={{if 'aMultipleChoiceQuestion' in _class}}"radio"{{else}}"checkbox"{{/if}}
-                     id="answer"
-                     name="${key}" 
-                     value="${$value.value}"
-                     class="mc-radio"
-                     {{if answer}}
-                      disabled
-                        {{if $value.value in answer}} checked {{/if}}
-                     {{/if}}/>
-              <label for="${$value.value}">${$value.value}</label>
-              <br/>
-              {{/each}}
-              </br>
-              {{if !answer || answer.length == 0}}
-              <button id="submit" class="submitArea" value="submit">Submit</button>
-              {{/if}}
-              <div id='badge' name=${key}></div>
-              
-              </br></br>
-            </div>
-          </li>
         </script>
         <script id="shortAnswerQuestionTemplate" type="text/x-jquery-tmpl">
           <li id="${key}" class="question">

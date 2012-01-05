@@ -41,7 +41,6 @@ $(document).ready(function() {
   // Compile templates
   //
   var templates = [
-  'multipleAnswerQuestionTemplate',
   'questionStatsTemplate',
   'graderQuestionTemplate',
   'shortAnswerQuestionTemplate',
@@ -70,14 +69,6 @@ $(document).ready(function() {
           case 'aMultipleChoiceQuestion':
             messageObj.answer = $('input:radio[name='+d.key+']:checked').val();
             break;
-          case 'aMultipleAnswerQuestion':
-            var data = $('input:checkbox[name='+d.key+']:checked');
-            $.each(data, function(key, object) {
-              messageObj.answer.push($(this).val());
-            });
-            if (messageObj.answer.length == 0)
-              messageObj.answer.push('None of the above');
-            break;
         }
       });
       return messageObj;
@@ -103,15 +94,6 @@ $(document).ready(function() {
     // Define pre-display functions by class
     if (d.answer == undefined) d.answer = null;
     var getQuestionTemplate = {
-      'aMultipleAnswerQuestion' : function() {
-        var tmp = d.answer
-        if (tmp && tmp.length >= 0) {
-          d.answer = [];
-          $.each(tmp, function(key, object) { d.answer.push(object.value) });
-          d.answer = oc(d.answer);
-        }
-        return 'multipleAnswerQuestionTemplate';
-      },
       'aShortAnswerQuestion' : function() {
         d.confident = d.answer && (d.answer.confidence >= 0.5);
         if (d.answer)
@@ -180,7 +162,7 @@ $(document).ready(function() {
     
     // Render template
     $.tmpl( questionTemplate, d ).prependTo( '#assignments' ).click(answerQuestion);
-    //$.tmpl( 'badgeTemplate', d ).prependTo( '#'+d.key+' #badge' );
+    $.tmpl( 'badgeTemplate', d ).prependTo( '#'+d.key+' #badge' );
     $( '#'+d.key+' #question-text' ).text( d.question.value ).autoResize({extraSpace : 0}).trigger('keydown');
     $( '.autoResizable' ).autoResize({extraSpace : 0}).trigger('keydown');
     
