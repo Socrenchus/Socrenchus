@@ -22,3 +22,6 @@ handlers:
 - url: /.*
   script: handlers.py
   login: required
+  
+builtins:
+- remote_api: on

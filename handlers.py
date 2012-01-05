@@ -49,50 +49,24 @@ class ClearDataHandler(webapp.RequestHandler):
     model.delete_multi([a.key for a in Question.query()])
     model.delete_multi([a.key for a in Answer.query()])
     
-class TestDataHandler(webapp.RequestHandler):
+class SanatizeDataHandler(webapp.RequestHandler):
   def get(self):
     """
     Generates test data, serves stream.html.
     """
-    # FIXME: os.environ['USER_EMAIL'] doesn't work outside testbed
-    if not Question.query().count(1):
-    
-      os.environ['USER_EMAIL'] = 'teacher@example.com'
-      ab = aBuilderQuestion.assign()
-      ab.submitAnswer('Name a number that is divisible by four.')
-      question = ab.answer
-
-      # have users answer the question
-      for i in range(30):
-        os.environ['USER_EMAIL'] = 'test'+str(i)+'@example.com'
-        a = aShortAnswerQuestion.assign(question, users.User('test'+str(i)+'@example.com'))
-        a.submitAnswer(str(i))
-
-      # confidently grade some answers
-      os.environ['USER_EMAIL'] = 'teacher@example.com'
-      a = aConfidentGraderQuestion.query(Assignment.user == users.User('teacher@example.com')).get()
-      for i in range(5):
-        a = a.submitAnswer(1.0-float(int(a.answers[0].get().value)%4/4))[2]
+    '''
+    query = Question.query()
+    for q in query:
+      for k in range(len(q.answers)):
+        if not q.answers[k].get():
+          q.answers.pop(k)
+      q.put()
+    '''
+    query = aGraderQuestion.query()
+    for q in query:
+      if q.answerInQuestion and not q.answerInQuestion.get():
+        q.delete()
       
-      # have the users grade eachother's answer
-      for i in range(5,30):
-        os.environ['USER_EMAIL'] = 'test'+str(i)+'@example.com'
-        a = aShortAnswerQuestion.query(Assignment.user == users.User()).get()
-        q = aGraderQuestion.query(Assignment.user == users.User()).get()
-        myAnswer = []
-        agree = random.random() < (0.9 * (1.0-float(int(a.answer.get().value)%4/4)))
-        for a in q.answers:
-          a = a.get()
-          if (1.0-float(int(a.value)%4/4)) > 0.5:
-            if agree:
-              myAnswer.append(a.value)
-          else:
-            if not agree:
-              myAnswer.append(a.value)
-
-        q.submitAnswer(myAnswer)
-
-    self.redirect('/')
     
 class AnswerQuestionHandler(webapp.RequestHandler):
 
@@ -188,7 +162,7 @@ def main():
   ]
   if _DEBUG:
     options = [
-      ('/experiments/test', TestDataHandler),
+      ('/experiments/sanatize', SanatizeDataHandler),
       ('/experiments/deleteall', ClearDataHandler),
     ] + options
   application = webapp.WSGIApplication(options, debug=_DEBUG)
