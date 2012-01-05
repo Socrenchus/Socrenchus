@@ -180,8 +180,8 @@ $(document).ready(function() {
     
     // Render template
     $.tmpl( questionTemplate, d ).prependTo( '#assignments' ).click(answerQuestion);
-    $.tmpl( 'badgeTemplate', d ).prependTo( '#'+d.key+' #badge' );
-    $( '#'+d.key+' #question-text' ).text( d.question.value );
+    //$.tmpl( 'badgeTemplate', d ).prependTo( '#'+d.key+' #badge' );
+    $( '#'+d.key+' #question-text' ).text( d.question.value ).autoResize({extraSpace : 0}).trigger('keydown');
     $( '.autoResizable' ).autoResize({extraSpace : 0}).trigger('keydown');
     
     // Handle post-display stuff
