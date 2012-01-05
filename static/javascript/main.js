@@ -43,7 +43,7 @@ $(document).ready(function() {
   var templates = [
   'questionStatsTemplate',
   'graderQuestionTemplate',
-  'shortAnswerQuestionTemplate',
+  'shortAnswerQuestionTemplate'
   ]; 
   $.each(templates, function(key, object) { $( '#'+object ).template( object ) });
   
