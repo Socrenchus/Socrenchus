@@ -61,9 +61,9 @@
         <script id="shortAnswerQuestionTemplate" type="text/x-jquery-tmpl">
           <li id="${key}" class="question">
             <div class="inner-question">
-              <textarea id='question-text' name=${key} disabled></textarea> 
+              <textarea id='question-text' name=${key} readonly></textarea> 
 
-              <textarea id="answer" class="defaultText autoResizable" title="enter your response here" {{if answer}}disabled{{/if}}>{{if answer}}${answer.value}{{/if}}</textarea>
+              <textarea id="answer" class="defaultText autoResizable no-selection" title="enter your response here" {{if answer}}readonly{{/if}}>{{if answer}}${answer.value}{{/if}}</textarea>
 
               </br>
               {{if !answer || answer.length == 0}}
@@ -78,9 +78,9 @@
         <script id="graderQuestionTemplate" type="text/x-jquery-tmpl">
           <li id="${key}" class="question">
             <div class="inner-question">
-              <textarea id='question-text' name=${key} disabled></textarea> 
+              <textarea id='question-text' name=${key} readonly></textarea> 
               
-              <textarea id="answerInQuestion" class="defaultText autoResizable" disabled>${answerInQuestion.value}</textarea>
+              <textarea id="answerInQuestion" class="defaultText autoResizable no-selection" readonly>${answerInQuestion.value}</textarea>
               
               <br/><br/>
               <div id="slider" name="${key}"></div>
@@ -97,11 +97,11 @@
         <script id="questionStatsTemplate" type="text/x-jquery-tmpl">
           <li id="${key}" class="question">
             <div class="inner-question">
-              <textarea id='question-text' name=${key} disabled></textarea> 
+              <textarea id='question-text' name=${key} readonly></textarea> 
               <div id="share">
               <b>Share this link with your students:</b>
               <br/>
-              <input type='textbox' value='http://${window.location.host}/${answer.key}' style='text-align:left;width:100%;float:left;' disabled />
+              <input type='textbox' value='http://${window.location.host}/${answer.key}' style='text-align:left;width:100%;float:left;' readonly />
               <span class="addthis_toolbox addthis_default_style" addthis:url='http://${window.location.host}/${answer.key}'>
               <a class="addthis_button_preferred_1"></a>
               <a class="addthis_button_preferred_2"></a>

@@ -69,6 +69,11 @@ h2 {
   width: 100%;
   overflow: hidden;
   resize: none;
+  outline: 0px none transparent;
+}
+
+.no-selection {
+  outline: 0px none transparent;
 }
 
 .question {
@@ -108,14 +113,4 @@ h2 {
 
 .ui-state-hover {
   opacity: 0.6;
-}
-
-.questionTextBox, .answerTextBox {
-  margin-left: 21px;
-  margin-right: 21px;
-  width: 100%;
-}
-
-.answerTextBox {
-  height: 21px;
 }
