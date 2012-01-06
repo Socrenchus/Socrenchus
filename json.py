@@ -11,15 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# Extended and ported to NDB by Bryan Goldstein.
 
 """Utility classes and methods for use with simplejson and appengine.
 
-Provides both a specialized simplejson encoder, GqlEncoder, designed to simplify
-encoding directly from GQL results to JSON. A helper function, encode, is also
-provided to further simplify usage.
+Provides both a specialized simplejson encoder, ModelEncoder, designed to simplify
+encoding directly from NDB Models and query results to JSON. A helper function, 
+encode, is also provided to further simplify usage.
 
-  GqlEncoder: Adds support for GQL results and properties to simplejson.
-  encode(input): Direct method to encode GQL objects as JSON.
+  ModelEncoder: Adds support for NDB Models to simplejson.
+  encode(input): Direct method to encode NDB Model objects as JSON.
 """
 
 import datetime
@@ -30,15 +32,15 @@ from google.appengine.api import users
 from ndb import model, polymodel, query
 
 
-class GqlEncoder(simplejson.JSONEncoder):
+class ModelEncoder(simplejson.JSONEncoder):
   
-  """Extends JSONEncoder to add support for GQL results and properties.
+  """Extends JSONEncoder to add support for NDB Models and query results.
   
-  Adds support to simplejson JSONEncoders for GQL results and properties by
+  Adds support to simplejson JSONEncoders for NDB Models and query results by
   overriding JSONEncoder's default method.
   """
   
-  # TODO Improve coverage for all of App Engine's Property types.
+  # TODO Improve coverage for all of NDB's Property types.
 
   def default(self, obj):
     
@@ -50,7 +52,7 @@ class GqlEncoder(simplejson.JSONEncoder):
     if isinstance(obj, query.Query):
       return list(obj)
 
-    elif isinstance(obj, model.Model) or isinstance(obj, polymodel.PolyModel):
+    elif isinstance(obj, model.Model):
       properties = obj._properties.items()
       output = {}
       for field, value in properties:
@@ -89,10 +91,10 @@ class GqlEncoder(simplejson.JSONEncoder):
 
 
 def encode(input):
-  """Encode an input GQL object as JSON
+  """Encode an input Model object as JSON
 
     Args:
-      input: A GQL object or DB property.
+      input: A Model object or DB property.
 
     Returns:
       A JSON string based on the input object. 
@@ -101,4 +103,4 @@ def encode(input):
       TypeError: Typically occurs when an input object contains an unsupported
         type.
     """
-  return GqlEncoder().encode(input)
+  return ModelEncoder().encode(input)
