@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #
 # Copyright 2011 Bryan Goldstein
+# All rights reserved.
 #
 
 """
@@ -10,15 +11,10 @@ Test file for the database model and core logic.
 import unittest
 import os
 import random
+import json
 from ndb import model, polymodel
 from google.appengine.ext import db
 from google.appengine.api import users
-#!/usr/bin/env python
-#
-# Copyright 2011 Bryan Goldstein.
-# All rights reserved.
-#
-
 from google.appengine.ext import testbed
 from google.appengine.datastore import datastore_stub_util
 from database import *
@@ -38,8 +34,39 @@ class DefaultTestClass(unittest.TestCase):
     self.testbed.init_memcache_stub()
     self.testbed.init_user_stub()
     
+    os.environ['AUTH_DOMAIN'] = 'testbed'
+    self.switchToUser(0)
+    
   def teardown(self):
     self.testbed.deactivate()
+  
+  def switchToUser(self, id):
+    os.environ['USER_EMAIL'] = 'test'+str(id)+'@example.com'
+    os.environ['USER_ID'] = str(id)
+  
+  def _testAssignQuestion(self, cls, item=None, user=None):
+    if not user:
+      user = users.get_current_user()
+    # Check length of assignments before
+    u = UserData.get_by_id(str(user.user_id()))
+    l = 0
+    if u:
+      l = len(u.assignments)
+    
+    cls.assign(item, user)
+    
+    # Check that it was added to UserData
+    u = UserData.get_by_id(str(user.user_id()))
+    self.assertEqual(len(u.assignments), l+1)
+    
+    # Check that the item was assigned
+    assigned = u.assignments[l].get()
+    if item:
+      self.assertEqual(assigned.key.parent(), item)
+    
+    # Check that the right user was assigned
+    self.assertEqual(assigned.user, user)
+
 
 class BuilderQuestionTests(DefaultTestClass):
   '''
@@ -50,7 +77,7 @@ class BuilderQuestionTests(DefaultTestClass):
     '''
     Tests that builder questions get assigned properly.
     '''
-    pass
+    self._testAssignQuestion(aBuilderQuestion)
     
   def testAnswerBuilderQuestion(self):
     '''
@@ -73,7 +100,7 @@ class ShortAnswerQuestionTests(DefaultTestClass):
     '''
     Tests that short answer questions get assigned properly.
     '''
-    pass
+    self._testAssignQuestion(aShortAnswerQuestion, Question().put())
     
   def testAnswerShortAnswerQuestion(self):
     '''
@@ -96,7 +123,10 @@ class GraderQuestionTests(DefaultTestClass):
     '''
     Tests that the grader question gets assigned properly.
     '''
-    pass
+    
+    q = Question(answers=[Answer().put()]).put()
+    self.switchToUser(1)
+    self._testAssignQuestion(aGraderQuestion, q)
     
   def testAnswerGraderQuestion(self):
     '''
@@ -119,7 +149,8 @@ class ConfidentGraderQuestionTests(DefaultTestClass):
     '''
     Tests that the grader question gets assigned properly.
     '''
-    pass
+    q = Question(answers=[Answer().put()]).put()
+    self._testAssignQuestion(aConfidentGraderQuestion, q)
 
   def testAnswerConfidentGraderQuestion(self):
     '''
@@ -133,30 +164,30 @@ class ConfidentGraderQuestionTests(DefaultTestClass):
     '''
     pass
 
-class FollowupQuestionTests(DefaultTestClass):
+class FollowUpQuestionTests(DefaultTestClass):
   '''
   Make sure everything related to followup questions is working.
   '''
     
-  def testAssignFollowupBuilderQuestion(self):
+  def testAssignFollowUpBuilderQuestion(self):
     '''
     Tests assigning a followup builder question.
     '''
-    pass
+    self._testAssignQuestion(aFollowUpBuilderQuestion)
     
-  def testAnswerFollowupBuilderQuestion(self):
+  def testAnswerFollowUpBuilderQuestion(self):
     '''
     Tests creation of a followup question.
     '''
     pass
     
-  def testAssignFollowupQuestion(self):
+  def testAssignFollowUpQuestion(self):
     '''
     Tests that followup question gets assigned when it should.
     '''
     pass
   
-  def testSerializeFollowupQuestion(self):
+  def testSerializeFollowUpQuestion(self):
     '''
     Tests that a followup question gets serialized properly.
     '''
