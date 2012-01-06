@@ -468,7 +468,7 @@ class aBuilderQuestion(aQuestion):
     Get an instance from the assigned object.
     """
     q = cls.query(ancestor=item)
-    # TODO: fix none query
+
     for i in q.filter(cls.user==user,cls.answer==None):
       if not i.answer:
         return i
