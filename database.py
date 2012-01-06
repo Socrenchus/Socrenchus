@@ -75,7 +75,7 @@ class Assignment(polymodel.PolyModel):
   Models a generic assignment
   """
   user = model.UserProperty(auto_current_user_add = True)
-  time = model.DateTimeProperty(auto_now_add = True)
+  time = model.DateTimeProperty(auto_now = True)
 # parent = assigned item
   
   @classmethod
@@ -503,41 +503,8 @@ class aBuilderQuestion(aQuestion):
 
     return output
     
-class aMultipleAnswerQuestion(aQuestion):
-  answers = model.KeyProperty(repeated=True)
-  answer = model.KeyProperty(repeated=True)
-  def prepare(self):
-    """
-    Assigns the answers from the question.
-    """
-    myAnswers = []
-    parent = self.key.parent().get()
-    for i in parent.answers:
-      myAnswers.append(i)
-
-    random.shuffle(myAnswers)
-    self.answers = myAnswers
-    self.put()
-    return self
-
-  def submitAnswer(self, answer):
-    """
-    Answers the question if it hasn't been answered.
-    """
-    if self.answer:
-      return False
-
-    myAnswers = []
-    for a in self.answers:
-      ans = a.get()
-      if ans.value in answer:
-        myAnswers.append(a)
-
-    # None of the above case
-    if len(answer) == 1 and answer[0] == 'None of the above':
-      a = Answer.get_or_insert('none', value="None of the above")
-      myAnswers.append(a)
-
-    self.answer = myAnswers
-    self.put()
-    return [self]
+class aFollowUpBuilderQuestion(aBuilderQuestion):
+  """
+  Same as a builder question but associates the question with an assignment.
+  """
+  pass
