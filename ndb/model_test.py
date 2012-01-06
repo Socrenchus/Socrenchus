@@ -926,6 +926,24 @@ class ModelTests(test_utils.NDBTest):
       # Reset environment.
       del os.environ['USER_EMAIL']
 
+  def testPickleProperty(self):
+    class MyModel(model.Model):
+      pkl = model.PickleProperty()
+    sample = {'one': 1, 2: [1, 2, '3'], 3.: model.Model}
+    ent = MyModel(pkl=sample)
+    ent.put()
+    ent2 = ent.key.get()
+    self.assertTrue(ent2.pkl == sample)
+
+  def testJsonProperty(self):
+    class MyModel(model.Model):
+      pkl = model.JsonProperty()
+    sample = [1, 2, {'a': 'one', 'b': [1, 2]}, 'xyzzy', [1, 2, 3]]
+    ent = MyModel(pkl=sample)
+    ent.put()
+    ent2 = ent.key.get()
+    self.assertTrue(ent2.pkl == sample)
+
   def DateAndOrTimePropertyTest(self, propclass, t1, t2):
     class ClockInOut(model.Model):
       ctime = propclass(auto_now_add=True)
@@ -1387,11 +1405,18 @@ class ModelTests(test_utils.NDBTest):
     class MyModel(model.Model):
       a = model.StructuredProperty(MySubmodel)
       b = model.LocalStructuredProperty(MySubmodel, repeated=True)
+      c = model.StructuredProperty(MySubmodel)
+      d = model.LocalStructuredProperty(MySubmodel)
+      e = model.StructuredProperty(MySubmodel, repeated=True)
     x = MyModel(a=MySubmodel(foo='foo', bar=42),
                 b=[MySubmodel(foo='f'), MySubmodel(bar=4)])
     self.assertEqual({'a': {'foo': 'foo', 'bar': 42},
                       'b': [{'foo': 'f', 'bar': None,},
-                            {'foo': None, 'bar': 4}]},
+                            {'foo': None, 'bar': 4}],
+                      'c': None,
+                      'd': None,
+                      'e': [],
+                      },
                      x.to_dict())
 
   def testModelPickling(self):
@@ -3111,6 +3136,60 @@ class CacheTests(test_utils.NDBTest):
     e = key.get()
     self.assertEqual(e, None)
 
+  def testCustomStructuredPropertyInRepeatedStructuredProperty(self):
+    class FuzzyDate(object):
+
+      def __init__(self, first, last=None):
+        assert isinstance(first, datetime.date)
+        assert last is None or isinstance(last, datetime.date)
+        self.first = first
+        self.last = last or first
+
+      def __eq__(self, other):
+        if not isinstance(other, FuzzyDate):
+          return NotImplemented
+        return self.first == other.first and self.last == other.last
+
+      def __ne__(self, other):
+        eq = self.__eq__(other)
+        if eq is not NotImplemented:
+          eq = not eq
+        return eq
+
+      def __repr__(self):
+        return 'FuzzyDate(%r, %r)' % (self.first, self.last)
+
+    class FuzzyDateModel(model.Model):
+      first = model.DateProperty()
+      last = model.DateProperty()
+
+    class FuzzyDateProperty(model.StructuredProperty):
+
+      def __init__(self, **kwds):
+        super(FuzzyDateProperty, self).__init__(FuzzyDateModel, **kwds)
+
+      def _validate(self, value):
+        assert isinstance(value, FuzzyDate)
+
+      def _to_base_type(self, value):
+        return FuzzyDateModel(first=value.first, last=value.last)
+
+      def _from_base_type(self, value):
+        return FuzzyDate(value.first, value.last)
+
+    class Inner(model.Model):
+      date = FuzzyDateProperty()
+
+    class Outer(model.Model):
+      wrap = model.StructuredProperty(Inner, repeated=True)
+
+    d = datetime.date(1900,1,1)
+    fd = FuzzyDate(d)
+    orig = Outer(wrap=[Inner(date=fd), Inner(date=fd)])
+    key = orig.put()
+    q = Outer.query()
+    copy = q.get()
+    self.assertEqual(copy, orig)
 
 def main():
   unittest.main()
