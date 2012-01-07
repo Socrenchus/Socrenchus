@@ -66,7 +66,18 @@ class DefaultTestClass(unittest.TestCase):
     
     # Check that the right user was assigned
     self.assertEqual(assigned.user, user)
-
+    
+    return assigned
+  
+  def getAssignmentByType(self, t):
+    '''
+    Return assignment that matches the type.
+    '''
+    u = UserData.get_by_id(str(users.get_current_user().user_id()))
+    if u:
+      for a in u.assignments:
+        if t in a.get().class_:
+          return a
 
 class BuilderQuestionTests(DefaultTestClass):
   '''
@@ -83,7 +94,14 @@ class BuilderQuestionTests(DefaultTestClass):
     '''
     Tests that a builder question creates a new question upon answering.
     '''
-    pass
+    a = self.getAssignmentByType('aBuilderQuestion')
+    if not a:
+      a = self._testAssignQuestion(aBuilderQuestion)
+    
+    a = a.submitAnswer('What is the answer?')[0]
+    
+    # make sure the question was created
+    self.assertTrue(isinstance(a.answer.get(), Question))
     
   def testSerializeBuilderQuestion(self):
     '''
@@ -169,24 +187,51 @@ class FollowUpQuestionTests(DefaultTestClass):
   Make sure everything related to followup questions is working.
   '''
     
-  def testAssignFollowUpBuilderQuestion(self):
+  def testAssignFollowUpBuilderQuestion(self, follow=None):
     '''
     Tests assigning a followup builder question.
     '''
-    self._testAssignQuestion(aFollowUpBuilderQuestion)
+    if not follow:
+      follow = Question().put()
+    return self._testAssignQuestion(aFollowUpBuilderQuestion, follow)
     
-  def testAnswerFollowUpBuilderQuestion(self):
+  def testAnswerFollowUpBuilderQuestion(self, follow=None):
     '''
     Tests creation of a followup question.
     '''
-    pass
+    a = self.testAssignFollowUpBuilderQuestion(follow)
+    
+    a = a.submitAnswer('What\'s next?')[0]
+    
+    # make sure the question was created
+    self.assertTrue(isinstance(a.answer.get(), Question))
+    
+    return a
     
   def testAssignFollowUpQuestion(self):
     '''
     Tests that followup question gets assigned when it should.
     '''
+    # test following a question
+    a = self.testAnswerFollowUpBuilderQuestion()
+    
+    f = a.key.parent()
+    result = aShortAnswerQuestion.assign(f).submitAnswer('')
+    self.assertEqual(len(result), 2)
+    
+    # test following an answer
+    a = self.testAnswerFollowUpBuilderQuestion(Answer().put())
+    
+    f = a.key.parent()
+    result = aShortAnswerQuestion.assign(f).submitAnswer('')
+    self.assertEqual(len(result), 2)
+    
+  def testRetroAssignFollowUpQuesiton(self):
+    '''
+    Tests that a followup question gets assigned retroactively.
+    '''
     pass
-  
+    
   def testSerializeFollowUpQuestion(self):
     '''
     Tests that a followup question gets serialized properly.
