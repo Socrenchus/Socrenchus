@@ -104,6 +104,9 @@ $(document).ready(function() {
         return 'graderQuestionTemplate';
       },
       'aBuilderQuestion' : function() {
+        d.question = {
+          value:'Think of the first question you want to ask your students...'
+        };
         if (d.answer) {
           return 'questionStatsTemplate';
         }

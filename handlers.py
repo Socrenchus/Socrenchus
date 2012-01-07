@@ -108,7 +108,7 @@ class StreamHandler(webapp.RequestHandler):
     
     ud = UserData.get_or_insert(str(users.get_current_user().user_id()))
     
-    assignments = model.get_multi(ud.assignments)
+    assignments = model.get_multi(ud.assignments[:6])
     
     self.response.headers.add_header("Content-Type", 'application/json')
     self.response.out.write(json.encode({'logout': users.create_logout_url( "/" ), 'assignments':assignments}))

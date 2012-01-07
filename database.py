@@ -23,6 +23,15 @@ import random
 ## Core Model and Logic ##
 ##########################
 
+class Connection(model.Model):
+  """
+  Models a link between questions.
+  """
+# parent = Question or Answer
+  target = model.KeyProperty()
+  score = model.FloatProperty(default=0.0)
+  age = model.IntegerProperty(default=0)
+
 class Question(model.Model):
   """
   Models a question.
@@ -30,7 +39,6 @@ class Question(model.Model):
   author = model.UserProperty(auto_current_user_add=True)
   value = model.TextProperty()
   answers = model.KeyProperty(repeated=True)
-# assignments = model.Query(aQuestion)
 
 class Answer(model.Model):
   """
@@ -121,6 +129,16 @@ class aQuestion(Assignment):
 # user = model.UserProperty(auto_current_user = True)
 # parent = question
 
+  def submitAnswer(self):
+    """
+    Assigns follow up questions.
+    """
+    result = []
+    for c in Connection.query(ancestor=self.key.parent()):
+      result.append(aShortAnswerQuestion.assign(c.target))
+      
+    return result
+
   def __json__(self):
     properties = self._properties.items()
     output = {}
@@ -168,6 +186,8 @@ class aShortAnswerQuestion(aQuestion):
       result.append(q)
 
     self.put()
+    
+    result.extend(aQuestion.submitAnswer(self))
     
     # assign the grading question
     return result
@@ -295,6 +315,8 @@ class aGraderQuestion(aNumericAnswerQuestion):
     next = aGraderQuestion.assign(self.key.parent())
     if next:
       result.append(next)
+
+    result.extend(aQuestion.submitAnswer(self))
 
     return result
   
@@ -459,8 +481,7 @@ class aBuilderQuestion(aQuestion):
     """
     Get the builder question.
     """
-    txt = 'Think of a short answer question that you would ask your students...'
-    return Question.get_or_insert('builderQuestion', value=txt, author=users.User('Personal Assistant')).key
+    return Question.get_or_insert('builderQuestion').key
   
   @classmethod
   def getInstance(cls, item, user=None):
@@ -478,14 +499,15 @@ class aBuilderQuestion(aQuestion):
   @classmethod
   def builderForQuestion(cls, question_key):
     return cls.query(cls.answer==question_key, ancestor=aBuilderQuestion.getItem()).get()  
-  
+
   def submitAnswer(self, answer):
     """
     Create the short answer question.
     """
     self.answer = Question(value=answer).put()
     self.put()
-    return [self]
+    
+    return [self, aFollowUpBuilderQuestion.assign(self.answer)]
     
   def __json__(self):
     output = aQuestion.__json__(self)
@@ -507,4 +529,37 @@ class aFollowUpBuilderQuestion(aBuilderQuestion):
   """
   Same as a builder question but associates the question with an assignment.
   """
-  pass
+  
+  def prepare(self):
+    """
+    Just override parent's prepare function.
+    """
+    return Assignment.prepare(self)
+  
+  def submitAnswer(self, answer):
+    """
+    Adds the new question to follow the parent.
+    """
+    # submit answer as normal
+    result = aBuilderQuestion.submitAnswer(self, answer)
+    
+    # add the connection object
+    Connection(parent=self.key.parent(),target=self.answer).put()
+    
+    # search for answered assignments of the connection object
+    q = self.key.parent().get()
+    if isinstance(q, Answer):
+      # the connection source is an answer
+      aShortAnswerQuestion.assign(self.answer, q.author)
+      
+      # TODO: assign to all the graders
+    else:
+      # assign to all the answerers
+      query = aShortAnswerQuestion.query(ancestor=q.key)
+      for item in query:
+        item = item.get()
+        if item.answer != None:
+          aShortAnswerQuestion.assign(self.answer, item.user)
+      
+    return result
+  

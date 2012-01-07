@@ -20,9 +20,9 @@ from google.appengine.datastore import datastore_stub_util
 from database import *
 
 class DefaultTestClass(unittest.TestCase):
-  '''
+  """
   Setup, teardown, and assorted utility functions for all test cases.
-  '''
+  """
   def setUp(self):
     # Create test bed
     self.testbed = testbed.Testbed()
@@ -70,9 +70,9 @@ class DefaultTestClass(unittest.TestCase):
     return assigned
   
   def getAssignmentByType(self, t):
-    '''
+    """
     Return assignment that matches the type.
-    '''
+    """
     u = UserData.get_by_id(str(users.get_current_user().user_id()))
     if u:
       for a in u.assignments:
@@ -80,20 +80,20 @@ class DefaultTestClass(unittest.TestCase):
           return a
 
 class BuilderQuestionTests(DefaultTestClass):
-  '''
+  """
   Make sure builder questions are functioning properly.
-  '''
+  """
   
   def testAssignBuilderQuestion(self):
-    '''
+    """
     Tests that builder questions get assigned properly.
-    '''
+    """
     self._testAssignQuestion(aBuilderQuestion)
     
   def testAnswerBuilderQuestion(self):
-    '''
+    """
     Tests that a builder question creates a new question upon answering.
-    '''
+    """
     a = self.getAssignmentByType('aBuilderQuestion')
     if not a:
       a = self._testAssignQuestion(aBuilderQuestion)
@@ -104,101 +104,101 @@ class BuilderQuestionTests(DefaultTestClass):
     self.assertTrue(isinstance(a.answer.get(), Question))
     
   def testSerializeBuilderQuestion(self):
-    '''
+    """
     Tests that the builder question gets serialized properly.
-    '''
+    """
     pass
 
 class ShortAnswerQuestionTests(DefaultTestClass):
-  '''
+  """
   Make sure short answer questions are functioning properly.
-  '''
+  """
   
   def testAssignShortAnswerQuestion(self):
-    '''
+    """
     Tests that short answer questions get assigned properly.
-    '''
+    """
     self._testAssignQuestion(aShortAnswerQuestion, Question().put())
     
   def testAnswerShortAnswerQuestion(self):
-    '''
+    """
     Tests that short answer questions behave as expected when answered.
-    '''
+    """
     pass
     
   def testSerializeShortAnswerQuestion(self):
-    '''
+    """
     Tests that a short answer question gets serialized properly.
-    '''
+    """
     pass
     
 class GraderQuestionTests(DefaultTestClass):
-  '''
+  """
   Make sure grader questions are functioning as they should.
-  '''
+  """
   
   def testAssignGraderQuestion(self):
-    '''
+    """
     Tests that the grader question gets assigned properly.
-    '''
+    """
     
     q = Question(answers=[Answer().put()]).put()
     self.switchToUser(1)
     self._testAssignQuestion(aGraderQuestion, q)
     
   def testAnswerGraderQuestion(self):
-    '''
+    """
     Tests that the grading works.
-    '''
+    """
     pass
   
   def testSerializeGraderQuestion(self):
-    '''
+    """
     Tests that grader questions get serialized properly.
-    '''
+    """
     pass
 
 class ConfidentGraderQuestionTests(DefaultTestClass):
-  '''
+  """
   Make sure grader questions are functioning as they should.
-  '''
+  """
 
   def testAssignConfidentGraderQuestion(self):
-    '''
+    """
     Tests that the grader question gets assigned properly.
-    '''
+    """
     q = Question(answers=[Answer().put()]).put()
     self._testAssignQuestion(aConfidentGraderQuestion, q)
 
   def testAnswerConfidentGraderQuestion(self):
-    '''
+    """
     Tests that the grading works.
-    '''
+    """
     pass
 
   def testSerializeConfidentGraderQuestion(self):
-    '''
+    """
     Tests that grader questions get serialized properly.
-    '''
+    """
     pass
 
 class FollowUpQuestionTests(DefaultTestClass):
-  '''
+  """
   Make sure everything related to followup questions is working.
-  '''
+  """
     
   def testAssignFollowUpBuilderQuestion(self, follow=None):
-    '''
+    """
     Tests assigning a followup builder question.
-    '''
+    """
     if not follow:
       follow = Question().put()
     return self._testAssignQuestion(aFollowUpBuilderQuestion, follow)
     
   def testAnswerFollowUpBuilderQuestion(self, follow=None):
-    '''
+    """
     Tests creation of a followup question.
-    '''
+    """
     a = self.testAssignFollowUpBuilderQuestion(follow)
     
     a = a.submitAnswer('What\'s next?')[0]
@@ -209,9 +209,9 @@ class FollowUpQuestionTests(DefaultTestClass):
     return a
     
   def testAssignFollowUpQuestion(self):
-    '''
+    """
     Tests that followup question gets assigned when it should.
-    '''
+    """
     # test following a question
     a = self.testAnswerFollowUpBuilderQuestion()
     
@@ -220,20 +220,27 @@ class FollowUpQuestionTests(DefaultTestClass):
     self.assertEqual(len(result), 2)
     
     # test following an answer
-    a = self.testAnswerFollowUpBuilderQuestion(Answer().put())
+    answer = Answer(parent=Question().put()).put()
+    a = self.testAnswerFollowUpBuilderQuestion(answer)
     
-    f = a.key.parent()
+    f = a.key.parent().parent()
     result = aShortAnswerQuestion.assign(f).submitAnswer('')
     self.assertEqual(len(result), 2)
     
   def testRetroAssignFollowUpQuesiton(self):
-    '''
+    """
     Tests that a followup question gets assigned retroactively.
-    '''
+    """
+    pass
+    
+  def testFollowUpStack(self):
+    """
+    Makes sure followup questions resolve in the right order.
+    """
     pass
     
   def testSerializeFollowUpQuestion(self):
-    '''
+    """
     Tests that a followup question gets serialized properly.
-    '''
+    """
     pass
