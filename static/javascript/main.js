@@ -61,9 +61,6 @@ $(document).ready(function() {
         case 'aShortAnswerQuestion':
           messageObj.answer = $('#'+d.key+' #answer').val();
           break;
-        case 'aMultipleChoiceQuestion':
-          messageObj.answer = $('input:radio[name='+d.key+']:checked').val();
-          break;
       }
     });
     return messageObj;
@@ -185,53 +182,54 @@ $(document).ready(function() {
   // Load the question stream
   //
   var navPage = 0;
-  var myCache = [];
+  var myCache = null;
   var reloadStream = function() { 
+    
+    var initializeStuff = function(data) {
+
+      $( "#logout" ).attr("href", data.logout);
+    
+      //
+      // Set up paging
+      //
+      $('#nextPage').click(function(obj) {
+        navPage++;
+        reloadStream();
+      });
+      $('#prevPage').click(function(obj) {
+        navPage--;
+        reloadStream();
+      });
+
+    }
+    
     var loadWithData = function(data) {
-      if (data == '') return;
-      $( "#assignments" ).empty();
-      data.assignments.forEach( function( d ) {
+
+      data.forEach( function( d ) {
           loadQuestion( d );
         });
 
-        if (data.assignments.length >= 15) {
+        if (data.length >= 15) {
           $('#nextPage').show();
         } else {
           $('#intro').clone().appendTo( '#assignments' );
           $('#nextPage').hide();
         }
         
-        if (navPage > 0) {
-          $('#prevPage').show();
-        } else {
-          $('#prevPage').hide();
-        }
-        
-        if ( myCache.length <= 1 ) {
-          
-          $( "#logout" ).attr("href", data.logout);
-        
-          //
-          // Set up paging
-          //
-          $('#nextPage').click(function(obj) {
-            navPage++;
-            reloadStream();
-          });
-          $('#prevPage').click(function(obj) {
-            navPage--;
-            reloadStream();
-          });
-          
-        }
     }
-    if ( !(navPage in myCache) ) {
+    var pageSize = 15;
+    var start = pageSize*navPage;
+    if ( !myCache || myCache.length >= start ) {
       $.getJSON('/ajax/stream',{'segment': navPage}, function(data) {
-        myCache.push(data);
-        loadWithData(data);
+        if (data == '') return;
+        if (myCache == null) {
+          myCache = data.assignments;
+          initializeStuff(data);
+        } else myCache.concat(data.assignments);
+        loadWithData(myCache.slice(start,start+pageSize));
       });
     } else {
-      loadWithData(myCache[navPage]);
+      loadWithData(myCache.slice(start,start+pageSize));
     }
   }
   reloadStream();
