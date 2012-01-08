@@ -38,35 +38,6 @@ class ExperimentOneHandler(webapp.RequestHandler):
     aBuilderQuestion.assign()
 
     self.redirect('/')
-
-class ClearDataHandler(webapp.RequestHandler):
-  def get(self):
-    """
-    Erases all the data in the datastore and memcache.
-    """
-    model.delete_multi([a.key for a in Assignment.query()])
-    model.delete_multi([a.key for a in UserData.query()])
-    model.delete_multi([a.key for a in Question.query()])
-    model.delete_multi([a.key for a in Answer.query()])
-    
-class SanatizeDataHandler(webapp.RequestHandler):
-  def get(self):
-    """
-    Generates test data, serves stream.html.
-    """
-    '''
-    query = Question.query()
-    for q in query:
-      for k in range(len(q.answers)):
-        if not q.answers[k].get():
-          q.answers.pop(k)
-      q.put()
-    '''
-    query = aGraderQuestion.query()
-    for q in query:
-      if q.answerInQuestion and not q.answerInQuestion.get():
-        q.delete()
-      
     
 class AnswerQuestionHandler(webapp.RequestHandler):
 
@@ -171,11 +142,6 @@ def main():
     ('/login', LoginHander),
     ('/.*', StaticPageServer),
   ]
-  if _DEBUG:
-    options = [
-      ('/experiments/sanatize', SanatizeDataHandler),
-      ('/experiments/deleteall', ClearDataHandler),
-    ] + options
   application = webapp.WSGIApplication(options, debug=_DEBUG)
   application = context.toplevel(application.__call__)
   wsgiref.handlers.CGIHandler().run(application)
