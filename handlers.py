@@ -106,19 +106,21 @@ class StreamHandler(webapp.RequestHandler):
     Return the user's question stream.
     """
     
-    sid = int(self.request.get('segment'))
+    sid = self.request.get('segment')
     if not sid:
       sid = 0
+    else:
+      sid = int(sid)
     
-    end = -(1+(sid*5))
-    start = -(1+((sid+1)*5))
+    start = sid*5
+    end = start+5
+
     
     ud = UserData.get_or_insert(str(users.get_current_user().user_id()))
     
-    assignment_keys = ud.assignments[start:end]
+    assignment_keys = ud.assignments
     assignment_keys.reverse()
-    assignments = model.get_multi(assignment_keys)
-    
+    assignments = model.get_multi(assignment_keys[start:end])
     self.response.headers["Content-Type"] = "application/json"
     self.response.out.write(json.encode({'logout': users.create_logout_url( "/" ), 'assignments':assignments}))
     

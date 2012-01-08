@@ -557,7 +557,6 @@ class aFollowUpBuilderQuestion(aBuilderQuestion):
       # assign to all the answerers
       query = aShortAnswerQuestion.query(ancestor=q.key)
       for item in query:
-        item = item.get()
         if item.answer != None:
           aShortAnswerQuestion.assign(self.answer, item.user)
       

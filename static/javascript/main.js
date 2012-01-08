@@ -49,7 +49,7 @@ $(document).ready(function() {
   
   
   // Define message objects by class
-  var createMessageObject = function() {
+  var createMessageObject = function(d) {
     var messageObj = {'question_id': d.key, 'answer': [], 'class': d._class }
     $.each(d._class, function(key, object) {
       switch ( object ) {
@@ -136,7 +136,8 @@ $(document).ready(function() {
   //
   // Load a question array
   //
-  var loadQuestion = function(d) {
+  var loadQuestion = function(d, prepend) {
+    prepend = typeof(prepend) != 'undefined' ? prepend : false;
     if (d.answer == undefined) d.answer = null;
     
     // Answer the question (on submit)
@@ -149,7 +150,7 @@ $(document).ready(function() {
           if (data) {
             for ( var i=0; i<data.length; i++ ){
               $('#'+data[i].key).remove();
-              loadQuestion( data[i] );
+              loadQuestion( data[i], true );
             }
           }
         });
@@ -164,7 +165,12 @@ $(document).ready(function() {
     });
     
     // Render template
-    $.tmpl( questionTemplate, d ).appendTo( '#assignments' ).click(answerQuestion);
+    var tmp = $.tmpl( questionTemplate, d ).click(answerQuestion);
+    if (prepend)
+      tmp.prependTo( '#assignments' );
+    else
+      tmp.appendTo( '#assignments' );
+      
     $( '#'+d.key+' #question-text' ).text( d.question.value ).autoResize({extraSpace : 0}).trigger('keydown');
     $( '.autoResizable' ).autoResize({extraSpace : 0}).trigger('keydown');
     
