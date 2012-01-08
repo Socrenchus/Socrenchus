@@ -105,7 +105,7 @@ $(document).ready(function() {
         options['value'] = d.answer;
         $('#'+d.key+' #answer').text(d.answer);
       }
-      $( '#slider' ).slider(options);
+      $( '#'+d.key+' #slider' ).slider(options);
     },
     'aBuilderQuestion' : function(d) {
       
@@ -172,23 +172,22 @@ $(document).ready(function() {
       tmp.appendTo( '#assignments' );
       
     $( '#'+d.key+' #question-text' ).text( d.question.value ).autoResize({extraSpace : 0}).trigger('keydown');
-    $( '.autoResizable' ).autoResize({extraSpace : 0}).trigger('keydown');
+    $( '#'+d.key+' .autoResizable' ).autoResize({extraSpace : 0}).trigger('keydown');
     
     // Handle post-display stuff
     $.each(d._class, function(key, object) {
       var tmp = postDisplay[object];
       if (tmp) tmp(d);
-    });
-    
+    });    
   }
   
   //
   // Load the question stream
   //
-  navPage = 0;
-  firstRun = true;
+  var navPage = 0;
+  var myCache = [];
   var reloadStream = function() { 
-    $.getJSON('/ajax/stream',{'segment': navPage}, function(data) {
+    var loadWithData = function(data) {
       if (data == '') return;
       $( "#assignments" ).empty();
       data.assignments.forEach( function( d ) {
@@ -208,8 +207,8 @@ $(document).ready(function() {
           $('#prevPage').hide();
         }
         
-        if ( firstRun ) {
-          firstRun = false;
+        if ( myCache.length <= 1 ) {
+          
           $( "#logout" ).attr("href", data.logout);
         
           //
@@ -223,51 +222,17 @@ $(document).ready(function() {
             navPage--;
             reloadStream();
           });
-        
-          //
-          // Set up autoresizing text areas
-          //
-          $('.autoResizable').autoResize({
-              // On resize:
-              onResize : function() {
-                  $(this).css({opacity:0.8});
-              },
-              // After resize:
-              animateCallback : function() {
-                  $(this).css({opacity:1});
-              },
-              // Quite slow animation:
-              animateDuration : 300,
-              // More extra space:
-              extraSpace : 10
-          }).trigger('keydown');
-
-          //
-          // Set up default text construct
-          //
-          $(function() {
-            $(".defaultText").focus(function(srcc)
-            {
-                if ($(this).val() == $(this)[0].title)
-                {
-                    $(this).removeClass("defaultTextActive");
-                    $(this).val("");
-                }
-            });
-
-            $(".defaultText").blur(function()
-            {
-                if ($(this).val() == "")
-                {
-                    $(this).addClass("defaultTextActive");
-                    $(this).val($(this)[0].title);
-                }
-            });
-
-            $(".defaultText").blur();
-          });
+          
         }
-    });
+    }
+    if ( !(navPage in myCache) ) {
+      $.getJSON('/ajax/stream',{'segment': navPage}, function(data) {
+        myCache.push(data);
+        loadWithData(data);
+      });
+    } else {
+      loadWithData(myCache[navPage]);
+    }
   }
   reloadStream();
   

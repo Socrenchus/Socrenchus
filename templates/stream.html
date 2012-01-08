@@ -33,79 +33,9 @@
         <a id="logout" name="logout">Logout</a>
         <img id='logo' src='/static/logo.jpg'>
       </div>
-      <!--<table id="table-top">
-      <tr>
-        <td>
-          <h1>Socrenchus&nbsp;</h1>
-          
-        </td>
-        <td>
-          <h2>> Online Learning Experiment</h2>
-        </td>
-      </tr>
-      <table>-->
       <div style="height:54px;"></div>
       <div id="learn">
         <ul id="assignments" class="sortable ui-helper-reset">
-          
-        <script id="shortAnswerQuestionTemplate" type="text/x-jquery-tmpl">
-          <li id="${key}" class="question">
-            <div class="inner-question">
-              <textarea id='question-text' name=${key} readonly></textarea> 
-
-              <textarea id="answer" class="defaultText autoResizable no-selection" title="enter your response here" {{if answer}}readonly{{/if}}>{{if answer}}${answer.value}{{/if}}</textarea>
-
-              </br>
-              {{if !answer || answer.length == 0}}
-              <button id="submit" class="submitArea" value="submit">Submit</button>
-              {{else confident}}
-              <a class="submitArea">Score: ${score*100}%</a>
-              {{/if}}
-              
-            </div>
-          </li>
-        </script>
-        <script id="graderQuestionTemplate" type="text/x-jquery-tmpl">
-          <li id="${key}" class="question">
-            <div class="inner-question">
-              <textarea id='question-text' name=${key} readonly></textarea> 
-              
-              <textarea id="answerInQuestion" class="defaultText autoResizable no-selection" readonly>${answerInQuestion.value}</textarea>
-              
-              <br/><br/>
-              <div id="slider" name="${key}"></div>
-              <br/>
-              You give this answer <span id="answer" name="${key}">0</span> out of 100.
-              <br/>
-              {{if !answer && answer != 0 }}
-              <button id="submit" class="submitArea" value="submit">Submit</button>
-              {{/if}}
-
-            </div>
-          </li>
-        </script>
-        <script id="questionStatsTemplate" type="text/x-jquery-tmpl">
-          <li id="${key}" class="question">
-            <div class="inner-question">
-              <textarea id='question-text' name=${key} readonly></textarea> 
-              <div id="share">
-              <b>Share this link with your students:</b>
-              <br/>
-              <input type='textbox' value='http://${window.location.host}/${answer.key}' style='text-align:left;width:100%;float:left;' readonly />
-              <span class="addthis_toolbox addthis_default_style" addthis:url='http://${window.location.host}/${answer.key}'>
-              <a class="addthis_button_preferred_1"></a>
-              <a class="addthis_button_preferred_2"></a>
-              <a class="addthis_button_preferred_3"></a>
-              <a class="addthis_button_preferred_4"></a>
-              <a class="addthis_button_compact"></a>
-              </span>
-              </div>
-              </br>
-              <div id='chart' name='${key}' style="width:100%;height:200px"></div>
-                  <a class="submitArea" href='/${key}/report.csv'>Download Report</a>
-              </div>
-          </li>
-        </script>
         </ul>
         <ul id="templates">
           <li id="intro" class="question">
@@ -119,6 +49,64 @@
               
               <br/>
           </li>
+          <script id="shortAnswerQuestionTemplate" type="text/x-jquery-tmpl">
+            <li id="${key}" class="question">
+              <div class="inner-question">
+                <textarea id='question-text' name=${key} readonly></textarea> 
+
+                <textarea id="answer" class="defaultText autoResizable no-selection" title="enter your response here" {{if answer}}readonly{{/if}}>{{if answer}}${answer.value}{{/if}}</textarea>
+
+                </br>
+                {{if !answer || answer.length == 0}}
+                <button id="submit" class="submitArea" value="submit">Submit</button>
+                {{else confident}}
+                <a class="submitArea">Score: ${score*100}%</a>
+                {{/if}}
+
+              </div>
+            </li>
+          </script>
+          <script id="graderQuestionTemplate" type="text/x-jquery-tmpl">
+            <li id="${key}" class="question">
+              <div class="inner-question">
+                <textarea id='question-text' name=${key} readonly></textarea> 
+
+                <textarea id="answerInQuestion" class="defaultText autoResizable no-selection" readonly>${answerInQuestion.value}</textarea>
+
+                <br/><br/>
+                <div id="slider" name="${key}"></div>
+                <br/>
+                You give this answer <span id="answer" name="${key}">0</span> out of 100.
+                <br/>
+                {{if !answer && answer != 0 }}
+                <button id="submit" class="submitArea" value="submit">Submit</button>
+                {{/if}}
+
+              </div>
+            </li>
+          </script>
+          <script id="questionStatsTemplate" type="text/x-jquery-tmpl">
+            <li id="${key}" class="question">
+              <div class="inner-question">
+                <textarea id='question-text' name=${key} readonly></textarea> 
+                <div id="share">
+                <b>Share this link with your students:</b>
+                <br/>
+                <input type='textbox' value='http://${window.location.host}/${answer.key}' style='text-align:left;width:100%;float:left;' readonly />
+                <span class="addthis_toolbox addthis_default_style" addthis:url='http://${window.location.host}/${answer.key}'>
+                <a class="addthis_button_preferred_1"></a>
+                <a class="addthis_button_preferred_2"></a>
+                <a class="addthis_button_preferred_3"></a>
+                <a class="addthis_button_preferred_4"></a>
+                <a class="addthis_button_compact"></a>
+                </span>
+                </div>
+                </br>
+                <div id='chart' name='${key}' style="width:100%;height:200px"></div>
+                    <a class="submitArea" href='/${key}/report.csv'>Download Report</a>
+                </div>
+            </li>
+          </script>
         </ul>
       </div>
       <span id="prevPage">
