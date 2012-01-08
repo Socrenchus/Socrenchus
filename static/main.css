@@ -14,6 +14,10 @@ h1 {
   color: #FFFFFF;
 }
 
+textarea[readonly] {
+  color: #595454;
+}
+
 #logo {
   height: 100px;
   margin-left: 35px;
@@ -70,6 +74,7 @@ h2 {
   overflow: hidden;
   resize: none;
   outline: 0px none transparent;
+  color: black;
 }
 
 #prevPage {

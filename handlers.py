@@ -112,8 +112,8 @@ class StreamHandler(webapp.RequestHandler):
     else:
       sid = int(sid)
     
-    start = sid*5
-    end = start+5
+    start = sid*15
+    end = start+15
 
     
     ud = UserData.get_or_insert(str(users.get_current_user().user_id()))

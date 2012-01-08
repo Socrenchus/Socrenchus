@@ -194,7 +194,7 @@ $(document).ready(function() {
           loadQuestion( d );
         });
 
-        if (data.assignments.length >= 5) {
+        if (data.assignments.length >= 15) {
           $('#nextPage').show();
         } else {
           $('#intro').clone().appendTo( '#assignments' );
