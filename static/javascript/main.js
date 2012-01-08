@@ -180,6 +180,7 @@ $(document).ready(function() {
   // Load the question stream
   //
   navPage = 0;
+  firstRun = true;
   var reloadStream = function() { 
     $.getJSON('/ajax/stream',{'segment': navPage}, function(data) {
       if (data == '') return;
@@ -188,28 +189,34 @@ $(document).ready(function() {
           loadQuestion( d );
         });
 
-        $( "#logout" ).attr("href", data.logout);
-        
         if (data.assignments.length >= 5) {
           $('#nextPage').show();
-          $('#nextPage').click(function(obj) {
-            navPage++;
-            reloadStream();
-          });
         } else {
-          $('#intro').appendTo( '#assignments' );
+          $('#intro').clone().appendTo( '#assignments' );
           $('#nextPage').hide();
         }
         
         if (navPage > 0) {
           $('#prevPage').show();
+        } else {
+          $('#prevPage').hide();
+        }
+        
+        if ( firstRun ) {
+          firstRun = false;
+          $( "#logout" ).attr("href", data.logout);
+        
+          //
+          // Set up paging
+          //
+          $('#nextPage').click(function(obj) {
+            navPage++;
+            reloadStream();
+          });
           $('#prevPage').click(function(obj) {
             navPage--;
             reloadStream();
           });
-        } else {
-          $('#prevPage').hide();
-        }
         
           //
           // Set up autoresizing text areas
@@ -253,6 +260,7 @@ $(document).ready(function() {
 
             $(".defaultText").blur();
           });
+        }
     });
   }
   reloadStream();
