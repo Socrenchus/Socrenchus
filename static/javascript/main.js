@@ -196,10 +196,6 @@ $(document).ready(function() {
         navPage++;
         reloadStream();
       });
-      $('#prevPage').click(function(obj) {
-        navPage--;
-        reloadStream();
-      });
 
     }
     
@@ -225,7 +221,7 @@ $(document).ready(function() {
         if (myCache == null) {
           myCache = data.assignments;
           initializeStuff(data);
-        } else myCache.concat(data.assignments);
+        } else myCache = myCache.concat(data.assignments);
         loadWithData(myCache.slice(start,start+pageSize));
       });
     } else {
