@@ -72,6 +72,27 @@ h2 {
   outline: 0px none transparent;
 }
 
+#prevPage {
+  float: left;
+  position: relative;
+  margin-left: 10px;
+  top: -25px;
+  display: none;
+}
+
+#nextPage {
+  float: right;
+  position: relative;
+  top: -25px;
+  margin-right: 10px;
+  diplay: none;  
+}
+
+#nextPage a, #prevPage a {
+  color: blue;
+  font-weight: bold;
+}
+
 .no-selection {
   outline: 0px none transparent;
 }
@@ -87,7 +108,7 @@ h2 {
   margin-right: 44px;
 }
 
-.template {
+#templates {
   display: none;
 }
 
