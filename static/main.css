@@ -91,6 +91,10 @@ h2 {
   font-weight: bold;
 }
 
+#grader {
+  margin-bottom: -35px;
+}
+
 .no-selection {
   outline: 0px none transparent;
 }
@@ -102,7 +106,7 @@ h2 {
 }
 
 .inner-question {
-  margin-left: 44px;
+  margin-left: 36px;
   margin-right: 44px;
 }
 

@@ -104,25 +104,24 @@ $(document).ready(function() {
     'aBuilderQuestion' : function(d) {
       if (d.answer) {
         var item = $('#templates > #stats').clone();
-        item.find('#assignment-text').text(d.answer.value);
         item.attr('id', d.key);
-        var questionURL = 'http://'+window.location.host+'/'+d.key;
+        var questionURL = 'http://'+window.location.host+'/'+d.answer.key;
         item.find('#share > input').attr('value', questionURL);
         item.find('#addThis').attr('addthis:url', questionURL);
         item.find('#report').attr('href','/'+d.key+'/report.csv');
         return item;
       }
       var item = getQuestionTemplate['aShortAnswerQuestion'](d);
-      var txt = 'Think of the first question you want to ask your students...';
+      var txt = 'It should be something that will help you lead into the rest of your material. It should also have at least one right answer.';
       item.find('#assignment-text').text(txt);
       return item;
     },
     'aFollowUpBuilderQuestion' : function(d) {
       var item = getQuestionTemplate['aBuilderQuestion'](d);
       if (!d.answer) {
-        var txt = 'What do you want to ask a student after they answer this question...';
+        var txt = 'What will you ask your students next...';
         item.find('#assignment-text').text(txt);
-      } else item.find('#assignment-text').text(d.question.value);
+      }
       
       return item;
     }
@@ -172,6 +171,8 @@ $(document).ready(function() {
         item.appendTo( '#assignments' );
         
       item.find('#question-text').text(d.question.value).autoResize().trigger('keydown');
+    } else if (prepend) {
+      $('#'+d.question.key).prependTo( '#assignments' );
     }
     
     // Execute preparation by class

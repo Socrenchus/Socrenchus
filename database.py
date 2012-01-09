@@ -83,7 +83,7 @@ class Assignment(polymodel.PolyModel):
   Models a generic assignment
   """
   user = model.UserProperty(auto_current_user_add = True)
-  time = model.DateTimeProperty(auto_now = True)
+  time = model.DateTimeProperty(auto_now_add = True)
 # parent = assigned item
   
   @classmethod
@@ -133,6 +133,12 @@ class aQuestion(Assignment):
     """
     Assigns follow up questions.
     """
+    # fix order
+    ud = UserData.get_or_insert(str(user.user_id()))
+    ud.assignments.remove(self.key)
+    ud.assignments.append(self.key)
+    ud.put()
+    
     result = []
     for c in Connection.query(ancestor=self.key.parent()):
       result.append(aShortAnswerQuestion.assign(c.target))
@@ -481,7 +487,8 @@ class aBuilderQuestion(aQuestion):
     """
     Get the builder question.
     """
-    return Question.get_or_insert('builderQuestion').key
+    txt = 'What is the first quesiton you would like to ask?'
+    return Question.get_or_insert('builderQuestion', value=txt).key
   
   @classmethod
   def getInstance(cls, item, user=None):
@@ -507,13 +514,14 @@ class aBuilderQuestion(aQuestion):
     self.answer = Question(value=answer).put()
     self.put()
     
-    return [self, aFollowUpBuilderQuestion.assign(self.answer)]
+    return [aFollowUpBuilderQuestion.assign(self.answer), self]
     
   def __json__(self):
     output = aQuestion.__json__(self)
     output['gradeDistribution'] = [0 for i in range(11)]
     output['confidentGradeDistribution'] = [0 for i in range(11)]
     if self.answer:
+      output['question'] = self.answer
       for a in self.answer.get().answers:
         ans = a.get()
         d = int(round(ans.correctness*10.0))
@@ -522,6 +530,8 @@ class aBuilderQuestion(aQuestion):
             output['confidentGradeDistribution'][d] += 1
           else:
             output['gradeDistribution'][d] += 1
+    else:
+      output['question'] = self.key.parent()
 
     return output
     
