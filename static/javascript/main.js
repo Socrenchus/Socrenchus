@@ -58,7 +58,7 @@ $(document).ready(function() {
       
       var item = $('#templates > #question').clone();
       item.attr('id', d.key);
-      item.find('#question-text').text(d.question);
+      item.find('#question-text').text(d.question.value);
       item.find('#submit').hide();
       item.find('#score').hide();
       item.find('#grader').hide();
@@ -81,7 +81,7 @@ $(document).ready(function() {
     'aGraderQuestion' : function(d) {
       var item = getQuestionTemplate['aQuestion'](d);
       item.find('#grader').show();
-      item.find('#answer').text(d.answerInQuestion.value);
+      item.find('#answer').text(d.answerInQuestion.value).attr('readonly','readonly');
       var options = {
           'slide': function( event, ui ) {
             item.find('#grade').text(ui.value);
@@ -100,11 +100,9 @@ $(document).ready(function() {
       return item;
     },
     'aBuilderQuestion' : function(d) {
-      d.question = {
-        value:'Think of the first question you want to ask your students...'
-      };
       if (d.answer) {
         var item = $('#templates > #questionStats').clone();
+        item.find('#question-text').text(d.answer.value);
         item.attr('id', d.key);
         var questionURL = 'http://'+window.location.host+'/'+d.key;
         item.find('#share > input').attr('value', questionURL);
@@ -112,7 +110,19 @@ $(document).ready(function() {
         item.find('#report').attr('href','/'+d.key+'/report.csv');
         return item;
       }
-      return getQuestionTemplate['aShortAnswerQuestion'](d);
+      var item = getQuestionTemplate['aShortAnswerQuestion'](d);
+      var txt = 'Think of the first question you want to ask your students...';
+      item.find('#question-text').text(txt);
+      return item;
+    },
+    'aFollowUpBuilderQuestion' : function(d) {
+      var item = getQuestionTemplate['aBuilderQuestion'](d);
+      if (!d.answer) {
+        var txt = 'What do you want to ask a student after they answer the following...\n\n';
+        item.find('#question-text').text(txt+d.question.value);
+      } else item.find('#question-text').text(d.question.value);
+      
+      return item;
     }
   };
   
@@ -120,7 +130,6 @@ $(document).ready(function() {
   var postDisplay = {
     'aBuilderQuestion' : function(d) {
       if (d.answer) {
-        $( '#'+d.key+' > div > #question-text' ).text( d.answer.value ).trigger('keydown');
         addthis.toolbox('.addthis_toolbox');
         var plot1 = [];
         var plot2 = [];
@@ -163,7 +172,7 @@ $(document).ready(function() {
     else
       questionTemplate.appendTo( '#assignments' );
       
-    $( '#'+d.key+' > div > #question-text' ).text( d.question.value ).autoResize({extraSpace : 0}).trigger('keydown');
+    $( '#'+d.key+' > div > #question-text' ).autoResize({extraSpace : 0}).trigger('keydown');
     $( '#'+d.key+' > div > .autoResizable' ).autoResize({extraSpace : 0}).trigger('keydown');
     
     // Handle post-display stuff
