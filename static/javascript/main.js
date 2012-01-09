@@ -37,84 +37,97 @@ $(document).ready(function() {
   if (urlPathArray.length == 2 && urlPathArray[1])
     $.get('/ajax/answer', {'question_id': urlPathArray[1]});
   
-  //
-  // Compile templates
-  //
-  var templates = [
-  'questionStatsTemplate',
-  'graderQuestionTemplate',
-  'shortAnswerQuestionTemplate'
-  ]; 
-  $.each(templates, function(key, object) { $( '#'+object ).template( object ) });
-  
-  
-  // Define message objects by class
-  var createMessageObject = function(d) {
-    var messageObj = {'question_id': d.key, 'answer': [], 'class': d._class }
-    $.each(d._class, function(key, object) {
-      switch ( object ) {
-        case 'aConfidentGraderQuestion':
-        case 'aGraderQuestion':
-          messageObj.answer = $('#'+d.key+' #answer').text();
-          break;
-        case 'aBuilderQuestion':
-        case 'aShortAnswerQuestion':
-          messageObj.answer = $('#'+d.key+' #answer').val();
-          break;
+  // Answer the question (on submit)
+  var answerQuestion = function( qid, ans ) {
+    window.history.pushState("", "", '/');
+    scrollTo(0,0);
+        
+    $.getJSON('/ajax/answer', {'question_id':qid,'answer':ans}, function(data) {
+      if (data) {
+        for ( var i=0; i<data.length; i++ ){
+          $('#'+data[i].key).remove();
+          loadQuestion( data[i], true );
+        }
       }
     });
-    return messageObj;
   }
   
   // Define pre-display functions by class
   var getQuestionTemplate = {
+    'aQuestion' : function(d) {
+      
+      var item = $('#templates > #question').clone();
+      item.attr('id', d.key);
+      item.find('#question-text').text(d.question);
+      item.find('#submit').hide();
+      item.find('#score').hide();
+      item.find('#grader').hide();
+
+      return item;
+    },
     'aShortAnswerQuestion' : function(d) {
-      d.confident = d.answer && (d.answer.confidence >= 0.5);
-      if (d.answer)
-        d.score = d.answer.correctness;
-      return 'shortAnswerQuestionTemplate';
+      var item = getQuestionTemplate['aQuestion'](d);
+      if (d.answer || d.answer == 0) {
+        item.find('#answer').text(d.answer.value).attr('readonly','readonly');
+        if (d.answer.confidence >= 0.5)
+          item.find('#score').text('Score: '+d.answer.correctness*100+'%').show();
+      } else {
+        item.find('#submit').click(function() {
+          answerQuestion(d.key, item.find('#answer').val());
+        }).show();
+      }
+      return item;
     },
     'aGraderQuestion' : function(d) {
-      d.question.author = {'nickname':'Personal Assistant'};
-      return 'graderQuestionTemplate';
+      var item = getQuestionTemplate['aQuestion'](d);
+      item.find('#grader').show();
+      item.find('#answer').text(d.answerInQuestion.value);
+      var options = {
+          'slide': function( event, ui ) {
+            item.find('#grade').text(ui.value);
+          }
+      };
+      if (!d.answer && d.answer != 0) {
+        item.find('#submit').click(function() {
+          answerQuestion(d.key, item.find('#grade').text());
+        }).show();
+      } else {
+        options['disabled'] = true;
+        options['value'] = d.answer;
+        item.find('#grade').text(d.answer);
+      }
+      item.find('#slider').slider(options);
+      return item;
     },
     'aBuilderQuestion' : function(d) {
       d.question = {
         value:'Think of the first question you want to ask your students...'
       };
       if (d.answer) {
-        return 'questionStatsTemplate';
+        var item = $('#templates > #questionStats').clone();
+        item.attr('id', d.key);
+        var questionURL = 'http://'+window.location.host+'/'+d.key;
+        item.find('#share > input').attr('value', questionURL);
+        item.find('#addThis').attr('addthis:url', questionURL);
+        item.find('#report').attr('href','/'+d.key+'/report.csv');
+        return item;
       }
-      return 'shortAnswerQuestionTemplate';
+      return getQuestionTemplate['aShortAnswerQuestion'](d);
     }
   };
   
   // Called just after display, by class
   var postDisplay = {
-    'aGraderQuestion' : function(d) {
-      var options = {
-          'slide': function( event, ui ) {
-            $('#'+d.key+' #answer').text(ui.value);
-          }
-      };
-      if (d.answer || d.answer == 0) {
-        options['disabled'] = true;
-        options['value'] = d.answer;
-        $('#'+d.key+' #answer').text(d.answer);
-      }
-      $( '#'+d.key+' #slider' ).slider(options);
-    },
     'aBuilderQuestion' : function(d) {
-      
       if (d.answer) {
-        $( '#'+d.key+' #question-text' ).text( d.answer.value ).trigger('keydown');
+        $( '#'+d.key+' > div > #question-text' ).text( d.answer.value ).trigger('keydown');
         addthis.toolbox('.addthis_toolbox');
         var plot1 = [];
         var plot2 = [];
         if (d.hasOwnProperty('gradeDistribution')) {
           $.each(d.gradeDistribution, function(key, object) { plot1.push([key*10,object]) });
           $.each(d.confidentGradeDistribution, function(key, object) { plot2.push([key*10,object]) });
-          $.plot($('#'+d.key+' #chart'), [ {
+          $.plot($('#'+d.key+' > div > #chart'), [ {
             label: "Graded by Algorithm",
             data: plot1,
             bars: {show: true, barWidth: 10, align:'center'},
@@ -137,39 +150,21 @@ $(document).ready(function() {
     prepend = typeof(prepend) != 'undefined' ? prepend : false;
     if (d.answer == undefined) d.answer = null;
     
-    // Answer the question (on submit)
-    var answerQuestion = function( eventObj ) {
-      if (eventObj.target.id == 'submit') {
-        window.history.pushState("object or string", "Title", '/');
-        scrollTo(0,0);
-        
-        $.getJSON('/ajax/answer', createMessageObject(d), function(data) {
-          if (data) {
-            for ( var i=0; i<data.length; i++ ){
-              $('#'+data[i].key).remove();
-              loadQuestion( data[i], true );
-            }
-          }
-        });
-      }
-    }
-    
     // Execute preparation by class
-    var questionTemplate = 'errorTemplate';
+    var questionTemplate = null;
     $.each(d._class, function(key, object) {
       var tmp = getQuestionTemplate[object];
       if (tmp) questionTemplate = tmp(d);
     });
     
     // Render template
-    var tmp = $.tmpl( questionTemplate, d ).click(answerQuestion);
     if (prepend)
-      tmp.prependTo( '#assignments' );
+      questionTemplate.prependTo( '#assignments' );
     else
-      tmp.appendTo( '#assignments' );
+      questionTemplate.appendTo( '#assignments' );
       
-    $( '#'+d.key+' #question-text' ).text( d.question.value ).autoResize({extraSpace : 0}).trigger('keydown');
-    $( '#'+d.key+' .autoResizable' ).autoResize({extraSpace : 0}).trigger('keydown');
+    $( '#'+d.key+' > div > #question-text' ).text( d.question.value ).autoResize({extraSpace : 0}).trigger('keydown');
+    $( '#'+d.key+' > div > .autoResizable' ).autoResize({extraSpace : 0}).trigger('keydown');
     
     // Handle post-display stuff
     $.each(d._class, function(key, object) {

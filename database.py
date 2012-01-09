@@ -498,7 +498,7 @@ class aBuilderQuestion(aQuestion):
   
   @classmethod
   def builderForQuestion(cls, question_key):
-    return cls.query(cls.answer==question_key, ancestor=aBuilderQuestion.getItem()).get()  
+    return cls.query(cls.answer==question_key).get()
 
   def submitAnswer(self, answer):
     """
