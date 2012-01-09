@@ -47,44 +47,45 @@
           </li>
           <li id="question" class="question">
             <div class="inner-question">
-              <textarea id='question-text' readonly></textarea> 
-
-              <textarea id="answer" class="defaultText autoResizable no-selection"></textarea>
+              <textarea id='question-text' class='autoResizable' readonly></textarea> 
               
-              <div id="grader">
-                <br/>
-                <div id="slider" name="${key}"></div>
-                <br/>
-                You give this answer <span id="grade">0</span> out of 100.
-              </div>
-
-              </br>
-
-              <button id="submit" class="submitArea" value="submit">Submit</button>
-
-              <a id="score" class="submitArea"></a>
+              <ul id='content' class='ui-helper-reset'></ul>
 
             </div>
           </li>
-          <li id="questionStats" class="question">
-            <div class="inner-question">
-              <textarea id='question-text' readonly></textarea> 
-              <div id="share">
+          <li id="assignment">
+            <textarea id='assignment-text' class='autoResizable' readonly></textarea> 
+            <textarea id="answer" class="defaultText autoResizable no-selection"></textarea>
+            
+            <div id="grader">
+              <br/>
+              <div id="slider"></div>
+              <br/>
+              You give this answer <span id="grade">0</span> out of 100.
+            </div>
+
+            </br>
+
+            <button id="submit" class="submitArea" value="submit">Submit</button>
+
+            <a id="score" class="submitArea"></a>
+          </li>
+          <li id="stats" class="question">
+            <div id="share">
               <b>Share this link with your students:</b>
               <br/>
               <input type='textbox' style='text-align:left;width:100%;float:left;' readonly />
               <span id="addThis" class="addthis_toolbox addthis_default_style">
-              <a class="addthis_button_preferred_1"></a>
-              <a class="addthis_button_preferred_2"></a>
-              <a class="addthis_button_preferred_3"></a>
-              <a class="addthis_button_preferred_4"></a>
-              <a class="addthis_button_compact"></a>
+                <a class="addthis_button_preferred_1"></a>
+                <a class="addthis_button_preferred_2"></a>
+                <a class="addthis_button_preferred_3"></a>
+                <a class="addthis_button_preferred_4"></a>
+                <a class="addthis_button_compact"></a>
               </span>
-              </div>
-              </br>
-              <div id='chart' style="width:100%;height:200px"></div>
-                  <a id='report' class="submitArea">Download Report</a>
-              </div>
+            </div>
+            </br>
+            <div id='chart' style="width:100%;height:200px"></div>
+            <a id='report' class="submitArea">Download Report</a>
           </li>
         </ul>
       </div>

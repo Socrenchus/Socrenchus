@@ -56,9 +56,8 @@ $(document).ready(function() {
   var getQuestionTemplate = {
     'aQuestion' : function(d) {
       
-      var item = $('#templates > #question').clone();
+      var item = $('#templates > #assignment').clone();
       item.attr('id', d.key);
-      item.find('#question-text').text(d.question.value);
       item.find('#submit').hide();
       item.find('#score').hide();
       item.find('#grader').hide();
@@ -67,6 +66,8 @@ $(document).ready(function() {
     },
     'aShortAnswerQuestion' : function(d) {
       var item = getQuestionTemplate['aQuestion'](d);
+      item.find('#assignment-text').text('Answer the question above to the best of your ability.');
+      
       if (d.answer || d.answer == 0) {
         item.find('#answer').text(d.answer.value).attr('readonly','readonly');
         if (d.answer.confidence >= 0.5)
@@ -81,6 +82,7 @@ $(document).ready(function() {
     'aGraderQuestion' : function(d) {
       var item = getQuestionTemplate['aQuestion'](d);
       item.find('#grader').show();
+      item.find('#assignment-text').text('Grade the following answer to the above question.');
       item.find('#answer').text(d.answerInQuestion.value).attr('readonly','readonly');
       var options = {
           'slide': function( event, ui ) {
@@ -101,8 +103,8 @@ $(document).ready(function() {
     },
     'aBuilderQuestion' : function(d) {
       if (d.answer) {
-        var item = $('#templates > #questionStats').clone();
-        item.find('#question-text').text(d.answer.value);
+        var item = $('#templates > #stats').clone();
+        item.find('#assignment-text').text(d.answer.value);
         item.attr('id', d.key);
         var questionURL = 'http://'+window.location.host+'/'+d.key;
         item.find('#share > input').attr('value', questionURL);
@@ -112,15 +114,15 @@ $(document).ready(function() {
       }
       var item = getQuestionTemplate['aShortAnswerQuestion'](d);
       var txt = 'Think of the first question you want to ask your students...';
-      item.find('#question-text').text(txt);
+      item.find('#assignment-text').text(txt);
       return item;
     },
     'aFollowUpBuilderQuestion' : function(d) {
       var item = getQuestionTemplate['aBuilderQuestion'](d);
       if (!d.answer) {
-        var txt = 'What do you want to ask a student after they answer the following...\n\n';
-        item.find('#question-text').text(txt+d.question.value);
-      } else item.find('#question-text').text(d.question.value);
+        var txt = 'What do you want to ask a student after they answer this question...';
+        item.find('#assignment-text').text(txt);
+      } else item.find('#assignment-text').text(d.question.value);
       
       return item;
     }
@@ -136,7 +138,7 @@ $(document).ready(function() {
         if (d.hasOwnProperty('gradeDistribution')) {
           $.each(d.gradeDistribution, function(key, object) { plot1.push([key*10,object]) });
           $.each(d.confidentGradeDistribution, function(key, object) { plot2.push([key*10,object]) });
-          $.plot($('#'+d.key+' > div > #chart'), [ {
+          $.plot($('#'+d.key+' > #chart'), [ {
             label: "Graded by Algorithm",
             data: plot1,
             bars: {show: true, barWidth: 10, align:'center'},
@@ -159,6 +161,19 @@ $(document).ready(function() {
     prepend = typeof(prepend) != 'undefined' ? prepend : false;
     if (d.answer == undefined) d.answer = null;
     
+    // Render the question
+    if (!$('#'+d.question.key).length) {
+      var item = $('#templates > #question').clone();
+      item.attr('id', d.question.key);
+      
+      if (prepend)
+        item.prependTo( '#assignments' );
+      else
+        item.appendTo( '#assignments' );
+        
+      item.find('#question-text').text(d.question.value).autoResize().trigger('keydown');
+    }
+    
     // Execute preparation by class
     var questionTemplate = null;
     $.each(d._class, function(key, object) {
@@ -167,13 +182,13 @@ $(document).ready(function() {
     });
     
     // Render template
+    var str = '#'+d.question.key+' > div > #content';
     if (prepend)
-      questionTemplate.prependTo( '#assignments' );
+      questionTemplate.prependTo( str );
     else
-      questionTemplate.appendTo( '#assignments' );
+      questionTemplate.appendTo( str );
       
-    $( '#'+d.key+' > div > #question-text' ).autoResize({extraSpace : 0}).trigger('keydown');
-    $( '#'+d.key+' > div > .autoResizable' ).autoResize({extraSpace : 0}).trigger('keydown');
+    $( '#'+d.key ).find('.autoResizable').autoResize({extraSpace : 0}).trigger('keydown');
     
     // Handle post-display stuff
     $.each(d._class, function(key, object) {

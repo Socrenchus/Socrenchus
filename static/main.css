@@ -68,7 +68,7 @@ h2 {
   float: right;
 }
 
-#question-text {
+#question-text, #assignment-text {
   border: none;
   width: 100%;
   overflow: hidden;
@@ -126,8 +126,17 @@ h2 {
   color: #a1a1a1; font-style: italic;
 }
 
-#assignments li { 
-  margin: 60px 5px 44px 5px;
+#assignments li{ 
+  margin: 60px 0px 44px 0px;
+}
+
+#content li { 
+  margin: 0px 10px 44px 5px;
+  padding-left: 10px;
+}
+
+#content {
+  border-left: 1px solid #ebebeb;
 }
 
 .ui-state-hover {
