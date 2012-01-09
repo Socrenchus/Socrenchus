@@ -134,7 +134,7 @@ class aQuestion(Assignment):
     Assigns follow up questions.
     """
     # fix order
-    ud = UserData.get_or_insert(str(user.user_id()))
+    ud = UserData.get_or_insert(str(self.user.user_id()))
     ud.assignments.remove(self.key)
     ud.assignments.append(self.key)
     ud.put()
