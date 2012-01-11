@@ -1,5 +1,5 @@
 body {
-  font-size: 11px;
+  font-size: 13px;
   font-family: 'Lucida Grande';
 }
 
@@ -12,6 +12,11 @@ a {
 h1 {
   text-align: right;
   color: #FFFFFF;
+}
+
+textarea {
+  font-size: 13px;
+  font-family: 'Lucida Grande';
 }
 
 textarea[readonly] {
@@ -41,15 +46,6 @@ h2 {
   -moz-border-radius-bottomleft: 10px;
   -webkit-border-bottom-left-radius: 10px;
   margin: auto;
-}
-
-#share {
-  background-color: #F0F0F0;
-  border: 5px solid lightGray;
-  padding: 10px;
-  padding-right: 15px;
-  -moz-border-radius: 10px;
-  -webkit-border-radius: 10px;
 }
 
 #logout {
@@ -131,7 +127,8 @@ h2 {
 }
 
 .defaultTextActive {
-  color: #a1a1a1; font-style: italic;
+  color: #a1a1a1; 
+  font-style: italic;
 }
 
 #assignments li{ 
@@ -149,4 +146,8 @@ h2 {
 
 .ui-state-hover {
   opacity: 0.6;
+}
+
+#report {
+  margin-left: 30px;
 }

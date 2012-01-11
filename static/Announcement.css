@@ -22,17 +22,6 @@ h2 {
   color: #444444;
 }
 
-#main {
-  background-color: #FFFFFF;
-  width: 576px;
-  border: 2px solid #ebebeb;
-  -moz-border-radius-bottomright: 10px;
-  -webkit-border-bottom-right-radius: 10px;
-  -moz-border-radius-bottomleft: 10px;
-  -webkit-border-bottom-left-radius: 10px;
-  margin: auto;
-}
-
 #logout {
   float: right;
   position: relative;

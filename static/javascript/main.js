@@ -67,15 +67,28 @@ $(document).ready(function() {
     'aShortAnswerQuestion' : function(d) {
       var item = getQuestionTemplate['aQuestion'](d);
       item.find('#assignment-text').text('Answer the question above to the best of your ability.');
-      
+      var answer = item.find('#answer');
       if (d.answer || d.answer == 0) {
-        item.find('#answer').text(d.answer.value).attr('readonly','readonly');
+        answer.text(d.answer.value).attr('readonly','readonly');
         if (d.answer.confidence >= 0.5)
           item.find('#score').text('Score: '+d.answer.correctness*100+'%').show();
       } else {
-        item.find('#submit').click(function() {
+        var submit = item.find('#submit').click(function() {
           answerQuestion(d.key, item.find('#answer').val());
-        }).show();
+        });
+        answer.focusin(function() {
+          submit.show();
+          if (answer.text() == answer.attr('title')) {
+            answer.text('');
+            answer.removeClass('defaultTextActive');
+          }
+        }).focusout(function() {
+          submit.hide();
+          if (answer.text() == '') {
+            answer.text(answer.attr('title'));
+            answer.addClass('defaultTextActive');
+          }
+        }).focusout();
       }
       return item;
     },
@@ -89,16 +102,20 @@ $(document).ready(function() {
             item.find('#grade').text(ui.value);
           }
       };
+      var slider = item.find('#slider');
       if (!d.answer && d.answer != 0) {
-        item.find('#submit').click(function() {
+        var submit = item.find('#submit').click(function() {
           answerQuestion(d.key, item.find('#grade').text());
-        }).show();
+        });
+        slider.focusin(function () {
+          submit.show();
+        });
       } else {
         options['disabled'] = true;
         options['value'] = d.answer;
         item.find('#grade').text(d.answer);
       }
-      item.find('#slider').slider(options);
+      slider.slider(options);
       return item;
     },
     'aBuilderQuestion' : function(d) {

@@ -28,7 +28,7 @@ from database import *
 
 _DEBUG = True
 
-class ExperimentOneHandler(webapp.RequestHandler):
+class CreateQuestionHandler(webapp.RequestHandler):
 
   def get(self):
     """
@@ -138,7 +138,7 @@ def main():
   options = [
     ('/ajax/stream', StreamHandler),
     (r'/ajax/answer', AnswerQuestionHandler),
-    ('/experiments/1', ExperimentOneHandler),
+    ('/teach', ExperimentOneHandler),
     (r'/(.*)/report.csv', GradeReport),
     ('/login', LoginHander),
     ('/.*', StaticPageServer),
