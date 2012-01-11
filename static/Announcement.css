@@ -1,21 +1,6 @@
-body {
-  font: normal 13px arial,sans-serif;
-}
-
-a {
-  color: #B3B3B3;
-  cursor: pointer;
-  text-decoration: none;
-}
 
 h1 {
   text-align: right;
-}
-
-#logo {
-  height: 100px;
-  margin-left: 35px;
-  margin-top: 15px;
 }
 
 
@@ -40,7 +25,7 @@ h2 {
 #main {
   background-color: #FFFFFF;
   width: 576px;
-  border: 1px solid #0bebeb;
+  border: 2px solid #ebebeb;
   -moz-border-radius-bottomright: 10px;
   -webkit-border-bottom-right-radius: 10px;
   -moz-border-radius-bottomleft: 10px;
@@ -51,17 +36,9 @@ h2 {
 #logout {
   float: right;
   position: relative;
-  color: #0bebeb;
+  color: #ebebeb;
   top: 0px;
   right: 5px;
-}
-
-#table-top {
-  width: 556px;
-  background-color: #FFFFFF;
-  position: absolute;
-  overflow: hidden;
-  padding-left: 20px;
 }
 
 #hello {

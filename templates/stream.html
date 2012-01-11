@@ -9,7 +9,7 @@
 </script>
     <script type="text/javascript" src="/static/javascript/autoresize.jquery.min.js">
 </script>
-<!--[if lte IE 8]><script language="javascript" type="text/javascript" src="excanvas.min.js"></script><![endif]-->
+<!--[if IE 8]><script language="javascript" type="text/javascript" src="excanvas.min.js"></script><![endif]-->
 <script type="text/javascript" src="http://s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4eff18ed1735c2b6"></script>
 <script type="text/javascript" src="/static/javascript/jquery.flot.min.js">
 </script>
@@ -24,12 +24,11 @@
     </title>
   </head>
   <body>
-    <div id="tabs">
+    <div id="main">
       <div id="table-top">
         <a id="logout" name="logout">Logout</a>
-        <img id='logo' src='/static/logo.jpg'>
+        <img id='logo' src='/static/logo.png'>
       </div>
-      <div style="height:54px;"></div>
       <div id="learn">
         <ul id="assignments" class="sortable ui-helper-reset">
         </ul>
@@ -71,6 +70,9 @@
             <a id="score" class="submitArea"></a>
           </li>
           <li id="stats">
+            <div id='chart' style="width:100%;height:200px"></div>
+            <a id='report' class="submitArea">Download Report</a>
+            <br/>
             <div id="share">
               <b>Share this question with your students:</b>
               <br/>
@@ -83,9 +85,6 @@
                 <a class="addthis_button_compact"></a>
               </span>
             </div>
-            </br>
-            <div id='chart' style="width:100%;height:200px"></div>
-            <a id='report' class="submitArea">Download Report</a>
           </li>
         </ul>
       </div>

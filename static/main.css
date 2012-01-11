@@ -21,7 +21,10 @@ textarea[readonly] {
 #logo {
   height: 100px;
   margin-left: 35px;
-  margin-top: 15px;
+}
+
+#learn {
+  margin-top: 100px;
 }
 
 h2 {
@@ -30,9 +33,9 @@ h2 {
   color: #FFFFFF;
 }
 
-#tabs {
+#main {
   width: 576px;
-  border: 1px solid #0bebeb;
+  border: 2px solid #ebebeb;
   -moz-border-radius-bottomright: 10px;
   -webkit-border-bottom-right-radius: 10px;
   -moz-border-radius-bottomleft: 10px;
@@ -41,8 +44,8 @@ h2 {
 }
 
 #share {
-  background-color: #DC8D31;
-  border: 5px solid #1D6DB6;
+  background-color: #F0F0F0;
+  border: 5px solid lightGray;
   padding: 10px;
   padding-right: 15px;
   -moz-border-radius: 10px;
@@ -52,16 +55,17 @@ h2 {
 #logout {
   float: right;
   position: relative;
-  color: #0bebeb;
+  color: #ebebeb;
   top: 0px;
   right: 5px;
 }
 
 #table-top {
   width: 576px;
-  background-color: #FFFFFF;
   position: absolute;
   overflow: hidden;
+  background-color: lightGray;
+  border-bottom: 2px solid #ebebeb;
 }
 
 .submitArea {
@@ -131,7 +135,7 @@ h2 {
 }
 
 #assignments li{ 
-  margin: 60px 0px 44px 0px;
+  margin: 0px 0px 0px 0px;
 }
 
 #content li { 

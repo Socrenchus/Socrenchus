@@ -116,8 +116,9 @@ class StaticPageServer(webapp.RequestHandler):
   Serves the static pages after determining login status.
   """
   def get(self):
-    if users.get_current_user():
-      path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'stream.html'))
+    user = users.get_current_user()
+    if user and (_DEBUG or UserData.get_by_id(user.user_id())):
+        path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'stream.html'))
     else:
       path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'index.html'))
     

@@ -431,7 +431,7 @@ class aConfidentGraderQuestion(aGraderQuestion):
     """
     minAns = Answer()
     minAns.confidence = 1.0
-    existing = [x for x in aConfidentGraderQuestion.query(ancestor=self.key.parent())]
+    existing = aConfidentGraderQuestion.query(ancestor=self.key.parent()).fetch()
     parent = self.key.parent().get()
     for ans in parent.answers:
       a = ans.get()
