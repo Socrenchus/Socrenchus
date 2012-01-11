@@ -138,7 +138,7 @@ def main():
   options = [
     ('/ajax/stream', StreamHandler),
     (r'/ajax/answer', AnswerQuestionHandler),
-    ('/teach', ExperimentOneHandler),
+    ('/teach', CreateQuestionHandler),
     (r'/(.*)/report.csv', GradeReport),
     ('/login', LoginHander),
     ('/.*', StaticPageServer),

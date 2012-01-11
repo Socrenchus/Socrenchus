@@ -71,7 +71,7 @@ $(document).ready(function() {
       if (d.answer || d.answer == 0) {
         answer.text(d.answer.value).attr('readonly','readonly');
         if (d.answer.confidence >= 0.5)
-          item.find('#score').text('Score: '+d.answer.correctness*100+'%').show();
+          item.find('#score').text('Score: '+d.answer.correctness*100).show();
       } else {
         var submit = item.find('#submit').click(function() {
           answerQuestion(d.key, item.find('#answer').val());
