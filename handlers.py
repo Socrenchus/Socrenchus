@@ -26,7 +26,7 @@ from google.appengine.api import users
 from ndb import context
 from database import *
 
-_DEBUG = True
+_DEBUG = os.path.isfile('deploy.sh')
 
 class CreateQuestionHandler(webapp.RequestHandler):
 
