@@ -55,13 +55,11 @@
           });
           answer.focusin(function() {
             submit.show();
-            if (answer.text() === answer.attr('title')) {
-              answer.text('');
-              return answer.removeClass('defaultTextActive');
-            }
+            answer.removeClass('defaultTextActive');
+            if (answer.val() === answer.attr('title')) return answer.text('');
           }).focusout(function() {
-            submit.hide();
-            if (answer.text() === '') {
+            if (answer.val() === '') {
+              submit.hide();
               answer.text(answer.attr('title'));
               return answer.addClass('defaultTextActive');
             }

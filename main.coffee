@@ -44,12 +44,12 @@ $(document).ready ->
         )
         answer.focusin(->
           submit.show()
-          if answer.text() is answer.attr('title')
+          answer.removeClass('defaultTextActive')
+          if answer.val() is answer.attr('title')
             answer.text('')
-            answer.removeClass('defaultTextActive')
         ).focusout(->
-          submit.hide()
-          if answer.text() is ''
+          if answer.val() is ''
+            submit.hide()
             answer.text answer.attr('title')
             answer.addClass('defaultTextActive')
         ).focusout()
@@ -83,7 +83,6 @@ $(document).ready ->
         item = $('#templates > #stats').clone()
         item.attr('id', d.key)
         questionURL = "http://#{window.location.host}/#{d.answer.key}"
-        item.find('#share > input').attr('value', questionURL)
         item.find('#addThis').attr('addthis:url', questionURL)
         item.find('#report').attr('href', "/#{d.key}/report.csv")
         
