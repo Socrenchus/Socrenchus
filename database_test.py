@@ -98,7 +98,7 @@ class BuilderQuestionTests(DefaultTestClass):
     if not a:
       a = self._testAssignQuestion(aBuilderQuestion)
     
-    a = a.submitAnswer('What is the answer?')[0]
+    a = a.submitAnswer('What is the answer?')[1]
     
     # make sure the question was created
     self.assertTrue(isinstance(a.answer.get(), Question))
@@ -201,7 +201,7 @@ class FollowUpQuestionTests(DefaultTestClass):
     """
     a = self.testAssignFollowUpBuilderQuestion(follow)
     
-    a = a.submitAnswer('What\'s next?')[0]
+    a = a.submitAnswer('What\'s next?')[1]
     
     # make sure the question was created
     self.assertTrue(isinstance(a.answer.get(), Question))
