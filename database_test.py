@@ -107,7 +107,7 @@ class BuilderQuestionTests(DefaultTestClass):
     """
     Tests that the builder question gets serialized properly.
     """
-    pass
+    raise NotImplementedError
 
 class ShortAnswerQuestionTests(DefaultTestClass):
   """
@@ -124,13 +124,13 @@ class ShortAnswerQuestionTests(DefaultTestClass):
     """
     Tests that short answer questions behave as expected when answered.
     """
-    pass
+    raise NotImplementedError
     
   def testSerializeShortAnswerQuestion(self):
     """
     Tests that a short answer question gets serialized properly.
     """
-    pass
+    raise NotImplementedError
     
 class GraderQuestionTests(DefaultTestClass):
   """
@@ -150,13 +150,13 @@ class GraderQuestionTests(DefaultTestClass):
     """
     Tests that the grading works.
     """
-    pass
+    raise NotImplementedError
   
   def testSerializeGraderQuestion(self):
     """
     Tests that grader questions get serialized properly.
     """
-    pass
+    raise NotImplementedError
 
 class ConfidentGraderQuestionTests(DefaultTestClass):
   """
@@ -174,13 +174,13 @@ class ConfidentGraderQuestionTests(DefaultTestClass):
     """
     Tests that the grading works.
     """
-    pass
+    raise NotImplementedError
 
   def testSerializeConfidentGraderQuestion(self):
     """
     Tests that grader questions get serialized properly.
     """
-    pass
+    raise NotImplementedError
 
 class FollowUpQuestionTests(DefaultTestClass):
   """
@@ -231,16 +231,16 @@ class FollowUpQuestionTests(DefaultTestClass):
     """
     Tests that a followup question gets assigned retroactively.
     """
-    pass
+    raise NotImplementedError
     
   def testFollowUpStack(self):
     """
     Makes sure followup questions resolve in the right order.
     """
-    pass
+    raise NotImplementedError
     
   def testSerializeFollowUpQuestion(self):
     """
     Tests that a followup question gets serialized properly.
     """
-    pass
+    raise NotImplementedError
