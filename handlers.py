@@ -11,8 +11,7 @@ This tool is designed to be a one stop shop for discovering
 new and interesting topics, sharing knowledge, and learning
 at a cost much lower then at a university.
 
-This file contains all of the request handlers required to
-serve json to the client.
+This file contains all of the request handlers.
 """
 
 __author__ = 'Bryan Goldstein'
@@ -24,124 +23,57 @@ import os
 from google.appengine.ext import webapp
 from google.appengine.api import users
 from ndb import context
-from database import *
+from rpc import *
 
-_DEBUG = os.path.isfile('deploy.sh')
-
-class CreateQuestionHandler(webapp.RequestHandler):
-
-  def get(self):
-    """
-    Assigns the builder question, serves stream.html.
-    """
-    
-    aBuilderQuestion.assign()
-
-    self.redirect('/')
-    
-class AnswerQuestionHandler(webapp.RequestHandler):
-
-  def get(self):
-    """
-    Assign the specified question or grade it.
-    """
-    # obtain the question
-    qid = self.request.get('question_id')
-
-    # obtain the answer
-    ans = self.request.get_all('answer[]')
-    if not ans:
-      ans = self.request.get('answer')
-    
-    args = self.request.arguments()
-    theClass = aShortAnswerQuestion
-    if 'class[aGraderQuestion]' in args:
-      theClass = aGraderQuestion
-
-    q = model.Key(urlsafe=qid).get()
-    result = None
-    if isinstance(q,Question):
-      result = theClass.assign(q.key)
-    elif bool(ans):
-      result = q.submitAnswer(ans)
-        
-    json_response = json.encode(result)
-    
-    self.response.headers.add_header("Content-Type", 'application/json')
-    self.response.out.write(json_response)
-
-class StreamHandler(webapp.RequestHandler):
-  
-  def get(self):
-    """
-    Return the user's question stream.
-    """
-    
-    sid = self.request.get('segment')
-    if not sid:
-      sid = 0
-    else:
-      sid = int(sid)
-    
-    start = sid*15
-    end = start+15
-
-    
-    ud = UserData.get_or_insert(str(users.get_current_user().user_id()))
-    
-    assignment_keys = ud.assignments
-    assignment_keys.reverse()
-    assignments = model.get_multi(assignment_keys[start:end])
-    self.response.headers["Content-Type"] = "application/json"
-    self.response.out.write(json.encode({'logout': users.create_logout_url( "/" ), 'assignments':assignments}))
-    
-class GradeReport(webapp.RequestHandler):
-  """
-  Downloads a csv grade report.
-  """
-  def get(self, param):
-    q = model.Key(urlsafe=param).get().answer.get()
-    if q and q.author == users.User():
-      output = 'email, grade\n'
-      for a in q.answers:
-        a = a.get()
-        output += a.author.email()+', '
-        output += str(a.correctness*100)+'%\n'
-        
-      self.response.headers["Content-Type"] = "text/csv"
-      self.response.out.write(output)
-    
-class StaticPageServer(webapp.RequestHandler):
-  """
-  Serves the static pages after determining login status.
-  """
-  def get(self):
-    user = users.get_current_user()
-    if user and (_DEBUG or UserData.get_by_id(user.user_id())):
-        path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'stream.html'))
-    else:
-      path = os.path.join(os.path.dirname(__file__), os.path.join('templates', 'index.html'))
-    
-    self.response.out.write(open(path).read())
+_DEBUG = 'localhost' in users.create_logout_url( "/" )
     
 class LoginHander(webapp.RequestHandler):
   """
   Logs the user in and redirects.
   """
   def get(self):
-    if users.get_current_user():
-      self.redirect('/')
-    else:
-      self.redirect(users.create_login_url(self.request.uri))
+    self.redirect('/')
+    
+class RPCHandler(webapp.RequestHandler):
+  """ 
+  Allows access to functions defined in the RPCMethods class.
+  """
+
+  def __init__(self):
+    webapp.RequestHandler.__init__(self)
+    self.methods = RPCMethods()
+
+  def get(self):
+    func = None
+
+    action = self.request.get('action')
+    if action:
+      if action[0] == '_':
+        self.error(403) # access denied
+        return
+      else:
+        func = getattr(self.methods, action, None)
+
+    if not func:
+      self.error(404) # file not found
+      return
+
+    args = ()
+    while True:
+      key = 'arg%d' % len(args)
+      val = self.request.get(key)
+      if val:
+        args += (json.simplejson.loads(val),)
+      else:
+        break
+    result = func(*args)
+    self.response.out.write(json.encode(result))
 
 def main():
   options = [
-    ('/ajax/stream', StreamHandler),
-    (r'/ajax/answer', AnswerQuestionHandler),
-    ('/teach', CreateQuestionHandler),
-    (r'/(.*)/report.csv', GradeReport),
+    ('/rpc', RPCHandler),
+    #(r'/(.*)/report.csv', GradeReport),
     ('/login', LoginHander),
-    ('/.*', StaticPageServer),
   ]
   application = webapp.WSGIApplication(options, debug=_DEBUG)
   application = context.toplevel(application.__call__)

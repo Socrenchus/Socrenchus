@@ -14,7 +14,8 @@
 #
 # Extended and ported to NDB by Bryan Goldstein.
 
-"""Utility classes and methods for use with simplejson and appengine.
+"""
+Utility classes and methods for use with simplejson and appengine.
 
 Provides both a specialized simplejson encoder, ModelEncoder, designed to simplify
 encoding directly from NDB Models and query results to JSON. A helper function, 
@@ -29,50 +30,29 @@ import simplejson
 import time
 
 from google.appengine.api import users
-from ndb import model, polymodel, query
+from ndb import model, query
 
 
 class ModelEncoder(simplejson.JSONEncoder):
   
-  """Extends JSONEncoder to add support for NDB Models and query results.
+  """
+  Extends JSONEncoder to add support for NDB Models and query results.
   
   Adds support to simplejson JSONEncoders for NDB Models and query results by
   overriding JSONEncoder's default method.
   """
   
-  # TODO Improve coverage for all of NDB's Property types.
-
   def default(self, obj):
-    
     """Tests the input object, obj, to encode as JSON."""
 
-    if hasattr(obj, '__json__'):
-      return getattr(obj, '__json__')()
+    if hasattr(obj, 'to_dict'):
+      return getattr(obj, 'to_dict')()
 
     if isinstance(obj, query.Query):
       return list(obj)
 
-    elif isinstance(obj, model.Model):
-      properties = obj._properties.items()
-      output = {}
-      for field, value in properties:
-        if hasattr(obj, field):
-          output[field] = getattr(obj, field)
-      output['key'] = obj.key.urlsafe()
-      return output
-
     elif isinstance(obj, datetime.datetime):
-      output = {}
-      fields = ['day', 'hour', 'microsecond', 'minute', 'month', 'second',
-          'year']
-      methods = ['ctime', 'isocalendar', 'isoformat', 'isoweekday',
-          'timetuple']
-      for field in fields:
-        output[field] = getattr(obj, field)
-      for method in methods:
-        output[method] = getattr(obj, method)()
-      output['epoch'] = time.mktime(obj.timetuple())
-      return output
+      return obj.isoformat()
 
     elif isinstance(obj, time.struct_time):
       return list(obj)
@@ -83,7 +63,7 @@ class ModelEncoder(simplejson.JSONEncoder):
       for method in methods:
         output[method] = getattr(obj, method)()
       return output
-      
+
     elif isinstance(obj, model.Key):
       return obj.get()
 
@@ -91,7 +71,8 @@ class ModelEncoder(simplejson.JSONEncoder):
 
 
 def encode(input):
-  """Encode an input Model object as JSON
+  """
+  Encode an input Model object as JSON
 
     Args:
       input: A Model object or DB property.
@@ -102,5 +83,5 @@ def encode(input):
     Raises:
       TypeError: Typically occurs when an input object contains an unsupported
         type.
-    """
+  """
   return ModelEncoder().encode(input)

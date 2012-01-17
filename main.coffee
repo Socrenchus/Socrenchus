@@ -1,21 +1,65 @@
 $(document).ready ->
   
   ###
+  Make a request to the server with optional callback.
+  ###
+  serverRequest = (function_name, opt_argv) ->
+    opt_argv = new Array() unless opt_argv
+    callback = null
+    len = opt_argv.length
+    if len > 0 and typeof opt_argv[len - 1] is "function"
+      callback = opt_argv[len - 1]
+      opt_argv.length--
+    query = "action=" + encodeURIComponent(function_name)
+    i = 0
+
+    while i < opt_argv.length
+      key = "arg" + i
+      val = JSON.stringify(opt_argv[i])
+      query += "&" + key + "=" + encodeURIComponent(val)
+      i++
+    query += "&time=" + new Date().getTime()
+    
+    $.ajax(
+      type: "GET",
+      url: '/rpc',
+      data: query,
+      dataType: "json",
+      complete: (xhr,textStatus) ->
+        if textStatus is 'parsererror'
+          $('#welcome').show()
+          $('#logout').text('Login')
+      success: (data, textStatus) ->
+        callback(data)
+    )
+    
+    
+  ###
+  Handle prepending questions to stream.
+  ###
+  prependQuestions = (data) ->
+    if data
+      i = 0
+      while i < data.length
+        $('#' + data[i].key).remove()
+        loadQuestion(data[i], true)
+        i++
+  
+  ###
   Send answer and handle reply.
   ###
   answerQuestion = (qid, ans) ->
-    window.history.pushState('', '', '/')
-    scrollTo(0, 0)
-    $.getJSON('/ajax/answer',
-      question_id: qid
-      answer: ans, 
-      (data) ->
-        if data
-          i = 0
-          while i < data.length
-            $('#' + data[i].key).remove()
-            loadQuestion(data[i], true)
-            i++)
+    serverRequest('answer', [qid, ans, (data) ->
+      window.scrollTo(0,0)
+      prependQuestions(data)
+    ])
+    
+  ###
+  Send assign and handle reply.
+  ###
+  assignQuestion = (qid) ->
+    serverRequest('assign', [qid, prependQuestions])
+        
 
   ###
   Build a question template by class.
@@ -165,14 +209,36 @@ $(document).ready ->
     
     questionTemplate.render()
 
+  ###
+  Load the stream.
+  ###
   navPage = 0
-  myCache = null
+  isFirstRun = true
   do reloadStream = ->
     initializeStuff = (data) ->
+      $('#logout').text('Logout')
       $('#logout').attr('href', data.logout)
-      $('#nextPage').click (obj) ->
+      classes = $('#classes')
+      classes.selectable(
+        unselecting: (event, ui) ->
+          $('.ui-unselecting').addClass('ui-last-selected')
+        unselected: (event, ui) ->
+          unless classes.find('.ui-selecting').length
+            $('.ui-last-selected').addClass('ui-selected')
+          $('.ui-last-selected').removeClass('ui-last-selected')
+        selected: (event, ui) ->
+          if ui.selected.id is 'create'
+            window.location = '/newclass'
+      ).mouseover((obj) ->
+        classes.children().show()
+      ).mouseout((obj) ->
+        classes.children().hide()
+        classes.find('.ui-selected, .ui-selecting').show()
+      )
+      $('#nextPage').click((obj) ->
         navPage++
         reloadStream()
+      )
 
     loadWithData = (data) ->
       data.forEach (d) ->
@@ -186,20 +252,13 @@ $(document).ready ->
 
     pageSize = 15
     start = pageSize * navPage
-    if not myCache or myCache.length >= start
-      $.getJSON('/ajax/stream',
-        segment: navPage, 
-        (data) ->
-          return  if data is ''
-          unless myCache?
-            myCache = data.assignments
-            initializeStuff(data)
-          else
-            myCache = myCache.concat(data.assignments)
-          return loadWithData(myCache.slice(start, start + pageSize))
-        )
-    else
-      return loadWithData(myCache.slice(start, start + pageSize))
+    serverRequest('stream', [navPage, (data) ->
+      return if data is ''
+      if isFirstRun
+        isFirstRun = false
+        initializeStuff(data)
+      return loadWithData(data.assignments)
+    ])
   
   ###
   Check for database key in URL.
@@ -207,6 +266,6 @@ $(document).ready ->
   do ->
     urlPathString = decodeURI(window.location.pathname)
     urlPathArray = urlPathString.split('/')
-    if urlPathArray.length is 2 and urlPathArray[1]
-      answerQuestion(urlPathArray[1], '')
+    if urlPathArray.length is 3 and urlPathArray[2]
+      assignQuestion(urlPathArray[2], '')
   

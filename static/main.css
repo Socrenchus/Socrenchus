@@ -11,7 +11,35 @@ a {
 
 h1 {
   text-align: right;
-  color: #FFFFFF;
+}
+
+
+h2 {
+  padding-top:4px;
+  text-align: left;
+}
+
+.mediumText {
+  text-align: left;
+  font-size: 30px;
+  line-height: 45px;
+  color: #000;
+}
+
+.largeText {
+  font-size: 40px;
+  line-height: 60px;
+  color: #444444;
+}
+
+.smallText {
+  text-align: right;
+  font-size: 17px;
+}
+
+#welcome {
+  display: none;
+  padding: 10px 56px 5px 56px;
 }
 
 textarea {
@@ -58,8 +86,8 @@ h2 {
 
 #table-top {
   width: 576px;
+  height: 100px;
   position: absolute;
-  overflow: hidden;
   background-color: lightGray;
   border-bottom: 2px solid #ebebeb;
 }
@@ -149,5 +177,38 @@ h2 {
 }
 
 #report {
+  display: none;
   margin-left: 30px;
 }
+
+#classes {
+  position: absolute;
+  width: 150px;
+  top: 30px;
+  right: 45px;
+  border: 5px solid #ebebeb;
+  background-color: lightGray;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+}
+
+#classes .ui-selecting { 
+  background: #FECA40; 
+}
+#classes .ui-selected { 
+  display: block;
+  background: gray;
+  color: lightGray;
+}
+#classes li {
+  display: none;
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 3px;
+  padding: 0.4em;
+  font-size: 1.1em;
+  height: 18px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+}
+

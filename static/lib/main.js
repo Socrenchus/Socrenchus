@@ -2,28 +2,75 @@
 
   $(document).ready(function() {
     /*
-      Send answer and handle reply.
+      Make a request to the server with optional callback.
     */
-    var answerQuestion, getQuestionTemplate, loadQuestion, myCache, navPage, reloadStream;
-    answerQuestion = function(qid, ans) {
-      window.history.pushState('', '', '/');
-      scrollTo(0, 0);
-      return $.getJSON('/ajax/answer', {
-        question_id: qid,
-        answer: ans
-      }, function(data) {
-        var i, _results;
-        if (data) {
-          i = 0;
-          _results = [];
-          while (i < data.length) {
-            $('#' + data[i].key).remove();
-            loadQuestion(data[i], true);
-            _results.push(i++);
+    var answerQuestion, assignQuestion, getQuestionTemplate, isFirstRun, loadQuestion, navPage, prependQuestions, reloadStream, serverRequest;
+    serverRequest = function(function_name, opt_argv) {
+      var callback, i, key, len, query, val;
+      if (!opt_argv) opt_argv = new Array();
+      callback = null;
+      len = opt_argv.length;
+      if (len > 0 && typeof opt_argv[len - 1] === "function") {
+        callback = opt_argv[len - 1];
+        opt_argv.length--;
+      }
+      query = "action=" + encodeURIComponent(function_name);
+      i = 0;
+      while (i < opt_argv.length) {
+        key = "arg" + i;
+        val = JSON.stringify(opt_argv[i]);
+        query += "&" + key + "=" + encodeURIComponent(val);
+        i++;
+      }
+      query += "&time=" + new Date().getTime();
+      return $.ajax({
+        type: "GET",
+        url: '/rpc',
+        data: query,
+        dataType: "json",
+        complete: function(xhr, textStatus) {
+          if (textStatus === 'parsererror') {
+            $('#welcome').show();
+            return $('#logout').text('Login');
           }
-          return _results;
+        },
+        success: function(data, textStatus) {
+          return callback(data);
         }
       });
+    };
+    /*
+      Handle prepending questions to stream.
+    */
+    prependQuestions = function(data) {
+      var i, _results;
+      if (data) {
+        i = 0;
+        _results = [];
+        while (i < data.length) {
+          $('#' + data[i].key).remove();
+          loadQuestion(data[i], true);
+          _results.push(i++);
+        }
+        return _results;
+      }
+    };
+    /*
+      Send answer and handle reply.
+    */
+    answerQuestion = function(qid, ans) {
+      return serverRequest('answer', [
+        qid, ans, function(data) {
+          window.scrollTo(0, 0);
+          return prependQuestions(data);
+        }
+      ]);
+    };
+    /*
+      Send assign and handle reply.
+    */
+    assignQuestion = function(qid) {
+      return serverRequest('assign', [qid, prependQuestions]);
     };
     /*
       Build a question template by class.
@@ -101,7 +148,6 @@
           item = $('#templates > #stats').clone();
           item.attr('id', d.key);
           questionURL = "http://" + window.location.host + "/" + d.answer.key;
-          item.find('#share > input').attr('value', questionURL);
           item.find('#addThis').attr('addthis:url', questionURL);
           item.find('#report').attr('href', "/" + d.key + "/report.csv");
           /*
@@ -202,12 +248,37 @@
       }).trigger('keydown');
       return questionTemplate.render();
     };
+    /*
+      Load the stream.
+    */
     navPage = 0;
-    myCache = null;
+    isFirstRun = true;
     (reloadStream = function() {
       var initializeStuff, loadWithData, pageSize, start;
       initializeStuff = function(data) {
+        var classes;
+        $('#logout').text('Logout');
         $('#logout').attr('href', data.logout);
+        classes = $('#classes');
+        classes.selectable({
+          unselecting: function(event, ui) {
+            return $('.ui-unselecting').addClass('ui-last-selected');
+          },
+          unselected: function(event, ui) {
+            if (!classes.find('.ui-selecting').length) {
+              $('.ui-last-selected').addClass('ui-selected');
+            }
+            return $('.ui-last-selected').removeClass('ui-last-selected');
+          },
+          selected: function(event, ui) {
+            if (ui.selected.id === 'create') return window.location = '/newclass';
+          }
+        }).mouseover(function(obj) {
+          return classes.children().show();
+        }).mouseout(function(obj) {
+          classes.children().hide();
+          return classes.find('.ui-selected, .ui-selecting').show();
+        });
         return $('#nextPage').click(function(obj) {
           navPage++;
           return reloadStream();
@@ -226,22 +297,16 @@
       };
       pageSize = 15;
       start = pageSize * navPage;
-      if (!myCache || myCache.length >= start) {
-        return $.getJSON('/ajax/stream', {
-          segment: navPage
-        }, function(data) {
+      return serverRequest('stream', [
+        navPage, function(data) {
           if (data === '') return;
-          if (myCache == null) {
-            myCache = data.assignments;
+          if (isFirstRun) {
+            isFirstRun = false;
             initializeStuff(data);
-          } else {
-            myCache = myCache.concat(data.assignments);
           }
-          return loadWithData(myCache.slice(start, start + pageSize));
-        });
-      } else {
-        return loadWithData(myCache.slice(start, start + pageSize));
-      }
+          return loadWithData(data.assignments);
+        }
+      ]);
     })();
     /*
       Check for database key in URL.
@@ -250,8 +315,8 @@
       var urlPathArray, urlPathString;
       urlPathString = decodeURI(window.location.pathname);
       urlPathArray = urlPathString.split('/');
-      if (urlPathArray.length === 2 && urlPathArray[1]) {
-        return answerQuestion(urlPathArray[1], '');
+      if (urlPathArray.length === 3 && urlPathArray[2]) {
+        return assignQuestion(urlPathArray[2], '');
       }
     })();
   });

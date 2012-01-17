@@ -39,6 +39,12 @@ class Question(model.Model):
   author = model.UserProperty(auto_current_user_add=True)
   value = model.TextProperty()
   answers = model.KeyProperty(repeated=True)
+  tags = model.KeyProperty(repeated=True)
+  
+  def to_dict(self):
+    result = model.Model.to_dict(self)
+    result['key'] = self.key.urlsafe()
+    return result
 
 class Answer(model.Model):
   """
@@ -57,16 +63,27 @@ class Answer(model.Model):
     # TODO: implement a real check
     return (self.author == users.get_current_user())
 
-  def __json__(self):
-    prop_filter = ['value']
-    if self.canShowScore():
-      prop_filter += ['correctness', 'confidence', 'author']
-    properties = self._properties.items()
-    output = {}
-    for field, value in properties:
-      if hasattr(self, field) and field in prop_filter:
-        output[field] = getattr(self, field)
+  def to_dict(self):
+    output = model.Model.to_dict(self)
     return output
+
+class Tag(model.Model):
+  """
+  Models a tag.
+  """
+  classes = model.KeyProperty(repeated=True)
+  questions = model.KeyProperty(repeated=True)
+
+class Class(model.Model):
+  """
+  Models a class.
+  """
+  value = model.StringProperty() # name of the class
+  tags = model.KeyProperty(repeated=True)
+  description = model.TextProperty()
+  questions = model.KeyProperty(repeated=True)
+  teachers = model.UserProperty(repeated=True)
+  students = model.UserProperty(repeated=True)
 
 ##########################
 ## User Model and Logic ##
@@ -77,6 +94,7 @@ class UserData(model.Model):
   Stores data specific to a user.
   """
   assignments = model.KeyProperty(repeated=True)
+  classes = model.KeyProperty(repeated=True)
 
 class Assignment(polymodel.PolyModel):
   """
@@ -119,6 +137,12 @@ class Assignment(polymodel.PolyModel):
     """
     self.put()
     return self
+    
+class aClass(Assignment):
+  """
+  Models user specific class data.
+  """
+  pass
 
 class aQuestion(Assignment):
   """
@@ -145,15 +169,11 @@ class aQuestion(Assignment):
       
     return result
 
-  def __json__(self):
-    properties = self._properties.items()
-    output = {}
-    for field, value in properties:
-      if hasattr(self, field):
-        output[field] = getattr(self, field)
+  def to_dict(self):
+    output = model.Model.to_dict(self)
     output['key'] = self.key.urlsafe()
     if self.key.parent():
-      output['question'] = self.key.parent().get()
+      output['question'] = self.key.parent().get().to_dict()
     output['_class'] = self.class_
     return output
 
@@ -198,15 +218,11 @@ class aShortAnswerQuestion(aQuestion):
     # assign the grading question
     return result
     
-  def __json__(self):
-    properties = self._properties.items()
-    output = {}
-    for field, value in properties:
-      if hasattr(self, field):
-        output[field] = getattr(self, field)
+  def to_dict(self):
+    output = aQuestion.to_dict(self)
     output['key'] = self.key.urlsafe()
     if self.key.parent():
-      output['question'] = self.key.parent().get()
+      output['question'] = self.key.parent().get().to_dict()
     if self.answer:
       output['score'] = self.answer.get().correctness
     output['_class'] = self.class_
@@ -516,8 +532,8 @@ class aBuilderQuestion(aQuestion):
     
     return [aFollowUpBuilderQuestion.assign(self.answer), self]
     
-  def __json__(self):
-    output = aQuestion.__json__(self)
+  def to_dict(self):
+    output = aQuestion.to_dict(self)
     output['gradeDistribution'] = [0 for i in range(11)]
     output['confidentGradeDistribution'] = [0 for i in range(11)]
     if self.answer:

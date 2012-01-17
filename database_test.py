@@ -131,7 +131,7 @@ class ShortAnswerQuestionTests(DefaultTestClass):
     Tests that a short answer question gets serialized properly.
     """
     raise NotImplementedError
-    
+
 class GraderQuestionTests(DefaultTestClass):
   """
   Make sure grader questions are functioning as they should.
@@ -162,20 +162,20 @@ class ConfidentGraderQuestionTests(DefaultTestClass):
   """
   Make sure grader questions are functioning as they should.
   """
-
+  
   def testAssignConfidentGraderQuestion(self):
     """
     Tests that the grader question gets assigned properly.
     """
     q = Question(answers=[Answer().put()]).put()
     self._testAssignQuestion(aConfidentGraderQuestion, q)
-
+    
   def testAnswerConfidentGraderQuestion(self):
     """
     Tests that the grading works.
     """
     raise NotImplementedError
-
+    
   def testSerializeConfidentGraderQuestion(self):
     """
     Tests that grader questions get serialized properly.
@@ -186,7 +186,7 @@ class FollowUpQuestionTests(DefaultTestClass):
   """
   Make sure everything related to followup questions is working.
   """
-    
+  
   def testAssignFollowUpBuilderQuestion(self, follow=None):
     """
     Tests assigning a followup builder question.
@@ -194,7 +194,7 @@ class FollowUpQuestionTests(DefaultTestClass):
     if not follow:
       follow = Question().put()
     return self._testAssignQuestion(aFollowUpBuilderQuestion, follow)
-    
+  
   def testAnswerFollowUpBuilderQuestion(self, follow=None):
     """
     Tests creation of a followup question.
@@ -207,7 +207,7 @@ class FollowUpQuestionTests(DefaultTestClass):
     self.assertTrue(isinstance(a.answer.get(), Question))
     
     return a
-    
+  
   def testAssignFollowUpQuestion(self):
     """
     Tests that followup question gets assigned when it should.
@@ -226,19 +226,19 @@ class FollowUpQuestionTests(DefaultTestClass):
     f = a.key.parent().parent()
     result = aShortAnswerQuestion.assign(f).submitAnswer('')
     self.assertEqual(len(result), 2)
-    
+  
   def testRetroAssignFollowUpQuesiton(self):
     """
     Tests that a followup question gets assigned retroactively.
     """
     raise NotImplementedError
-    
+  
   def testFollowUpStack(self):
     """
     Makes sure followup questions resolve in the right order.
     """
     raise NotImplementedError
-    
+  
   def testSerializeFollowUpQuestion(self):
     """
     Tests that a followup question gets serialized properly.
