@@ -182,12 +182,14 @@ h2 {
 }
 
 #classes {
+  display: none;
   position: absolute;
   width: 150px;
   top: 30px;
   right: 45px;
   border: 5px solid #ebebeb;
-  background-color: lightGray;
+  background-color: #2965AF;
+  color: white;
   -moz-border-radius: 10px;
   -webkit-border-radius: 10px;
 }
@@ -197,9 +199,14 @@ h2 {
 }
 #classes .ui-selected { 
   display: block;
-  background: gray;
-  color: lightGray;
+  color: black;
+  background: lightGray;
 }
+#classes .ui-mouseover {
+  color: black;
+  background: lightGray;
+}
+
 #classes li {
   display: none;
   overflow: hidden;
@@ -210,5 +217,9 @@ h2 {
   height: 18px;
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
+}
+
+#chart {
+  margin-bottom: 20px;
 }
 

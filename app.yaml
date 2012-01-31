@@ -5,7 +5,7 @@ api_version: 1
 
 handlers:
 
-- url: /(q/.+)?
+- url: /((q/.+)|newclass)?
   static_files: static/index.html
   upload: static/index.html
 
@@ -13,7 +13,7 @@ handlers:
   script: $PYTHON_LIB/apphosting/ext/admin/
   login: admin
 
-- url: /(login|rpc)
+- url: /(login|logout|rpc)(.*)
   script: handlers.py
   login: required
   

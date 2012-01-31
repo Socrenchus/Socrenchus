@@ -34,6 +34,13 @@ class LoginHander(webapp.RequestHandler):
   def get(self):
     self.redirect('/')
     
+class LogoutHander(webapp.RequestHandler):
+  """
+  Logs the user out and redirects.
+  """
+  def get(self):
+    self.redirect(users.create_logout_url( "/" ))
+    
 class RPCHandler(webapp.RequestHandler):
   """ 
   Allows access to functions defined in the RPCMethods class.
@@ -43,37 +50,47 @@ class RPCHandler(webapp.RequestHandler):
     webapp.RequestHandler.__init__(self)
     self.methods = RPCMethods()
 
-  def get(self):
+  def get(self, collection, key):
     func = None
 
-    action = self.request.get('action')
-    if action:
-      if action[0] == '_':
+    if not collection:
+      collection = self.request.get('action')
+
+    if collection:
+      if collection[0] == '_':
         self.error(403) # access denied
         return
       else:
-        func = getattr(self.methods, action, None)
+        func = getattr(self.methods, collection, None)
 
     if not func:
       self.error(404) # file not found
       return
-
-    args = ()
-    while True:
-      key = 'arg%d' % len(args)
-      val = self.request.get(key)
-      if val:
-        args += (json.simplejson.loads(val),)
-      else:
-        break
-    result = func(*args)
+    
+    obj = None
+    if self.request.body:
+      obj = json.simplejson.loads(self.request.body)
+    
+    result = func(key, obj)
     self.response.out.write(json.encode(result))
+    
+  def put(self, collection, key):
+    return self.get(collection, key)
+    
+class CollectionHandler(webapp.RequestHandler):
+  """
+  Handle Backbone.js collection sync calls.
+  """
+  pass
 
 def main():
   options = [
-    ('/rpc', RPCHandler),
     #(r'/(.*)/report.csv', GradeReport),
     ('/login', LoginHander),
+    ('/logout', LogoutHander),
+    (r'/rpc/(.*)/(.*)', RPCHandler),
+    (r'/rpc/(.*)()', RPCHandler),
+    (r'/rpc()()', RPCHandler)
   ]
   application = webapp.WSGIApplication(options, debug=_DEBUG)
   application = context.toplevel(application.__call__)

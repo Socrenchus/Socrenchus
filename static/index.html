@@ -1,44 +1,48 @@
 <!--Copyright 2011 Bryan Goldstein. All rights reserved.-->
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
-<html lang="en">
+<!DOCTYPE html PUBLIC '-//W3C//DTD HTML 4.01//EN'>
+<html lang='en'>
   <head>
-    <script type="text/javascript" src="/json2.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript">
+    <script src='//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js' type='text/javascript'>
 </script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js" type="text/javascript">
+    <script src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js' type='text/javascript'>
 </script>
-    <script type="text/javascript" src="/lib/autoresize.jquery.min.js">
+    <script type='text/javascript' src='/lib/autoresize.jquery.min.js'>
 </script>
-<!--[if IE 8]><script language="javascript" type="text/javascript" src="excanvas.min.js"></script><![endif]-->
-<script type="text/javascript" src="http://s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4eff18ed1735c2b6"></script>
-    <script type="text/javascript">var addthis_config={data_track_clickback: false}</script>
-<script type="text/javascript" src="/lib/jquery.flot.min.js">
+<!--[if IE 8]><script language='javascript' type='text/javascript' src='excanvas.min.js'></script><![endif]-->
+<script type='text/javascript' src='http://s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4eff18ed1735c2b6'></script>
+    <script type='text/javascript'>var addthis_config={data_track_clickback: false}</script>
+<script type='text/javascript' src='/lib/jqBarGraph.packed.js'>
 </script>
-<script type="text/javascript" src="/lib/jquery.flot.stack.min.js">
+<script type='text/javascript' src='http://documentcloud.github.com/underscore/underscore-min.js'></script>
+<script type='text/javascript' src='http://documentcloud.github.com/backbone/backbone-min.js'></script>
+<script type='text/javascript' src='/lib/milk.min.js'></script>
+    <script type='text/javascript' src='/lib/main.js'>
 </script>
-    <script type="text/javascript" src="/lib/main.js">
-</script>
-    <link href="/main.css" type="text/css" rel="stylesheet">
-    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/flick/jquery-ui.css" type="text/css" rel="stylesheet">
+    <link href='/main.css' type='text/css' rel='stylesheet'>
+    <link href='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/flick/jquery-ui.css' type='text/css' rel='stylesheet'>
     <title>
       Directed Learning
     </title>
   </head>
   <body>
-    <div id="main">
-      <div id="table-top">
-        <a id="logout" name="logout" href='/login'></a>
+    <div id='main'>
+      <div id='table-top'>
+        <a id='logout' name='logout' href='/login'></a>
         <img id='logo' src='/logo.png'>
+        <ul id='classes' class='ui-helper-reset'>
+          <li class='ui-selected'>Your classes...</li>
+          <li id='create'>Teach a class</li>
+        </ul>
       </div>
-      <div id="learn">
-              <div id="welcome">
+      <div id='learn'>
+              <div id='welcome'>
         <h1 class='mediumText'><i>WHAT IF</i> YOU HAD A <span class='largeText'>PERSONAL TUTOR</span> THAT REGULARLY MET WITH ALL YOUR PROFESSORS TO ADVOCATE FOR YOU AND TEACH YOU EVERYTHING YOU DON'T UNDERSTAND?<br/><hr/></h1><h1 class='mediumText'><i>WHAT IF</i> YOU HAD A <span class='largeText'>GRADER</span> FOR ALL YOUR CLASSES THAT WORKED WITH YOUR STUDENTS TO HELP YOU UNDERSTAND THEIR NEEDS?<br/><hr/></h1><h2 class='smallText mediumText'>GOODBYE <i>WHAT IF</i>, HELLO&nbsp;&nbsp;<span class='mediumText'>SOCRENCHUS</span></h2>
           </div>
-        <ul id="assignments" class="sortable ui-helper-reset">
+        <ul id='assignments' class='sortable ui-helper-reset'>
         </ul>
-        <ul id="templates">
-          <li id="intro" class="question">
-            <div class="inner-question">
+        <div id='templates'>
+          <script type='text/template' id='intro' class='question'>
+            <div class='inner-question'>
               <div id='question-text'>Welcome to Socrenchus, we have begun on the path to redesigning the educational experience for the information age, but we aren't quite there yet.
                 <br/><br/>
                 If you have an issue you can report it on the Google group <a href='https://groups.google.com/forum/#!forum/socrenchus'>here</a>. Enjoy what we have to offer so far!
@@ -47,48 +51,49 @@
               </div> 
               
               <br/>
-          </li>
-          <li id="question" class="question">
-            <div class="inner-question">
+          </script>
+          <script type='text/template' id='question' class='question'>
+            <div class='inner-question'>
               <textarea id='question-text' class='autoResizable' readonly></textarea> 
               
               <ul id='content' class='ui-helper-reset'></ul>
 
             </div>
-          </li>
-          <li id="assignment">
-            <textarea id='assignment-text' class='autoResizable' readonly></textarea> 
-            <textarea id="answer" class="defaultText autoResizable no-selection" title="Your response here..."></textarea>
+          </script>
+          <script type='text/template' id='assignment'>
+            <textarea id='assignment-text' class='autoResizable' readonly>    
+            </textarea>
+            <textarea id='answer' class='defaultText autoResizable no-selection' title='Your response here...'></textarea>
             
-            <div id="grader">
+            <div id='grader'>
               <br/>
-              <div id="slider"></div>
+              <div id='slider'></div>
               <br/>
-              <span id="grade">&#8593; Move slider to grade</span>
+              <span id='grade'>&#8593; Move slider to grade</span>
             </div>
 
             </br>
+            <button id='submit' class='submitArea' value='submit'>Submit</button>
 
-            <button id="submit" class="submitArea" value="submit">Submit</button>
-
-            <a id="score"></a>
-          </li>
-          <li id="stats">
-            <div id='chart' style="width:100%;height:200px"></div>
+            <a id='score'></a>
+          </script>
+          <script type='text/template' id='stats'>
+            <div id='chart'></div>
             <a id='report' >Download Report</a>
-            <div id="share" class="submitArea">
-              <span id="addThis" class="addthis_toolbox addthis_default_style">
-                <a class="addthis_button_preferred_1"></a>
-                <a class="addthis_button_preferred_2"></a>
-                <a class="addthis_button_preferred_3"></a>
-                <a class="addthis_button_preferred_4"></a>
-                <a class="addthis_button_compact"></a>
+            <textarea id='assignment-text' class='autoResizable' readonly>Share this with your students to get started...</textarea>
+            <div id='share' class='submitArea'>
+              <span id='addThis' class='addthis_toolbox addthis_default_style'>
+                <a class='addthis_button_preferred_1'></a>
+                <a class='addthis_button_preferred_2'></a>
+                <a class='addthis_button_preferred_3'></a>
+                <a class='addthis_button_preferred_4'></a>
+                <a class='addthis_button_compact'></a>
               </span>
             </div>
-          </li>
-        </ul>
+          </script>
+        </div>
       </div>
-      <span id="nextPage">
+      <span id='nextPage'>
         <a>More</a>
       </span>
     </div>

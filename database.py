@@ -43,7 +43,7 @@ class Question(model.Model):
   
   def to_dict(self):
     result = model.Model.to_dict(self)
-    result['key'] = self.key.urlsafe()
+    result['id'] = self.key.urlsafe()
     return result
 
 class Answer(model.Model):
@@ -82,7 +82,7 @@ class Class(model.Model):
   tags = model.KeyProperty(repeated=True)
   description = model.TextProperty()
   questions = model.KeyProperty(repeated=True)
-  teachers = model.UserProperty(repeated=True)
+  teacher = model.UserProperty()
   students = model.UserProperty(repeated=True)
 
 ##########################
@@ -171,10 +171,9 @@ class aQuestion(Assignment):
 
   def to_dict(self):
     output = model.Model.to_dict(self)
-    output['key'] = self.key.urlsafe()
+    output['id'] = self.key.urlsafe()
     if self.key.parent():
       output['question'] = self.key.parent().get().to_dict()
-    output['_class'] = self.class_
     return output
 
 class aShortAnswerQuestion(aQuestion):
@@ -220,12 +219,11 @@ class aShortAnswerQuestion(aQuestion):
     
   def to_dict(self):
     output = aQuestion.to_dict(self)
-    output['key'] = self.key.urlsafe()
+    output['id'] = self.key.urlsafe()
     if self.key.parent():
       output['question'] = self.key.parent().get().to_dict()
     if self.answer:
       output['score'] = self.answer.get().correctness
-    output['_class'] = self.class_
     return output
 
 class aNumericAnswerQuestion(aQuestion):
@@ -503,7 +501,7 @@ class aBuilderQuestion(aQuestion):
     """
     Get the builder question.
     """
-    txt = 'What is the first quesiton you would like to ask?'
+    txt = 'Follow the steps to create a new class...'
     return Question.get_or_insert('builderQuestion', value=txt).key
   
   @classmethod
@@ -527,7 +525,7 @@ class aBuilderQuestion(aQuestion):
     """
     Create the short answer question.
     """
-    self.answer = Question(value=answer).put()
+    self.answer = Question(value=answer[-1]).put()
     self.put()
     
     return [aFollowUpBuilderQuestion.assign(self.answer), self]
@@ -567,7 +565,10 @@ class aFollowUpBuilderQuestion(aBuilderQuestion):
     Adds the new question to follow the parent.
     """
     # submit answer as normal
-    result = aBuilderQuestion.submitAnswer(self, answer)
+    self.answer = Question(value=answer).put()
+    self.put()
+
+    result = [aFollowUpBuilderQuestion.assign(self.answer), self]
     
     # add the connection object
     Connection(parent=self.key.parent(),target=self.answer).put()

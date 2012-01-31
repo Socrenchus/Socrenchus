@@ -24,6 +24,58 @@ class RPCMethods:
     Defines the methods that can be RPCed.
     """
     
+    def assignments(self, key, obj):
+      """
+      Handles assignment related queries.
+      """
+      result = None
+      if key:
+        if obj:
+          """ update """          
+          # retrieve the assignment
+          q = model.Key(urlsafe=key).get()
+
+          # answer it
+          if 'answer' in obj.keys() and 'value' in obj['answer'].keys():
+            result = q.submitAnswer(obj['answer']['value'])
+            
+          # put/assign it
+          q.put()
+        else:
+          """ delete """          
+          pass
+      else:
+        if obj:
+          """ create """
+        else:
+          """ read """
+          result = self.stream(0)['assignments']
+
+      return result
+
+    
+    def questions(self, *args):
+      """
+      Handles question related queries.
+      """
+      result = None
+      if key:
+        if obj:
+          """ update """
+          pass
+        else:
+          """ delete """          
+          pass
+      else:
+        if obj:
+          """ create """
+          pass
+        else:
+          """ read """
+          pass
+
+      return result
+    
     def assign(self, *args):
       """
       Assign a question to the user.
@@ -47,7 +99,7 @@ class RPCMethods:
       key = str(args[0])
 
       # obtain the answer
-      ans = str(args[1])
+      ans = args[1]
 
       # retrieve the assignment
       q = model.Key(urlsafe=key).get()
@@ -84,4 +136,4 @@ class RPCMethods:
       """
       Creates a class for the user.
       """
-      pass
+      return [ aBuilderQuestion.assign() ]

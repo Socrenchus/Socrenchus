@@ -1,271 +1,225 @@
-$(document).ready ->
+$ ->
   
   ###
-  Make a request to the server with optional callback.
+  # Core Model and Logic 
   ###
-  serverRequest = (function_name, opt_argv) ->
-    opt_argv = new Array() unless opt_argv
-    callback = null
-    len = opt_argv.length
-    if len > 0 and typeof opt_argv[len - 1] is "function"
-      callback = opt_argv[len - 1]
-      opt_argv.length--
-    query = "action=" + encodeURIComponent(function_name)
-    i = 0
+  class Class extends Backbone.Model
+  class Question extends Backbone.Model
+  class Assignment extends Backbone.Model
+    defaults:
+      question: {}
+    answer: (ans) ->
+      @save({answer:{value:ans}},{success:@answered})
+      @clear()
+    answered: (model, response) ->
+      myAssignments.add(response)
+  
+  class Questions extends Backbone.Collection
+    model: Question
+  
+  myQuestions = new Questions()
+  
+  class Assignments extends Backbone.Collection
+    model: Assignment
+    url: '/rpc/assignments'
+    question: (q) -> @filter (a) -> a.get('question').id is q.id
+    add: (items) ->
+      super(items)
+      items = [items] unless items.length?
+      for item in items
+        unless myQuestions.get(item.question.id)
+          myQuestions.add(new Question(item.question))
+          
+  class Classes extends Backbone.Collection
+    model: Class
 
-    while i < opt_argv.length
-      key = "arg" + i
-      val = JSON.stringify(opt_argv[i])
-      query += "&" + key + "=" + encodeURIComponent(val)
-      i++
-    query += "&time=" + new Date().getTime()
-    
-    $.ajax(
-      type: "GET",
-      url: '/rpc',
-      data: query,
-      dataType: "json",
-      complete: (xhr,textStatus) ->
-        if textStatus is 'parsererror'
-          $('#welcome').show()
-          $('#logout').text('Login')
-      success: (data, textStatus) ->
-        callback(data)
-    )
-    
-    
-  ###
-  Handle prepending questions to stream.
-  ###
-  prependQuestions = (data) ->
-    if data
-      i = 0
-      while i < data.length
-        $('#' + data[i].key).remove()
-        loadQuestion(data[i], true)
-        i++
+  
+  myAssignments = new Assignments()
   
   ###
-  Send answer and handle reply.
+  # View
   ###
-  answerQuestion = (qid, ans) ->
-    serverRequest('answer', [qid, ans, (data) ->
-      window.scrollTo(0,0)
-      prependQuestions(data)
-    ])
+  
+  Templates = {}
+  Templates[e.id] = $(e).html() for e in $('#templates').children()
+  
+  class AssignmentView extends Backbone.View
+    tagName: 'li'
+    template: Templates.assignment
+    initialize: ->
+      @id = @model.id
+      @model.bind('change', @render, @)
+    render: ->
+      $(@el).html(@template)
+      @$('#score').hide()
+      @$('#submit').hide()
+      @$('#grader').hide()
+      $(@el)
+    remove: -> $(@el).remove()
+    clear: -> @model.destroy()
     
-  ###
-  Send assign and handle reply.
-  ###
-  assignQuestion = (qid) ->
-    serverRequest('assign', [qid, prependQuestions])
+  class aShortAnswerView extends AssignmentView
+    events:
+      'click #submit': 'answer'
+      'focusin' : 'focusin'
+      'focusout' : 'focusout'
+    render: ->
+      super()
+      @$('#assignment-text').text('Answer the question above to the best of your ability.')
+      
+      answer = @$('#answer').focusout()
+      a = @model.get('answer')
+      if a?
+        answer.text(a.value).attr('readonly', 'readonly')
+        @$('#score').text(a.correctness * 100).show()  if a.confidence >= 0.5
         
-
-  ###
-  Build a question template by class.
-  ###
-  getQuestionTemplate =
+      $(@el)
+    focusin: ->
+      answer = @$('#answer')
+      unless @model.get('answer')?
+        @$('#submit').show()
+        answer.removeClass('defaultTextActive')
+        answer.text('') if answer.val() is answer.attr('title')
+    focusout: ->
+      answer = @$('#answer')
+      if answer.val() is '' and not @model.get('answer')?
+        @$('#submit').hide()
+        answer.addClass('defaultTextActive')
+        answer.text(answer.attr('title'))
+    answer: ->
+      @model.answer(@$('#answer').val())
     
-    aQuestion: (d) ->
-      item = $('#templates > #assignment').clone()
-      item.attr('id', d.key)
-      item.find('#submit').hide()
-      item.find('#score').hide()
-      item.find('#grader').hide()
-      item.render = () -> # function called after template is placed
-      return item
+  class aGraderView extends AssignmentView
+    events:
+      'click #submit': 'answer'
+      'focusin #slider': 'focusin'
+    render: ->
+      super()
+      @$('#grader').show()
+      @$('#assignment-text').text('Grade the following answer to the above question.')
+      @$('#answer').text(@model.get('answerInQuestion').value).attr('readonly', 'readonly')
+      options = slide: (event, ui) =>
+        @$('#grade').text(ui.value)
 
-    aShortAnswerQuestion: (d) ->
-      item = getQuestionTemplate['aQuestion'](d)
-      item.find('#assignment-text').text('Answer the question above to the best of your ability.')
-      answer = item.find('#answer')
-      if d.answer or d.answer is 0
-        answer.text(d.answer.value).attr('readonly', 'readonly')
-        item.find('#score').text(d.answer.correctness * 100).show()  if d.answer.confidence >= 0.5
-      else
-        submit = item.find('#submit').click(->
-          answerQuestion(d.key, item.find('#answer').val())
-        )
-        answer.focusin(->
-          submit.show()
-          answer.removeClass('defaultTextActive')
-          if answer.val() is answer.attr('title')
-            answer.text('')
-        ).focusout(->
-          if answer.val() is ''
-            submit.hide()
-            answer.text answer.attr('title')
-            answer.addClass('defaultTextActive')
-        ).focusout()
-      return item
-
-    aGraderQuestion: (d) ->
-      item = getQuestionTemplate['aQuestion'](d)
-      item.find('#grader').show()
-      item.find('#assignment-text').text('Grade the following answer to the above question.')
-      item.find('#answer').text(d.answerInQuestion.value).attr('readonly', 'readonly')
-      options = slide: (event, ui) ->
-        item.find('#grade').text(ui.value)
-
-      slider = item.find('#slider')
-      if not d.answer and d.answer isnt 0
-        submit = item.find('#submit').click(->
-          answerQuestion(d.key, item.find('#grade').text())
-        )
-        slider.focusin ->
-          submit.show()
-          item.find('#grade').text('0')
-      else
+      a = @model.get('answer')
+      if a?
         options['disabled'] = true
-        options['value'] = d.answer
-        item.find('#grade').text(d.answer)
-      slider.slider(options)
-      return item
-
-    aBuilderQuestion: (d) ->
-      if d.answer
-        item = $('#templates > #stats').clone()
-        item.attr('id', d.key)
-        questionURL = "http://#{window.location.host}/#{d.answer.key}"
-        item.find('#addThis').attr('addthis:url', questionURL)
-        item.find('#report').attr('href', "/#{d.key}/report.csv")
-        
-        ###
-        Draw the plot and toolbox at template render time.
-        ###
-        item.render = () ->
-          addthis.toolbox('.addthis_toolbox')
-          plot1 = []
-          plot2 = []
-          if d.hasOwnProperty('gradeDistribution')
-            $.each(d.gradeDistribution, (key, object) ->
-              plot1.push [ key * 10, object ])
-            $.each(d.confidentGradeDistribution, (key, object) ->
-              plot2.push [ key * 10, object ])
-            $.plot($("##{d.key} > #chart"), [
-              label: 'Graded by Algorithm'
-              data: plot1
-              bars:
-                show: true
-                barWidth: 10
-                align: 'center'
-
-              stack: true
-            ,
-              label: 'Graded by You'
-              data: plot2
-              bars:
-                show: true
-                barWidth: 10
-                align: 'center'
-
-              stack: true
-             ],
-              yaxis:
-                show: true
-
-              xaxis:
-                show: true)
-        
-        return item
-      item = getQuestionTemplate['aShortAnswerQuestion'](d)
-      txt = 'It should be something that will help you lead into the rest of your material. It should also have at least one right answer.'
-      item.find('#assignment-text').text(txt)
-      return item
-
-    aFollowUpBuilderQuestion: (d) ->
-      item = getQuestionTemplate['aBuilderQuestion'](d)
-      unless d.answer
-        txt = 'What will you ask your students next...'
-        item.find('#assignment-text').text txt
-      return item
-  
-  ###
-  Load an individual question to the stream.
-  ###
-  loadQuestion = (d, prepend) ->
-    prepend = false if typeof (prepend) is 'undefined'
-    d.answer = null if d.answer is `undefined`
-    unless $('#' + d.question.key).length
-      item = $('#templates > #question').clone()
-      item.attr 'id', d.question.key
-      if prepend
-        item.prependTo '#assignments'
+        options['value'] = a
+        @$('#grade').text(a)
+      @$('#slider').slider(options)
+      $(@el)
+    focusin: ->
+      @$('#submit').show()
+    answer: ->
+      @model.answer(@$('#grade').text())
+      
+  class aFollowUpView extends aShortAnswerView
+    render: ->
+      unless @model.get('answer')?
+        @template = Templates.assignment
+        super()
+        @$('#assignment-text').text('What will you ask your students next...')
       else
-        item.appendTo '#assignments'
-      item.find('#question-text').text(d.question.value).autoResize().trigger('keydown')
-    else $('#' + d.question.key).prependTo '#assignments'  if prepend
-    questionTemplate = null
-    $.each d._class, (key, object) ->
-      tmp = getQuestionTemplate[object]
-      questionTemplate = tmp(d)  if tmp
+        @template = Templates.stats
+        super()
+        @$('#assignment-text').hide()
+        questionURL = "http://#{window.location.host}/#{@model.id}"
+        @$('#addThis').attr('addthis:url', questionURL)
+        @$('#report').attr('href', "/#{@model.id}/report.csv")
+        $(@el).ready => @draw()
+      
+      $(@el)
+      
+    draw: ->
+      data = []
+      sum = 0
+      if @model.get('gradeDistribution')?
+        gd = @model.get('gradeDistribution')
+        cgd = @model.get('confidentGradeDistribution')
+        for key, object of gd
+          data.push([ [object, cgd[key]], "#{key * 10}" ])
+          sum += object
+          sum += cgd[key]
+        if false and sum > 0
+          @$('#chart').jqbargraph(
+            'data': data
+            'width': 470
+            'colors': ['#242424','#437346'] 
+            'animate': false
+            'legends': ['Algorithm','You']
+            'legend': false
+            'barSpace': 0
+            )
+        else
+          @$('#chart').hide()
+          @$('#share').removeClass('submitArea')
+          @$('#addThis').addClass('addthis_32x32_style')
+      addthis.toolbox('.addthis_toolbox')
 
-    str = "##{d.question.key} > div > #content"
-    if prepend
-      questionTemplate.prependTo(str)
-    else
-      questionTemplate.appendTo(str)
-    $('#' + d.key).find('.autoResizable').autoResize(extraSpace: 0).trigger('keydown')
-    
-    questionTemplate.render()
+  
+  class QuestionView extends Backbone.View
+    tagName: 'li'
+    className: 'question'
+    template: Templates.question
+    initialize: ->
+      @id = @model.id
+    render: -> 
+      $(@el).html(@template)
+      @$('#question-text').text(@model.get('value'))
+      @addAll()
+      return $(@el)
+    addOne: (item) ->
+      a = null
+      switch item.get('class_').pop()
+        when 'aShortAnswerQuestion'
+          a = new aShortAnswerView({ model: item })
+        when 'aGraderQuestion', 'aConfidentGraderQuestion'
+          a = new aGraderView({ model: item })
+        when 'aFollowUpBuilderQuestion'
+          a = new aFollowUpView({ model: item })
+        else
+          a = new AssignmentView({ model: item })
+      $(a.render()).appendTo(@$('#content'))
+    addAll: ->
+      for item in @assignments()
+        @addOne(item)
+    assignments: -> myAssignments.question(@model)
+    remove: -> $(@el).remove()
+    clear: -> @model.destroy()
 
-  ###
-  Load the stream.
-  ###
-  navPage = 0
-  isFirstRun = true
-  do reloadStream = ->
-    initializeStuff = (data) ->
-      $('#logout').text('Logout')
-      $('#logout').attr('href', data.logout)
-      classes = $('#classes')
-      classes.selectable(
-        unselecting: (event, ui) ->
-          $('.ui-unselecting').addClass('ui-last-selected')
-        unselected: (event, ui) ->
-          unless classes.find('.ui-selecting').length
-            $('.ui-last-selected').addClass('ui-selected')
-          $('.ui-last-selected').removeClass('ui-last-selected')
-        selected: (event, ui) ->
-          if ui.selected.id is 'create'
-            window.location = '/newclass'
-      ).mouseover((obj) ->
-        classes.children().show()
-      ).mouseout((obj) ->
-        classes.children().hide()
-        classes.find('.ui-selected, .ui-selecting').show()
+  class StreamView extends Backbone.View
+    initialize: ->
+      myQuestions.bind('add',   @addOne, this)
+      myQuestions.bind('reset', @addAll, this)
+      myAssignments.fetch()
+    addOne: (item) ->
+      q = new QuestionView(
+        model: myQuestions.get(item.get('id'))
       )
-      $('#nextPage').click((obj) ->
-        navPage++
-        reloadStream()
-      )
-
-    loadWithData = (data) ->
-      data.forEach (d) ->
-        loadQuestion d
-
-      if data.length >= 15
-        $('#nextPage').show()
-      else
-        $('#intro').clone().appendTo('#assignments')
-        $('#nextPage').hide()
-
-    pageSize = 15
-    start = pageSize * navPage
-    serverRequest('stream', [navPage, (data) ->
-      return if data is ''
-      if isFirstRun
-        isFirstRun = false
-        initializeStuff(data)
-      return loadWithData(data.assignments)
-    ])
+      $(q.render()).appendTo(@el)
+    addAll: -> 
+      myQuestions.each(@addOne)
+    remove: -> $(@el).remove()
+    clear: -> @model.destroy()
+  
+  App = new StreamView({el: $('#assignments')})
   
   ###
-  Check for database key in URL.
+  # Routes
   ###
-  do ->
-    urlPathString = decodeURI(window.location.pathname)
-    urlPathArray = urlPathString.split('/')
-    if urlPathArray.length is 3 and urlPathArray[2]
-      assignQuestion(urlPathArray[2], '')
+  # TODO: fix router
+  class Workspace extends Backbone.Router
+    routes:
+      'newclass': 'newclass'
+      'q/:id' : 'assign'
+    newclass: ->
+      #$.get('/rpc/createClass')
+      #myAssignments.fetch()
+      b = new ClassBuilderView()
+      b.render()
+    assign: (id) ->
+      myAssignments.get(id)
+      myAssignments.fetch()
   
+  app_router = new Workspace()
+  app_router.newclass()
