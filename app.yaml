@@ -5,7 +5,7 @@ api_version: 1
 
 handlers:
 
-- url: /((q/.+)|newclass)?
+- url: /(\#.*)?
   static_files: static/index.html
   upload: static/index.html
 
