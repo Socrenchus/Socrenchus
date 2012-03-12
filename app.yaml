@@ -6,8 +6,8 @@ api_version: 1
 handlers:
 
 - url: /(\#.*)?
-  static_files: static/index.html
-  upload: static/index.html
+  static_files: client/static/index.html
+  upload: client/static/index.html
 
 - url: /admin/.*
   script: $PYTHON_LIB/apphosting/ext/admin/
