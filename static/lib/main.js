@@ -72,7 +72,8 @@
 
       PostView.prototype.render = function() {
         $(this.el).html(this.template);
-        return $(this.el).find('#content').text(this.get('content'));
+        $(this.el).find('#content').text(this.model.get('content'));
+        return $(this.el);
       };
 
       return PostView;
@@ -144,7 +145,7 @@
         pv = new PostView({
           model: p
         });
-        return $('assignments').append(pv.render());
+        return $('#assignments').append(pv.render());
       };
 
       return Workspace;

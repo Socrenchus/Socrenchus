@@ -31,7 +31,8 @@ $ ->
       @id = @model.id
     render: ->
       $(@el).html(@template)
-      $(@el).find('#content').text(@get('content'))
+      $(@el).find('#content').text(@model.get('content'))
+      return $(@el)
       
   class StreamView extends Backbone.View
     initialize: ->
@@ -67,7 +68,7 @@ $ ->
         responses: ''
       )
       pv = new PostView(model: p)
-      $('assignments').append(pv.render())
+      $('#assignments').append(pv.render())
       
   
   app_router = new Workspace()

@@ -1,0 +1,3 @@
+[submodule "client/omnipost"]
+	path = client/omnipost
+	url = git@github.com:Socrenchus/omnipost.git
