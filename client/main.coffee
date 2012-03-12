@@ -3,25 +3,18 @@ $ ->
   ###
   # Core Model and Logic 
   ###
-  class Question extends Backbone.Model
-    initialize: ->
-      @assignments = new Assignments()
-      @assignments.add(@get('assignments'))
-
-  class Assignment extends Backbone.Model
-    answer: (ans) ->
+    
+  class Post extends Backbone.Model
+    respond: (response) ->
+      p = new Post( value: response )
       @save(
-        answer:
-          value: ans
+        responses:
+          @get( 'responses' ).push( p.cid )
       )
-
-  class Assignments extends Backbone.Collection
-    model: Assignment
-    localStorage: new Store('assignments')
-
-  class Questions extends Backbone.Collection
-    model: Question
-    localStorage: new Store('questions')
+    
+  class Posts extends Backbone.Collection
+    model: Post
+    localStorage: new Store('posts')
     
   ###
   # View
@@ -30,71 +23,52 @@ $ ->
   Templates = {}
   Templates[e.id] = $(e).html() for e in $('#templates').children()
   
-  class AssignmentView extends Backbone.View
+  class PostView extends Backbone.View
     tagName: 'li'
-    template: Templates.assignment
+    className: 'post'
+    template: Templates.post
     initialize: ->
       @id = @model.id
-      @model.bind('change', @render, @)
     render: ->
       $(@el).html(@template)
-      @$('#score').hide()
-      @$('#grader').hide()
-      @$('#assignment-text').hide()
-      @$('#answer').submitView(tools: @$('#submit'))
-      a = @model.get('answer')
-      if a?
-        answer.text(a.value).attr('readonly', 'readonly')
-        @$('#score').text(a.correctness * 100).show()  if a.confidence >= 0.5
-        
-      $(@el)
-    answer: ->
-      @model.answer(@$('#answer').val())
-  
-  class QuestionView extends Backbone.View
-    tagName: 'li'
-    className: 'question'
-    template: Templates.question
-    initialize: ->
-      @id = @model.id
-    render: -> 
-      $(@el).html(@template)
-      @$('#question-text').text(@model.get('value'))
-      @addAll()
-      return $(@el)
-    addOne: (item) ->
-      a = new AssignmentView(model: item)
-      $(a.render()).appendTo(@$('#content'))
-    addAll: ->
-      for item in @assignments()
-        @addOne(item)
-    assignments: -> myAssignments.question(@model)
-
+      $(@el).find('#content').text(@get('content'))
+      
   class StreamView extends Backbone.View
     initialize: ->
-      @$('#newquestion').html(Templates.assignment).find('#assignment-text').submitView(tools: @$('#newquestion').find('#submit'))
-      myQuestions.bind('add',   @addOne, this)
-      myQuestions.bind('reset', @addAll, this)
-      myQuestions.fetch()
+      postCollection.bind('add', @addOne, this)
+      postCollection.bind('reset', @addAll, this)
+      postCollection.fetch()
     addOne: (item) ->
-      q = new QuestionView(model: item)
-      $(q.render()).appendTo(@$('#assignments'))
-    addAll: -> 
-      myQuestions.each(@addOne)
-    newQuestion: ->
+      post = new PostView(model: item)
+      #parents = ()
+      $(post.render()).appendTo()
+    addAll: ->
+      postCollection.each(@addOne)
   
-  myQuestions = new Questions()
+  postCollection = new Posts()
   App = new StreamView(el: $('#learn'))
     
   ###
   # Routes
   ###
-  # TODO: fix router
   class Workspace extends Backbone.Router
     routes:
       '/:id' : 'assign'
+      'mockup': 'mockup'
     assign: (id) ->
-      myAssignments.get(id)
-      myAssignments.fetch()
+      postCollection.get(id)
+      postCollection.fetch()
+    mockup: ->
+      p = new Post(
+        content: 'This is an example post.'
+        topic_tags: ''
+        rubric_tags: ''
+        parents: ''
+        responses: ''
+      )
+      pv = new PostView(model: p)
+      $('assignments').append(pv.render())
+      
   
   app_router = new Workspace()
+  Backbone.history.start()
