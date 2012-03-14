@@ -22,7 +22,7 @@ import os
 
 from google.appengine.ext import webapp
 from google.appengine.api import users
-from ndb import context
+from google.appengine.ext.ndb import context
 from rpc import *
 
 _DEBUG = 'localhost' in users.create_logout_url( "/" )

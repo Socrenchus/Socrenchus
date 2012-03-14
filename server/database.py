@@ -13,8 +13,8 @@ need work.
 This is the database model and core logic.
 """
 
-from ndb import model, polymodel
 from google.appengine.api import users
+from google.appengine.ext import ndb
 
 import random
 
