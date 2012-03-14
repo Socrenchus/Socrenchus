@@ -1,0 +1,11 @@
+.ui-omniPost{width:500px;}
+    
+.ui-omniPostActive{color:#a1a1a1;font-style:italic;}
+    
+#ui-omniPostSubmit{margin-left:auto;}
+    
+#ui-omniPostText:focus{outline:none;}
+    
+#ui-omniPostCollapse{height:16px;position:relative;float:right;top:21px;}
+	
+#ui-omniPostAttach{height:16px;position:relative;float:right;top:21px;}

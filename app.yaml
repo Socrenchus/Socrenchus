@@ -14,11 +14,11 @@ handlers:
   login: admin
 
 - url: /(login|logout|rpc)(.*)
-  script: handlers.py
+  script: server/handlers.py
   login: required
   
 - url: /
-  static_dir: static
+  static_dir: client/static
   
 builtins:
 - remote_api: on

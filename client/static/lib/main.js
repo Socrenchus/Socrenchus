@@ -72,7 +72,7 @@
 
       PostView.prototype.render = function() {
         $(this.el).html(this.template);
-        $(this.el).find('#content').text(this.model.get('content'));
+        $(this.el).find('#content').text(this.model.get('content')).omnipost();
         return $(this.el);
       };
 

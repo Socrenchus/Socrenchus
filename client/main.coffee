@@ -31,7 +31,7 @@ $ ->
       @id = @model.id
     render: ->
       $(@el).html(@template)
-      $(@el).find('#content').text(@model.get('content'))
+      $(@el).find('#content').text(@model.get('content')).omnipost()
       return $(@el)
       
   class StreamView extends Backbone.View
