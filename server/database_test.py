@@ -12,17 +12,15 @@ import unittest
 import os
 import random
 import json
-from ndb import model, polymodel
+from google.appengine.ext import ndb
 from google.appengine.ext import db
 from google.appengine.api import users
 from google.appengine.ext import testbed
 from google.appengine.datastore import datastore_stub_util
 from database import *
 
-class DefaultTestClass(unittest.TestCase):
-  """
-  Setup, teardown, and assorted utility functions for all test cases.
-  """
+class DatabaseTests(unittest.TestCase):
+  
   def setUp(self):
     # Create test bed
     self.testbed = testbed.Testbed()
@@ -39,208 +37,54 @@ class DefaultTestClass(unittest.TestCase):
     
   def teardown(self):
     self.testbed.deactivate()
-  
+    
   def switchToUser(self, id):
     os.environ['USER_EMAIL'] = 'test'+str(id)+'@example.com'
     os.environ['USER_ID'] = str(id)
-  
-  def _testAssignQuestion(self, cls, item=None, user=None):
-    if not user:
-      user = users.get_current_user()
-    # Check length of assignments before
-    u = UserData.get_by_id(str(user.user_id()))
-    l = 0
-    if u:
-      l = len(u.assignments)
     
-    cls.assign(item, user)
+  def testTagScoreInference(self):
+    # create six posts
+    parent = Post().put()
+    posts = [Post(parent=parent).put() for i in range(5)]
+    # one that shares one tag
+    Tag(parent=posts[0], title='1').put()
+    Tag(parent=posts[0], title='two').put()
+    Tag(parent=posts[0], title='red').put()
+    Tag(parent=posts[0], title='blue').put()
+    # one that shares one important tag
+    for i in range(10):
+      Tag(parent=posts[1], title='5').put()
+    Tag(parent=posts[1], title='is').put()
+    Tag(parent=posts[1], title='right').put()
+    Tag(parent=posts[1], title='out').put()
+    # one that shares multiple tags
+    for i in range(10):
+      Tag(parent=posts[2], title=str(i)).put()
+    Tag(parent=posts[3], title='ok').put()
+    # one that doesn't share any tags
+    Tag(parent=posts[3], title='I').put()
+    Tag(parent=posts[3], title='dont').put()
+    Tag(parent=posts[3], title='match').put()
+    # one that share's tags but is not a sibling
+    for i in range(10):
+      Tag(parent=parent, title=str(i)).put()
+    Tag(parent=parent, title='uhh').put()
+    # one that share's all its tags
+    for i in range(10):
+      Tag(parent=posts[4], title=str(i)).put()
     
-    # Check that it was added to UserData
-    u = UserData.get_by_id(str(user.user_id()))
-    self.assertEqual(len(u.assignments), l+1)
+    # make sure our scores stayed at zero
+    self.assertEqual(parent.get().score, 0)
+    for post in posts:
+      self.assertEqual(post.get().score, 0)
+      
+    # try marking the post that shares all its tags correct
+    Tag(parent=posts[4], title='correct').put()
     
-    # Check that the item was assigned
-    assigned = u.assignments[l].get()
-    if item:
-      self.assertEqual(assigned.key.parent(), item)
+    # check that scores updated appropriately
+    self.assertTrue(posts[1].get().score > posts[0].get().score)
+    self.assertTrue(posts[0].get().score > posts[3].get().score)
+    self.assertEqual(posts[3].get().score, 0)
+    self.assertEqual(parent.get().score, 0)
+    self.assertNotEqual(posts[4].get().score, 0)
     
-    # Check that the right user was assigned
-    self.assertEqual(assigned.user, user)
-    
-    return assigned
-  
-  def getAssignmentByType(self, t):
-    """
-    Return assignment that matches the type.
-    """
-    u = UserData.get_by_id(str(users.get_current_user().user_id()))
-    if u:
-      for a in u.assignments:
-        if t in a.get().class_:
-          return a
-
-class BuilderQuestionTests(DefaultTestClass):
-  """
-  Make sure builder questions are functioning properly.
-  """
-  
-  def testAssignBuilderQuestion(self):
-    """
-    Tests that builder questions get assigned properly.
-    """
-    self._testAssignQuestion(aBuilderQuestion)
-    
-  def testAnswerBuilderQuestion(self):
-    """
-    Tests that a builder question creates a new question upon answering.
-    """
-    a = self.getAssignmentByType('aBuilderQuestion')
-    if not a:
-      a = self._testAssignQuestion(aBuilderQuestion)
-    
-    a = a.submitAnswer('What is the answer?')[1]
-    
-    # make sure the question was created
-    self.assertTrue(isinstance(a.answer.get(), Question))
-    
-  def testSerializeBuilderQuestion(self):
-    """
-    Tests that the builder question gets serialized properly.
-    """
-    raise NotImplementedError
-
-class ShortAnswerQuestionTests(DefaultTestClass):
-  """
-  Make sure short answer questions are functioning properly.
-  """
-  
-  def testAssignShortAnswerQuestion(self):
-    """
-    Tests that short answer questions get assigned properly.
-    """
-    self._testAssignQuestion(aShortAnswerQuestion, Question().put())
-    
-  def testAnswerShortAnswerQuestion(self):
-    """
-    Tests that short answer questions behave as expected when answered.
-    """
-    raise NotImplementedError
-    
-  def testSerializeShortAnswerQuestion(self):
-    """
-    Tests that a short answer question gets serialized properly.
-    """
-    raise NotImplementedError
-
-class GraderQuestionTests(DefaultTestClass):
-  """
-  Make sure grader questions are functioning as they should.
-  """
-  
-  def testAssignGraderQuestion(self):
-    """
-    Tests that the grader question gets assigned properly.
-    """
-    
-    q = Question(answers=[Answer().put()]).put()
-    self.switchToUser(1)
-    self._testAssignQuestion(aGraderQuestion, q)
-    
-  def testAnswerGraderQuestion(self):
-    """
-    Tests that the grading works.
-    """
-    raise NotImplementedError
-  
-  def testSerializeGraderQuestion(self):
-    """
-    Tests that grader questions get serialized properly.
-    """
-    raise NotImplementedError
-
-class ConfidentGraderQuestionTests(DefaultTestClass):
-  """
-  Make sure grader questions are functioning as they should.
-  """
-  
-  def testAssignConfidentGraderQuestion(self):
-    """
-    Tests that the grader question gets assigned properly.
-    """
-    q = Question(answers=[Answer().put()]).put()
-    self._testAssignQuestion(aConfidentGraderQuestion, q)
-    
-  def testAnswerConfidentGraderQuestion(self):
-    """
-    Tests that the grading works.
-    """
-    raise NotImplementedError
-    
-  def testSerializeConfidentGraderQuestion(self):
-    """
-    Tests that grader questions get serialized properly.
-    """
-    raise NotImplementedError
-
-class FollowUpQuestionTests(DefaultTestClass):
-  """
-  Make sure everything related to followup questions is working.
-  """
-  
-  def testAssignFollowUpBuilderQuestion(self, follow=None):
-    """
-    Tests assigning a followup builder question.
-    """
-    if not follow:
-      follow = Question().put()
-    return self._testAssignQuestion(aFollowUpBuilderQuestion, follow)
-  
-  def testAnswerFollowUpBuilderQuestion(self, follow=None):
-    """
-    Tests creation of a followup question.
-    """
-    a = self.testAssignFollowUpBuilderQuestion(follow)
-    
-    a = a.submitAnswer('What\'s next?')[1]
-    
-    # make sure the question was created
-    self.assertTrue(isinstance(a.answer.get(), Question))
-    
-    return a
-  
-  def testAssignFollowUpQuestion(self):
-    """
-    Tests that followup question gets assigned when it should.
-    """
-    # test following a question
-    a = self.testAnswerFollowUpBuilderQuestion()
-    
-    f = a.key.parent()
-    result = aShortAnswerQuestion.assign(f).submitAnswer('')
-    self.assertEqual(len(result), 2)
-    
-    # test following an answer
-    answer = Answer(parent=Question().put()).put()
-    a = self.testAnswerFollowUpBuilderQuestion(answer)
-    
-    f = a.key.parent().parent()
-    result = aShortAnswerQuestion.assign(f).submitAnswer('')
-    self.assertEqual(len(result), 2)
-  
-  def testRetroAssignFollowUpQuesiton(self):
-    """
-    Tests that a followup question gets assigned retroactively.
-    """
-    raise NotImplementedError
-  
-  def testFollowUpStack(self):
-    """
-    Makes sure followup questions resolve in the right order.
-    """
-    raise NotImplementedError
-  
-  def testSerializeFollowUpQuestion(self):
-    """
-    Tests that a followup question gets serialized properly.
-    """
-    raise NotImplementedError
