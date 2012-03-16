@@ -25,8 +25,8 @@ class Post(ndb.Model):
 # parent  = parent post (optional)
   author  = ndb.UserProperty(auto_current_user_add=True)
   content = ndb.TextProperty()
-  score   = ndb.FloatProperty()
-  age     = ndb.IntegerProperty()
+  score   = ndb.FloatProperty(default=0.0)
+  age     = ndb.IntegerProperty(default=0)
   
 class Tag(ndb.Model):
   """
@@ -42,7 +42,7 @@ class Tag(ndb.Model):
     """
     Finds the importance of a tag on a given post.
     """
-    count = Tag.query(ancestor=post_key, Tag.title==tag_name).count()
+    count = Tag.query(Tag.title==tag_name, ancestor=post_key).count()
     total = Tag.query(ancestor=post_key).count()
     count = float(count)
     total = float(total)
@@ -53,27 +53,27 @@ class Tag(ndb.Model):
     Update score of affected posts
     """
     
-    base = Tag.query(ancestor=self.parent, Query.OR(Tag.title='correct', Tag.title='incorrect')).get()
+    base = Tag.query(ndb.OR(Tag.title == 'correct', Tag.title == 'incorrect'), ancestor=self.key.parent()).get()
     
     # check if we are a base tag
-    if self.title == 'correct' or self.title = 'incorrect':
+    if self.title == 'correct' or self.title == 'incorrect':
       # check if another base tag exists
       if base:
         raise Exception('base tag already exists')
       # loop through all the tags in our parent and call update_scores
-      q = Tag.query(ancestor=self.parent, Tag.title!=self.title)
+      q = Tag.query(Tag.title!=self.title, ancestor=self.key.parent())
       for tag in q:
         tag.update_scores()
     elif base:
       # TODO: calculate user's experience on current tag
       experience = 0.001
-      sib_posts = Post.query(ancestor=self.parent.get().parent)
+      sib_posts = Post.query(ancestor=self.key.parent().parent())
       # loop through all sibling posts with matching tag
       for sib_post in sib_posts.iter(keys_only=True):
-        tag = Tag.query(ancestor=sib_post, Tag.title==self.title).get()
+        tag = Tag.query(Tag.title==self.title, ancestor=sib_post).get()
         if tag:
           # importance of tag on current post
-          this_weight =Tag.weight(self.title, self.parent)
+          this_weight =Tag.weight(self.title, self.key.parent())
           # importance of tag on sibling post
           sib_weight = Tag.weight(self.title, sib_post)
           # age of sibling post's score
@@ -85,7 +85,7 @@ class Tag(ndb.Model):
           # check if we are being added
           if not remove:
             # increment age
-            sib_post.age++
+            sib_post.age += 1
             # check if our base tag is positive
             if base.title == 'correct':
               # add to sibling post's score
@@ -95,7 +95,7 @@ class Tag(ndb.Model):
               sib_post.score -= delta
           else:
             # decrement age
-            sib_post.age--
+            sib_post.age -= 1
             # check if our base tag is positive
             if base.title == 'correct':
               # subtract from sibling post's score
