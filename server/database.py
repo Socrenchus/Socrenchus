@@ -18,574 +18,107 @@ from google.appengine.ext import ndb
 
 import random
 
-
-##########################
-## Core Model and Logic ##
-##########################
-
-class Connection(model.Model):
+class Post(ndb.Model):
   """
-  Models a link between questions.
+  A post can be a question, it can be an answer, it can even be a statement.    
   """
-# parent = Question or Answer
-  target = model.KeyProperty()
-  score = model.FloatProperty(default=0.0)
-  age = model.IntegerProperty(default=0)
-
-class Question(model.Model):
-  """
-  Models a question.
-  """
-  author = model.UserProperty(auto_current_user_add=True)
-  value = model.TextProperty()
-  answers = model.KeyProperty(repeated=True)
-  tags = model.KeyProperty(repeated=True)
+# parent  = parent post (optional)
+  author  = ndb.UserProperty(auto_current_user_add=True)
+  content = ndb.TextProperty()
+  score   = ndb.FloatProperty()
+  age     = ndb.IntegerProperty()
   
-  def to_dict(self):
-    result = model.Model.to_dict(self)
-    result['id'] = self.key.urlsafe()
-    return result
-
-class Answer(model.Model):
+class Tag(ndb.Model):
   """
-  Models an answer.
+  A tag is a byte sized, repeatable, calculable piece of information about  
+  something. It can be used to describe a post, or even a user or a tag.
   """
-  author = model.UserProperty(auto_current_user_add = True)
-  value = model.TextProperty()
-  correctness = model.FloatProperty(default=0.0) # probability of answer being correct
-  confidence = model.FloatProperty(default=0.0)  # probability of grading being correct
-# parent = Question
-
-  def canShowScore(self):
-    """
-    Determines if it is safe to show the user the score.
-    """
-    # TODO: implement a real check
-    return (self.author == users.get_current_user())
-
-  def to_dict(self):
-    output = model.Model.to_dict(self)
-    return output
-
-class Tag(model.Model):
-  """
-  Models a tag.
-  """
-  classes = model.KeyProperty(repeated=True)
-  questions = model.KeyProperty(repeated=True)
-
-class Class(model.Model):
-  """
-  Models a class.
-  """
-  value = model.StringProperty() # name of the class
-  tags = model.KeyProperty(repeated=True)
-  description = model.TextProperty()
-  questions = model.KeyProperty(repeated=True)
-  teacher = model.UserProperty()
-  students = model.UserProperty(repeated=True)
-
-##########################
-## User Model and Logic ##
-##########################
-
-class UserData(model.Model):
-  """
-  Stores data specific to a user.
-  """
-  assignments = model.KeyProperty(repeated=True)
-  classes = model.KeyProperty(repeated=True)
-
-class Assignment(polymodel.PolyModel):
-  """
-  Models a generic assignment
-  """
-  user = model.UserProperty(auto_current_user_add = True)
-  time = model.DateTimeProperty(auto_now_add = True)
-# parent = assigned item
+# parent = item being tagged
+  user    = ndb.UserProperty(auto_current_user_add=True)
+  title   = ndb.StringProperty()
   
   @classmethod
-  def assign(cls, item=None, user=None):
+  def weight(cls, tag_name, post_key):
     """
-    Assign an object (key) if it isn't already assigned
+    Finds the importance of a tag on a given post.
     """
-    if not user:
-      user = users.get_current_user()
-    if not item:
-      item = cls.getItem()
-    instance = cls.getInstance(item, user)
-    if not instance:
-      instance = cls(parent=item)
-      instance.user = user
-      instance = instance.prepare()
-      if instance:
-        ud = UserData.get_or_insert(str(user.user_id()))
-        ud.assignments.append(instance.key)
-        ud.put()
-    return instance
-    
-  @classmethod
-  def getInstance(cls, item, user=None):
-    """
-    Get an instance from the assigned object.
-    """
-    return cls.query(cls.user==user, ancestor=item).get()
+    count = Tag.query(ancestor=post_key, Tag.title==tag_name).count()
+    total = Tag.query(ancestor=post_key).count()
+    count = float(count)
+    total = float(total)
+    return count/total
   
-  def prepare(self):
+  def update_scores(self, remove=False):
     """
-    After initializing, prepare sets up and stores the assignment.
+    Update score of affected posts
     """
-    self.put()
-    return self
     
-class aClass(Assignment):
-  """
-  Models user specific class data.
-  """
-  pass
-
-class aQuestion(Assignment):
-  """
-  Models user specific question data.
-  """
-  liked = model.BooleanProperty(default=False)
-  score = model.FloatProperty(default=0.0)
-# user = model.UserProperty(auto_current_user = True)
-# parent = question
-
-  def submitAnswer(self):
-    """
-    Assigns follow up questions.
-    """
-    # fix order
-    ud = UserData.get_or_insert(str(self.user.user_id()))
-    ud.assignments.remove(self.key)
-    ud.assignments.append(self.key)
-    ud.put()
+    base = Tag.query(ancestor=self.parent, Query.OR(Tag.title='correct', Tag.title='incorrect')).get()
     
-    result = []
-    for c in Connection.query(ancestor=self.key.parent()):
-      result.append(aShortAnswerQuestion.assign(c.target))
-      
-    return result
-
-  def to_dict(self):
-    output = model.Model.to_dict(self)
-    output['id'] = self.key.urlsafe()
-    if self.key.parent():
-      output['question'] = self.key.parent().get().to_dict()
-    return output
-
-class aShortAnswerQuestion(aQuestion):
-  answer = model.KeyProperty()
-  def submitAnswer(self, myAnswer):
-    """
-    Answers the question if it hasn't been answered.
-    """
-    if self.answer:
-      return False    
-    # get user (login is required in app.yaml)
-    u = users.User()
-    
-    # Generate the assesment question
-    q = None
-    teacherQ = True
-    parent = self.key.parent().get()
-    if len(parent.answers) >= 1:
-      q = aGraderQuestion.assign(parent.key)
-    
-    teacherQ = aConfidentGraderQuestion.isGradingQuestion(parent.key)
-        
-    # Create the user's answer
-    self.answer = Answer(value=myAnswer, parent=parent.key).put()
-    parent.answers.append(self.answer)
-    parent.put()
-    
-    # Assign the teacher to grade
-    if not teacherQ:
-      aConfidentGraderQuestion.assign(parent.key, parent.author)
-    
-    result = [self]
-    
-    if q:
-      result.append(q)
-
-    self.put()
-    
-    result.extend(aQuestion.submitAnswer(self))
-    
-    # assign the grading question
-    return result
-    
-  def to_dict(self):
-    output = aQuestion.to_dict(self)
-    output['id'] = self.key.urlsafe()
-    if self.key.parent():
-      output['question'] = self.key.parent().get().to_dict()
-    if self.answer:
-      output['score'] = self.answer.get().correctness
-    return output
-
-class aNumericAnswerQuestion(aQuestion):
-  """
-  Models a question where a numeric response is required.
-  """
-  answer = model.FloatProperty()
-
-class aGraderQuestion(aNumericAnswerQuestion):
-  """
-  Used to grade short answer questions.
-  """
-  answerInQuestion = model.KeyProperty()
-  @classmethod
-  def gradedAnswer(cls, answer):
-    """
-    Returns a query for assignments that graded any given answer.
-    """
-    return cls.query(cls.answerInQuestion==answer, ancestor=answer.parent())
-    
-  @classmethod
-  def userGradedAnswer(cls, answer, user=None):
-    """
-    Returns a query for an assignment graded by a user.
-    """
-    if not user:
-      user = users.get_current_user()
-    return cls.gradedAnswer(answer).filter(cls.user==user)
-    
-  @classmethod
-  def userGradesForQuestion(cls, question, user=None):
-    """
-    Returns all of a users grading for the current question.
-    """
-    if not user:
-      user = users.get_current_user()
-    return cls.query(cls.user==user, ancestor=question)
-    
-  @classmethod
-  def regradeAnswer(cls, answer):
-    """
-    Regrade the given answer key.
-    """      
-    # find neighbors
-    query = aGraderQuestion.gradedAnswer(answer)
-    for q in query:
-      if q.answer != None:
-        q.grade()
-  
-  @classmethod
-  def getInstance(cls, item, user=None):
-    """
-    Get an instance from the assigned object.
-    """
-    return None
-
-  def prepare(self):
-    """
-    Assigns the answers from the question.
-    """
-    answers = []
-    parent = self.key.parent().get()
-    for ans in parent.answers:
-      answers.append(ans)
-    
-    random.shuffle(answers)
-    
-    # All answers waiting to be graded by count
-    answerCount = {}
-    for a in answers:
-      count = aGraderQuestion.gradedAnswer(a).count()
-      if count in answerCount.keys():
-        answerCount[count].append(a)
-      else:
-        answerCount[count] = [a]
-        
-        
-    gradedAnswers = [g.answerInQuestion for g in aGraderQuestion.userGradesForQuestion(self.key.parent())]
-    
-    # Assign the answer
-    self.answerInQuestion = None
-    for count in answerCount.keys():
-      if self.answerInQuestion:
-        break
-      for a in answerCount[count]:
-        if not a in gradedAnswers and a.get().author != self.user:
-          self.answerInQuestion = a
-          break
-    
-    # Check that there was enough
-    if not self.answerInQuestion:
-      return None
-    
-    self.put()
-    return self
-
-  def submitAnswer(self, answer):
-    """
-    Submits the answer.
-    """
-
-    self.answer = float(answer)
-    self.put()
-    
-    self.grade()
-
-    # assign next GraderQuestion
-    result = [self]
-    next = aGraderQuestion.assign(self.key.parent())
-    if next:
-      result.append(next)
-
-    result.extend(aQuestion.submitAnswer(self))
-
-    return result
-  
-  def getConfidence(self):
-    """
-    Gets the confidence in the current user's grading of the question.
-    """
-    confidenceSum = 0.0
-    confidenceSumMax = 0.0
-    normalizer = 0
-    myAnswer = (self.answer/100.0)
-    for g in aGraderQuestion.userGradesForQuestion(self.key.parent()):
-      # get and store the answer
-      a = g.answerInQuestion
-      ans = a.get()
-            
-      # answer's current marks with grader's
-      match = abs(myAnswer - ans.correctness)
-      
-      # give the grader some of the answer's confidence
-      confidenceSum += match * ans.confidence
-      
-      # increment normalizer
-      normalizer += 1
-      confidenceSumMax += ans.confidence
-      
-    # error check
-    if normalizer == 0:
-      return
-      
-    # calculate score (confidence normalized by maximum)
-    if confidenceSumMax != 0:
-      self.score = (confidenceSum / confidenceSumMax)
-    self.put()
-      
-    # normalize confidence (if no error)
-    return (confidenceSum / float(normalizer))
-  
-  def grade(self):
-    """
-    Apply grading relevent to aGraderQuestion
-    """
-    # grade with new found confidence
-    answersToRegrade = []
-    myAnswer = (self.answer/100.0)
-    confidence = self.getConfidence()
-    for g in aGraderQuestion.userGradesForQuestion(self.key.parent()):
-      a = g.answerInQuestion.get()
-      if not aConfidentGraderQuestion.hasGradedAnswer(a.key):
-        numGraders = aGraderQuestion.gradedAnswer(a.key).count()
-        tmp = numGraders*(a.confidence * a.correctness)
-        tmp += confidence * myAnswer
-        if (confidence + numGraders*a.confidence) != 0:
-          tmp /= (confidence + numGraders*a.confidence)
-        a.correctness = tmp
-        beforeConfidence = a.confidence
-        a.confidence = (confidence + (a.confidence * numGraders)) / (1 + numGraders)
-        a.put()
-      
-        # recurse if condition is met
-        # TODO: fiddle with condition
-        if a.confidence - beforeConfidence > 0.1:
-          answersToRegrade.append(a)
-    
-    # recurse
-    for a in answersToRegrade:
-      aGraderQuestion.regradeAnswer(a.key)
-
-class aConfidentGraderQuestion(aGraderQuestion):
-  """
-  Allows the creator of a short answer question to set the baseline.
-  """
-  @classmethod
-  def getInstance(cls, item, user=None):
-    """
-    Get an instance from the assigned question.
-    """
-    user = item.get().author
-    q = cls.query(ancestor=item)
-    
-    q.filter(cls.user==user)
-    for i in q.iter():
-      if i.answer == None:
-        return i
-      
-    return None
-  
-  @classmethod
-  def isGradingQuestion(cls, question_key):
-    """
-    True if the question is being graded
-    """
-    return bool(cls.getInstance(question_key))
-    
-  @classmethod
-  def hasGradedAnswer(cls, answer):
-    """
-    True if the answer has been graded
-    """
-    q = cls.query(cls.answerInQuestion==answer, ancestor=answer.parent())
-    return (q.count(1) > 0)
-  
-  def prepare(self):
-    """
-    Chooses the lowest confidence answer to grade.
-    """
-    minAns = Answer()
-    minAns.confidence = 1.0
-    existing = aConfidentGraderQuestion.query(ancestor=self.key.parent()).fetch()
-    parent = self.key.parent().get()
-    for ans in parent.answers:
-      a = ans.get()
-      if a.confidence < minAns.confidence and not (a in existing):
-        minAns = a
-      if minAns.confidence == 0.0:
-        break
-        
-    if minAns.confidence == 1.0:
-      return None
-    
-    # add the answer in question
-    self.answerInQuestion = minAns.key
-    
-    self.put()
-    return self
-
-  def submitAnswer(self, answer):
-    """
-    Submits the grade, regrades neighbors, and assigns 
-    next ConfidentGraderQuestion.
-    """
-
-    # submit the grade
-    a = self.answerInQuestion.get()
-    a.correctness = float(float(answer)/100.0)
-    a.confidence = 1.0
-    a.put()
-
-    self.answer = float(answer)
-    self.score = a.correctness
-    self.put()
-    
-    # regrade the answer
-    aGraderQuestion.regradeAnswer(a.key)
-
-    # assign next ConfidentGraderQuestion
-    result = [self, aBuilderQuestion.builderForQuestion(self.key.parent())]
-    parent = self.key.parent().get()
-    next = aConfidentGraderQuestion.assign(parent.key, parent.author)
-    if next:
-      result.append(next)
-
-    return result
-    
-class aBuilderQuestion(aQuestion):
-  """
-  Creates a short answer question and tracks class progress.
-  """
-  answer = model.KeyProperty() # Question
-  @classmethod
-  def getItem(cls):
-    """
-    Get the builder question.
-    """
-    txt = 'Follow the steps to create a new class...'
-    return Question.get_or_insert('builderQuestion', value=txt).key
-  
-  @classmethod
-  def getInstance(cls, item, user=None):
-    """
-    Get an instance from the assigned object.
-    """
-    q = cls.query(ancestor=item)
-
-    for i in q.filter(cls.user==user,cls.answer==None):
-      if not i.answer:
-        return i
-        
-    return None
-  
-  @classmethod
-  def builderForQuestion(cls, question_key):
-    return cls.query(cls.answer==question_key).get()
-
-  def submitAnswer(self, answer):
-    """
-    Create the short answer question.
-    """
-    self.answer = Question(value=answer[-1]).put()
-    self.put()
-    
-    return [aFollowUpBuilderQuestion.assign(self.answer), self]
-    
-  def to_dict(self):
-    output = aQuestion.to_dict(self)
-    output['gradeDistribution'] = [0 for i in range(11)]
-    output['confidentGradeDistribution'] = [0 for i in range(11)]
-    if self.answer:
-      output['question'] = self.answer
-      for a in self.answer.get().answers:
-        ans = a.get()
-        d = int(round(ans.correctness*10.0))
-        if d and ans.confidence != 0:
-          if aConfidentGraderQuestion.hasGradedAnswer(a):
-            output['confidentGradeDistribution'][d] += 1
+    # check if we are a base tag
+    if self.title == 'correct' or self.title = 'incorrect':
+      # check if another base tag exists
+      if base:
+        raise Exception('base tag already exists')
+      # loop through all the tags in our parent and call update_scores
+      q = Tag.query(ancestor=self.parent, Tag.title!=self.title)
+      for tag in q:
+        tag.update_scores()
+    elif base:
+      # TODO: calculate user's experience on current tag
+      experience = 0.001
+      sib_posts = Post.query(ancestor=self.parent.get().parent)
+      # loop through all sibling posts with matching tag
+      for sib_post in sib_posts.iter(keys_only=True):
+        tag = Tag.query(ancestor=sib_post, Tag.title==self.title).get()
+        if tag:
+          # importance of tag on current post
+          this_weight =Tag.weight(self.title, self.parent)
+          # importance of tag on sibling post
+          sib_weight = Tag.weight(self.title, sib_post)
+          # age of sibling post's score
+          sib_post = sib_post.get()
+          age = float(1 + sib_post.age)
+          # calculate change in score
+          delta = (experience*this_weight*sib_weight)/age
+          
+          # check if we are being added
+          if not remove:
+            # increment age
+            sib_post.age++
+            # check if our base tag is positive
+            if base.title == 'correct':
+              # add to sibling post's score
+              sib_post.score += delta
+            else:
+              # subtract from sibling post's score
+              sib_post.score -= delta
           else:
-            output['gradeDistribution'][d] += 1
-    else:
-      output['question'] = self.key.parent()
-
-    return output
-    
-class aFollowUpBuilderQuestion(aBuilderQuestion):
-  """
-  Same as a builder question but associates the question with an assignment.
-  """
+            # decrement age
+            sib_post.age--
+            # check if our base tag is positive
+            if base.title == 'correct':
+              # subtract from sibling post's score
+              sib_post.score -= delta
+            else:
+              # add to sibling post's score
+              sib_post.score += delta
+              
+          # store sib_post
+          sib_post.put_async()
   
-  def prepare(self):
-    """
-    Just override parent's prepare function.
-    """
-    return Assignment.prepare(self)
-  
-  def submitAnswer(self, answer):
-    """
-    Adds the new question to follow the parent.
-    """
-    # submit answer as normal
-    self.answer = Question(value=answer).put()
-    self.put()
+  def _pre_put_hook(self):
+    # call update_scores when tag is created
+    self.update_scores()
 
-    result = [aFollowUpBuilderQuestion.assign(self.answer), self]
-    
-    # add the connection object
-    Connection(parent=self.key.parent(),target=self.answer).put()
-    
-    # search for answered assignments of the connection object
-    q = self.key.parent().get()
-    if isinstance(q, Answer):
-      # the connection source is an answer
-      aShortAnswerQuestion.assign(self.answer, q.author)
-      
-      # TODO: assign to all the graders
-    else:
-      # assign to all the answerers
-      query = aShortAnswerQuestion.query(ancestor=q.key)
-      for item in query:
-        if item.answer != None:
-          aShortAnswerQuestion.assign(self.answer, item.user)
-      
-    return result
+  def _pre_delete_hook(self):
+    # call update_scores when tag is deleted
+    self.update_scores(remove=True)
+
+class Stream(ndb.Model):
+  """
+  Stores data associated with the user's stream.
+  """
+  user    = ndb.UserProperty(auto_current_user_add=True)
+  posts   = ndb.KeyProperty(kind=Post, repeated=True)
   
