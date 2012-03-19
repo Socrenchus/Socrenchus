@@ -26,7 +26,47 @@ class Post(ndb.Model):
   author  = ndb.UserProperty(auto_current_user_add=True)
   content = ndb.TextProperty()
   score   = ndb.FloatProperty(default=0.0)
-  age     = ndb.IntegerProperty(default=0)
+  
+  def update_score(self, tags=None, remove=False):
+    """
+    Update this post's score
+    """
+    # default to all tags
+    if not tags:
+      tags = [t.title for t in Tag.query(Tag.title!='correct',Tag.title!='incorrect',ancestor=self.key)]
+      tags = list(set(tags))
+    
+    # TODO: calculate user's experience in current context
+    experience = 100.001
+    sib_posts = Post.query(ancestor=self.key.parent())
+      
+    for tag in tags:
+      # importance of tag on this post
+      self_weight = Tag.weight(tag, self.key)
+    
+      # loop through all sibling posts
+      for sib_post in sib_posts.iter(keys_only=True):
+      
+        # importance of tag on sibling post
+        sib_weight = Tag.weight(tag, sib_post)
+      
+        if sib_weight > 0:
+          # base tag correlation
+          correct = Tag.query(Tag.title=='correct', ancestor=sib_post).count()
+          incorrect = Tag.query(Tag.title=='incorrect', ancestor=sib_post).count()
+      
+          # calculate change in score
+          delta = (experience*self_weight*sib_weight*(correct-incorrect))
+    
+          # check if the tag is being removed
+          if remove:
+            delta = -delta
+    
+          # adjust the score
+          self.score += delta
+            
+    # store post
+    self.put()
   
 class Tag(ndb.Model):
   """
@@ -46,74 +86,29 @@ class Tag(ndb.Model):
     total = Tag.query(ancestor=post_key).count()
     count = float(count)
     total = float(total)
-    return count/total
-  
-  def update_scores(self, remove=False):
-    """
-    Update score of affected posts
-    """
     
-    base = Tag.query(ndb.OR(Tag.title == 'correct', Tag.title == 'incorrect'), ancestor=self.key.parent()).get()
-    
-    # check if we are a base tag
+    if total > 0:
+      return count/total
+    else:
+      return 0.0
+      
+  def update_post_scores(self, remove=False):
+    """
+    Find the related posts and call their update_score method.
+    """
     if self.title == 'correct' or self.title == 'incorrect':
-      # check if another base tag exists
-      if base:
-        raise Exception('base tag already exists')
-      # loop through all the tags in our parent and call update_scores
-      q = Tag.query(Tag.title!=self.title, ancestor=self.key.parent())
-      for tag in q:
-        tag.update_scores()
-    elif base:
-      # TODO: calculate user's experience on current tag
-      experience = 0.001
-      sib_posts = Post.query(ancestor=self.key.parent().parent())
-      # loop through all sibling posts with matching tag
-      for sib_post in sib_posts.iter(keys_only=True):
-        tag = Tag.query(Tag.title==self.title, ancestor=sib_post).get()
-        if tag:
-          # importance of tag on current post
-          this_weight =Tag.weight(self.title, self.key.parent())
-          # importance of tag on sibling post
-          sib_weight = Tag.weight(self.title, sib_post)
-          # age of sibling post's score
-          sib_post = sib_post.get()
-          age = float(1 + sib_post.age)
-          # calculate change in score
-          delta = (experience*this_weight*sib_weight)/age
-          
-          # check if we are being added
-          if not remove:
-            # increment age
-            sib_post.age += 1
-            # check if our base tag is positive
-            if base.title == 'correct':
-              # add to sibling post's score
-              sib_post.score += delta
-            else:
-              # subtract from sibling post's score
-              sib_post.score -= delta
-          else:
-            # decrement age
-            sib_post.age -= 1
-            # check if our base tag is positive
-            if base.title == 'correct':
-              # subtract from sibling post's score
-              sib_post.score -= delta
-            else:
-              # add to sibling post's score
-              sib_post.score += delta
-              
-          # store sib_post
-          sib_post.put_async()
+      for p in Post.query(ancestor=self.key.parent().parent()):
+        p.update_score(None, remove)
+    else:
+      self.key.parent().get().update_score([self.title], remove)
   
   def _pre_put_hook(self):
-    # call update_scores when tag is created
-    self.update_scores()
+    # call update_post_scores when tag is created
+    self.update_post_scores()
 
   def _pre_delete_hook(self):
-    # call update_scores when tag is deleted
-    self.update_scores(remove=True)
+    # call update_score when tag is deleted
+    self.update_post_scores(remove=True)
 
 class Stream(ndb.Model):
   """

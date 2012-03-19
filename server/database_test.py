@@ -26,7 +26,7 @@ class DatabaseTests(unittest.TestCase):
     self.testbed = testbed.Testbed()
     self.testbed.activate()
     # Create a consistency policy that will simulate the High Replication consistency model.
-    self.policy = datastore_stub_util.PseudoRandomHRConsistencyPolicy(probability=0.7)
+    self.policy = datastore_stub_util.PseudoRandomHRConsistencyPolicy(probability=1.0)
     # Initialize the datastore stub with this policy.
     self.testbed.init_datastore_v3_stub(consistency_policy=self.policy)
     self.testbed.init_memcache_stub()
@@ -60,7 +60,7 @@ class DatabaseTests(unittest.TestCase):
     # one that shares multiple tags
     for i in range(10):
       Tag(parent=posts[2], title=str(i)).put()
-    Tag(parent=posts[3], title='ok').put()
+    Tag(parent=posts[2], title='ok').put()
     # one that doesn't share any tags
     Tag(parent=posts[3], title='I').put()
     Tag(parent=posts[3], title='dont').put()
@@ -82,8 +82,8 @@ class DatabaseTests(unittest.TestCase):
     Tag(parent=posts[4], title='correct').put()
     
     # check that scores updated appropriately
-    self.assertTrue(posts[1].get().score > posts[0].get().score)
-    self.assertTrue(posts[0].get().score > posts[3].get().score)
+    self.assertGreater(posts[1].get().score, posts[0].get().score)
+    self.assertGreater(posts[0].get().score, posts[3].get().score)
     self.assertEqual(posts[3].get().score, 0)
     self.assertEqual(parent.get().score, 0)
     self.assertNotEqual(posts[4].get().score, 0)
