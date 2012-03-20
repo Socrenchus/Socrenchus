@@ -27,45 +27,20 @@ class Post(ndb.Model):
   content = ndb.TextProperty()
   score   = ndb.FloatProperty(default=0.0)
   
-  def update_score(self, tags=None, remove=False):
+  def update_score(self, remove=False):
     """
     Update this post's score
     """
-    # default to all tags
-    if not tags:
-      tags = [t.title for t in Tag.query(Tag.title!='correct',Tag.title!='incorrect',ancestor=self.key)]
-      tags = list(set(tags))
+    # create the base tag queries
+    correct = Tag.query(Tag.title=='correct', ancestor=self)
+    incorrect = Tag.query(Tag.title=='incorrect', ancestor=self)
     
-    # TODO: calculate user's experience in current context
-    experience = 100.001
-    sib_posts = Post.query(ancestor=self.key.parent())
-      
-    for tag in tags:
-      # importance of tag on this post
-      self_weight = Tag.weight(tag, self.key)
+    # extract and sum the experience points from the base tags
+    correct = sum([t.xp for t in correct])
+    incorrect = sum([t.xp for t in incorrect])
     
-      # loop through all sibling posts
-      for sib_post in sib_posts.iter(keys_only=True):
-      
-        # importance of tag on sibling post
-        sib_weight = Tag.weight(tag, sib_post)
-      
-        if sib_weight > 0:
-          # base tag correlation
-          correct = Tag.query(Tag.title=='correct', ancestor=sib_post).count()
-          incorrect = Tag.query(Tag.title=='incorrect', ancestor=sib_post).count()
-      
-          # calculate change in score
-          delta = (experience*self_weight*sib_weight*(correct-incorrect))
-    
-          # check if the tag is being removed
-          if remove:
-            delta = -delta
-    
-          # adjust the score
-          self.score += delta
-            
-    # store post
+    # subtract and store the score
+    self.score = correct - incorrect
     self.put()
   
 class Tag(ndb.Model):
@@ -76,6 +51,7 @@ class Tag(ndb.Model):
 # parent = item being tagged
   user    = ndb.UserProperty(auto_current_user_add=True)
   title   = ndb.StringProperty()
+  xp      = ndb.FloatProperty(default=0.0)
   
   @classmethod
   def weight(cls, tag_name, post_key):
@@ -92,23 +68,26 @@ class Tag(ndb.Model):
     else:
       return 0.0
       
-  def update_post_scores(self, remove=False):
+  def is_base(self):
     """
-    Find the related posts and call their update_score method.
+    Check if tag is a base tag.
     """
-    if self.title == 'correct' or self.title == 'incorrect':
-      for p in Post.query(ancestor=self.key.parent().parent()):
-        p.update_score(None, remove)
-    else:
-      self.key.parent().get().update_score([self.title], remove)
+    return self.title == 'correct' or self.title == 'incorrect'
+      
+  def update_post_score(self, remove=False):
+    """
+    Update our tagged post's score if we are a base tag.
+    """
+    if self.is_base():
+      self.key.parent().get().update_score(remove)
   
   def _pre_put_hook(self):
     # call update_post_scores when tag is created
-    self.update_post_scores()
+    self.update_post_score()
 
   def _pre_delete_hook(self):
     # call update_score when tag is deleted
-    self.update_post_scores(remove=True)
+    self.update_post_score(remove=True)
 
 class Stream(ndb.Model):
   """
