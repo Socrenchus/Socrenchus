@@ -22,20 +22,22 @@ class Post(ndb.Model):
   """
   A post can be a question, it can be an answer, it can even be a statement.    
   """
-# parent  = parent post (optional)
-  author  = ndb.UserProperty(auto_current_user_add=True)
-  content = ndb.TextProperty()
-  score   = ndb.FloatProperty(default=0.0)
+# parent    = parent post (optional)
+  author    = ndb.UserProperty(auto_current_user_add=True)
+  content   = ndb.TextProperty()
+  score     = ndb.FloatProperty(default=0.0)
+  timestamp = ndb.DateTimeProperty(auto_now=True)
   
 class Tag(ndb.Model):
   """
   A tag is a byte sized, repeatable, calculable piece of information about  
   something. It can be used to describe a post, or even a user or a tag.
   """
-# parent = item being tagged
-  user    = ndb.UserProperty(auto_current_user_add=True)
-  title   = ndb.StringProperty()
-  xp      = ndb.FloatProperty(default=0.0)
+# parent    = item being tagged
+  user      = ndb.UserProperty(auto_current_user_add=True)
+  title     = ndb.StringProperty()
+  xp        = ndb.FloatProperty(default=0.0)
+  timestamp = ndb.DateTimeProperty(auto_now=True)
   
   def weight(self):
     """
@@ -82,6 +84,7 @@ class Stream(ndb.Model):
   """
   Stores data associated with the user's stream.
   """
-  user    = ndb.UserProperty(auto_current_user_add=True)
-  posts   = ndb.KeyProperty(kind=Post, repeated=True)
+  user      = ndb.UserProperty(auto_current_user_add=True)
+  posts     = ndb.KeyProperty(kind=Post, repeated=True)
+  timestamp = ndb.DateTimeProperty(auto_now=True)
   
