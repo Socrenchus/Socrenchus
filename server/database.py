@@ -53,13 +53,12 @@ class Tag(ndb.Model):
   title   = ndb.StringProperty()
   xp      = ndb.FloatProperty(default=0.0)
   
-  @classmethod
-  def weight(cls, tag_name, post_key):
+  def weight(self):
     """
     Finds the importance of a tag on a given post.
     """
-    count = Tag.query(Tag.title==tag_name, ancestor=post_key).count()
-    total = Tag.query(ancestor=post_key).count()
+    count = Tag.query(Tag.title==self.title, ancestor=self.key.parent()).count()
+    total = Tag.query(ancestor=self.key.parent()).count()
     count = float(count)
     total = float(total)
     
