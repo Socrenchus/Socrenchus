@@ -63,22 +63,24 @@ class Tag(ndb.Model):
     """
     Update experience points of tag by dereferencing against parent post.
     """
-    # check if parent post exists
-    if self.key.parent().parent():
-      # dereference the experience points
-      self.xp = 0 # clear the current
-      # get tags of parent post by weight
-      tags_d = [t.title for t in Tag.query(ancestor=self.key.parent().parent())]
-      tags = list(set(tags_d))
-      for tag in tags:
-        # get users experience for each tag
-        ref_tag = Tag.query(Tag.title == tag, ancestor=self.user).get()
-        if not ref_tag:
-          ref_tag = Tag(title=tag, parent=user)
-        # use weights to calculate new experience
-        self.xp += ((ref_tag.xp * tags_d.count(tag)) / len(tags_d))
-    else:
-      self.xp = 1 # base point for tagging
+    # check if experience was manually set
+    if not self.xp:
+      # check if parent post exists
+      if self.key.parent().parent():
+        # dereference the experience points
+        self.xp = 0 # clear the current
+        # get tags of parent post by weight
+        tags_d = [t.title for t in Tag.query(ancestor=self.key.parent().parent())]
+        tags = list(set(tags_d))
+        for tag in tags:
+          # get users experience for each tag
+          ref_tag = Tag.query(Tag.title == tag, ancestor=self.user).get()
+          if not ref_tag:
+            ref_tag = Tag(title=tag, parent=user)
+          # use weights to calculate new experience
+          self.xp += ((ref_tag.xp * tags_d.count(tag)) / len(tags_d))
+      else:
+        self.xp = 1 # base point for tagging
       
   def update_post_score(self, remove=False):
     """
