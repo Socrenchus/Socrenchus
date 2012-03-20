@@ -71,3 +71,4 @@ class DatabaseTests(unittest.TestCase):
     # check it
     self.assertEqual(post.score, -2)
     
+    

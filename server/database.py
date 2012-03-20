@@ -36,22 +36,8 @@ class Tag(ndb.Model):
 # parent    = item being tagged
   user      = ndb.UserProperty(auto_current_user_add=True)
   title     = ndb.StringProperty()
-  xp        = ndb.FloatProperty(default=0.0)
+  xp        = ndb.FloatProperty(default=1.0)
   timestamp = ndb.DateTimeProperty(auto_now=True)
-  
-  def weight(self):
-    """
-    Finds the importance of a tag on a given post.
-    """
-    count = Tag.query(Tag.title==self.title, ancestor=self.key.parent()).count()
-    total = Tag.query(ancestor=self.key.parent()).count()
-    count = float(count)
-    total = float(total)
-    
-    if total > 0:
-      return count/total
-    else:
-      return 0.0
       
   def is_base(self):
     """
@@ -64,23 +50,25 @@ class Tag(ndb.Model):
     Update experience points of tag by dereferencing against parent post.
     """
     # check if experience was manually set
-    if not self.xp:
+    if self.xp == 1.0:
+      # dereference the experience points
+      user = Stream.query(Stream.user==self.user).iter(keys_only=True).next()
+      self.xp = 0 # clear the current
+      def title_list(tag):
+        return tag.title
+      tags_d = Tag.query(ancestor=self.key.parent()).map(title_list)
       # check if parent post exists
-      if self.key.parent().parent():
-        # dereference the experience points
-        self.xp = 0 # clear the current
-        # get tags of parent post by weight
-        tags_d = [t.title for t in Tag.query(ancestor=self.key.parent().parent())]
-        tags = list(set(tags_d))
-        for tag in tags:
-          # get users experience for each tag
-          ref_tag = Tag.query(Tag.title == tag, ancestor=self.user).get()
-          if not ref_tag:
-            ref_tag = Tag(title=tag, parent=user)
-          # use weights to calculate new experience
-          self.xp += ((ref_tag.xp * tags_d.count(tag)) / len(tags_d))
-      else:
-        self.xp = 1 # base point for tagging
+      parent = self.key.parent().parent()
+      if parent:
+        tags_d.extend(Tag.query(ancestor=parent).map(title_list))
+      tags = list(set(tags_d))
+      for tag in tags:
+        # get users experience for each tag
+        ref_tag = Tag.query(Tag.title == tag, ancestor=user).get()
+        if not ref_tag:
+          ref_tag = Tag(title=tag, parent=user)
+        # use weights to calculate new experience
+        self.xp += ((ref_tag.xp * tags_d.count(tag)) / len(tags_d))
       
   def update_post_score(self, remove=False):
     """
@@ -98,7 +86,13 @@ class Tag(ndb.Model):
       
       # reference the experience points earned
       user = Stream.query(Stream.user==post.author).iter(keys_only=True).next()
-      tags_d = [t.title for t in Tag.query(ancestor=self.key.parent())]
+      def title_list(tag):
+        return tag.title
+      tags_d = Tag.query(ancestor=self.key.parent()).map(title_list)
+      # check if parent post exists
+      parent = self.key.parent().parent()
+      if parent:
+        tags_d.extend(Tag.query(ancestor=parent).map(title_list))
       tags = list(set(tags_d))
       for tag in tags:
         ref_tag = Tag.query(Tag.title == tag, ancestor=user).get()
