@@ -58,12 +58,34 @@ class Tag(ndb.Model):
     Check if tag is a base tag.
     """
     return self.title == 'correct' or self.title == 'incorrect'
+    
+  def update_experience(self):
+    """
+    Update experience points of tag by dereferencing against parent post.
+    """
+    # check if parent post exists
+    if self.key.parent().parent():
+      # dereference the experience points
+      self.xp = 0 # clear the current
+      # get tags of parent post by weight
+      tags_d = [t.title for t in Tag.query(ancestor=self.key.parent().parent())]
+      tags = list(set(tags_d))
+      for tag in tags:
+        # get users experience for each tag
+        ref_tag = Tag.query(Tag.title == tag, ancestor=self.user).get()
+        if not ref_tag:
+          ref_tag = Tag(title=tag, parent=user)
+        # use weights to calculate new experience
+        self.xp += ((ref_tag.xp * tags_d.count(tag)) / len(tags_d))
+    else:
+      self.xp = 1 # base point for tagging
       
   def update_post_score(self, remove=False):
     """
     Update our tagged post's score if we are a base tag.
     """
-    if self.is_base():
+    if self.is_base() and self.key.parent().kind() == 'Post':
+      # update the score of the post
       post = self.key.parent().get()
       delta = self.xp
       if self.title == 'incorrect':
@@ -71,9 +93,21 @@ class Tag(ndb.Model):
       if remove:
         delta = -delta
       post.score += delta
+      
+      # reference the experience points earned
+      user = Stream.query(Stream.user==post.author).iter(keys_only=True).next()
+      tags_d = [t.title for t in Tag.query(ancestor=self.key.parent())]
+      tags = list(set(tags_d))
+      for tag in tags:
+        ref_tag = Tag.query(Tag.title == tag, ancestor=user).get()
+        if not ref_tag:
+          ref_tag = Tag(title=tag, parent=user)
+        ref_tag.xp += ((delta * tags_d.count(tag)) / len(tags_d))
+        ref_tag.put_async()
   
   def _pre_put_hook(self):
     # call update_post_scores when tag is created
+    self.update_experience()
     self.update_post_score()
 
   def _pre_delete_hook(self):

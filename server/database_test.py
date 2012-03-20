@@ -41,6 +41,9 @@ class DatabaseTests(unittest.TestCase):
   def switchToUser(self, id):
     os.environ['USER_EMAIL'] = 'test'+str(id)+'@example.com'
     os.environ['USER_ID'] = str(id)
+    stream = Stream.query(Stream.user==users.User()).get()
+    if not stream:
+      Stream().put()
     
   def testPostScoring(self):
     # create post
