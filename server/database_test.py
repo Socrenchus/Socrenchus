@@ -42,49 +42,29 @@ class DatabaseTests(unittest.TestCase):
     os.environ['USER_EMAIL'] = 'test'+str(id)+'@example.com'
     os.environ['USER_ID'] = str(id)
     
-  def testTagScoreInference(self):
-    # create six posts
-    parent = Post().put()
-    posts = [Post(parent=parent).put() for i in range(5)]
-    # one that shares one tag
-    Tag(parent=posts[0], title='1').put()
-    Tag(parent=posts[0], title='two').put()
-    Tag(parent=posts[0], title='red').put()
-    Tag(parent=posts[0], title='blue').put()
-    # one that shares one important tag
-    for i in range(10):
-      Tag(parent=posts[1], title='5').put()
-    Tag(parent=posts[1], title='is').put()
-    Tag(parent=posts[1], title='right').put()
-    Tag(parent=posts[1], title='out').put()
-    # one that shares multiple tags
-    for i in range(10):
-      Tag(parent=posts[2], title=str(i)).put()
-    Tag(parent=posts[2], title='ok').put()
-    # one that doesn't share any tags
-    Tag(parent=posts[3], title='I').put()
-    Tag(parent=posts[3], title='dont').put()
-    Tag(parent=posts[3], title='match').put()
-    # one that share's tags but is not a sibling
-    for i in range(10):
-      Tag(parent=parent, title=str(i)).put()
-    Tag(parent=parent, title='uhh').put()
-    # one that share's all its tags
-    for i in range(10):
-      Tag(parent=posts[4], title=str(i)).put()
-    
-    # make sure our scores stayed at zero
-    self.assertEqual(parent.get().score, 0)
-    for post in posts:
-      self.assertEqual(post.get().score, 0)
-      
-    # try marking the post that shares all its tags correct
-    Tag(parent=posts[4], title='correct').put()
-    
-    # check that scores updated appropriately
-    self.assertGreater(posts[1].get().score, posts[0].get().score)
-    self.assertGreater(posts[0].get().score, posts[3].get().score)
-    self.assertEqual(posts[3].get().score, 0)
-    self.assertEqual(parent.get().score, 0)
-    self.assertNotEqual(posts[4].get().score, 0)
+  def testPostScoring(self):
+    # create post
+    post = Post()
+    post.put()
+    # check that post score is zero
+    self.assertEqual(post.score, 0)
+    # create correct tags
+    xpc = [5,10,15,20,25]
+    for x in xpc:
+      self.switchToUser(x)
+      Tag(parent=post.key, title='correct', xp=x).put()
+    # check that the post score is positive
+    self.assertEqual(post.score, sum(xpc))
+    # create incorrect tags
+    xpi = [6,9,16,19,24,1]
+    for x in xpi:
+      self.switchToUser(x)
+      Tag(parent=post.key, title='incorrect', xp=x).put()
+    # check that the post score is zero
+    self.assertEqual(post.score, 0)
+    # now lets make the post score negative
+    self.switchToUser(2)
+    Tag(parent=post.key, title='incorrect', xp=2).put()
+    # check it
+    self.assertEqual(post.score, -2)
     

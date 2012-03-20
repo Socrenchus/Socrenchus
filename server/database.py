@@ -27,22 +27,6 @@ class Post(ndb.Model):
   content = ndb.TextProperty()
   score   = ndb.FloatProperty(default=0.0)
   
-  def update_score(self, remove=False):
-    """
-    Update this post's score
-    """
-    # create the base tag queries
-    correct = Tag.query(Tag.title=='correct', ancestor=self)
-    incorrect = Tag.query(Tag.title=='incorrect', ancestor=self)
-    
-    # extract and sum the experience points from the base tags
-    correct = sum([t.xp for t in correct])
-    incorrect = sum([t.xp for t in incorrect])
-    
-    # subtract and store the score
-    self.score = correct - incorrect
-    self.put()
-  
 class Tag(ndb.Model):
   """
   A tag is a byte sized, repeatable, calculable piece of information about  
@@ -78,7 +62,13 @@ class Tag(ndb.Model):
     Update our tagged post's score if we are a base tag.
     """
     if self.is_base():
-      self.key.parent().get().update_score(remove)
+      post = self.key.parent().get()
+      delta = self.xp
+      if self.title == 'incorrect':
+        delta = -delta
+      if remove:
+        delta = -delta
+      post.score += delta
   
   def _pre_put_hook(self):
     # call update_post_scores when tag is created
