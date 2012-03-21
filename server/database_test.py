@@ -121,4 +121,4 @@ class DatabaseTests(unittest.TestCase):
     self.switchToUser('tagging')
     t = Tag(parent=p, title='blah')
     t.put()
-    self.assertEqual(round(t.xp), 61)
+    self.assertEqual(t.xp, 50)
