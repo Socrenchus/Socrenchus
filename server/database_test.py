@@ -71,4 +71,27 @@ class DatabaseTests(unittest.TestCase):
     # check it
     self.assertEqual(post.score, -2)
     
+  def testExperienceReferencing(self):
+    # create post
+    self.switchToUser(100)
+    post = Post()
+    post.put()
+    # designate a list of tag names
+    tag_names = range(1, 11)
+    # tag the post
+    for i in tag_names:
+      for j in range(i):
+        self.switchToUser(j)
+        t = Tag(parent=post.key, title=str(i), xp=0)
+        t.put()
+        self.assertEqual(t.xp, 0) # check that our start xp is zero
+    # adjust the score
+    post.adjust_score(100.0)
+    # check that the tags were updated properly
+    user = Stream.query(Stream.user==post.author).iter(keys_only=True).next()
+    tags = Tag.query(ancestor=user).fetch()
+    self.assertEqual(len(tags),len(tag_names))
+    for t in tags:
+      self.assertAlmostEqual(t.xp, int(t.title)*(100.0/sum(tag_names))+1)
+    
     

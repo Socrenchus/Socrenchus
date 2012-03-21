@@ -34,7 +34,6 @@ class Post(ndb.Model):
     """
     # adjust the score by delta
     self.score += delta
-    self.put_async()
     # reference the experience points earned
     user = Stream.query(Stream.user==self.author).iter(keys_only=True).next()
     def title_list(tag):
@@ -50,7 +49,8 @@ class Post(ndb.Model):
       if not ref_tag:
         ref_tag = Tag(title=tag, parent=user)
       ref_tag.xp += ((delta * tags_d.count(tag)) / len(tags_d))
-      ref_tag.put_async()
+      ref_tag.put()
+    self.put()
   
 class Tag(ndb.Model):
   """
