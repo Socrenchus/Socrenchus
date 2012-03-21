@@ -28,6 +28,27 @@ class Post(ndb.Model):
   score     = ndb.FloatProperty(default=0.0)
   timestamp = ndb.DateTimeProperty(auto_now=True)
   
+  def update_score(self, delta):
+    """
+    Adjust post's score by delta and reference experience.
+    """
+    # reference the experience points earned
+    user = Stream.query(Stream.user==self.author).iter(keys_only=True).next()
+    def title_list(tag):
+      return tag.title
+    tags_d = Tag.query(ancestor=self.key).map(title_list)
+    # check if parent post exists
+    parent = self.key.parent()
+    if parent:
+      tags_d.extend(Tag.query(ancestor=parent).map(title_list))
+    tags = list(set(tags_d))
+    for tag in tags:
+      ref_tag = Tag.query(Tag.title == tag, ancestor=user).get()
+      if not ref_tag:
+        ref_tag = Tag(title=tag, parent=user)
+      ref_tag.xp += ((delta * tags_d.count(tag)) / len(tags_d))
+      ref_tag.put_async()
+  
 class Tag(ndb.Model):
   """
   A tag is a byte sized, repeatable, calculable piece of information about  
@@ -82,24 +103,7 @@ class Tag(ndb.Model):
         delta = -delta
       if remove:
         delta = -delta
-      post.score += delta
-      
-      # reference the experience points earned
-      user = Stream.query(Stream.user==post.author).iter(keys_only=True).next()
-      def title_list(tag):
-        return tag.title
-      tags_d = Tag.query(ancestor=self.key.parent()).map(title_list)
-      # check if parent post exists
-      parent = self.key.parent().parent()
-      if parent:
-        tags_d.extend(Tag.query(ancestor=parent).map(title_list))
-      tags = list(set(tags_d))
-      for tag in tags:
-        ref_tag = Tag.query(Tag.title == tag, ancestor=user).get()
-        if not ref_tag:
-          ref_tag = Tag(title=tag, parent=user)
-        ref_tag.xp += ((delta * tags_d.count(tag)) / len(tags_d))
-        ref_tag.put_async()
+      post.update_score(delta)
   
   def _pre_put_hook(self):
     # call update_post_scores when tag is created
