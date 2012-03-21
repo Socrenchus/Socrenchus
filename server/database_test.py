@@ -93,5 +93,32 @@ class DatabaseTests(unittest.TestCase):
     self.assertEqual(len(tags),len(tag_names))
     for t in tags:
       self.assertAlmostEqual(t.xp, int(t.title)*(100.0/sum(tag_names))+1)
-    
-    
+      
+  def testExperienceDereferencing(self):
+    # switch to 'tagging' user
+    self.switchToUser('tagging')
+    user = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
+    # give 'tagging' user experience in a few tags
+    Tag(parent=user, title='a', xp=100).put()
+    Tag(parent=user, title='b', xp=50).put()
+    Tag(parent=user, title='c', xp=25).put()
+    # switch to 'posting' user
+    self.switchToUser('posting')
+    # create a post
+    p = Post().put()
+    # switch between arbitrary users and tag the post as such
+    self.switchToUser('userA')
+    Tag(parent=p, title='a', xp=1).put()
+    Tag(parent=p, title='b', xp=3).put()
+    Tag(parent=p, title='c', xp=2).put()
+    self.switchToUser('userB')
+    Tag(parent=p, title='a', xp=2).put()
+    Tag(parent=p, title='b', xp=2).put()
+    Tag(parent=p, title='d', xp=5).put()
+    self.switchToUser('userC')
+    Tag(parent=p, title='a', xp=3).put()
+    # switch back to 'tagging' user and apply a tag
+    self.switchToUser('tagging')
+    t = Tag(parent=p, title='blah')
+    t.put()
+    self.assertEqual(round(t.xp), 61)

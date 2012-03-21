@@ -99,16 +99,20 @@ class Tag(ndb.Model):
     Update our tagged post's score if we are a base tag.
     """
     # check that we meet the conditions for a score adjustment
-    if self.is_base() and self.key.parent().kind() == 'Post':
-      # figure out the sign on the score change
-      delta = self.xp
-      if self.title == 'incorrect':
-        delta = -delta
-      if remove:
-        delta = -delta
-      # adjust the score
-      post = self.key.parent().get()
-      post.adjust_score(delta)
+    if self.key.parent().kind() == 'Post':
+      if self.is_base(): # adjust the score for the poster
+        # figure out the sign on the score change
+        delta = self.xp
+        if self.title == 'incorrect':
+          delta = -delta
+        if remove:
+          delta = -delta
+        # adjust the score
+        post = self.key.parent().get()
+        post.adjust_score(delta)
+      else: # TODO: adjust the experience for the taggers
+        pass
+   
   
   def _pre_put_hook(self):
     # call eval_score_changes when tag is created
