@@ -28,10 +28,13 @@ class Post(ndb.Model):
   score     = ndb.FloatProperty(default=0.0)
   timestamp = ndb.DateTimeProperty(auto_now=True)
   
-  def update_score(self, delta):
+  def adjust_score(self, delta):
     """
     Adjust post's score by delta and reference experience.
     """
+    # adjust the score by delta
+    self.score += delta
+    self.put_async()
     # reference the experience points earned
     user = Stream.query(Stream.user==self.author).iter(keys_only=True).next()
     def title_list(tag):
@@ -91,28 +94,30 @@ class Tag(ndb.Model):
         # use weights to calculate new experience
         self.xp += ((ref_tag.xp * tags_d.count(tag)) / len(tags_d))
       
-  def update_post_score(self, remove=False):
+  def eval_score_change(self, remove=False):
     """
     Update our tagged post's score if we are a base tag.
     """
+    # check that we meet the conditions for a score adjustment
     if self.is_base() and self.key.parent().kind() == 'Post':
-      # update the score of the post
-      post = self.key.parent().get()
+      # figure out the sign on the score change
       delta = self.xp
       if self.title == 'incorrect':
         delta = -delta
       if remove:
         delta = -delta
-      post.update_score(delta)
+      # adjust the score
+      post = self.key.parent().get()
+      post.adjust_score(delta)
   
   def _pre_put_hook(self):
-    # call update_post_scores when tag is created
+    # call eval_score_changes when tag is created
     self.update_experience()
-    self.update_post_score()
+    self.eval_score_change()
 
   def _pre_delete_hook(self):
     # call update_score when tag is deleted
-    self.update_post_score(remove=True)
+    self.eval_score_change(remove=True)
 
 class Stream(ndb.Model):
   """
