@@ -82,9 +82,9 @@ class DatabaseTests(unittest.TestCase):
     for i in tag_names:
       for j in range(i):
         self.switchToUser(j)
-        t = Tag(parent=post.key, title=str(i), xp=0)
+        t = Tag(parent=post.key, title=str(i))
         t.put()
-        self.assertEqual(t.xp, 0) # check that our start xp is zero
+        self.assertEqual(round(t.xp), 1) # check that our start xp is the base score
     # adjust the score
     post.adjust_score(100.0)
     # check that the tags were updated properly
@@ -121,4 +121,4 @@ class DatabaseTests(unittest.TestCase):
     self.switchToUser('tagging')
     t = Tag(parent=p, title='blah')
     t.put()
-    self.assertEqual(t.xp, 50)
+    self.assertEqual(round(t.xp), 50)
