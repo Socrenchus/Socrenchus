@@ -3,22 +3,30 @@ fs = require 'fs'
 util = require 'util'
 {spawn} = require 'child_process'
 
-outputJSFolder = 'static/lib'
-outputImageFolder = 'static'
+outputFolder = 'static/lib'
+outputImageFolder = 'static/images'
+
+cssSrcFolders = [
+    'tagbox/stylesheets'
+    'votebox/stylesheets'    
+    'omnipost/stylesheets'
+]
+
 imageSrcFolders = [
     'tagbox/images'
     'votebox/images'
 ]
 
 srcFolders = [
+    'main'
     'tagbox'
     'votebox'
     'omnipost'
 ]
-  
+
 build = (callback) ->
   for folder in srcFolders
-    coffee = spawn 'coffee', ['-c', '-o', outputJSFolder, folder]
+    coffee = spawn 'coffee', ['-c', '-o', outputFolder, folder]
     coffee.stderr.on 'data', (data) ->
       process.stderr.write data.toString()
     coffee.stdout.on 'data', (data) ->
@@ -26,38 +34,47 @@ build = (callback) ->
     coffee.on 'exit', (code) ->
       callback?() if code is 0
 
-copyWithDirectory = (path) ->
+watch = (callback) ->
+  for folder in srcFolders
+    coffee = spawn 'coffee', ['-w', '-c', '-o', outputFolder, folder]
+    coffee.stderr.on 'data', (data) ->
+      process.stderr.write data.toString()
+    coffee.stdout.on 'data', (data) ->
+      util.log data.toString()
+    coffee.on 'exit', (code) ->
+      callback?() if code is 0
+
+copyWithDirectory = (path, output) ->
   files = fs.readdirSync(path)
   for i in files
     currentFile = path + '/' + i
     stats = fs.statSync(currentFile)
     if stats.isFile()
-      cpy = spawn 'cp', [currentFile, outputImageFolder]
+      cpy = spawn 'cp', [currentFile, output]
       cpy.stderr.on 'data', (data) ->
         process.stderr.write data.toString()
       cpy.stdout.on 'data', (data) ->
         util.log data.toString()
     else if stats.isDirectory()
-      copyWithDirectory(currentFile)
+      copyWithDirectory(currentFile, output)
 
-copy = () ->
-  for imgSrcFolder in imageSrcFolders  
-    copyWithDirectory(imgSrcFolder)      
+copy = (folderArray, output) ->
+  for folder in folderArray  
+    copyWithDirectory(folder, output)
 
 task 'build', 'Build to static/lib from tagbox, votebox, and omnipost', ->
   build()
 
+task 'cpcss', 'Copy all cssfiles from the respective images folders in tagbox, votebox, and omnipost into static folder', ->
+  copy(cssSrcFolders, outputFolder)
+
 task 'cpimgs', 'Copy all images from the respective images folders in tagbox, votebox, and omnipost into static folder', ->
-  copy()
+  copy(imageSrcFolders, outputImageFolder)
 
-task 'watch', 'Watch for changes in tagbox, votebox, and omnipost, and if there are, build it to static/lib', ->
-  for folder in srcFolders
-    coffee = spawn 'coffee', ['-w', '-c', '-o', outputJSFolder, folder]
-    coffee.stderr.on 'data', (data) ->
-      process.stderr.write data.toString()
-    coffee.stdout.on 'data', (data) ->
-      util.log data.toString()
+task 'watch', 'Watch coffee files in tagbox, votebox, and omnipost for changes and if there is one, build it and put it in static/lib', ->
+  watch()
 
-task 'buildAll', 'build all coffee files and copy all images', ->
+task 'buildAndCpAll', 'build all coffee files and copy all images', ->
   invoke 'build'
   invoke 'cpimgs'
+  invoke 'cpcss'
