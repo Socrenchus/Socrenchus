@@ -28,6 +28,13 @@ class Post(ndb.Model):
   score     = ndb.FloatProperty(default=0.0)
   timestamp = ndb.DateTimeProperty(auto_now=True)
   
+  def dereference_experience(self):
+    """
+    Dereference a user's experience on a post.
+    """
+    # TODO: abstract out dereferencing here
+    pass
+  
   def adjust_score(self, delta):
     """
     Adjust post's score by delta and reference experience.
@@ -57,6 +64,34 @@ class Post(ndb.Model):
         ref_tag.xp += ((delta * tags_d[tag]) / s)
         ref_tag.put()
     self.put()
+    
+  def recommend(self, n=1, tags=None):
+    """
+    Use this post to recommend the next n posts to the user.
+    """
+    # TODO: Implement Post's recommend(n) function
+    # TODO: Design solution for recommending on the root
+    # only recomend if we responded to the post
+    resp = Post.query(ancestor=self.key).iter(keys_only=True)
+    if resp.has_next():
+      # get our response to the post
+      resp = resp_next()
+      # do query to get direct children of post (matching one of the tags)
+      children = {}
+      def count_children(key):
+        while key != self.key:
+          if not key in children.keys():
+            children[key] = 0
+          children[key] += 1
+          key = key.parent()
+      Post.query(ancestor=self.key).map(keys_only=True)
+      # TODO: filter recommendation on tags
+      # dereference current user's experience on our response to post
+      xp = resp.dereference_experience()
+      # use experience on our response to post to get user's percentile on post
+      percentile = None # TODO: calculate percentile
+      # advance in the ordered sub posts according to percentile
+      #  e.g. user with highest experience gets least popular posts
   
 class Tag(ndb.Model):
   """
@@ -115,6 +150,7 @@ class Tag(ndb.Model):
     # check that we meet the conditions for a score adjustment
     if self.key.parent().kind() == 'Post':
       if self.is_base(): # adjust the score for the poster
+        # TODO: don't adjust score if we've changed our mind
         # figure out the sign on the score change
         delta = self.xp
         if self.title == 'incorrect':
