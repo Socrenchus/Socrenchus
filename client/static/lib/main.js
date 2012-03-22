@@ -72,7 +72,14 @@
 
       PostView.prototype.render = function() {
         $(this.el).html(this.template);
-        $(this.el).find('#content').text(this.model.get('content')).omnipost();
+        $(this.el).find('.inner-question').votebox({
+          votesnum: this.model.get('votecount')
+        });
+        $(this.el).find('.inner-question').omnipost({
+          editing: false,
+          postcontent: this.model.get('content'),
+          linkedcontent: this.model.get('linkedcontent')
+        });
         return $(this.el);
       };
 
@@ -134,9 +141,11 @@
       };
 
       Workspace.prototype.mockup = function() {
-        var p, pv;
+        var p, p1, pv, pv1;
         p = new Post({
           content: 'This is an example post.',
+          linkedcontent: '<img src="http://m-27.com/wp-content/lol/kaiji.jpg" alt=""/>',
+          votecount: 25,
           topic_tags: '',
           rubric_tags: '',
           parents: '',
@@ -145,7 +154,19 @@
         pv = new PostView({
           model: p
         });
-        return $('#assignments').append(pv.render());
+        $('#assignments').append(pv.render());
+        p1 = new Post({
+          content: 'This is an example post.',
+          linkedcontent: '<img src="http://m-27.com/wp-content/lol/kaiji.jpg" alt=""/>',
+          topic_tags: '',
+          rubric_tags: '',
+          parents: '',
+          responses: ''
+        });
+        pv1 = new PostView({
+          model: p1
+        });
+        return $('#assignments').append(pv1.render());
       };
 
       return Workspace;

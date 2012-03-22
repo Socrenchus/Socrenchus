@@ -31,7 +31,9 @@ $ ->
       @id = @model.id
     render: ->
       $(@el).html(@template)
-      $(@el).find('#content').text(@model.get('content')).omnipost()
+      # $(@el).find('#content').text(@model.get('content')).omnipost()    
+      $(@el).find('.inner-question').votebox({votesnum:@model.get('votecount')})
+      $(@el).find('.inner-question').omnipost({editing:false, postcontent:@model.get('content'), linkedcontent:@model.get('linkedcontent')})
       return $(@el)
       
   class StreamView extends Backbone.View
@@ -62,6 +64,8 @@ $ ->
     mockup: ->
       p = new Post(
         content: 'This is an example post.'
+        linkedcontent: '<img src="http://m-27.com/wp-content/lol/kaiji.jpg" alt=""/>'
+        votecount: 25
         topic_tags: ''
         rubric_tags: ''
         parents: ''
@@ -69,6 +73,16 @@ $ ->
       )
       pv = new PostView(model: p)
       $('#assignments').append(pv.render())
+      p1 = new Post(
+        content: 'This is an example post.'
+        linkedcontent: '<img src="http://m-27.com/wp-content/lol/kaiji.jpg" alt=""/>'
+        topic_tags: ''
+        rubric_tags: ''
+        parents: ''
+        responses: ''
+      )
+      pv1 = new PostView(model: p1)
+      $('#assignments').append(pv1.render())
       
   
   app_router = new Workspace()

@@ -2,26 +2,33 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD HTML 4.01//EN'>
 <html lang='en'>
   <head>
-    <script src='//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js' type='text/javascript'>
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'>
 </script>
     <script src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js' type='text/javascript'>
 </script>
-    <script type='text/javascript' src='/lib/autoresize.jquery.min.js'>
+    <script type='text/javascript' src='lib/autoresize.jquery.min.js'>
 </script>
 <!--[if IE 8]><script language='javascript' type='text/javascript' src='excanvas.min.js'></script><![endif]-->
 <script type='text/javascript' src='http://s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4eff18ed1735c2b6'></script>
     <script type='text/javascript'>var addthis_config={data_track_clickback: false}</script>
-<script type='text/javascript' src='/lib/jqBarGraph.packed.js'>
+<script type='text/javascript' src='lib/jqBarGraph.packed.js'>
 </script>
 <script type='text/javascript' src='http://documentcloud.github.com/underscore/underscore-min.js'></script>
 <script type='text/javascript' src='http://documentcloud.github.com/backbone/backbone-min.js'></script>
-<script type='text/javascript' src='/lib/backbone.localStorage-min.js'></script>
-<script type='text/javascript' src='/lib/jquery.ui.omnipost.js'>
+<script type='text/javascript' src='lib/backbone.localStorage-min.js'></script>
+<script type='text/javascript' src='lib/jquery.ui.omnipost.js'>
 </script>
-<script type='text/javascript' src='/lib/main.js'>
+<link href='lib/ui.omnipost.css' type='text/css' rel='stylesheet'>
+<script type='text/javascript' src='lib/jquery.ui.votebox.js'>
 </script>
-    <link href='/lib/ui.omnipost.css' type='text/css' rel='stylesheet'>
-    <link href='/main.css' type='text/css' rel='stylesheet'>
+<link href='lib/ui.votebox.css' type='text/css' rel='stylesheet'>
+<script type='text/javascript' src='lib/jquery.ui.tagbox.js'>
+</script>
+<link href='lib/ui.tagbox.css' type='text/css' rel='stylesheet'>
+<script type='text/javascript' src='lib/main.js'>
+</script>
+    
+    <link href='main.css' type='text/css' rel='stylesheet'>
     <link href='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/flick/jquery-ui.css' type='text/css' rel='stylesheet'>
     <title>
       Directed Learning
@@ -31,7 +38,7 @@
     <div id='main'>
       <div id='table-top'>
         <a id='logout' name='logout' href='/login'></a>
-        <img id='logo' src='/logo.png'>
+        <img id='logo' src='logo.png'>
         <ul id='classes' class='ui-helper-reset'>
           <li class='ui-selected'>Your classes...</li>
           <li id='create'>Teach a class</li>
@@ -58,7 +65,7 @@
           </script>
           <script type='text/template' id='post' class='question'>
             <div class='inner-question'>
-              <textarea id='content' class='autoResizable' readonly></textarea> 
+           <!--   <textarea id='content' class='autoResizable' readonly></textarea> -->
               
               <ul id='replies' class='ui-helper-reset'></ul>
 
@@ -101,5 +108,7 @@
         <a>More</a>
       </span>
     </div>
+    <script type="text/javascript">
+    </script>
   </body>
 </html>
