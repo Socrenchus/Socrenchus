@@ -36,8 +36,9 @@ $ ->
       # $(@el).find('#content').text(@model.get('content')).omnipost()    
       $(@el).find('.inner-question').votebox({votesnum:@model.get('votecount')})
       $(@el).find('.inner-question').omnipost({editing:@model.get('editing'), postcontent:@model.get('content'), linkedcontent:@model.get('linkedcontent')})
+      $(@el).find('.inner-question').tagbox({editing: @model.get('editing'), tags:@model.get('tags')})
       $(@el).append("<button id='reply'>Reply</button>");
-      $(@el).find('.inner-question').tagbox({tags:@model.get('topic_tags')})
+      
       return $(@el)
     
     replyToPost: ->
@@ -46,8 +47,7 @@ $ ->
         content: ''
         linkedcontent: ''
         votecount: 0
-        topic_tags: []
-        rubric_tags: ''
+        tags: []
         parents: @model
         responses: ''
       )
@@ -85,8 +85,7 @@ $ ->
         content: 'This is an example post.'
         linkedcontent: '<img src="http://m-27.com/wp-content/lol/kaiji.jpg" alt=""/>'
         votecount: 25
-        topic_tags: ["kaiji", "san"]
-        rubric_tags: ''
+        tags: ["kaiji", "san"]
         parents: ''
         responses: ''
       )
@@ -96,8 +95,7 @@ $ ->
         editing: false
         content: 'This is an example post.'
         linkedcontent: '<img src="http://m-27.com/wp-content/lol/kaiji.jpg" alt=""/>'
-        topic_tags: ["do", "re", "mi", "fa", "so"]
-        rubric_tags: ''
+        tags: ["do", "re", "mi", "fa", "so"]
         parents: ''
         responses: ''
       )

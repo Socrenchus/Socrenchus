@@ -86,10 +86,11 @@
           postcontent: this.model.get('content'),
           linkedcontent: this.model.get('linkedcontent')
         });
-        $(this.el).append("<button id='reply'>Reply</button>");
         $(this.el).find('.inner-question').tagbox({
-          tags: this.model.get('topic_tags')
+          editing: this.model.get('editing'),
+          tags: this.model.get('tags')
         });
+        $(this.el).append("<button id='reply'>Reply</button>");
         return $(this.el);
       };
 
@@ -100,9 +101,8 @@
           content: '',
           linkedcontent: '',
           votecount: 0,
-          topic_tags: [],
-          rubric_tags: '',
-          parents: '',
+          tags: [],
+          parents: this.model,
           responses: ''
         });
         replyView = new PostView({
@@ -175,8 +175,7 @@
           content: 'This is an example post.',
           linkedcontent: '<img src="http://m-27.com/wp-content/lol/kaiji.jpg" alt=""/>',
           votecount: 25,
-          topic_tags: ["kaiji", "san"],
-          rubric_tags: '',
+          tags: ["kaiji", "san"],
           parents: '',
           responses: ''
         });
@@ -188,8 +187,7 @@
           editing: false,
           content: 'This is an example post.',
           linkedcontent: '<img src="http://m-27.com/wp-content/lol/kaiji.jpg" alt=""/>',
-          topic_tags: ["do", "re", "mi", "fa", "so"],
-          rubric_tags: '',
+          tags: ["do", "re", "mi", "fa", "so"],
           parents: '',
           responses: ''
         });
