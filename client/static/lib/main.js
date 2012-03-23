@@ -66,6 +66,12 @@
 
       PostView.prototype.template = Templates.post;
 
+      PostView.prototype.events = function() {
+        return {
+          'click button#reply': 'replyToPost'
+        };
+      };
+
       PostView.prototype.initialize = function() {
         return this.id = this.model.id;
       };
@@ -76,11 +82,33 @@
           votesnum: this.model.get('votecount')
         });
         $(this.el).find('.inner-question').omnipost({
-          editing: false,
+          editing: this.model.get('editing'),
           postcontent: this.model.get('content'),
           linkedcontent: this.model.get('linkedcontent')
         });
+        $(this.el).append("<button id='reply'>Reply</button>");
+        $(this.el).find('.inner-question').tagbox({
+          tags: this.model.get('topic_tags')
+        });
         return $(this.el);
+      };
+
+      PostView.prototype.replyToPost = function() {
+        var replyPost, replyView;
+        replyPost = new Post({
+          editing: true,
+          content: '',
+          linkedcontent: '',
+          votecount: 0,
+          topic_tags: [],
+          rubric_tags: '',
+          parents: '',
+          responses: ''
+        });
+        replyView = new PostView({
+          model: replyPost
+        });
+        return $(this.el).append(replyView.render());
       };
 
       return PostView;
@@ -143,10 +171,11 @@
       Workspace.prototype.mockup = function() {
         var p, p1, pv, pv1;
         p = new Post({
+          editing: false,
           content: 'This is an example post.',
           linkedcontent: '<img src="http://m-27.com/wp-content/lol/kaiji.jpg" alt=""/>',
           votecount: 25,
-          topic_tags: '',
+          topic_tags: ["kaiji", "san"],
           rubric_tags: '',
           parents: '',
           responses: ''
@@ -156,9 +185,10 @@
         });
         $('#assignments').append(pv.render());
         p1 = new Post({
+          editing: false,
           content: 'This is an example post.',
           linkedcontent: '<img src="http://m-27.com/wp-content/lol/kaiji.jpg" alt=""/>',
-          topic_tags: '',
+          topic_tags: ["do", "re", "mi", "fa", "so"],
           rubric_tags: '',
           parents: '',
           responses: ''
