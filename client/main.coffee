@@ -5,9 +5,10 @@ $ ->
   ###
     
   class Post extends Backbone.Model
-    respond: (response) ->
+    respond: (response) =>
       
       p = new Post(
+        id: 1.1
         editing: false
         content: response.posttext
         linkedcontent: response.linkdata
@@ -17,7 +18,7 @@ $ ->
         responses: ''
       )
       pv = new PostView(model: p)
-      $('#assignments').append(pv.render())
+      $('#response' + @id).append(pv.render())
       #@save(
       #  responses:
       #    @get( 'responses' ).push( p.cid )
@@ -56,7 +57,8 @@ $ ->
       @renderPostContent()
       $(@el).find('.inner-question').tagbox({editing: true, tags:@model.get('tags')})
       $(@el).find('.inner-question').omnipost({callback: @model.respond, editing:true})
-      
+      responsediv = $("<div id = 'response#{@id}'></div>")
+      $(@el).find('.inner-question').append(responsediv)
       return $(@el)
         
   class StreamView extends Backbone.View
@@ -86,6 +88,7 @@ $ ->
       postCollection.fetch()
     mockup: ->
       p = new Post(
+        id: 1
         editing: false
         content: 'This is an example post.'
         linkedcontent: '<img src = "http://m-27.com/wp-content/lol/kaiji.jpg" width = "300" heigh = "auto">'
@@ -97,6 +100,7 @@ $ ->
       pv = new PostView(model: p)
       $('#assignments').append(pv.render())
       p1 = new Post(
+        id: 2
         editing: false
         content: 'This is an example post.'
         linkedcontent: '<a href = "http://www.imdb.com">www.imdb.com</a>'
