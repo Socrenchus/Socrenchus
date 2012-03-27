@@ -6,11 +6,22 @@ $ ->
     
   class Post extends Backbone.Model
     respond: (response) ->
-      p = new Post( value: response )
-      @save(
-        responses:
-          @get( 'responses' ).push( p.cid )
+      
+      p = new Post(
+        editing: false
+        content: response.posttext
+        linkedcontent: response.linkdata
+        votecount: 0
+        tags: ["kaiji", "san"]
+        parents: ''
+        responses: ''
       )
+      pv = new PostView(model: p)
+      $('#assignments').append(pv.render())
+      #@save(
+      #  responses:
+      #    @get( 'responses' ).push( p.cid )
+      #)
     
   class Posts extends Backbone.Collection
     model: Post
@@ -28,31 +39,25 @@ $ ->
     className: 'post'
     template: Templates.post
     events: ->
-      'click button#reply': 'replyToPost'
+      
     initialize: ->
       @id = @model.id
+      
+    renderPostContent: ->
+      postcontentdiv = $("<div class = 'ui-postcontent'></div>")
+      postcontentdiv.append(@model.get('linkedcontent'))
+      postcontentdiv.append('<br />')
+      postcontentdiv.append(@model.get('content'))
+      $(@el).find('.inner-question').append(postcontentdiv)
+    
     render: ->
       $(@el).html(@template)
-      # $(@el).find('#content').text(@model.get('content')).omnipost()    
       $(@el).find('.inner-question').votebox({votesnum:@model.get('votecount')})
-      $(@el).find('.inner-question').omnipost({editing:@model.get('editing'), postcontent:@model.get('content'), linkedcontent:@model.get('linkedcontent')})
-      $(@el).find('.inner-question').tagbox({editing: @model.get('editing'), tags:@model.get('tags')})
-      $(@el).append("<button id='reply'>Reply</button>");
+      @renderPostContent()
+      $(@el).find('.inner-question').tagbox({editing: true, tags:@model.get('tags')})
+      $(@el).find('.inner-question').omnipost({callback: @model.respond, editing:true})
       
       return $(@el)
-    
-    replyToPost: ->
-      replyPost = new Post(
-        editing: true
-        content: ''
-        linkedcontent: ''
-        votecount: 0
-        tags: []
-        parents: @model
-        responses: ''
-      )
-      replyView = new PostView(model: replyPost)
-      $(@el).append(replyView.render())
         
   class StreamView extends Backbone.View
     initialize: ->
@@ -83,7 +88,7 @@ $ ->
       p = new Post(
         editing: false
         content: 'This is an example post.'
-        linkedcontent: '<img src="http://m-27.com/wp-content/lol/kaiji.jpg" alt=""/>'
+        linkedcontent: '<img src = "http://m-27.com/wp-content/lol/kaiji.jpg" width = "300" heigh = "auto">'
         votecount: 25
         tags: ["kaiji", "san"]
         parents: ''
@@ -94,7 +99,7 @@ $ ->
       p1 = new Post(
         editing: false
         content: 'This is an example post.'
-        linkedcontent: '<img src="http://m-27.com/wp-content/lol/kaiji.jpg" alt=""/>'
+        linkedcontent: '<a href = "http://www.imdb.com">www.imdb.com</a>'
         tags: ["do", "re", "mi", "fa", "so"]
         parents: ''
         responses: ''
