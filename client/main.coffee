@@ -8,6 +8,7 @@ $ ->
     respond: (response) =>
       
       p = new Post(
+        parentID: @id
         id: 1.1
         editing: false
         content: response.posttext
@@ -17,8 +18,7 @@ $ ->
         parents: ''
         responses: ''
       )
-      pv = new PostView(model: p)
-      $('#response' + @id).append(pv.render())
+      App.addOne(p)
       #@save(
       #  responses:
       #    @get( 'responses' ).push( p.cid )
@@ -68,8 +68,9 @@ $ ->
       postCollection.fetch()
     addOne: (item) ->
       post = new PostView(model: item)
-      #parents = ()
-      $(post.render()).appendTo()
+      $('#response' + item.get('parentID')).append(post.render())
+      # parents = ()
+      # $(post.render()).appendTo()
     addAll: ->
       postCollection.each(@addOne)
   
