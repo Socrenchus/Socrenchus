@@ -6,19 +6,20 @@ $ ->
     
   class Post extends Backbone.Model
     respond: (response) =>
-      
       p = new Post(
         parentID: @id
-        id: 1.1
+        id: '' + @id + @get('responses').length
         editing: false
         content: response.posttext
         linkedcontent: response.linkdata
         votecount: 0
         tags: ["kaiji", "san"]
         parents: ''
-        responses: ''
+        responses: []
       )
-      App.addOne(p)
+      alert p.get('id')
+      @get('responses').push(p)
+      postCollection.create(p)
       #@save(
       #  responses:
       #    @get( 'responses' ).push( p.cid )
@@ -65,17 +66,22 @@ $ ->
     initialize: ->
       postCollection.bind('add', @addOne, this)
       postCollection.bind('reset', @addAll, this)
+      postCollection.bind('all', @render, this)
       postCollection.fetch()
     addOne: (item) ->
       post = new PostView(model: item)
-      $('#response' + item.get('parentID')).append(post.render())
+      if document.getElementById('response' + item.get('parentID'))
+        $('#response' + item.get('parentID')).append(post.render())
+      else      
+        $('#assignments').append(post.render())
       # parents = ()
       # $(post.render()).appendTo()
     addAll: ->
       postCollection.each(@addOne)
-  
-  postCollection = new Posts()
-  App = new StreamView(el: $('#learn'))
+    deleteOne: (item) ->
+      item.destroy()
+    deleteAll: ->
+      postCollection.each(@deleteOne)
     
   ###
   # Routes
@@ -83,23 +89,27 @@ $ ->
   class Workspace extends Backbone.Router
     routes:
       '/:id' : 'assign'
-      'mockup': 'mockup'
+      'unpopulate' : 'unpopulate'
+      'populate' : 'populate'
     assign: (id) ->
       postCollection.get(id)
       postCollection.fetch()
-    mockup: ->
+
+    unpopulate: ->
+      App.deleteAll()
+
+    populate: ->
       p = new Post(
         id: 1
         editing: false
         content: 'This is an example post.'
-        linkedcontent: '<img src = "http://m-27.com/wp-content/lol/kaiji.jpg" width = "300" heigh = "auto">'
+        linkedcontent: '<img src = "http://m-27.com/wp-content/lol/kaiji.jpg" width = "300" height = "auto">'
         votecount: 25
         tags: ["kaiji", "san"]
         parents: ''
-        responses: ''
+        responses: []
       )
-      pv = new PostView(model: p)
-      $('#assignments').append(pv.render())
+      postCollection.create(p)
       p1 = new Post(
         id: 2
         editing: false
@@ -107,11 +117,12 @@ $ ->
         linkedcontent: '<a href = "http://www.imdb.com">www.imdb.com</a>'
         tags: ["do", "re", "mi", "fa", "so"]
         parents: ''
-        responses: ''
+        responses: []
       )
-      pv1 = new PostView(model: p1)
-      $('#assignments').append(pv1.render())
+      postCollection.create(p1)
       
   
-  app_router = new Workspace()
+  postCollection = new Posts()
+  App = new StreamView(el: $('#learn')) 
+  app_router = new Workspace()   
   Backbone.history.start()
