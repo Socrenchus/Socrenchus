@@ -17,13 +17,11 @@ $ ->
         parents: ''
         responses: []
       )
-      alert p.get('id')
-      @get('responses').push(p)
+      responseArray = @get('responses')
+      responseArray.push(p.get('id'))
+      @save({responses: responseArray})
       postCollection.create(p)
-      #@save(
-      #  responses:
-      #    @get( 'responses' ).push( p.cid )
-      #)
+      
     
   class Posts extends Backbone.Collection
     model: Post
@@ -47,7 +45,7 @@ $ ->
       
     renderPostContent: ->
       postcontentdiv = $("<div class = 'ui-postcontent'></div>")
-      postcontentdiv.append(@model.get('linkedcontent'))
+      postcontentdiv.append($(@model.get('linkedcontent')))
       postcontentdiv.append('<br />')
       postcontentdiv.append(@model.get('content'))
       $(@el).find('.inner-question').append(postcontentdiv)
@@ -81,6 +79,7 @@ $ ->
     deleteOne: (item) ->
       item.destroy()
     deleteAll: ->
+      postCollection.fetch()
       postCollection.each(@deleteOne)
     
   ###
@@ -103,7 +102,7 @@ $ ->
         id: 1
         editing: false
         content: 'This is an example post.'
-        linkedcontent: '<img src = "http://m-27.com/wp-content/lol/kaiji.jpg" width = "300" height = "auto">'
+        linkedcontent: '<img src = "http://m-27.com/wp-content/lol/kaiji.jpg" width = "350" height = "auto">'
         votecount: 25
         tags: ["kaiji", "san"]
         parents: ''
