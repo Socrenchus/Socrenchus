@@ -14,7 +14,7 @@ $ ->
         linkedcontent: response.linkdata
         votecount: 0
         tags: ["kaiji", "san"]
-        parents: ''
+        parents: [@id]
         responses: []
       )
       responseArray = @get('responses')
@@ -58,6 +58,17 @@ $ ->
       $(@el).find('.inner-question').omnipost({callback: @model.respond, editing:true})
       responsediv = $("<div id = 'response#{@id}'></div>")
       $(@el).find('.inner-question').append(responsediv)
+      if @model.get('parents').length is 0
+        lockedpostsdiv = $("<div class='locked-posts'>
+            <div class='more-experience-needed'>
+            Sorry, you need more experience to view the next #{Math.floor(2+Math.random() * 7)} posts
+          </div></div>")
+        progressbardiv = $("<div class='progressbar'></div>")
+        percent = Math.floor(40+Math.random()*60)
+        progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'><p>#{percent}% Experience</p></div>")
+        progressbardiv.append(progressindicatordiv)
+        lockedpostsdiv.append(progressbardiv)
+        $(@el).find('.inner-question').append(lockedpostsdiv)
       return $(@el)
         
   class StreamView extends Backbone.View
@@ -69,7 +80,7 @@ $ ->
     addOne: (item) ->
       post = new PostView(model: item)
       if document.getElementById('response' + item.get('parentID'))
-        $('#response' + item.get('parentID')).append(post.render())
+        $('#response' + item.get('parentID')).prepend(post.render())
       else      
         $('#assignments').append(post.render())
       # parents = ()
