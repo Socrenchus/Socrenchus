@@ -134,11 +134,20 @@ background-image: linear-gradient(top,white,#ECECEC);
   position:relative;
 }
 
+.profile-element-header {
+  font-family: Trebuchet MS,Liberation Sans,DejaVu Sans,sans-serif;
+  font-weight: bold;
+  font-size: 18px;
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  clear: both;
+}
+
 .badge {
   margin: 5px;
   position: relative;
   float: left;
-  width: 150px;  
   height: 32px;  
 }
 
@@ -147,14 +156,51 @@ background-image: linear-gradient(top,white,#ECECEC);
 }
 
 .badge-title {  
+  font-family: Trebuchet MS,Liberation Sans,DejaVu Sans,sans-serif;
   float: left;
   margin-left: 5px;
   position: relative;
   top: 8px;
 }
 
+#friends-list {
+  width: 576px;
+}
+
+#friends-list ul {
+  width: 200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#friends-list li {
+  font-style: normal;
+  margin-bottom: 55px;
+}
+
+.friend-profile-pic {
+  float: left;
+}
+
+.friend-name {
+  font-family: Trebuchet MS,Liberation Sans,DejaVu Sans,sans-serif;
+  position: relative;
+  margin-left: 77px;
+  top: 23px;
+}
+
+#collapsable-profile {
+  width: 576px;
+}
+
 #tagcloud-img {
-  width:576px;
+  width: 500px;
+  height: 300px;
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #dropdown-panel {
