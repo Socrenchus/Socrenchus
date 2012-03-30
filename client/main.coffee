@@ -59,14 +59,21 @@ $ ->
       responsediv = $("<div id = 'response#{@id}'></div>")
       $(@el).find('.inner-question').append(responsediv)
       if @model.get('parents').length is 0
-        lockedpostsdiv = $("<div class='locked-posts'>
-            <div class='more-experience-needed'>
-            Sorry, you need more experience to view the next #{Math.floor(2+Math.random() * 7)} posts
-          </div></div>")
+        lockedpostsdiv = $("<div class='locked-posts'></div>")
         progressbardiv = $("<div class='progressbar'></div>")
-        percent = Math.floor(40+Math.random()*60)
-        progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'><p>#{percent}% Experience</p></div>")
-        progressbardiv.append(progressindicatordiv)
+        percent = Math.floor(Math.random()*100)
+        textinline = true
+        indicatortext = $('<p>Unlock ' + Math.floor(2+Math.random() * 7) + ' posts</p>')
+        if percent < 100.0/350.0 * 100
+          textinline = false
+        if textinline
+          progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")
+          progressindicatordiv.append(indicatortext)          
+          progressbardiv.append(progressindicatordiv)
+        else
+          progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")          
+          progressbardiv.append(progressindicatordiv)
+          progressbardiv.append(indicatortext)            
         lockedpostsdiv.append(progressbardiv)
         $(@el).find('.inner-question').append(lockedpostsdiv)
       return $(@el)
