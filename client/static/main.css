@@ -101,10 +101,64 @@ h2 {
   border-bottom: 2px solid #ebebeb;
 }
 
-#profile-view img {
+#notification-box {
+  position:absolute;
+  left: 235px;
+  top: 42px;
+  z-index: 100;
+}
+
+#notification-counter {
+  color: #666;
+  font-family: Arial,sans-serif;
+  cursor: pointer;
+  margin: 10px;
+  background-color: #F8F8F8;
+  background-image: -webkit-linear-gradient(top,white,#ECECEC);
+background-image: -moz-linear-gradient(top,white,#ECECEC);
+background-image: -ms-linear-gradient(top,white,#ECECEC);
+background-image: -o-linear-gradient(top,white,#ECECEC);
+background-image: linear-gradient(top,white,#ECECEC);
+  border-color: #C6C6C6;
+  float: right;
+  position: relative;
+  top: 12px;
+  text-align: center;
+  width: 20px;
+  height:20px;
+}
+
+#profile-view {
   width: 576px;
   height: auto;
   position:relative;
+}
+
+.badge {
+  margin: 5px;
+  position: relative;
+  float: left;
+  width: 150px;  
+  height: 32px;  
+}
+
+.badge-image {
+  float: left;
+}
+
+.badge-title {  
+  float: left;
+  margin-left: 5px;
+  position: relative;
+  top: 8px;
+}
+
+#tagcloud-img {
+  width:576px;
+}
+
+#dropdown-panel {
+  width:576px;
 }
 
 .submitArea {

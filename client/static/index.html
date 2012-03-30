@@ -17,6 +17,8 @@
 <script type='text/javascript' src='http://documentcloud.github.com/backbone/backbone-min.js'></script>
 <script type='text/javascript' src='lib/backbone.localStorage-min.js'></script>
 <script type="text/javascript" src="https://raw.github.com/padolsey/jQuery.fn.autoResize/master/jquery.autoresize.js"></script>
+<script type='text/javascript' src='lib/jquery.ui.dropdown.js'>
+</script>
 <script type='text/javascript' src='lib/jquery.ui.omnipost.js'>
 </script>
 <link href='lib/ui.omnipost.css' type='text/css' rel='stylesheet'>
@@ -36,18 +38,38 @@
   </head>
   <body>
     <div id='main'>
-      <div id='table-top'>
-        <h2 id='welcome-user'>Welcome user92934</h2>
-        <a id='view-profile' href = 'profile.html'>View Profile</a>
+      <div id='table-top'>        
+        <h3 id='notification-counter' title='Notifications'>2</h3>
+        <img id='notification-box' src='images/notifications.png'>
+        <h2 id='welcome-user'>Welcome John</h2>
         <a id='logout' name='logout' href='/login'></a>
-        <img onclick='location.href = "index.html"' id='logo' src='logo.png'>
+        <img onclick='location.href = "index.html" 'style="cursor:pointer"' id='logo' src='logo.png'>
         <ul id='classes' class='ui-helper-reset'>
           <li class='ui-selected'>Your classes...</li>
           <li id='create'>Teach a class</li>
         </ul>
       </div>
       <div id='profile-view'>
-        <img src='images/dropdown.png'>
+        <div id='collapseable-profile'>
+          <img id='tagcloud-img' src='images/tagcloud.png'>
+          </img>
+          <div class='badge' title='50 posts submitted'>
+            <img class='badge-image' src='http://www.epa.gov/accessibility/images/icons/icon_mouth2.gif' width = '32px'>
+              <div class='badge-title'>Conversationalist</div>
+            </img>
+          </div>
+          <div class='badge' title='Tagged one post with over 5 tags'>
+            <img class='badge-image' src='images/gradCapIcon.png' width = '32px'>
+              <div class='badge-title'>Scholar</div>
+            </img>
+          </div>
+          <div class='badge' title='One of your posts has been tagged by 10 different players'>
+            <img class='badge-image' src='http://crossexamined.org/images/home-banners-event.jpg' width = '32px'>
+              <div class='badge-title'>Inspirational</div>
+            </img>
+          </div>
+        </div>
+        <img id='dropdown-panel' src='images/dropdown.png'>
         </img>
       </div>
       <div id='learn'>

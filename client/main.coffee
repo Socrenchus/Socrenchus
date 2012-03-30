@@ -99,6 +99,16 @@ $ ->
     deleteAll: ->
       postCollection.fetch()
       postCollection.each(@deleteOne)
+    render: ->
+      $('#collapseable-profile').hide()
+      $('#dropdown-panel').click( ->
+        $('#collapseable-profile').slideToggle("fast")
+      )
+
+      $('#notification-box').hide()
+      $('#notification-counter').click( ->
+        $('#notification-box').toggle()
+      )
     
   ###
   # Routes
