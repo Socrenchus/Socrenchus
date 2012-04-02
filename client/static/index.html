@@ -30,13 +30,21 @@
 <link href='/lib/ui.tagbox.css' type='text/css' rel='stylesheet'>
 </script>
     
-    <link href='main.css' type='text/css' rel='stylesheet'>
+    <link href='/main.css' type='text/css' rel='stylesheet'>
     <link href='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/flick/jquery-ui.css' type='text/css' rel='stylesheet'>
     <title>
       Directed Learning
     </title>
   </head>
   <body>
+    <div id='left-instructions'>
+      <div id='profile-instructions'>
+        By clicking this tab, you can view your profile.  This includes a list of you tags, badges, and list of friends that use Socrenchus from another website such as facebook.      
+      </div>
+      <div id='post-instructions'>
+        By clicking this tab, you can view your profile.  This includes a list of you tags, badges, and list of friends that use Socrenchus from another website such as facebook.      
+      </div>
+    </div>
     <div id='main'>
       <div id='table-top'>    
         <!-- TODO: integrate the notifications into the streamview -->    
@@ -44,7 +52,7 @@
         <img id='notification-box' src='/images/notifications.png'>
         <h2 id='welcome-user'>Welcome John</h2>
         <a id='logout' name='logout' href='/login'></a>
-        <img onclick='location.href = "index.html" 'style="cursor:pointer"' id='logo' src='/logo.png'>
+        <img onclick='location.href = "/" 'style="cursor:pointer"' id='logo' src='/logo.png'>
         <ul id='classes' class='ui-helper-reset'>
           <li class='ui-selected'>Your classes...</li>
           <li id='create'>Teach a class</li>
@@ -146,7 +154,9 @@
         <a>More</a>
       </span>
     </div>
-    
+    <div id='right-instructions'>
+        hello
+      </div>
     <script type='text/javascript' src='/lib/main.js'>
     <script type="text/javascript">
     </script>
