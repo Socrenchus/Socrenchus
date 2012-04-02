@@ -38,7 +38,8 @@
   </head>
   <body>
     <div id='main'>
-      <div id='table-top'>        
+      <div id='table-top'>    
+        <!-- TODO: integrate the notifications into the streamview -->    
         <h3 id='notification-counter' title='Notifications'>2</h3>
         <img id='notification-box' src='images/notifications.png'>
         <h2 id='welcome-user'>Welcome John</h2>
@@ -52,8 +53,10 @@
       <div id='profile-view'>
         <div id='collapseable-profile'>
           <div class='profile-element-header'>Your Tags</div>          
+           <!-- TODO: integrate the tag cloud into the streamview -->    
           <img id='tagcloud-img' src='images/tagcloud.png'>
-          </img>          
+          </img>   
+           <!-- TODO: integrate the badges into the streamview -->           
           <div id='badges'>
             <div class='profile-element-header'>Your Badges</div>
             <div class='badge' title='50 posts submitted'>
@@ -103,10 +106,7 @@
           </script>
           <script type='text/template' id='post' class='question'>
             <div class='inner-question'>
-           <!--   <textarea id='content' class='autoResizable' readonly></textarea> -->
-              
               <ul id='replies' class='ui-helper-reset'></ul>
-
             </div>
           </script>
           <script type='text/template' id='assignment'>
