@@ -22,11 +22,25 @@ class Post(ndb.Model):
   """
   A post can be a question, it can be an answer, it can even be a statement.    
   """
-# parent    = parent post (optional)
-  author    = ndb.UserProperty(auto_current_user_add=True)
-  content   = ndb.TextProperty()
-  score     = ndb.FloatProperty(default=0.0)
-  timestamp = ndb.DateTimeProperty(auto_now=True)
+# parent      = parent post (optional)
+  author      = ndb.UserProperty(auto_current_user_add=True)
+  content     = ndb.TextProperty()
+  score       = ndb.FloatProperty(default=0.0)
+  timestamp   = ndb.DateTimeProperty(auto_now=True)
+  
+  @ndb.ComputedProperty
+  def popularity(self):
+    """
+    Count the number of children a post has.
+    """
+    return ndb.Query(ancestor=self.key).count()
+  
+  def dereference_experience(self):
+    """
+    Dereference a user's experience on a post.
+    """
+    # TODO: abstract out dereferencing here
+    pass
   
   def adjust_score(self, delta):
     """
@@ -57,17 +71,38 @@ class Post(ndb.Model):
         ref_tag.xp += ((delta * tags_d[tag]) / s)
         ref_tag.put()
     self.put()
+    
+  def recommend(self, n=1, tags=None):
+    """
+    Use this post to recommend the next n posts to the user.
+    """
+    # TODO: Implement Post's recommend(n) function
+    # TODO: Design solution for recommending on the root
+    # only recomend if we responded to the post
+    resp = Post.query(ancestor=self.key).iter(keys_only=True)
+    if resp.has_next():
+      # get our response to the post
+      resp = resp_next()
+      # do query to get direct children of post (matching one of the tags)
+      q = Post.query(ancestor=self.key).order(-child_count)
+      # TODO: filter recommendation on tags
+      # dereference current user's experience on our response to post
+      xp = resp.dereference_experience()
+      # use experience on our response to post to get user's percentile on post
+      percentile = None # TODO: calculate percentile
+      # advance in the ordered sub posts according to percentile
+      #  e.g. user with highest experience gets least popular posts
   
 class Tag(ndb.Model):
   """
   A tag is a byte sized, repeatable, calculable piece of information about  
   something. It can be used to describe a post, or even a user or a tag.
   """
-# parent    = item being tagged
-  user      = ndb.UserProperty(auto_current_user_add=True)
-  title     = ndb.StringProperty()
-  xp        = ndb.FloatProperty(default=1.0)
-  timestamp = ndb.DateTimeProperty(auto_now=True)
+# parent      = item being tagged
+  user        = ndb.UserProperty(auto_current_user_add=True)
+  title       = ndb.StringProperty()
+  xp          = ndb.FloatProperty(default=1.0)
+  timestamp   = ndb.DateTimeProperty(auto_now=True)
       
   def is_base(self):
     """
@@ -115,6 +150,7 @@ class Tag(ndb.Model):
     # check that we meet the conditions for a score adjustment
     if self.key.parent().kind() == 'Post':
       if self.is_base(): # adjust the score for the poster
+        # TODO: don't adjust score if we've changed our mind
         # figure out the sign on the score change
         delta = self.xp
         if self.title == 'incorrect':
@@ -141,7 +177,7 @@ class Stream(ndb.Model):
   """
   Stores data associated with the user's stream.
   """
-  user      = ndb.UserProperty(auto_current_user_add=True)
-  posts     = ndb.KeyProperty(kind=Post, repeated=True)
-  timestamp = ndb.DateTimeProperty(auto_now=True)
+  user        = ndb.UserProperty(auto_current_user_add=True)
+  posts       = ndb.KeyProperty(kind=Post, repeated=True)
+  timestamp   = ndb.DateTimeProperty(auto_now=True)
   
