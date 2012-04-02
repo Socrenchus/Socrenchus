@@ -8,6 +8,7 @@
     pluginName = 'omnipost';
     defaults = {
       editing: true,
+      callback: '',
       postcontent: '',
       linkedcontent: ''
     };
@@ -78,7 +79,7 @@
 
       LinkPanel.prototype.init = function() {
         var _this = this;
-        this.maximagewidth = 300;
+        this.maximagewidth = 350;
         LinkPanel.__super__.init.apply(this, arguments).init();
         this.linkbox = $("<textarea class='ui-omniPostLink'></textarea>");
         this.submitLink = $("<button class='ui-submitLink'>Add</button>");
@@ -127,9 +128,9 @@
 
       LinkPanel.prototype.content = function() {
         if (this.displayedContent === 'image') {
-          return this.attachedImage;
+          return $.trim(this.attachedImage[0].outerHTML);
         } else if (this.displayedContent === 'link') {
-          return this.linktosite;
+          return $.trim(this.linktosite[0].outerHTML);
         } else {
           return null;
         }
@@ -161,7 +162,6 @@
 
       function Plugin(element, options) {
         this.element = element;
-        this.createcompletepost = __bind(this.createcompletepost, this);
         this.options = $.extend({}, defaults, options);
         this._defaults = defaults;
         this._name = 'tagbox';
@@ -169,107 +169,87 @@
       }
 
       Plugin.prototype.init = function() {
-        var collapse, link, linkPanel, omnicontainer, panelselectors, post, selectedImageLink, text, videoPanel, videolink,
+        var collapse, link, linkPanel, message, omnicontainer, omnipostdiv, panelselectors, post, selectedImageLink, text, videoPanel, videolink,
           _this = this;
-        if (this.options.editing) {
-          linkPanel = new LinkPanel('ui-linkbox', 'images/linkAttach.png', 'images/collapse.png');
-          videoPanel = new VideoPanel('ui-linkbox', 'images/videoAttach.png', 'images/collapse.png');
-          collapse = $("<img alt='x' title='x' id='ui-omniPostCollapse'>");
-          collapse.attr('src', 'images/collapse.png');
-          link = $("<img alt='a' title='attach a link' id='ui-omniPostAttach'>");
-          link.attr('src', 'images/linkAttach.png');
-          videolink = $("<img alt='a' title='attach a link' id='ui-omniPostVideoAttach'>");
-          videolink.attr('src', 'images/videoAttach.png');
-          panelselectors = $("<div id = 'ui-panelSelectors'></div>");
-          panelselectors.append(videolink);
-          panelselectors.append(link);
-          omnicontainer = $("<div id='ui-omniContainer'></div>");
-          text = $("<textarea id='ui-omniPostText'></textarea>");
-          text.autoResize({
-            extraSpace: 50
-          }).addClass('ui-omniPost');
-          selectedImageLink = $("<img alt='x' title='your linked image' id='ui-omniPostImage'>");
-          selectedImageLink.hide();
-          omnicontainer.append(text);
-          omnicontainer.append(collapse);
-          omnicontainer.append(panelselectors);
-          $(this.element).append(omnicontainer);
-          linkPanel.addPanelToContainer($(this.element));
-          linkPanel.hide();
-          videoPanel.addPanelToContainer($(this.element));
-          videoPanel.hide();
-          $(this.element).append(selectedImageLink);
-          $(this.element).append($('<br/>'));
-          post = $("<button id='ui-omniPostSubmit'>Post</button>");
-          $(this.element).append(post);
-          $(this.element).addClass('ui-omniPost');
-          $(this.element).focusin(function() {
-            if (!text.attr('readonly')) {
-              post.show();
-              collapse.show();
-              panelselectors.show();
-              if (text.height() < 50) text.height(50);
-            }
-            text.removeClass('ui-omniPostActive');
-            if (text.val() === $(_this.element).attr('title')) return text.val('');
-          });
-          collapse.click(function() {
-            post.hide();
-            text.val($(_this.element).attr('title'));
-            text.addClass('ui-omniPostActive');
-            text.height(28);
-            collapse.hide();
-            panelselectors.hide();
-            linkPanel.hide();
-            return videoPanel.hide();
-          }).click();
-          link.click(function() {
-            return linkPanel.show();
-          });
-          videolink.click(function() {
-            return videoPanel.show();
-          });
-          return post.click(function() {
-            var linkedcontent, textcontent;
-            if (text.val() !== '' || !linkPanel.isEmpty()) {
-              post.remove();
-              textcontent = text.val();
-              text.remove();
-              linkedcontent = linkPanel.content();
-              linkPanel.remove();
-              videoPanel.remove();
-              collapse.remove();
-              panelselectors.remove();
-              return _this.createcompletepost(textcontent, linkedcontent);
-            }
-          });
-        } else {
-          return this.createcompletepost(this.options.postcontent, this.options.linkedcontent);
-        }
-      };
-
-      Plugin.prototype.createcompletepost = function(postcontent, linkedcontent) {
-        var linkedelement, posttext,
-          _this = this;
-        posttext = $("<p class = 'posttext'>" + postcontent + "</p>");
-        linkedelement = $("<img src = " + linkedcontent + " alt = 'linked content' />");
-        $(document).ready(function() {
-          return linkedelement.error(function() {
-            var linkedcontentpreview;
-            linkedelement.remove();
-            linkedelement = $("<a href = " + linkedcontent + ">" + linkedcontent + "</a>");
-            if (linkedcontent.indexOf("http://") !== 0) {
-              linkedelement.attr('href', 'http://' + linkedelement.attr('href'));
-            }
-            linkedcontentpreview = $("<iframe id='frame' src=" + (linkedelement.attr('href')) + " scrolling = no></iframe>");
-            _this.omnifinaldiv.prepend(linkedelement);
-            return _this.omnifinaldiv.prepend(linkedcontentpreview);
-          });
+        message = 'Post your reply here...';
+        omnipostdiv = $("<div class = 'ui-omnipost'></div>");
+        linkPanel = new LinkPanel('ui-linkbox', '/images/linkAttach.png', '/images/collapse.png');
+        videoPanel = new VideoPanel('ui-linkbox', '/images/videoAttach.png', '/images/collapse.png');
+        collapse = $("<img alt='x' title='x' id='ui-omniPostCollapse'>");
+        collapse.attr('src', '/images/collapse.png');
+        link = $("<img alt='a' title='attach a link' id='ui-omniPostAttach'>");
+        link.attr('src', '/images/linkAttach.png');
+        videolink = $("<img alt='a' title='attach a link' id='ui-omniPostVideoAttach'>");
+        videolink.attr('src', '/images/videoAttach.png');
+        panelselectors = $("<div id = 'ui-panelSelectors'></div>");
+        panelselectors.append(videolink);
+        panelselectors.append(link);
+        omnicontainer = $("<div id='ui-omniContainer'></div>");
+        text = $("<textarea id='ui-omniPostText'></textarea>");
+        text.autoResize({
+          extraSpace: 50
+        }).addClass('ui-omniPost');
+        selectedImageLink = $("<img alt='x' title='your linked image' id='ui-omniPostImage'>");
+        selectedImageLink.hide();
+        omnicontainer.append(text);
+        omnicontainer.append(collapse);
+        omnicontainer.append(panelselectors);
+        omnipostdiv.append(omnicontainer);
+        linkPanel.addPanelToContainer(omnipostdiv);
+        linkPanel.hide();
+        videoPanel.addPanelToContainer(omnipostdiv);
+        videoPanel.hide();
+        $(this.element).append(selectedImageLink);
+        $(this.element).append($('<br/>'));
+        post = $("<button id='ui-omniPostSubmit'>Post</button>");
+        omnipostdiv.append(post);
+        $(this.element).append(omnipostdiv);
+        $(this.element).addClass('ui-omniPost');
+        omnipostdiv.focusin(function() {
+          if (!text.attr('readonly')) {
+            post.show();
+            collapse.show();
+            panelselectors.show();
+            if (text.height() < 50) text.height(50);
+          }
+          text.removeClass('ui-omniPostActive');
+          if (text.val() === message) return text.val('');
         });
-        this.omnifinaldiv = $("<div id = 'ui-postedcontent'></div>");
-        if (linkedcontent !== null) this.omnifinaldiv.append(linkedelement);
-        if (postcontent !== '') this.omnifinaldiv.append(posttext);
-        return $(this.element).append(this.omnifinaldiv);
+        collapse.click(function() {
+          post.hide();
+          text.val(message);
+          text.addClass('ui-omniPostActive');
+          text.height(28);
+          collapse.hide();
+          panelselectors.hide();
+          linkPanel.hide();
+          return videoPanel.hide();
+        }).click();
+        link.click(function() {
+          return linkPanel.show();
+        });
+        videolink.click(function() {
+          return videoPanel.show();
+        });
+        ({
+          content: function() {
+            var data;
+            data = {
+              posttext: $.trim(text.val()),
+              linkdata: linkPanel.content()
+            };
+            return data;
+          }
+        });
+        return post.click(function() {
+          var data;
+          data = {
+            posttext: $.trim(text.val()),
+            linkdata: linkPanel.content()
+          };
+          omnipostdiv.remove();
+          return _this.options.callback(data);
+        });
       };
 
       Plugin.prototype.destroy = function() {
