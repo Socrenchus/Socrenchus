@@ -122,3 +122,7 @@ class DatabaseTests(unittest.TestCase):
     t = Tag(parent=p, title='blah')
     t.put()
     self.assertEqual(round(t.xp), 50)
+    
+  def testRecommendation(self):
+    # TODO: write recommendation test
+    pass

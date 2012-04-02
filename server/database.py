@@ -22,11 +22,18 @@ class Post(ndb.Model):
   """
   A post can be a question, it can be an answer, it can even be a statement.    
   """
-# parent    = parent post (optional)
-  author    = ndb.UserProperty(auto_current_user_add=True)
-  content   = ndb.TextProperty()
-  score     = ndb.FloatProperty(default=0.0)
-  timestamp = ndb.DateTimeProperty(auto_now=True)
+# parent      = parent post (optional)
+  author      = ndb.UserProperty(auto_current_user_add=True)
+  content     = ndb.TextProperty()
+  score       = ndb.FloatProperty(default=0.0)
+  timestamp   = ndb.DateTimeProperty(auto_now=True)
+  
+  @ndb.ComputedProperty
+  def popularity(self):
+    """
+    Count the number of children a post has.
+    """
+    return ndb.Query(ancestor=self.key).count()
   
   def dereference_experience(self):
     """
@@ -77,14 +84,7 @@ class Post(ndb.Model):
       # get our response to the post
       resp = resp_next()
       # do query to get direct children of post (matching one of the tags)
-      children = {}
-      def count_children(key):
-        while key != self.key:
-          if not key in children.keys():
-            children[key] = 0
-          children[key] += 1
-          key = key.parent()
-      Post.query(ancestor=self.key).map(keys_only=True)
+      q = Post.query(ancestor=self.key).order(-child_count)
       # TODO: filter recommendation on tags
       # dereference current user's experience on our response to post
       xp = resp.dereference_experience()
@@ -98,11 +98,11 @@ class Tag(ndb.Model):
   A tag is a byte sized, repeatable, calculable piece of information about  
   something. It can be used to describe a post, or even a user or a tag.
   """
-# parent    = item being tagged
-  user      = ndb.UserProperty(auto_current_user_add=True)
-  title     = ndb.StringProperty()
-  xp        = ndb.FloatProperty(default=1.0)
-  timestamp = ndb.DateTimeProperty(auto_now=True)
+# parent      = item being tagged
+  user        = ndb.UserProperty(auto_current_user_add=True)
+  title       = ndb.StringProperty()
+  xp          = ndb.FloatProperty(default=1.0)
+  timestamp   = ndb.DateTimeProperty(auto_now=True)
       
   def is_base(self):
     """
@@ -177,7 +177,7 @@ class Stream(ndb.Model):
   """
   Stores data associated with the user's stream.
   """
-  user      = ndb.UserProperty(auto_current_user_add=True)
-  posts     = ndb.KeyProperty(kind=Post, repeated=True)
-  timestamp = ndb.DateTimeProperty(auto_now=True)
+  user        = ndb.UserProperty(auto_current_user_add=True)
+  posts       = ndb.KeyProperty(kind=Post, repeated=True)
+  timestamp   = ndb.DateTimeProperty(auto_now=True)
   
