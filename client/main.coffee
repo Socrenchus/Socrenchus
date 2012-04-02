@@ -5,13 +5,12 @@ $ ->
   ###
     
   class Post extends Backbone.Model
-    respond: (response) =>
+    respond: (content) =>
       p = new Post(
         parentID: @id
         id: '' + @id + @get('responses').length
         editing: false
-        content: response.posttext
-        linkedcontent: response.linkdata
+        content: content
         votecount: 0
         tags: ["kaiji", "san"]
         parents: [@id]
@@ -45,9 +44,9 @@ $ ->
       
     renderPostContent: ->
       postcontentdiv = $("<div class = 'ui-postcontent'></div>")
-      postcontentdiv.append($(@model.get('linkedcontent')))
+      postcontentdiv.append($(@model.get('content').linkdata))
       postcontentdiv.append('<br />')
-      postcontentdiv.append(@model.get('content'))
+      postcontentdiv.append(@model.get('content').posttext)
       $(@el).find('.inner-question').append(postcontentdiv)
     
     render: ->
@@ -126,22 +125,23 @@ $ ->
       App.deleteAll()
 
     populate: ->
+      data = {posttext: 'This is an example post.', linkdata: '<img src = "http://m-27.com/wp-content/lol/kaiji.jpg" width = "350" height = "auto">'}
       p = new Post(
         id: 1
         editing: false
-        content: 'This is an example post.'
-        linkedcontent: '<img src = "http://m-27.com/wp-content/lol/kaiji.jpg" width = "350" height = "auto">'
+        content: data
         votecount: 25
         tags: ["kaiji", "san"]
         parents: ''
         responses: []
       )
       postCollection.create(p)
+
+      data = {posttext: 'This is an example post.', linkdata: '<a href = "http://www.imdb.com">www.imdb.com</a>'}
       p1 = new Post(
         id: 2
         editing: false
-        content: 'This is an example post.'
-        linkedcontent: '<a href = "http://www.imdb.com">www.imdb.com</a>'
+        content: data
         tags: ["do", "re", "mi", "fa", "so"]
         parents: ''
         responses: []
