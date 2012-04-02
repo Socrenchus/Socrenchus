@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC '-//W3C//DTD HTML 4.01//EN'>
 <html lang='en'>
   <head>
-    <script src='//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js' type='text/javascript'>
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'>
 </script>
     <script src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js' type='text/javascript'>
 </script>
@@ -16,11 +16,20 @@
 <script type='text/javascript' src='http://documentcloud.github.com/underscore/underscore-min.js'></script>
 <script type='text/javascript' src='http://documentcloud.github.com/backbone/backbone-min.js'></script>
 <script type='text/javascript' src='/lib/backbone.localStorage-min.js'></script>
+<script type="text/javascript" src="https://raw.github.com/padolsey/jQuery.fn.autoResize/master/jquery.autoresize.js"></script>
+<script type='text/javascript' src='/lib/jquery.ui.dropdown.js'>
+</script>
 <script type='text/javascript' src='/lib/jquery.ui.omnipost.js'>
 </script>
-<script type='text/javascript' src='/lib/main.js'>
+<link href='/lib/ui.omnipost.css' type='text/css' rel='stylesheet'>
+<script type='text/javascript' src='/lib/jquery.ui.votebox.js'>
 </script>
-    <link href='/lib/ui.omnipost.css' type='text/css' rel='stylesheet'>
+<link href='/lib/ui.votebox.css' type='text/css' rel='stylesheet'>
+<script type='text/javascript' src='/lib/jquery.ui.tagbox.js'>
+</script>
+<link href='/lib/ui.tagbox.css' type='text/css' rel='stylesheet'>
+</script>
+    
     <link href='/main.css' type='text/css' rel='stylesheet'>
     <link href='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/flick/jquery-ui.css' type='text/css' rel='stylesheet'>
     <title>
@@ -28,17 +37,65 @@
     </title>
   </head>
   <body>
+    <div id='left-instructions'>
+      <div id='profile-instructions'>
+        By clicking this tab, you can view your profile.  This includes a list of you tags, badges, and list of friends that use Socrenchus from another website such as facebook.      
+      </div>
+      <div id='post-instructions'>
+        By clicking this tab, you can view your profile.  This includes a list of you tags, badges, and list of friends that use Socrenchus from another website such as facebook.      
+      </div>
+    </div>
     <div id='main'>
-      <div id='table-top'>
+      <div id='table-top'>    
+        <!-- TODO: integrate the notifications into the streamview -->    
+        <h3 id='notification-counter' title='Notifications'>2</h3>
+        <img id='notification-box' src='/images/notifications.png'>
+        <h2 id='welcome-user'>Welcome John</h2>
         <a id='logout' name='logout' href='/login'></a>
-        <img id='logo' src='/logo.png'>
+        <img onclick='location.href = "/" 'style="cursor:pointer"' id='logo' src='/logo.png'>
         <ul id='classes' class='ui-helper-reset'>
           <li class='ui-selected'>Your classes...</li>
           <li id='create'>Teach a class</li>
         </ul>
       </div>
+      <div id='profile-view'>
+        <div id='collapseable-profile'>
+          <div class='profile-element-header'>Your Tags</div>          
+           <!-- TODO: integrate the tag cloud into the streamview -->    
+          <img id='tagcloud-img' src='/images/tagcloud.png'>
+          </img>   
+           <!-- TODO: integrate the badges into the streamview -->           
+          <div id='badges'>
+            <div class='profile-element-header'>Your Badges</div>
+            <div class='badge' title='50 posts submitted'>
+            <img class='badge-image' src='http://www.epa.gov/accessibility/images/icons/icon_mouth2.gif' width='32px' height='32px'>            
+            </img>
+            <div class='badge-title'>Conversationalist</div>
+            </div>
+            <div class='badge' title='Tagged one post with over 5 tags'>
+            <img class='badge-image' src='/images/gradCapIcon.png' width='32px' height='32px'>
+            </img>
+            <div class='badge-title'>Scholar</div>
+            </div>
+            <div class='badge' title='One of your posts has been tagged by 10 different players'>
+            <img class='badge-image' src='http://crossexamined.org/images/home-banners-event.jpg' width='32px' height='32px'>
+            </img>
+            <div class='badge-title'>Inspirational</div>
+            </div>
+          </div>
+          <div id='friends-list'>
+            <div class='profile-element-header'>Your Friends</div>
+            <ul style='list-style: none'>
+              <li><img class='friend-profile-pic' src='http://crossexamined.org/images/home-banners-event.jpg' width='64px' height='64px'><h3 class='friend-name'>John Doe</h3>
+              <li><img class='friend-profile-pic' src='http://crossexamined.org/images/home-banners-event.jpg' width='64px' height='64px'><h3 class='friend-name'>John Doe</h3>
+            </ul> 
+          </div>
+        </div>
+        <img id='dropdown-panel' src='/images/dropdown.png'>
+        </img>
+      </div>
       <div id='learn'>
-              <div id='welcome'>
+        <div id='welcome'>
         <h1 class='mediumText'><i>WHAT IF</i> YOU HAD A <span class='largeText'>PERSONAL TUTOR</span> THAT REGULARLY MET WITH ALL YOUR PROFESSORS TO ADVOCATE FOR YOU AND TEACH YOU EVERYTHING YOU DON'T UNDERSTAND?<br/><hr/></h1><h1 class='mediumText'><i>WHAT IF</i> YOU HAD A <span class='largeText'>GRADER</span> FOR ALL YOUR CLASSES THAT WORKED WITH YOUR STUDENTS TO HELP YOU UNDERSTAND THEIR NEEDS?<br/><hr/></h1><h2 class='smallText mediumText'>GOODBYE <i>WHAT IF</i>, HELLO&nbsp;&nbsp;<span class='mediumText'>SOCRENCHUS</span></h2>
           </div>
           <div id='newquestion'></div>
@@ -53,15 +110,11 @@
                 <br/><br/>
                 - Bryan
               </div> 
-              
               <br/>
           </script>
           <script type='text/template' id='post' class='question'>
             <div class='inner-question'>
-              <textarea id='content' class='autoResizable' readonly></textarea> 
-              
               <ul id='replies' class='ui-helper-reset'></ul>
-
             </div>
           </script>
           <script type='text/template' id='assignment'>
@@ -101,5 +154,11 @@
         <a>More</a>
       </span>
     </div>
+    <div id='right-instructions'>
+        hello
+      </div>
+    <script type='text/javascript' src='/lib/main.js'>
+    <script type="text/javascript">
+    </script>
   </body>
 </html>
