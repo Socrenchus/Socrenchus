@@ -100,15 +100,230 @@ $ ->
       postCollection.each(@deleteOne)
     render: ->
       $('#collapseable-profile').hide()
+      profileshowing = false
       $('#dropdown-panel').click( ->
-        $('#collapseable-profile').slideToggle("fast")
+        profileshowing = !profileshowing
+        $('#collapseable-profile').slideToggle("fast", ( ->             
+              $(window).trigger('scroll')
+              if profileshowing
+                $('#tagcloud-img').qtip("show");
+                $('#badges').qtip("show");
+                $('#friends-list').qtip("show");
+              else
+                $('#tagcloud-img').qtip("hide");
+                $('#badges').qtip("hide");
+                $('#friends-list').qtip("hide");
+          )
+        )
       )
 
       $('#notification-box').hide()
       $('#notification-counter').click( ->
         $('#notification-box').toggle()
       )
-    
+
+      $(document).ready( -> 
+        $(window).trigger('scroll')
+      )
+      $('#dropdown-panel').qtip({
+               content: 'By clicking this tab, you can view your profile.  This includes a list of your tags, badges, and list of friends that use Socrenchus from another website such as facebook.',
+               position: {
+                  corner: {
+                     tooltip: 'topLeft',
+                     target: 'bottomRight'
+                  }
+               },
+               show: {
+                  when: false,
+                  ready: true 
+               },
+               hide: false,
+               style: {
+                  border: {
+                     width: 5,
+                     radius: 10
+                  },
+                  padding: 10, 
+                  textAlign: 'center',
+                  tip: true, 
+                  name: 'cream'
+               }
+            });
+
+      $('#tagcloud-img').qtip({
+               content: 'This is your tag cloud.  It contains all tags that you have been involved in, where the bigger the tag, the bigger your involvement.',
+               position: {
+                  corner: {
+                     tooltip: 'leftMiddle',
+                     target: 'rightMiddle'
+                  }
+               },
+               show: {
+                  when: false,
+                  ready: false
+               },
+               hide: false,
+               style: {
+                  border: {
+                     width: 5,
+                     radius: 10
+                  },
+                  padding: 10, 
+                  textAlign: 'center',
+                  tip: true, 
+                  name: 'cream'
+               }
+            });
+      $('#badges').qtip({
+               content: 'A list of your badges.  Earn more by accomplishing certain tasks',
+               position: {
+                  corner: {
+                     tooltip: 'rightMiddle',
+                     target: 'leftMiddle'
+                  }
+               },
+               show: {
+                  when: false,
+                  ready: false
+               },
+               hide: false,
+               style: {
+                  border: {
+                     width: 5,
+                     radius: 10
+                  },
+                  padding: 10, 
+                  textAlign: 'center',
+                  tip: true, 
+                  name: 'cream'
+               }
+            });
+
+      $('#friends-list').qtip({
+               content: 'A list of your friends.  These are friends from other websites, such as facebook, that are using Socrenchus.',
+               position: {
+                  corner: {
+                     tooltip: 'rightMiddle',
+                     target: 'leftMiddle'
+                  }
+               },
+               show: {
+                  when: false,
+                  ready: false
+               },
+               hide: false,
+               style: {
+                  border: {
+                     width: 5,
+                     radius: 10
+                  },
+                  padding: 10, 
+                  textAlign: 'center',
+                  tip: true, 
+                  name: 'cream'
+               }
+            });
+
+      $('#notification-counter').qtip({
+               content: 'This shows you how many unviewed notifications you have.  Clicking on it reveals what those notifications are.',
+               position: {
+                 corner: {
+                    tooltip: 'leftMiddle',
+                    target: 'rightMiddle'
+                 }
+               },
+               show: {
+                 when: false,
+                 ready: true
+               },
+               hide: false,
+               style: {
+                 border: {
+                   width: 5,
+                   radius: 10
+                 },
+                 padding: 10, 
+                 textAlign: 'center',
+                 tip: true, 
+                 name: 'cream'
+               }
+      });
+        
+      $('.ui-votebox:first').qtip({
+               content: 'Clicking up or down on this UI element will allow you to change the score of the post you are voting on.  In the future, this will take into account your experience in the topic of the answer you are voting on.',
+               position: {
+                  corner: {
+                     tooltip: 'rightMiddle',
+                     target: 'leftMiddle'
+                  }
+               },
+               show: {
+                  when: false,
+                  ready: true 
+               },
+               hide: false,
+               style: {
+                  border: {
+                     width: 5,
+                     radius: 10
+                  },
+                  padding: 10, 
+                  textAlign: 'center',
+                  tip: true, 
+                  name: 'cream'
+               }
+            });
+        
+      $('.ui-tagbox:first').qtip({
+               content: 'You can tag a post with a list of topics that you deem relavent.  Tags can be multiple words, and are seperated by pressing enter or the comma key.',
+               position: {
+                  corner: {
+                     tooltip: 'rightMiddle',
+                     target: 'leftMiddle'
+                  }
+               },
+               show: {
+                  when: false,
+                  ready: true 
+               },
+               hide: false,
+               style: {
+                  border: {
+                     width: 5,
+                     radius: 10
+                  },
+                  padding: 10, 
+                  textAlign: 'center',
+                  tip: true, 
+                  name: 'cream'
+               }
+            });
+       
+      $('#ui-omniContainer').qtip({
+               content: 'You can include several forms of content when you make a post.  Text and images are already included, and video posting will be included shortly.',
+               position: {
+                  corner: {
+                     tooltip: 'leftMiddle',
+                     target: 'rightMiddle'
+                  }
+               },
+               show: {
+                  when: false,
+                  ready: true 
+               },
+               hide: false,
+               style: {
+                  border: {
+                     width: 5,
+                     radius: 10
+                  },
+                  padding: 10, 
+                  textAlign: 'center',
+                  tip: true, 
+                  name: 'cream'
+               }
+            });
+        
   ###
   # Routes
   ###
