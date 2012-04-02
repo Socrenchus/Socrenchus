@@ -66,14 +66,49 @@
 
       PostView.prototype.template = Templates.post;
 
+      PostView.prototype.events = function() {
+        return {
+          'click button#reply': 'replyToPost'
+        };
+      };
+
       PostView.prototype.initialize = function() {
         return this.id = this.model.id;
       };
 
       PostView.prototype.render = function() {
         $(this.el).html(this.template);
-        $(this.el).find('#content').text(this.model.get('content')).omnipost();
+        $(this.el).find('.inner-question').votebox({
+          votesnum: this.model.get('votecount')
+        });
+        $(this.el).find('.inner-question').omnipost({
+          editing: this.model.get('editing'),
+          postcontent: this.model.get('content'),
+          linkedcontent: this.model.get('linkedcontent')
+        });
+        $(this.el).find('.inner-question').tagbox({
+          editing: this.model.get('editing'),
+          tags: this.model.get('tags')
+        });
+        $(this.el).append("<button id='reply'>Reply</button>");
         return $(this.el);
+      };
+
+      PostView.prototype.replyToPost = function() {
+        var replyPost, replyView;
+        replyPost = new Post({
+          editing: true,
+          content: '',
+          linkedcontent: '',
+          votecount: 0,
+          tags: [],
+          parents: this.model,
+          responses: ''
+        });
+        replyView = new PostView({
+          model: replyPost
+        });
+        return $(this.el).append(replyView.render());
       };
 
       return PostView;
@@ -134,18 +169,32 @@
       };
 
       Workspace.prototype.mockup = function() {
-        var p, pv;
+        var p, p1, pv, pv1;
         p = new Post({
+          editing: false,
           content: 'This is an example post.',
-          topic_tags: '',
-          rubric_tags: '',
+          linkedcontent: '<img src="http://m-27.com/wp-content/lol/kaiji.jpg" alt=""/>',
+          votecount: 25,
+          tags: ["kaiji", "san"],
           parents: '',
           responses: ''
         });
         pv = new PostView({
           model: p
         });
-        return $('#assignments').append(pv.render());
+        $('#assignments').append(pv.render());
+        p1 = new Post({
+          editing: false,
+          content: 'This is an example post.',
+          linkedcontent: '<img src="http://m-27.com/wp-content/lol/kaiji.jpg" alt=""/>',
+          tags: ["do", "re", "mi", "fa", "so"],
+          parents: '',
+          responses: ''
+        });
+        pv1 = new PostView({
+          model: p1
+        });
+        return $('#assignments').append(pv1.render());
       };
 
       return Workspace;
