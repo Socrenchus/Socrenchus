@@ -1,9 +1,9 @@
 [submodule "client/omnipost"]
 	path = client/omnipost
-	url = git@github.com:prashn64/omnipost.git
+	url = git@github.com:Socrenchus/omnipost.git
 [submodule "client/tagbox"]
 	path = client/tagbox
-	url = git@github.com:prashn64/tagbox.git
+	url = git@github.com:Socrenchus/tagbox.git
 [submodule "client/votebox"]
 	path = client/votebox
-	url = git@github.com:prasn64/votebox.git
+	url = git@github.com:Socrenchus/votebox.git
