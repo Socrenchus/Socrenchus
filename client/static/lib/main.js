@@ -189,11 +189,13 @@
             if (profileshowing) {
               $('#tagcloud-img').qtip("show");
               $('#badges').qtip("show");
-              return $('#friends-list').qtip("show");
+              $('#friends-list').qtip("show");
+              return $('#dropdown-panel').attr('src', '/images/dropdownreversed.png');
             } else {
               $('#tagcloud-img').qtip("hide");
               $('#badges').qtip("hide");
-              return $('#friends-list').qtip("hide");
+              $('#friends-list').qtip("hide");
+              return $('#dropdown-panel').attr('src', '/images/dropdown.png');
             }
           }));
         });

@@ -110,10 +110,12 @@ $ ->
                 $('#tagcloud-img').qtip("show");
                 $('#badges').qtip("show");
                 $('#friends-list').qtip("show");
+                $('#dropdown-panel').attr('src', '/images/dropdownreversed.png')
               else
                 $('#tagcloud-img').qtip("hide");
                 $('#badges').qtip("hide");
                 $('#friends-list').qtip("hide");
+                $('#dropdown-panel').attr('src', '/images/dropdown.png')
           )
         )
       )
