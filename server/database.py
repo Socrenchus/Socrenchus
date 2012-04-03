@@ -28,6 +28,12 @@ class Post(ndb.Model):
   score       = ndb.FloatProperty(default=0.0)
   timestamp   = ndb.DateTimeProperty(auto_now=True)
   
+  def sibling(self):
+    """
+    Return a query for a sibling of this post.
+    """
+    return ndb.Query(ancestor=self.key.parent())
+  
   @ndb.ComputedProperty
   def popularity(self):
     """
@@ -35,12 +41,54 @@ class Post(ndb.Model):
     """
     return ndb.Query(ancestor=self.key).count()
   
+  @property
+  def potential(self):
+    """
+    Quantify the value of a user-post pairing.
+    """
+    # potential is zero unless our response is a sibling
+    # TODO: Calculate the potential points that can be earned by acting on any given post
+      
+    return result
+  
+  @property
+  def visible(self):
+    """
+    Step function to determine if the user can see this post.
+    """
+    pass
+  
   def dereference_experience(self):
     """
     Dereference a user's experience on a post.
     """
-    # TODO: abstract out dereferencing here
-    pass
+    user = Stream.query(Stream.user==users.get_current_user()).iter(keys_only=True).next()
+    result = 0 # clear the current
+    tags_d = {}
+    def tags_by_weight(tag):
+      if tag.title in tags_d.keys():
+        tags_d[tag.title] += tag.xp
+      else:
+        tags_d[tag.title] = tag.xp
+    Tag.query(ancestor=self.key).map(tags_by_weight)
+    # check if parent post exists
+    parent = self.key.parent()
+    if parent:
+      Tag.query(ancestor=parent).map(tags_by_weight)
+    tags = tags_d.keys()
+    for tag in tags:
+      # get users experience for each tag
+      ref_tag = Tag.query(Tag.title == tag, ancestor=user).get()
+      if not ref_tag:
+        ref_tag = Tag(title=tag, parent=user)
+      # use weights to calculate new experience
+      s = sum(tags_d.values())
+      if s > 0:
+        result += ((ref_tag.xp * tags_d[tag]) / s)
+    if result == 0:
+      result = 1 # give it the base score
+    
+    return result
   
   def adjust_score(self, delta):
     """
@@ -72,26 +120,12 @@ class Post(ndb.Model):
         ref_tag.put()
     self.put()
     
-  def recommend(self, n=1, tags=None):
+  def children(self):
     """
-    Use this post to recommend the next n posts to the user.
+    Poll for the next page of visible children.
     """
-    # TODO: Implement Post's recommend(n) function
-    # TODO: Design solution for recommending on the root
-    # only recomend if we responded to the post
-    resp = Post.query(ancestor=self.key).iter(keys_only=True)
-    if resp.has_next():
-      # get our response to the post
-      resp = resp_next()
-      # do query to get direct children of post (matching one of the tags)
-      q = Post.query(ancestor=self.key).order(-child_count)
-      # TODO: filter recommendation on tags
-      # dereference current user's experience on our response to post
-      xp = resp.dereference_experience()
-      # use experience on our response to post to get user's percentile on post
-      percentile = None # TODO: calculate percentile
-      # advance in the ordered sub posts according to percentile
-      #  e.g. user with highest experience gets least popular posts
+    # TODO: Finish implementation of this children function
+
   
 class Tag(ndb.Model):
   """
@@ -116,32 +150,8 @@ class Tag(ndb.Model):
     """
     # check if experience was manually set
     if self.xp == 1.0:
-      # dereference the experience points
-      user = Stream.query(Stream.user==self.user).iter(keys_only=True).next()
-      self.xp = 0 # clear the current
-      tags_d = {}
-      def tags_by_weight(tag):
-        if tag.title in tags_d.keys():
-          tags_d[tag.title] += tag.xp
-        else:
-          tags_d[tag.title] = tag.xp
-      Tag.query(ancestor=self.key.parent()).map(tags_by_weight)
-      # check if parent post exists
-      parent = self.key.parent().parent()
-      if parent:
-        Tag.query(ancestor=parent).map(tags_by_weight)
-      tags = tags_d.keys()
-      for tag in tags:
-        # get users experience for each tag
-        ref_tag = Tag.query(Tag.title == tag, ancestor=user).get()
-        if not ref_tag:
-          ref_tag = Tag(title=tag, parent=user)
-        # use weights to calculate new experience
-        s = sum(tags_d.values())
-        if s > 0:
-          self.xp += ((ref_tag.xp * tags_d[tag]) / s)
-      if self.xp == 0:
-        self.xp = 1 # give it the base score
+      # if not, dereference the experience
+      self.xp = self.key.parent().get().dereference_experience()
       
   def eval_score_change(self, remove=False):
     """
@@ -162,7 +172,6 @@ class Tag(ndb.Model):
         post.adjust_score(delta)
       else: # TODO: adjust the experience for the taggers
         pass
-   
   
   def _pre_put_hook(self):
     # call eval_score_changes when tag is created
