@@ -92,7 +92,7 @@ class DatabaseTests(unittest.TestCase):
     tags = Tag.query(ancestor=user).fetch()
     self.assertEqual(len(tags),len(tag_names))
     for t in tags:
-      self.assertAlmostEqual(t.xp, int(t.title)*(100.0/sum(tag_names))+1)
+      self.assertEqual(round(t.xp), round(int(t.title)*(100.0/sum(tag_names))+1))
       
   def testExperienceDereferencing(self):
     # switch to 'tagging' user

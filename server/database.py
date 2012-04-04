@@ -64,13 +64,7 @@ class Post(ndb.Model):
     """
     user = Stream.query(Stream.user==users.get_current_user()).iter(keys_only=True).next()
     result = 0 # clear the current
-    tags_d = {}
-    def tags_by_weight(tag):
-      if tag.title in tags_d.keys():
-        tags_d[tag.title] += tag.xp
-      else:
-        tags_d[tag.title] = tag.xp
-    Tag.query(ancestor=self.key).map(tags_by_weight)
+    tags_d = Tag.weights(Tag.query(ancestor=self.key))
     # check if parent post exists
     parent = self.key.parent()
     if parent:
@@ -98,13 +92,7 @@ class Post(ndb.Model):
     self.score += delta
     # reference the experience points earned
     user = Stream.query(Stream.user==self.author).iter(keys_only=True).next()
-    tags_d = {}
-    def tags_by_weight(tag):
-      if tag.title in tags_d.keys():
-        tags_d[tag.title] += tag.xp
-      else:
-        tags_d[tag.title] = tag.xp
-    Tag.query(ancestor=self.key).map(tags_by_weight)
+    tags_d = Tag.weights(Tag.query(ancestor=self.key))
     # check if parent post exists
     parent = self.key.parent()
     if parent:
@@ -126,7 +114,6 @@ class Post(ndb.Model):
     """
     # TODO: Finish implementation of this children function
 
-  
 class Tag(ndb.Model):
   """
   A tag is a byte sized, repeatable, calculable piece of information about  
@@ -137,6 +124,34 @@ class Tag(ndb.Model):
   title       = ndb.StringProperty()
   xp          = ndb.FloatProperty(default=1.0)
   timestamp   = ndb.DateTimeProperty(auto_now=True)
+      
+  @classmethod
+  def weights(cls, q):
+    """
+    Get an associative array of tags and their weights.
+    """
+    result = {}
+    def tag_enum(tag):
+      if tag.title in result.keys():
+        result[tag.title] += tag.xp
+      else:
+        result[tag.title] = tag.xp
+    q.map(tag_enum)
+    return result
+  
+  @classmethod
+  def users(cls, q):
+    """
+    Get a count of tags by user.
+    """
+    result = {}
+    def tag_enum(tag):
+      if tag.user in result.keys():
+        result[tag.user] += 1
+      else:
+        result[tag.user] = 1
+    q.map(tag_enum)
+    return result
       
   def is_base(self):
     """
@@ -164,13 +179,40 @@ class Tag(ndb.Model):
         delta = self.xp
         if self.title == 'incorrect':
           delta = -delta
-        if remove:
-          delta = -delta
         # adjust the score
         post = self.key.parent().get()
         post.adjust_score(delta)
-      else: # TODO: adjust the experience for the taggers
-        pass
+      else: # adjust the experience for the taggers
+        user = Stream.query(Stream.user==users.get_current_user()).iter(keys_only=True).next()
+        post_tags = Tag.weights(Tag.query(ancestor=self.key.parent()))
+        user_tag_count = Tag.query(Tag.user == users.User(), ancestor=self.key.parent()).count()
+        all_tags = Tag.weights(Tag.query()) # TODO: cache this query somewhere
+        ref_tag = Tag.query(Tag.title == self.title, ancestor=user).get()
+        if not ref_tag:
+          ref_tag = Tag(title=self.title, parent=user)
+        # calculate change in xp for current user
+        post_norm = sum(post_tags.values()) + 1
+        all_norm = sum(all_tags.values()) + 1
+        user_norm = user_tag_count + 1
+        if self.title in all_tags:
+          delta = (all_tags[self.title] / all_norm)
+          # apply the change to the current user
+          if self.title in post_tags:
+            ref_tag.xp += (delta * (post_tags[self.title] / post_norm) / user_norm)
+            ref_tag.put()
+            # calculate the change for other taggers
+            delta *= (self.xp / post_norm)
+            user_counts = Tag.users(Tag.query(ancestor=self.key.parent()))
+            ref_tag = None
+            for user in user_counts.keys():
+              norm = user_counts[user] + 1
+              user = Stream.query(Stream.user==user).iter(keys_only=True).next()
+              ref_tag = Tag.query(Tag.title == self.title, ancestor=user).get()
+              if not ref_tag:
+                ref_tag = Tag(title=self.title, parent=user)
+              ref_tag.xp += (delta / norm)
+              ref_tag.put()
+          
   
   def _pre_put_hook(self):
     # call eval_score_changes when tag is created
