@@ -4,23 +4,27 @@ util = require 'util'
 {spawn} = require 'child_process'
 
 outputJSFolder = 'static/lib'
-outputImageFolder = 'static'
+outputImageFolder = 'static/images'
+
 imageSrcFolders = [
     'tagbox/images'
     'votebox/images'
     'omnipost/images'
+    'notify/images'
 ]
 
 cssSrcFolders = [
     'tagbox/stylesheets'
     'votebox/stylesheets'
     'omnipost/stylesheets'
+    'notify/stylesheets'
 ]
 srcFolders = [
     'main'
     'tagbox'
     'votebox'
     'omnipost'
+    'notify'
 ]
   
 build = (callback) ->
@@ -33,13 +37,13 @@ build = (callback) ->
     coffee.on 'exit', (code) ->
       callback?() if code is 0
 
-copyWithDirectory = (path) ->
+copyWithDirectory = (path,output) ->
   files = fs.readdirSync(path)
   for i in files
     currentFile = path + '/' + i
     stats = fs.statSync(currentFile)
     if stats.isFile()
-      cpy = spawn 'cp', [currentFile, outputImageFolder]
+      cpy = spawn 'cp', [currentFile, output]
       cpy.stderr.on 'data', (data) ->
         process.stderr.write data.toString()
       cpy.stdout.on 'data', (data) ->
@@ -52,11 +56,11 @@ task 'build', 'Build to static/lib from tagbox, votebox, and omnipost', ->
 
 task 'cpimgs', 'Copy all images from the respective images folders in tagbox, votebox, and omnipost into static folder', ->
   for imgSrcFolder in imageSrcFolders  
-    copyWithDirectory(imgSrcFolder)      
+    copyWithDirectory(imgSrcFolder, outputImageFolder)      
 
 task 'cpcss', 'Copy all css files from the respective folders in tagbox, votebox, and omnipost into static/lib folder', ->
   for cssSrcFolder in cssSrcFolders  
-    copyWithDirectory(cssSrcFolder) 
+    copyWithDirectory(cssSrcFolder, outputJSFolder) 
 
 task 'watch', 'Watch for changes in tagbox, votebox, and omnipost, and if there are, build it to static/lib', ->
   for folder in srcFolders
