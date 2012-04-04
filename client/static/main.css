@@ -84,7 +84,8 @@ h2 {
 }
 
 #story {
-  float: left;
+  position: absolute;
+  left: 10;
   width: 300px;
 }
 
@@ -115,8 +116,8 @@ h2 {
 
 #notification-box {
   position:absolute;
-  left: 235px;
-  top: 42px;
+  left: 10px;
+  bottom: -180px;
   z-index: 100;
 }
 
@@ -132,9 +133,9 @@ background-image: -ms-linear-gradient(top,white,#ECECEC);
 background-image: -o-linear-gradient(top,white,#ECECEC);
 background-image: linear-gradient(top,white,#ECECEC);
   border-color: #C6C6C6;
-  float: right;
+  float: left;
   position: relative;
-  top: 12px;
+  top: -40px;
   text-align: center;
   width: 20px;
   height:20px;
