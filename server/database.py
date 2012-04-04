@@ -153,14 +153,13 @@ class Tag(ndb.Model):
       # if not, dereference the experience
       self.xp = self.key.parent().get().dereference_experience()
       
-  def eval_score_change(self, remove=False):
+  def eval_score_change(self):
     """
     Update our tagged post's score if we are a base tag.
     """
     # check that we meet the conditions for a score adjustment
     if self.key.parent().kind() == 'Post':
       if self.is_base(): # adjust the score for the poster
-        # TODO: don't adjust score if we've changed our mind
         # figure out the sign on the score change
         delta = self.xp
         if self.title == 'incorrect':
@@ -177,10 +176,6 @@ class Tag(ndb.Model):
     # call eval_score_changes when tag is created
     self.update_experience()
     self.eval_score_change()
-
-  def _pre_delete_hook(self):
-    # call update_score when tag is deleted
-    self.eval_score_change(remove=True)
 
 class Stream(ndb.Model):
   """
