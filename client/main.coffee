@@ -82,8 +82,9 @@ $ ->
       @streamviewRendered = false
       postCollection.bind('add', @addOne, this)
       postCollection.bind('reset', @addAll, this)
-      postCollection.bind('all', @render, this)
+      #postCollection.bind('all', @render, this)
       postCollection.fetch()
+      @render()
     addOne: (item) ->
       post = new PostView(model: item)
       if document.getElementById('response' + item.get('parentID'))
@@ -97,7 +98,6 @@ $ ->
     deleteOne: (item) ->
       item.destroy()
     deleteAll: ->
-      postCollection.fetch()
       postCollection.each(@deleteOne)
     render: =>
       if !@streamviewRendered
@@ -127,15 +127,8 @@ $ ->
           $(window).trigger('scroll')
         )
 
-        $('#notification-counter').click( =>
-          if !@notificationTipInvisible
-            $('#dropdown-panel').qtip("show");
-          $('#notification-counter').qtip("hide");
-          @notificationTipInvisible = true
-        )
-
         $('#notification-counter').qtip({
-                 content: 'Unviewed Notifications.  Click on it to reveal the notifications.',
+                 content: 'Click Here.',
                  position: {
                    corner: {
                       tooltip: 'leftMiddle',
@@ -144,7 +137,7 @@ $ ->
                  },
                  show: {
                    when: false,
-                   ready: true
+                   ready: false
                  },
                  hide: false,
                  style: {
@@ -160,13 +153,6 @@ $ ->
                  }
         });
              
-        $('#dropdown-panel').click( =>
-          if !@dropdownTipInvisible            
-            $('.ui-votebox:first').qtip("show");
-          $('#dropdown-panel').qtip("hide");
-          @dropdownTipInvisible = true
-        )
-
         $('#dropdown-panel').qtip({
                  content: 'Click to view your profile.',
                  position: {
@@ -193,27 +179,7 @@ $ ->
                  }
               });
 
-        $('.ui-votebox').click( =>
-           if !@voteboxTipInvisible
-             $('.ui-tagbox:first').qtip("show");
-           $('.ui-votebox:first').qtip("hide");
-           @voteboxTipInvisible = true
-        )
-
-        # FIXME: remove these next 2 click events once we figure out why the event isn't propagating up to the parent.
-        $('.ui-votebox #ui-upvote').click( =>
-           if !@voteboxTipInvisible
-             $('.ui-tagbox:first').qtip("show");
-           $('.ui-votebox:first').qtip("hide");
-           @voteboxTipInvisible = true
-        )
-  
-        $('.ui-votebox #ui-downvote').click( =>
-           if !@voteboxTipInvisible
-             $('.ui-tagbox:first').qtip("show");
-           $('.ui-votebox:first').qtip("hide");
-           @voteboxTipInvisible = true
-        )
+       
 
         $('.ui-votebox:first').qtip({
                  content: 'Click up or down to set the score of a post.',
@@ -240,19 +206,7 @@ $ ->
                     name: 'cream'
                  }
               });
-        $('.ui-tagbox:first').keydown( =>
-          if event.keyCode is 188 or event.keyCode is 13
-            if !@tagboxTip2Invisible
-              $('#ui-omniContainer').qtip("show");
-            $('.ui-tagbox:first').qtip("hide");
-            @tagboxTip2Invisible = true
-        )
-
-        $('.ui-tagbox:first').click( =>
-           if !@tagboxTipInvisible                
-             $('.ui-tagbox:first').qtip('api').updateContent('Tags can be multiple words, and are seperated by pressing enter or the comma key.')
-           @tagboxTipInvisible = true        
-        )
+       
         $('.ui-tagbox:first').qtip({
                  content: 'You can tag a post with a list of topics.',
                  position: {
@@ -279,19 +233,8 @@ $ ->
                  }
               });
          
-        $('.ui-omnipost:first').focusin( ->
-          if !@omniboxTipInvisible                
-            $('#ui-omniContainer').qtip('api').updateContent('Click the icons to add content such as links, images or video.')
-          @omniboxTipInvisible = true
-        )
-
-        $(document).click( ->
-          #unless event.target is $('.ui-omnipost:first')               
-          #  $('#ui-omniContainer').qtip('hide')
-        )
-
         $('#ui-omniContainer').qtip({
-                 content: 'Click to make a post.',
+                 content: 'Click here first.',
                  position: {
                     corner: {
                        tooltip: 'leftMiddle',
@@ -315,7 +258,68 @@ $ ->
                     name: 'cream'
                  }
               });
-          @streamviewRendered = true
+        $('#ui-omniContainer').qtip("show")
+        $('#notification-counter').click( =>
+          if !@notificationTipInvisible
+            $('#dropdown-panel').qtip("show");
+          $('#notification-counter').qtip("hide");
+          @notificationTipInvisible = true
+        )
+
+        $('#dropdown-panel').click( =>
+          if !@dropdownTipInvisible            
+            $('.ui-votebox:first').qtip("show");
+          $('#dropdown-panel').qtip("hide");
+          @dropdownTipInvisible = true
+        )
+
+        $('.ui-votebox').click( =>
+           if !@voteboxTipInvisible
+             $('.ui-tagbox:first').qtip("show");
+           $('.ui-votebox:first').qtip("hide");
+           @voteboxTipInvisible = true
+        )
+
+         # FIXME: remove these next 2 click events once we figure out why the event isn't propagating up to the parent.
+        $('.ui-votebox #ui-upvote').click( =>
+           if !@voteboxTipInvisible
+             $('.ui-tagbox:first').qtip("show");
+           $('.ui-votebox:first').qtip("hide");
+           @voteboxTipInvisible = true
+        )
+  
+        $('.ui-votebox #ui-downvote').click( =>
+           if !@voteboxTipInvisible
+             $('.ui-tagbox:first').qtip("show");
+           $('.ui-votebox:first').qtip("hide");
+           @voteboxTipInvisible = true
+        )
+
+        $('.ui-tagbox:first').keydown( =>
+          if event.keyCode is 188 or event.keyCode is 13
+            if !@tagboxTip2Invisible
+              $('#ui-omniContainer').qtip("show");
+            $('.ui-tagbox:first').qtip("hide");
+            @tagboxTip2Invisible = true
+        )
+
+        $('.ui-tagbox:first').click( =>
+           if !@tagboxTipInvisible                
+             $('.ui-tagbox:first').qtip('api').updateContent('Tags can be multiple words, and are seperated by pressing enter or the comma key.')
+           @tagboxTipInvisible = true        
+        )
+
+        $('.ui-omnipost:first').click( ->
+          if !@omniboxTipInvisible                
+            $('#ui-omniContainer').qtip('api').updateContent('Click the icons to add content such as links, images or video.')
+          @omniboxTipInvisible = true
+        )
+
+        $(document).click( ->
+          #unless event.target is $('.ui-omnipost:first')               
+          #  $('#ui-omniContainer').qtip('hide')
+        )  
+        @streamviewRendered = true
         
   ###
   # Routes
@@ -329,35 +333,28 @@ $ ->
       postCollection.get(id)
       postCollection.fetch()
 
+    deleteOne: (item) ->
+      item.destroy()
+
     unpopulate: ->
-      App.deleteAll()
+      postCollection.fetch()
+      postCollection.each(@deleteOne)
 
     populate: ->
-      data = {posttext: 'This is an example post.', linkdata: '<img src = "http://m-27.com/wp-content/lol/kaiji.jpg" width = "350" height = "auto">'}
+      data = {posttext: 'What is your earliest memory of WWII?', linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'}
       p = new Post(
         id: 1
         editing: false
         content: data
         votecount: 25
-        tags: ["kaiji", "san"]
+        tags: ["world war II"]
         parents: ''
         responses: []
       )
       postCollection.create(p)
-
-      data = {posttext: 'This is an example post.', linkdata: '<a href = "http://www.imdb.com">www.imdb.com</a>'}
-      p1 = new Post(
-        id: 2
-        editing: false
-        content: data
-        tags: ["do", "re", "mi", "fa", "so"]
-        parents: ''
-        responses: []
-      )
-      postCollection.create(p1)
       
   
-  postCollection = new Posts()
+  postCollection = new Posts()  
+  app_router = new Workspace() 
+  Backbone.history.start()  
   App = new StreamView(el: $('#learn')) 
-  app_router = new Workspace()   
-  Backbone.history.start()

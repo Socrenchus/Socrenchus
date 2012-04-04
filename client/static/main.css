@@ -83,8 +83,20 @@ h2 {
   right: 5px;
 }
 
-#welcome-user {
-  float: right;
+#story {
+  float: left;
+  width: 300px;
+}
+
+#story div {
+  float: left;
+  width: 300px;
+  padding: 5px;
+  margin-bottom: 20px;
+}
+
+#story-part1 {
+  border: 2px solid yellow;
 }
 
 #view-profile {
@@ -167,26 +179,16 @@ background-image: linear-gradient(top,white,#ECECEC);
   width: 576px;
 }
 
-#friends-list ul {
-  width: 200px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-#friends-list li {
-  font-style: normal;
-  margin-bottom: 55px;
+.friend-element {
+  margin: 10px;
+  float:left;
 }
 
 .friend-profile-pic {
   float: left;
 }
-
 .friend-name {
-  font-family: Trebuchet MS,Liberation Sans,DejaVu Sans,sans-serif;
-  position: relative;
-  margin-left: 77px;
-  top: 23px;
+  float:right;
 }
 
 #collapsable-profile {
