@@ -148,8 +148,8 @@
         this.streamviewRendered = false;
         postCollection.bind('add', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
-        postCollection.bind('all', this.render, this);
-        return postCollection.fetch();
+        postCollection.fetch();
+        return this.render();
       };
 
       StreamView.prototype.addOne = function(item) {
@@ -173,7 +173,6 @@
       };
 
       StreamView.prototype.deleteAll = function() {
-        postCollection.fetch();
         return postCollection.each(this.deleteOne);
       };
 
@@ -202,13 +201,8 @@
           $(document).ready(function() {
             return $(window).trigger('scroll');
           });
-          $('#notification-counter').click(function() {
-            if (!_this.notificationTipInvisible) $('#dropdown-panel').qtip("show");
-            $('#notification-counter').qtip("hide");
-            return _this.notificationTipInvisible = true;
-          });
           $('#notification-counter').qtip({
-            content: 'Unviewed Notifications.  Click on it to reveal the notifications.',
+            content: 'Click Here.',
             position: {
               corner: {
                 tooltip: 'leftMiddle',
@@ -217,7 +211,7 @@
             },
             show: {
               when: false,
-              ready: true
+              ready: false
             },
             hide: false,
             style: {
@@ -231,11 +225,6 @@
               'font-size': 16,
               name: 'cream'
             }
-          });
-          $('#dropdown-panel').click(function() {
-            if (!_this.dropdownTipInvisible) $('.ui-votebox:first').qtip("show");
-            $('#dropdown-panel').qtip("hide");
-            return _this.dropdownTipInvisible = true;
           });
           $('#dropdown-panel').qtip({
             content: 'Click to view your profile.',
@@ -262,21 +251,6 @@
               name: 'cream'
             }
           });
-          $('.ui-votebox').click(function() {
-            if (!_this.voteboxTipInvisible) $('.ui-tagbox:first').qtip("show");
-            $('.ui-votebox:first').qtip("hide");
-            return _this.voteboxTipInvisible = true;
-          });
-          $('.ui-votebox #ui-upvote').click(function() {
-            if (!_this.voteboxTipInvisible) $('.ui-tagbox:first').qtip("show");
-            $('.ui-votebox:first').qtip("hide");
-            return _this.voteboxTipInvisible = true;
-          });
-          $('.ui-votebox #ui-downvote').click(function() {
-            if (!_this.voteboxTipInvisible) $('.ui-tagbox:first').qtip("show");
-            $('.ui-votebox:first').qtip("hide");
-            return _this.voteboxTipInvisible = true;
-          });
           $('.ui-votebox:first').qtip({
             content: 'Click up or down to set the score of a post.',
             position: {
@@ -301,19 +275,6 @@
               'font-size': 16,
               name: 'cream'
             }
-          });
-          $('.ui-tagbox:first').keydown(function() {
-            if (event.keyCode === 188 || event.keyCode === 13) {
-              if (!_this.tagboxTip2Invisible) $('#ui-omniContainer').qtip("show");
-              $('.ui-tagbox:first').qtip("hide");
-              return _this.tagboxTip2Invisible = true;
-            }
-          });
-          $('.ui-tagbox:first').click(function() {
-            if (!_this.tagboxTipInvisible) {
-              $('.ui-tagbox:first').qtip('api').updateContent('Tags can be multiple words, and are seperated by pressing enter or the comma key.');
-            }
-            return _this.tagboxTipInvisible = true;
           });
           $('.ui-tagbox:first').qtip({
             content: 'You can tag a post with a list of topics.',
@@ -340,15 +301,8 @@
               name: 'cream'
             }
           });
-          $('.ui-omnipost:first').focusin(function() {
-            if (!this.omniboxTipInvisible) {
-              $('#ui-omniContainer').qtip('api').updateContent('Click the icons to add content such as links, images or video.');
-            }
-            return this.omniboxTipInvisible = true;
-          });
-          $(document).click(function() {});
           $('#ui-omniContainer').qtip({
-            content: 'Click to make a post.',
+            content: 'Click here first.',
             position: {
               corner: {
                 tooltip: 'leftMiddle',
@@ -372,6 +326,52 @@
               name: 'cream'
             }
           });
+          $('#ui-omniContainer').qtip("show");
+          $('#notification-counter').click(function() {
+            if (!_this.notificationTipInvisible) $('#dropdown-panel').qtip("show");
+            $('#notification-counter').qtip("hide");
+            return _this.notificationTipInvisible = true;
+          });
+          $('#dropdown-panel').click(function() {
+            if (!_this.dropdownTipInvisible) $('.ui-votebox:first').qtip("show");
+            $('#dropdown-panel').qtip("hide");
+            return _this.dropdownTipInvisible = true;
+          });
+          $('.ui-votebox').click(function() {
+            if (!_this.voteboxTipInvisible) $('.ui-tagbox:first').qtip("show");
+            $('.ui-votebox:first').qtip("hide");
+            return _this.voteboxTipInvisible = true;
+          });
+          $('.ui-votebox #ui-upvote').click(function() {
+            if (!_this.voteboxTipInvisible) $('.ui-tagbox:first').qtip("show");
+            $('.ui-votebox:first').qtip("hide");
+            return _this.voteboxTipInvisible = true;
+          });
+          $('.ui-votebox #ui-downvote').click(function() {
+            if (!_this.voteboxTipInvisible) $('.ui-tagbox:first').qtip("show");
+            $('.ui-votebox:first').qtip("hide");
+            return _this.voteboxTipInvisible = true;
+          });
+          $('.ui-tagbox:first').keydown(function() {
+            if (event.keyCode === 188 || event.keyCode === 13) {
+              if (!_this.tagboxTip2Invisible) $('#ui-omniContainer').qtip("show");
+              $('.ui-tagbox:first').qtip("hide");
+              return _this.tagboxTip2Invisible = true;
+            }
+          });
+          $('.ui-tagbox:first').click(function() {
+            if (!_this.tagboxTipInvisible) {
+              $('.ui-tagbox:first').qtip('api').updateContent('Tags can be multiple words, and are seperated by pressing enter or the comma key.');
+            }
+            return _this.tagboxTipInvisible = true;
+          });
+          $('.ui-omnipost:first').click(function() {
+            if (!this.omniboxTipInvisible) {
+              $('#ui-omniContainer').qtip('api').updateContent('Click the icons to add content such as links, images or video.');
+            }
+            return this.omniboxTipInvisible = true;
+          });
+          $(document).click(function() {});
           return this.streamviewRendered = true;
         }
       };
@@ -401,50 +401,42 @@
         return postCollection.fetch();
       };
 
+      Workspace.prototype.deleteOne = function(item) {
+        return item.destroy();
+      };
+
       Workspace.prototype.unpopulate = function() {
-        return App.deleteAll();
+        postCollection.fetch();
+        return postCollection.each(this.deleteOne);
       };
 
       Workspace.prototype.populate = function() {
-        var data, p, p1;
+        var data, p;
         data = {
-          posttext: 'This is an example post.',
-          linkdata: '<img src = "http://m-27.com/wp-content/lol/kaiji.jpg" width = "350" height = "auto">'
+          posttext: 'What is your earliest memory of WWII?',
+          linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'
         };
         p = new Post({
           id: 1,
           editing: false,
           content: data,
           votecount: 25,
-          tags: ["kaiji", "san"],
+          tags: ["world war II"],
           parents: '',
           responses: []
         });
-        postCollection.create(p);
-        data = {
-          posttext: 'This is an example post.',
-          linkdata: '<a href = "http://www.imdb.com">www.imdb.com</a>'
-        };
-        p1 = new Post({
-          id: 2,
-          editing: false,
-          content: data,
-          tags: ["do", "re", "mi", "fa", "so"],
-          parents: '',
-          responses: []
-        });
-        return postCollection.create(p1);
+        return postCollection.create(p);
       };
 
       return Workspace;
 
     })(Backbone.Router);
     postCollection = new Posts();
-    App = new StreamView({
+    app_router = new Workspace();
+    Backbone.history.start();
+    return App = new StreamView({
       el: $('#learn')
     });
-    app_router = new Workspace();
-    return Backbone.history.start();
   });
 
 }).call(this);
