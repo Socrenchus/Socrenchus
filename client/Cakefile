@@ -8,8 +8,14 @@ outputImageFolder = 'static'
 imageSrcFolders = [
     'tagbox/images'
     'votebox/images'
+    'omnipost/images'
 ]
 
+cssSrcFolders = [
+    'tagbox/stylesheets'
+    'votebox/stylesheets'
+    'omnipost/stylesheets'
+]
 srcFolders = [
     'main'
     'tagbox'
@@ -41,15 +47,16 @@ copyWithDirectory = (path) ->
     else if stats.isDirectory()
       copyWithDirectory(currentFile)
 
-copy = () ->
-  for imgSrcFolder in imageSrcFolders  
-    copyWithDirectory(imgSrcFolder)      
-
 task 'build', 'Build to static/lib from tagbox, votebox, and omnipost', ->
   build()
 
 task 'cpimgs', 'Copy all images from the respective images folders in tagbox, votebox, and omnipost into static folder', ->
-  copy()
+  for imgSrcFolder in imageSrcFolders  
+    copyWithDirectory(imgSrcFolder)      
+
+task 'cpcss', 'Copy all css files from the respective folders in tagbox, votebox, and omnipost into static/lib folder', ->
+  for cssSrcFolder in cssSrcFolders  
+    copyWithDirectory(cssSrcFolder) 
 
 task 'watch', 'Watch for changes in tagbox, votebox, and omnipost, and if there are, build it to static/lib', ->
   for folder in srcFolders
@@ -59,6 +66,7 @@ task 'watch', 'Watch for changes in tagbox, votebox, and omnipost, and if there 
     coffee.stdout.on 'data', (data) ->
       util.log data.toString()
 
-task 'buildAll', 'build all coffee files and copy all images', ->
+task 'buildAndCpAll', 'build all coffee files and copy all images', ->
   invoke 'build'
   invoke 'cpimgs'
+  invoke 'cpcss'
