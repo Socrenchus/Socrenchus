@@ -145,7 +145,7 @@
       }
 
       StreamView.prototype.initialize = function() {
-        this.tooltipsRendered = false;
+        this.streamviewRendered = false;
         postCollection.bind('add', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
         postCollection.bind('all', this.render, this);
@@ -180,107 +180,27 @@
       StreamView.prototype.render = function() {
         var profileshowing,
           _this = this;
-        $('#collapseable-profile').hide();
-        profileshowing = false;
-        $('#dropdown-panel').click(function() {
-          profileshowing = !profileshowing;
-          return $('#collapseable-profile').slideToggle("fast", (function() {
-            $(window).trigger('scroll');
-            if (profileshowing) {
-              $('#tagcloud-img').qtip("show");
-              $('#badges').qtip("show");
-              $('#friends-list').qtip("show");
-              return $('#dropdown-panel').attr('src', '/images/dropdownreversed.png');
-            } else {
-              $('#tagcloud-img').qtip("hide");
-              $('#badges').qtip("hide");
-              $('#friends-list').qtip("hide");
-              return $('#dropdown-panel').attr('src', '/images/dropdown.png');
-            }
-          }));
-        });
-        $('#notification-box').hide();
-        $('#notification-counter').click(function() {
-          return $('#notification-box').toggle();
-        });
-        $(document).ready(function() {
-          return $(window).trigger('scroll');
-        });
-        if (!this.tooltipsRendered) {
-          $('#tagcloud-img').qtip({
-            content: 'This is your tag cloud.  It contains every tag by every person.  The size of the tag shows how often that tag gets used by everyone.  The color of the tag shows how often you use that tag or have it used on you.',
-            position: {
-              corner: {
-                tooltip: 'leftMiddle',
-                target: 'rightMiddle'
+        if (!this.streamviewRendered) {
+          $('#collapseable-profile').hide();
+          profileshowing = false;
+          $('#dropdown-panel').click(function() {
+            profileshowing = !profileshowing;
+            return $('#collapseable-profile').slideToggle("fast", (function() {
+              $(window).trigger('scroll');
+              if (profileshowing) {
+                return $('#dropdown-panel').attr('src', '/images/dropdownreversed.png');
+              } else {
+                return $('#dropdown-panel').attr('src', '/images/dropdown.png');
               }
-            },
-            show: {
-              when: false,
-              ready: false
-            },
-            hide: false,
-            style: {
-              border: {
-                width: 5,
-                radius: 10
-              },
-              padding: 10,
-              textAlign: 'center',
-              tip: true,
-              'font-size': 16,
-              name: 'cream'
-            }
+            }));
           });
-          $('#badges').qtip({
-            content: 'A list of your badges.  Earn more by accomplishing certain tasks',
-            position: {
-              corner: {
-                tooltip: 'rightMiddle',
-                target: 'leftMiddle'
-              }
-            },
-            show: {
-              when: false,
-              ready: false
-            },
-            hide: false,
-            style: {
-              border: {
-                width: 5,
-                radius: 10
-              },
-              padding: 10,
-              textAlign: 'center',
-              tip: true,
-              'font-size': 16,
-              name: 'cream'
-            }
+          if (postCollection.length === 0) $('#dropdown-panel').click();
+          $('#notification-box').hide();
+          $('#notification-counter').click(function() {
+            return $('#notification-box').toggle();
           });
-          $('#friends-list').qtip({
-            content: 'A list of your friends.  These are friends from other websites, such as facebook, that are using Socrenchus.',
-            position: {
-              corner: {
-                tooltip: 'rightMiddle',
-                target: 'leftMiddle'
-              }
-            },
-            show: {
-              when: false,
-              ready: false
-            },
-            hide: false,
-            style: {
-              border: {
-                width: 5,
-                radius: 10
-              },
-              padding: 10,
-              textAlign: 'center',
-              tip: true,
-              'font-size': 16,
-              name: 'cream'
-            }
+          $(document).ready(function() {
+            return $(window).trigger('scroll');
           });
           $('#notification-counter').click(function() {
             if (!_this.notificationTipInvisible) $('#dropdown-panel').qtip("show");
@@ -318,7 +238,7 @@
             return _this.dropdownTipInvisible = true;
           });
           $('#dropdown-panel').qtip({
-            content: 'Click this tab to view you profile.  This includes a list of tags, badges, and friends that use Socrenchus from another website such as facebook.',
+            content: 'Click to view your profile.',
             position: {
               corner: {
                 tooltip: 'topLeft',
@@ -382,13 +302,21 @@
               name: 'cream'
             }
           });
+          $('.ui-tagbox:first').keydown(function() {
+            if (event.keyCode === 188 || event.keyCode === 13) {
+              if (!_this.tagboxTip2Invisible) $('#ui-omniContainer').qtip("show");
+              $('.ui-tagbox:first').qtip("hide");
+              return _this.tagboxTip2Invisible = true;
+            }
+          });
           $('.ui-tagbox:first').click(function() {
-            if (!_this.tagboxTipInvisible) $('#ui-omniContainer').qtip("show");
-            $('.ui-tagbox:first').qtip("hide");
+            if (!_this.tagboxTipInvisible) {
+              $('.ui-tagbox:first').qtip('api').updateContent('Tags can be multiple words, and are seperated by pressing enter or the comma key.');
+            }
             return _this.tagboxTipInvisible = true;
           });
           $('.ui-tagbox:first').qtip({
-            content: 'You can tag a post with a list of topics.  Tags can be multiple words, and are seperated by pressing enter or the comma key.',
+            content: 'You can tag a post with a list of topics.',
             position: {
               corner: {
                 tooltip: 'rightMiddle',
@@ -412,11 +340,15 @@
               name: 'cream'
             }
           });
-          $('.ui-omnipost:first').click(function() {
-            return $('#ui-omniContainer').qtip("hide");
+          $('.ui-omnipost:first').focusin(function() {
+            if (!this.omniboxTipInvisible) {
+              $('#ui-omniContainer').qtip('api').updateContent('Click the icons to add content such as links, images or video.');
+            }
+            return this.omniboxTipInvisible = true;
           });
+          $(document).click(function() {});
           $('#ui-omniContainer').qtip({
-            content: 'Make a post.  Text, images, and links are already included, and video posting will be included shortly.',
+            content: 'Click to make a post.',
             position: {
               corner: {
                 tooltip: 'leftMiddle',
@@ -440,7 +372,7 @@
               name: 'cream'
             }
           });
-          return this.tooltipsRendered = true;
+          return this.streamviewRendered = true;
         }
       };
 
