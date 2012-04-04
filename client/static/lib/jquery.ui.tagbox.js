@@ -28,7 +28,7 @@
           _this = this;
         this.alltags = [];
         editingoldtag = false;
-        addtagstext = '+ Tags';
+        addtagstext = 'Tag the above post here...';
         if (this.options.editing) {
           tagsdiv = $("<div class='ui-tagbox'></div>");
           this.tagtext = $("<div class='ui-tagtext' contentEditable='false'></div>");
@@ -38,12 +38,11 @@
           this.currenttag = $("<div class='ui-individualtag' contentEditable='true'></div>");
           this.message = $("<div class='ui-tagmessage'>" + addtagstext + "</div>");
           this.tagtext.append(tagIcon);
-          this.tagtext.append(this.currenttag);
           this.tagtext.append(this.message);
+          this.tagtext.append(this.currenttag);
           this.tagtext.focusout(function() {
-            if (_this.alltags.length === 0) {
-              _this.message = $("<div class='ui-tagmessage'>" + addtagstext + "</div>");
-              return _this.tagtext.append(_this.message);
+            if (_this.alltags.length === 0 && _this.currenttag.text() === '') {
+              return _this.message.show();
             }
           });
           this.tagtext.keydown(function(event) {
@@ -54,7 +53,7 @@
           });
           return this.tagtext.click(function() {
             if (!_this.editingoldtag) {
-              _this.message.remove();
+              _this.message.hide();
               return _this.currenttag.focus();
             }
           });

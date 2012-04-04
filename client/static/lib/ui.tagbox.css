@@ -26,3 +26,9 @@
     position: relative;
     float: left;
 }
+
+.ui-tagmessage {
+  color: #a1a1a1;
+  font-style: italic;
+  margin: 3px;
+}
