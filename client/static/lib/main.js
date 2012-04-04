@@ -194,6 +194,7 @@
               }
             }));
           });
+          if (postCollection.length === 0) $('#dropdown-panel').click();
           $('#notification-box').hide();
           $('#notification-counter').click(function() {
             return $('#notification-box').toggle();
@@ -339,11 +340,15 @@
               name: 'cream'
             }
           });
-          $('.ui-omnipost:first').click(function() {
-            return $('#ui-omniContainer').qtip("hide");
+          $('.ui-omnipost:first').focusin(function() {
+            if (!this.omniboxTipInvisible) {
+              $('#ui-omniContainer').qtip('api').updateContent('Click the icons to add content such as links, images or video.');
+            }
+            return this.omniboxTipInvisible = true;
           });
+          $(document).click(function() {});
           $('#ui-omniContainer').qtip({
-            content: 'Make a post.  Text, images, and links are already included, and video posting will be included shortly.',
+            content: 'Click to make a post.',
             position: {
               corner: {
                 tooltip: 'leftMiddle',

@@ -115,6 +115,9 @@ $ ->
           )
         )
         
+        if postCollection.length is 0
+          $('#dropdown-panel').click()
+
         $('#notification-box').hide()
         $('#notification-counter').click( ->
           $('#notification-box').toggle()
@@ -276,12 +279,19 @@ $ ->
                  }
               });
          
-        $('.ui-omnipost:first').click( ->
-           $('#ui-omniContainer').qtip("hide");
+        $('.ui-omnipost:first').focusin( ->
+          if !@omniboxTipInvisible                
+            $('#ui-omniContainer').qtip('api').updateContent('Click the icons to add content such as links, images or video.')
+          @omniboxTipInvisible = true
+        )
+
+        $(document).click( ->
+          #unless event.target is $('.ui-omnipost:first')               
+          #  $('#ui-omniContainer').qtip('hide')
         )
 
         $('#ui-omniContainer').qtip({
-                 content: 'Make a post.  Text, images, and links are already included, and video posting will be included shortly.',
+                 content: 'Click to make a post.',
                  position: {
                     corner: {
                        tooltip: 'leftMiddle',
