@@ -21,7 +21,7 @@
     border: 1px solid black;
 }
 
-#ui-tagpic {
+.ui-tagpic {
     height: 30px;
     position: relative;
     float: left;

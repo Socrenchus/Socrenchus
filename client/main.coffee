@@ -79,7 +79,7 @@ $ ->
         
   class StreamView extends Backbone.View
     initialize: ->
-      @tooltipsRendered = false
+      @streamviewRendered = false
       postCollection.bind('add', @addOne, this)
       postCollection.bind('reset', @addAll, this)
       postCollection.bind('all', @render, this)
@@ -100,36 +100,36 @@ $ ->
       postCollection.fetch()
       postCollection.each(@deleteOne)
     render: =>
-      $('#collapseable-profile').hide()
-      profileshowing = false
-      $('#dropdown-panel').click( ->
-        profileshowing = !profileshowing
-        $('#collapseable-profile').slideToggle("fast", ( ->             
-              $(window).trigger('scroll')
-              if profileshowing
-                $('#tagcloud-img').qtip("show");
-                $('#badges').qtip("show");
-                $('#friends-list').qtip("show");
-                $('#dropdown-panel').attr('src', '/images/dropdownreversed.png')
-              else
-                $('#tagcloud-img').qtip("hide");
-                $('#badges').qtip("hide");
-                $('#friends-list').qtip("hide");
-                $('#dropdown-panel').attr('src', '/images/dropdown.png')
+      if !@streamviewRendered
+        $('#collapseable-profile').hide()
+        profileshowing = false
+        $('#dropdown-panel').click( ->
+          profileshowing = !profileshowing
+          $('#collapseable-profile').slideToggle("fast", ( ->             
+                $(window).trigger('scroll')
+                if profileshowing
+                  $('#tagcloud-img').qtip("show");
+                  $('#badges').qtip("show");
+                  $('#friends-list').qtip("show");
+                  $('#dropdown-panel').attr('src', '/images/dropdownreversed.png')
+                else
+                  $('#tagcloud-img').qtip("hide");
+                  $('#badges').qtip("hide");
+                  $('#friends-list').qtip("hide");
+                  $('#dropdown-panel').attr('src', '/images/dropdown.png')
+            )
           )
         )
-      )
-      
-      $('#notification-box').hide()
-      $('#notification-counter').click( ->
-        $('#notification-box').toggle()
-      )
+        
+        $('#notification-box').hide()
+        $('#notification-counter').click( ->
+          $('#notification-box').toggle()
+        )
 
-      $(document).ready( -> 
-        $(window).trigger('scroll')
-      )
+        $(document).ready( -> 
+          $(window).trigger('scroll')
+        )
       
-      if !@tooltipsRendered
         $('#tagcloud-img').qtip({
                  content: 'This is your tag cloud.  It contains every tag by every person.  The size of the tag shows how often that tag gets used by everyone.  The color of the tag shows how often you use that tag or have it used on you.',
                  position: {
@@ -240,12 +240,12 @@ $ ->
                  }
         });
              
-        $('#dropdown-panel').click( =>
-          if !@dropdownTipInvisible            
-            $('.ui-votebox:first').qtip("show");
-          $('#dropdown-panel').qtip("hide");
-          @dropdownTipInvisible = true
-        )
+        #$('#dropdown-panel').click( =>
+          #if !@dropdownTipInvisible            
+          #  $('.ui-votebox:first').qtip("show");
+          #$('#dropdown-panel').qtip("hide");
+          #@dropdownTipInvisible = true
+        #)
 
         $('#dropdown-panel').qtip({
                  content: 'Click this tab to view you profile.  This includes a list of tags, badges, and friends that use Socrenchus from another website such as facebook.',
@@ -382,7 +382,7 @@ $ ->
                     name: 'cream'
                  }
               });
-          @tooltipsRendered = true
+          @streamviewRendered = true
         
   ###
   # Routes

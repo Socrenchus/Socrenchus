@@ -145,7 +145,7 @@
       }
 
       StreamView.prototype.initialize = function() {
-        this.tooltipsRendered = false;
+        this.streamviewRendered = false;
         postCollection.bind('add', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
         postCollection.bind('all', this.render, this);
@@ -180,33 +180,33 @@
       StreamView.prototype.render = function() {
         var profileshowing,
           _this = this;
-        $('#collapseable-profile').hide();
-        profileshowing = false;
-        $('#dropdown-panel').click(function() {
-          profileshowing = !profileshowing;
-          return $('#collapseable-profile').slideToggle("fast", (function() {
-            $(window).trigger('scroll');
-            if (profileshowing) {
-              $('#tagcloud-img').qtip("show");
-              $('#badges').qtip("show");
-              $('#friends-list').qtip("show");
-              return $('#dropdown-panel').attr('src', '/images/dropdownreversed.png');
-            } else {
-              $('#tagcloud-img').qtip("hide");
-              $('#badges').qtip("hide");
-              $('#friends-list').qtip("hide");
-              return $('#dropdown-panel').attr('src', '/images/dropdown.png');
-            }
-          }));
-        });
-        $('#notification-box').hide();
-        $('#notification-counter').click(function() {
-          return $('#notification-box').toggle();
-        });
-        $(document).ready(function() {
-          return $(window).trigger('scroll');
-        });
-        if (!this.tooltipsRendered) {
+        if (!this.streamviewRendered) {
+          $('#collapseable-profile').hide();
+          profileshowing = false;
+          $('#dropdown-panel').click(function() {
+            profileshowing = !profileshowing;
+            return $('#collapseable-profile').slideToggle("fast", (function() {
+              $(window).trigger('scroll');
+              if (profileshowing) {
+                $('#tagcloud-img').qtip("show");
+                $('#badges').qtip("show");
+                $('#friends-list').qtip("show");
+                return $('#dropdown-panel').attr('src', '/images/dropdownreversed.png');
+              } else {
+                $('#tagcloud-img').qtip("hide");
+                $('#badges').qtip("hide");
+                $('#friends-list').qtip("hide");
+                return $('#dropdown-panel').attr('src', '/images/dropdown.png');
+              }
+            }));
+          });
+          $('#notification-box').hide();
+          $('#notification-counter').click(function() {
+            return $('#notification-box').toggle();
+          });
+          $(document).ready(function() {
+            return $(window).trigger('scroll');
+          });
           $('#tagcloud-img').qtip({
             content: 'This is your tag cloud.  It contains every tag by every person.  The size of the tag shows how often that tag gets used by everyone.  The color of the tag shows how often you use that tag or have it used on you.',
             position: {
@@ -311,11 +311,6 @@
               'font-size': 16,
               name: 'cream'
             }
-          });
-          $('#dropdown-panel').click(function() {
-            if (!_this.dropdownTipInvisible) $('.ui-votebox:first').qtip("show");
-            $('#dropdown-panel').qtip("hide");
-            return _this.dropdownTipInvisible = true;
           });
           $('#dropdown-panel').qtip({
             content: 'Click this tab to view you profile.  This includes a list of tags, badges, and friends that use Socrenchus from another website such as facebook.',
@@ -440,7 +435,7 @@
               name: 'cream'
             }
           });
-          return this.tooltipsRendered = true;
+          return this.streamviewRendered = true;
         }
       };
 
