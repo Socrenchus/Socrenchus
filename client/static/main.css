@@ -75,11 +75,13 @@ h2 {
   -webkit-border-bottom-right-radius: 10px;
   -moz-border-radius-bottomleft: 10px;
   -webkit-border-bottom-left-radius: 10px;
+  border-left: 2px solid lightGrey;
+  border-right: 2px solid lightGrey;
   margin: auto;
 }
 
 #footer {
-  width: 800px;
+  width: 810px;
   margin-top: -60px;
 }
 
