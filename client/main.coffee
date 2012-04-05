@@ -101,16 +101,12 @@ $ ->
       postCollection.each(@deleteOne)
     render: =>
       if !@streamviewRendered
-        $('#collapseable-profile').hide()
+        $('#collapsible-profile').hide()
         profileshowing = false
         $('#dropdown-panel').click( ->
           profileshowing = !profileshowing
-          $('#collapseable-profile').slideToggle("fast", ( ->             
+          $('#collapsible-profile').slideToggle("fast", ( ->             
                 $(window).trigger('scroll')
-                if profileshowing
-                  $('#dropdown-panel').attr('src', '/images/dropdownreversed.png')
-                else
-                  $('#dropdown-panel').attr('src', '/images/dropdown.png')
             )
           )
         )

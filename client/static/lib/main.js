@@ -180,17 +180,12 @@
         var profileshowing,
           _this = this;
         if (!this.streamviewRendered) {
-          $('#collapseable-profile').hide();
+          $('#collapsible-profile').hide();
           profileshowing = false;
           $('#dropdown-panel').click(function() {
             profileshowing = !profileshowing;
-            return $('#collapseable-profile').slideToggle("fast", (function() {
-              $(window).trigger('scroll');
-              if (profileshowing) {
-                return $('#dropdown-panel').attr('src', '/images/dropdownreversed.png');
-              } else {
-                return $('#dropdown-panel').attr('src', '/images/dropdown.png');
-              }
+            return $('#collapsible-profile').slideToggle("fast", (function() {
+              return $(window).trigger('scroll');
             }));
           });
           if (postCollection.length === 0) $('#dropdown-panel').click();
