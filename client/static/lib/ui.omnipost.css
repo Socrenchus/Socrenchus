@@ -14,6 +14,7 @@
 
 #ui-omniContainer {
     border: 1px solid black;
+    background-color: white;
     position: relative;
     width: 350px;
 }
@@ -59,6 +60,7 @@
 
 .ui-linkbox {
     width: 350px;
+    background-color: white;
     position: relative;
     border: 1px solid black;
     border-top-style: none;
