@@ -1,6 +1,7 @@
 body {
   font-size: 13px;
   font-family: 'Lucida Grande';
+  text-align:center;
 }
 
 a {
@@ -54,6 +55,7 @@ textarea[readonly] {
 #logo {
   height: 100px;
   margin-left: 35px;
+  float: left;
 }
 
 #learn {
@@ -66,12 +68,19 @@ h2 {
 }
 
 #main {
+  text-align: left;
   width: 576px;
+  background-color: #ebebeb;
   -moz-border-radius-bottomright: 10px;
   -webkit-border-bottom-right-radius: 10px;
   -moz-border-radius-bottomleft: 10px;
   -webkit-border-bottom-left-radius: 10px;
   margin: auto;
+}
+
+#footer {
+  width: 800px;
+  margin-top: -60px;
 }
 
 #logout {
