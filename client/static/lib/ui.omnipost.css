@@ -20,6 +20,7 @@
 }
 #ui-omniPostText {
     position: relative;
+    width: 280px;
     outline: none;
     resize: none;
     border: none;

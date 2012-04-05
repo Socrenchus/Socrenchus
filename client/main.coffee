@@ -80,11 +80,23 @@ $ ->
   class StreamView extends Backbone.View
     initialize: ->
       @streamviewRendered = false
+      @selectedStory = '#story-part1'
       postCollection.bind('add', @addOne, this)
       postCollection.bind('reset', @addAll, this)
       #postCollection.bind('all', @render, this)
       postCollection.fetch()
       @render()
+
+    #FIXME: remove these next 2 functions after the demo.
+    setStoryPart: (storyPart) ->
+      $(@selectedStory).css('border-style', 'none');
+      @selectedStory = storyPart
+      $(@selectedStory).css('border', '2px solid yellow');
+    
+    textCompletionCall: =>
+      @setStoryPart('#story-part3')
+      $('.ui-omnipost:first #ui-omniPostSubmit').click()
+
     addOne: (item) ->
       post = new PostView(model: item)
       if document.getElementById('response' + item.get('parentID'))
@@ -305,9 +317,14 @@ $ ->
            @tagboxTipInvisible = true        
         )
 
-        $('.ui-omnipost:first').click( ->
+        $('.ui-omnipost:first').click( =>
           if !@omniboxTipInvisible                
-            $('#ui-omniContainer').qtip('api').updateContent('Click the icons to add content such as links, images or video.')
+            #$('#ui-omniContainer').qtip('api').updateContent('Click the icons to add content such as links, images or video.')
+            $('.ui-tagbox:first').qtip("show")
+            $('#ui-omniContainer').qtip("hide")
+            @setStoryPart('#story-part2')
+            $('.ui-omnipost:first #ui-omniPostText').val('I remember my mother cooking breakfast while my sister, my father, and I listened to the radio as FDR began another one of his fireside chats. It was september of 1939 and the topic was the European War.')
+            $('.ui-omnipost:first #ui-omniPostText').textareatypewriter(@textCompletionCall)
           @omniboxTipInvisible = true
         )
 
@@ -349,6 +366,17 @@ $ ->
       )
       postCollection.create(p)
       
+      data = {posttext: 'Does anyone remember these delicious candybars?', linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/PjcDkdfe6tg" frameborder="0" allowfullscreen></iframe>'}
+      p1 = new Post(
+        id: 2
+        editing: false
+        content: data
+        votecount: 25
+        tags: ["world war II"]
+        parents: ''
+        responses: []
+      )
+      postCollection.create(p1)
   
   postCollection = new Posts()  
   app_router = new Workspace() 

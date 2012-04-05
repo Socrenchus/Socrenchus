@@ -141,15 +141,28 @@
 
       function StreamView() {
         this.render = __bind(this.render, this);
+        this.textCompletionCall = __bind(this.textCompletionCall, this);
         StreamView.__super__.constructor.apply(this, arguments);
       }
 
       StreamView.prototype.initialize = function() {
         this.streamviewRendered = false;
+        this.selectedStory = '#story-part1';
         postCollection.bind('add', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
         postCollection.fetch();
         return this.render();
+      };
+
+      StreamView.prototype.setStoryPart = function(storyPart) {
+        $(this.selectedStory).css('border-style', 'none');
+        this.selectedStory = storyPart;
+        return $(this.selectedStory).css('border', '2px solid yellow');
+      };
+
+      StreamView.prototype.textCompletionCall = function() {
+        this.setStoryPart('#story-part3');
+        return $('.ui-omnipost:first #ui-omniPostSubmit').click();
       };
 
       StreamView.prototype.addOne = function(item) {
@@ -361,10 +374,14 @@
             return _this.tagboxTipInvisible = true;
           });
           $('.ui-omnipost:first').click(function() {
-            if (!this.omniboxTipInvisible) {
-              $('#ui-omniContainer').qtip('api').updateContent('Click the icons to add content such as links, images or video.');
+            if (!_this.omniboxTipInvisible) {
+              $('.ui-tagbox:first').qtip("show");
+              $('#ui-omniContainer').qtip("hide");
+              _this.setStoryPart('#story-part2');
+              $('.ui-omnipost:first #ui-omniPostText').val('I remember my mother cooking breakfast while my sister, my father, and I listened to the radio as FDR began another one of his fireside chats. It was september of 1939 and the topic was the European War.');
+              $('.ui-omnipost:first #ui-omniPostText').textareatypewriter(_this.textCompletionCall);
             }
-            return this.omniboxTipInvisible = true;
+            return _this.omniboxTipInvisible = true;
           });
           $(document).click(function() {});
           return this.streamviewRendered = true;
@@ -406,7 +423,7 @@
       };
 
       Workspace.prototype.populate = function() {
-        var data, p;
+        var data, p, p1;
         data = {
           posttext: 'What is your earliest memory of WWII?',
           linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'
@@ -420,7 +437,21 @@
           parents: '',
           responses: []
         });
-        return postCollection.create(p);
+        postCollection.create(p);
+        data = {
+          posttext: 'Does anyone remember these delicious candybars?',
+          linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/PjcDkdfe6tg" frameborder="0" allowfullscreen></iframe>'
+        };
+        p1 = new Post({
+          id: 2,
+          editing: false,
+          content: data,
+          votecount: 25,
+          tags: ["world war II"],
+          parents: '',
+          responses: []
+        });
+        return postCollection.create(p1);
       };
 
       return Workspace;
