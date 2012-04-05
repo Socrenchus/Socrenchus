@@ -112,6 +112,9 @@ h2 {
   position: absolute;
   left: 10;
   width: 300px;
+  text-shadow: 1px 1px 0px #000000;
+   filter: dropshadow(color=#000000, offx=1, offy=1);
+}
 }
 
 #story div {
