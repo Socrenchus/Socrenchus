@@ -20,6 +20,7 @@
 }
 #ui-omniPostText {
     position: relative;
+    width: 280px;
     outline: none;
     resize: none;
     border: none;
@@ -59,6 +60,14 @@
 }
 
 .ui-linkbox {
+    width: 350px;
+    background-color: white;
+    position: relative;
+    border: 1px solid black;
+    border-top-style: none;
+}
+
+.ui-videobox {
     width: 350px;
     background-color: white;
     position: relative;
