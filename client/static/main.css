@@ -53,8 +53,8 @@ textarea[readonly] {
 }
 
 #logo {
-  height: 100px;
-  margin-left: 35px;
+  height: 95px;
+  margin-left: 15px;
   float: left;
 }
 
@@ -133,13 +133,20 @@ h2 {
 
 #table-top {
   width: 576px;
-  height: 100px;
+  height: 90px;
   position: relative;
   background: url('/images/parchmenttexture.png') repeat;
-  border-bottom: 2px solid white;
+  border-bottom: 2px solid #ebebeb;
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
   z-index: 100;
+}
+
+#profile-view {
+  width: 576px;
+  height: auto;
+  position:relative;
+  top: 5px;
 }
 
 #notification-box {
@@ -167,12 +174,6 @@ background-image: linear-gradient(top,white,#ECECEC);
   text-align: center;
   width: 20px;
   height:20px;
-}
-
-#profile-view {
-  width: 576px;
-  height: auto;
-  position:relative;
 }
 
 .profile-element-header {
@@ -224,6 +225,7 @@ background-image: linear-gradient(top,white,#ECECEC);
   width: 614px;
   margin-bottom: 5px;
   margin-left: -21px;
+  margin-top: -10px;
 }
 
 #tagcloud-img {
