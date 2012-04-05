@@ -15,6 +15,7 @@ $ ->
         tags: ["kaiji", "san"]
         parents: [@id]
         responses: []
+        hidden: false
       )
       responseArray = @get('responses')
       responseArray.push(p.get('id'))
@@ -50,31 +51,32 @@ $ ->
       $(@el).find('.inner-question').append(postcontentdiv)
     
     render: ->
-      $(@el).html(@template)
-      $(@el).find('.inner-question').votebox({votesnum:@model.get('votecount')})
-      @renderPostContent()
-      $(@el).find('.inner-question').tagbox({editing: true, tags:@model.get('tags')})
-      $(@el).find('.inner-question').omnipost({callback: @model.respond, editing:true})
-      responsediv = $("<div id = 'response#{@id}'></div>")
-      $(@el).find('.inner-question').append(responsediv)
-      if @model.get('parents').length is 0
-        lockedpostsdiv = $("<div class='locked-posts'></div>")
-        progressbardiv = $("<div class='progressbar'></div>")
-        percent = Math.floor(Math.random()*100)
-        textinline = true
-        indicatortext = $('<p>Unlock ' + Math.floor(2+Math.random() * 7) + ' posts</p>')
-        if percent < 100.0/350.0 * 100
-          textinline = false
-        if textinline
-          progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")
-          progressindicatordiv.append(indicatortext)          
-          progressbardiv.append(progressindicatordiv)
-        else
-          progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")          
-          progressbardiv.append(progressindicatordiv)
-          progressbardiv.append(indicatortext)            
-        lockedpostsdiv.append(progressbardiv)
-        $(@el).find('.inner-question').append(lockedpostsdiv)
+      unless @model.get('hidden')
+        $(@el).html(@template)
+        $(@el).find('.inner-question').votebox({votesnum:@model.get('votecount')})
+        @renderPostContent()
+        $(@el).find('.inner-question').tagbox({editing: true, tags:@model.get('tags')})
+        $(@el).find('.inner-question').omnipost({callback: @model.respond, editing:true})
+        responsediv = $("<div id = 'response#{@id}'></div>")
+        $(@el).find('.inner-question').append(responsediv)
+        if @model.get('parents').length is 0
+          lockedpostsdiv = $("<div class='locked-posts'></div>")
+          progressbardiv = $("<div class='progressbar'></div>")
+          percent = Math.floor(Math.random()*100)
+          textinline = true
+          indicatortext = $('<p>Unlock ' + Math.floor(2+Math.random() * 7) + ' posts</p>')
+          if percent < 100.0/350.0 * 100
+            textinline = false
+          if textinline
+            progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")
+            progressindicatordiv.append(indicatortext)          
+            progressbardiv.append(progressindicatordiv)
+          else
+            progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")          
+            progressbardiv.append(progressindicatordiv)
+            progressbardiv.append(indicatortext)            
+          lockedpostsdiv.append(progressbardiv)
+          $(@el).find('.inner-question').append(lockedpostsdiv)
       return $(@el)
         
   class StreamView extends Backbone.View
@@ -93,10 +95,88 @@ $ ->
       @selectedStory = storyPart
       $(@selectedStory).css('border', '2px solid yellow');
     
-    textCompletionCall: =>
+    storyPart2Done: =>
       @setStoryPart('#story-part3')
       $('.ui-omnipost:first #ui-omniPostSubmit').click()
+      post = postCollection.get(2)
+      post.set("hidden", false)
+      pv = new PostView({model:post})
+      $('.post:first #response1').append(pv.render())
+      $('.post:first #response1 .ui-tagbox:eq(1)').qtip({
+                 content: 'Click here next.',
+                 position: {
+                    corner: {
+                       tooltip: 'rightMiddle',
+                       target: 'leftMiddle'
+                    }
+                 },
+                 show: {
+                    when: false,
+                    ready: true 
+                 },
+                 hide: false,
+                 style: {
+                    border: {
+                       width: 5,
+                       radius: 10
+                    },
+                    padding: 10, 
+                    textAlign: 'center',
+                    tip: true, 
+                    'font-size': 16,
+                    name: 'cream'
+                 }
+      });        
+      $('.post:first #response1 .ui-tagbox:eq(1)').click( =>
+        $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').text('Reggies candy bar ')
+        $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(@storyPart3Done)
+      )
 
+    storyPart3Done: =>
+      @setStoryPart('#story-part4')
+      e = jQuery.Event('keydown')
+      e.keyCode = 13
+      $('.post:first #response1 .ui-tagbox:eq(1) .ui-tagtext').trigger(e)
+      $('.post:first #response1 .ui-tagbox:eq(1)').qtip("hide")
+      $('.post:first #response1 .ui-omnipost:eq(1)').qtip({
+                 content: 'Now click here',
+                 position: {
+                    corner: {
+                       tooltip: 'leftMiddle',
+                       target: 'rightMiddle'
+                    }
+                 },
+                 show: {
+                    when: false,
+                    ready: true 
+                 },
+                 hide: false,
+                 style: {
+                    border: {
+                       width: 5,
+                       radius: 10
+                    },
+                    padding: 10, 
+                    textAlign: 'center',
+                    tip: true, 
+                    'font-size': 16,
+                    name: 'cream'
+                 }
+              });
+      $('.post:first #response1 .ui-omnipost:eq(1)').focusin( =>
+        event.stopPropagation()
+        $('.post:first #response1 .ui-omnipost:eq(1) #ui-omniPostVideoAttach').click()
+        $('.post:first #response1 .ui-omnipost:eq(1) .ui-videobox .ui-omniPostLink').val('http://www.youtube.com/watch?v=2F_PxO1QJ1c')
+        $('.post:first #response1 .ui-omnipost:eq(1) .ui-videobox .ui-omniPostLink').textareatypewriter(@storyPart4Done)
+      )
+
+    storyPart4Done: =>
+      @setStoryPart('#story-part5')
+      post = postCollection.get(3)
+      post.set("hidden", false)
+      pv = new PostView({model:post})
+      $('.post:first #response1 #response2').append(pv.render())
+      $('.post:first #response1 .ui-omnipost:eq(1)').remove()
     addOne: (item) ->
       post = new PostView(model: item)
       if document.getElementById('response' + item.get('parentID'))
@@ -135,86 +215,6 @@ $ ->
           $(window).trigger('scroll')
         )
 
-        $('#notification-counter').qtip({
-                 content: 'Click Here.',
-                 position: {
-                   corner: {
-                      tooltip: 'leftMiddle',
-                      target: 'rightMiddle'
-                   }
-                 },
-                 show: {
-                   when: false,
-                   ready: false
-                 },
-                 hide: false,
-                 style: {
-                   border: {
-                     width: 5,
-                     radius: 10
-                   },
-                   padding: 10, 
-                   textAlign: 'center',
-                   tip: true,
-                   'font-size': 16,
-                   name: 'cream'
-                 }
-        });
-             
-        $('#dropdown-panel').qtip({
-                 content: 'Click to view your profile.',
-                 position: {
-                    corner: {
-                       tooltip: 'topLeft',
-                       target: 'bottomRight'
-                    }
-                 },
-                 show: {
-                    when: false,
-                    ready: false 
-                 },
-                 hide: false,
-                 style: {
-                    border: {
-                       width: 5,
-                       radius: 10
-                    },
-                    padding: 10, 
-                    textAlign: 'center',
-                    tip: true, 
-                    'font-size': 16,
-                    name: 'cream'
-                 }
-              });
-
-       
-
-        $('.ui-votebox:first').qtip({
-                 content: 'Click up or down to set the score of a post.',
-                 position: {
-                    corner: {
-                       tooltip: 'rightMiddle',
-                       target: 'leftMiddle'
-                    }
-                 },
-                 show: {
-                    when: false,
-                    ready: false 
-                 },
-                 hide: false,
-                 style: {
-                    border: {
-                       width: 5,
-                       radius: 10
-                    },
-                    padding: 10, 
-                    textAlign: 'center',
-                    tip: true, 
-                    'font-size': 16,
-                    name: 'cream'
-                 }
-              });
-       
         $('.ui-tagbox:first').qtip({
                  content: 'You can tag a post with a list of topics.',
                  position: {
@@ -267,64 +267,14 @@ $ ->
                  }
               });
         $('#ui-omniContainer').qtip("show")
-        $('#notification-counter').click( =>
-          if !@notificationTipInvisible
-            $('#dropdown-panel').qtip("show");
-          $('#notification-counter').qtip("hide");
-          @notificationTipInvisible = true
-        )
-
-        $('#dropdown-panel').click( =>
-          if !@dropdownTipInvisible            
-            $('.ui-votebox:first').qtip("show");
-          $('#dropdown-panel').qtip("hide");
-          @dropdownTipInvisible = true
-        )
-
-        $('.ui-votebox').click( =>
-           if !@voteboxTipInvisible
-             $('.ui-tagbox:first').qtip("show");
-           $('.ui-votebox:first').qtip("hide");
-           @voteboxTipInvisible = true
-        )
-
-         # FIXME: remove these next 2 click events once we figure out why the event isn't propagating up to the parent.
-        $('.ui-votebox #ui-upvote').click( =>
-           if !@voteboxTipInvisible
-             $('.ui-tagbox:first').qtip("show");
-           $('.ui-votebox:first').qtip("hide");
-           @voteboxTipInvisible = true
-        )
-  
-        $('.ui-votebox #ui-downvote').click( =>
-           if !@voteboxTipInvisible
-             $('.ui-tagbox:first').qtip("show");
-           $('.ui-votebox:first').qtip("hide");
-           @voteboxTipInvisible = true
-        )
-
-        $('.ui-tagbox:first').keydown( =>
-          if event.keyCode is 188 or event.keyCode is 13
-            if !@tagboxTip2Invisible
-              $('#ui-omniContainer').qtip("show");
-            $('.ui-tagbox:first').qtip("hide");
-            @tagboxTip2Invisible = true
-        )
-
-        $('.ui-tagbox:first').click( =>
-           if !@tagboxTipInvisible                
-             $('.ui-tagbox:first').qtip('api').updateContent('Tags can be multiple words, and are seperated by pressing enter or the comma key.')
-           @tagboxTipInvisible = true        
-        )
 
         $('.ui-omnipost:first').click( =>
           if !@omniboxTipInvisible                
             #$('#ui-omniContainer').qtip('api').updateContent('Click the icons to add content such as links, images or video.')
-            $('.ui-tagbox:first').qtip("show")
             $('#ui-omniContainer').qtip("hide")
             @setStoryPart('#story-part2')
             $('.ui-omnipost:first #ui-omniPostText').val('I remember my mother cooking breakfast while my sister, my father, and I listened to the radio as FDR began another one of his fireside chats. It was september of 1939 and the topic was the European War.')
-            $('.ui-omnipost:first #ui-omniPostText').textareatypewriter(@textCompletionCall)
+            $('.ui-omnipost:first #ui-omniPostText').textareatypewriter(@storyPart2Done)
           @omniboxTipInvisible = true
         )
 
@@ -355,6 +305,11 @@ $ ->
 
     populate: ->
       data = {posttext: 'What is your earliest memory of WWII?', linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'}
+      
+      data1 = {posttext: 'Does anyone remember these delicious candybars?', linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/PjcDkdfe6tg" frameborder="0" allowfullscreen></iframe>'}
+      
+      data2 = {posttext: '', linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/2F_PxO1QJ1c" frameborder="0" allowfullscreen></iframe>'}
+
       p = new Post(
         id: 1
         editing: false
@@ -363,20 +318,33 @@ $ ->
         tags: ["world war II"]
         parents: ''
         responses: []
+        hidden: false
       )
       postCollection.create(p)
-      
-      data = {posttext: 'Does anyone remember these delicious candybars?', linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/PjcDkdfe6tg" frameborder="0" allowfullscreen></iframe>'}
+
       p1 = new Post(
         id: 2
         editing: false
-        content: data
+        content: data1
         votecount: 25
         tags: ["world war II"]
-        parents: ''
+        parents: [p]
         responses: []
+        hidden: true
       )
       postCollection.create(p1)
+
+      p2 = new Post(
+        id: 3
+        editing: false
+        content: data2
+        votecount: 25
+        tags: ["world war II"]
+        parents: [p1]
+        responses: []
+        hidden: true
+      )
+      postCollection.create(p2)
   
   postCollection = new Posts()  
   app_router = new Workspace() 

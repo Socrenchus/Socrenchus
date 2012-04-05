@@ -67,6 +67,14 @@
     border-top-style: none;
 }
 
+.ui-videobox {
+    width: 350px;
+    background-color: white;
+    position: relative;
+    border: 1px solid black;
+    border-top-style: none;
+}
+
 .ui-omniPostLink {
     width: 200px;
     height: 20px;

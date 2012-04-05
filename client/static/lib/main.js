@@ -27,7 +27,8 @@
           votecount: 0,
           tags: ["kaiji", "san"],
           parents: [this.id],
-          responses: []
+          responses: [],
+          hidden: false
         });
         responseArray = this.get('responses');
         responseArray.push(p.get('id'));
@@ -95,39 +96,41 @@
 
       PostView.prototype.render = function() {
         var indicatortext, lockedpostsdiv, percent, progressbardiv, progressindicatordiv, responsediv, textinline;
-        $(this.el).html(this.template);
-        $(this.el).find('.inner-question').votebox({
-          votesnum: this.model.get('votecount')
-        });
-        this.renderPostContent();
-        $(this.el).find('.inner-question').tagbox({
-          editing: true,
-          tags: this.model.get('tags')
-        });
-        $(this.el).find('.inner-question').omnipost({
-          callback: this.model.respond,
-          editing: true
-        });
-        responsediv = $("<div id = 'response" + this.id + "'></div>");
-        $(this.el).find('.inner-question').append(responsediv);
-        if (this.model.get('parents').length === 0) {
-          lockedpostsdiv = $("<div class='locked-posts'></div>");
-          progressbardiv = $("<div class='progressbar'></div>");
-          percent = Math.floor(Math.random() * 100);
-          textinline = true;
-          indicatortext = $('<p>Unlock ' + Math.floor(2 + Math.random() * 7) + ' posts</p>');
-          if (percent < 100.0 / 350.0 * 100) textinline = false;
-          if (textinline) {
-            progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
-            progressindicatordiv.append(indicatortext);
-            progressbardiv.append(progressindicatordiv);
-          } else {
-            progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
-            progressbardiv.append(progressindicatordiv);
-            progressbardiv.append(indicatortext);
+        if (!this.model.get('hidden')) {
+          $(this.el).html(this.template);
+          $(this.el).find('.inner-question').votebox({
+            votesnum: this.model.get('votecount')
+          });
+          this.renderPostContent();
+          $(this.el).find('.inner-question').tagbox({
+            editing: true,
+            tags: this.model.get('tags')
+          });
+          $(this.el).find('.inner-question').omnipost({
+            callback: this.model.respond,
+            editing: true
+          });
+          responsediv = $("<div id = 'response" + this.id + "'></div>");
+          $(this.el).find('.inner-question').append(responsediv);
+          if (this.model.get('parents').length === 0) {
+            lockedpostsdiv = $("<div class='locked-posts'></div>");
+            progressbardiv = $("<div class='progressbar'></div>");
+            percent = Math.floor(Math.random() * 100);
+            textinline = true;
+            indicatortext = $('<p>Unlock ' + Math.floor(2 + Math.random() * 7) + ' posts</p>');
+            if (percent < 100.0 / 350.0 * 100) textinline = false;
+            if (textinline) {
+              progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
+              progressindicatordiv.append(indicatortext);
+              progressbardiv.append(progressindicatordiv);
+            } else {
+              progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
+              progressbardiv.append(progressindicatordiv);
+              progressbardiv.append(indicatortext);
+            }
+            lockedpostsdiv.append(progressbardiv);
+            $(this.el).find('.inner-question').append(lockedpostsdiv);
           }
-          lockedpostsdiv.append(progressbardiv);
-          $(this.el).find('.inner-question').append(lockedpostsdiv);
         }
         return $(this.el);
       };
@@ -141,7 +144,9 @@
 
       function StreamView() {
         this.render = __bind(this.render, this);
-        this.textCompletionCall = __bind(this.textCompletionCall, this);
+        this.storyPart4Done = __bind(this.storyPart4Done, this);
+        this.storyPart3Done = __bind(this.storyPart3Done, this);
+        this.storyPart2Done = __bind(this.storyPart2Done, this);
         StreamView.__super__.constructor.apply(this, arguments);
       }
 
@@ -160,9 +165,98 @@
         return $(this.selectedStory).css('border', '2px solid yellow');
       };
 
-      StreamView.prototype.textCompletionCall = function() {
+      StreamView.prototype.storyPart2Done = function() {
+        var post, pv,
+          _this = this;
         this.setStoryPart('#story-part3');
-        return $('.ui-omnipost:first #ui-omniPostSubmit').click();
+        $('.ui-omnipost:first #ui-omniPostSubmit').click();
+        post = postCollection.get(2);
+        post.set("hidden", false);
+        pv = new PostView({
+          model: post
+        });
+        $('.post:first #response1').append(pv.render());
+        $('.post:first #response1 .ui-tagbox:eq(1)').qtip({
+          content: 'Click here next.',
+          position: {
+            corner: {
+              tooltip: 'rightMiddle',
+              target: 'leftMiddle'
+            }
+          },
+          show: {
+            when: false,
+            ready: true
+          },
+          hide: false,
+          style: {
+            border: {
+              width: 5,
+              radius: 10
+            },
+            padding: 10,
+            textAlign: 'center',
+            tip: true,
+            'font-size': 16,
+            name: 'cream'
+          }
+        });
+        return $('.post:first #response1 .ui-tagbox:eq(1)').click(function() {
+          $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').text('Reggies candy bar ');
+          return $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(_this.storyPart3Done);
+        });
+      };
+
+      StreamView.prototype.storyPart3Done = function() {
+        var _this = this;
+        this.setStoryPart('#story-part4');
+        e = jQuery.Event('keydown');
+        e.keyCode = 13;
+        $('.post:first #response1 .ui-tagbox:eq(1) .ui-tagtext').trigger(e);
+        $('.post:first #response1 .ui-tagbox:eq(1)').qtip("hide");
+        $('.post:first #response1 .ui-omnipost:eq(1)').qtip({
+          content: 'Now click here',
+          position: {
+            corner: {
+              tooltip: 'leftMiddle',
+              target: 'rightMiddle'
+            }
+          },
+          show: {
+            when: false,
+            ready: true
+          },
+          hide: false,
+          style: {
+            border: {
+              width: 5,
+              radius: 10
+            },
+            padding: 10,
+            textAlign: 'center',
+            tip: true,
+            'font-size': 16,
+            name: 'cream'
+          }
+        });
+        return $('.post:first #response1 .ui-omnipost:eq(1)').focusin(function() {
+          event.stopPropagation();
+          $('.post:first #response1 .ui-omnipost:eq(1) #ui-omniPostVideoAttach').click();
+          $('.post:first #response1 .ui-omnipost:eq(1) .ui-videobox .ui-omniPostLink').val('http://www.youtube.com/watch?v=2F_PxO1QJ1c');
+          return $('.post:first #response1 .ui-omnipost:eq(1) .ui-videobox .ui-omniPostLink').textareatypewriter(_this.storyPart4Done);
+        });
+      };
+
+      StreamView.prototype.storyPart4Done = function() {
+        var post, pv;
+        this.setStoryPart('#story-part5');
+        post = postCollection.get(3);
+        post.set("hidden", false);
+        pv = new PostView({
+          model: post
+        });
+        $('.post:first #response1 #response2').append(pv.render());
+        return $('.post:first #response1 .ui-omnipost:eq(1)').remove();
       };
 
       StreamView.prototype.addOne = function(item) {
@@ -208,81 +302,6 @@
           });
           $(document).ready(function() {
             return $(window).trigger('scroll');
-          });
-          $('#notification-counter').qtip({
-            content: 'Click Here.',
-            position: {
-              corner: {
-                tooltip: 'leftMiddle',
-                target: 'rightMiddle'
-              }
-            },
-            show: {
-              when: false,
-              ready: false
-            },
-            hide: false,
-            style: {
-              border: {
-                width: 5,
-                radius: 10
-              },
-              padding: 10,
-              textAlign: 'center',
-              tip: true,
-              'font-size': 16,
-              name: 'cream'
-            }
-          });
-          $('#dropdown-panel').qtip({
-            content: 'Click to view your profile.',
-            position: {
-              corner: {
-                tooltip: 'topLeft',
-                target: 'bottomRight'
-              }
-            },
-            show: {
-              when: false,
-              ready: false
-            },
-            hide: false,
-            style: {
-              border: {
-                width: 5,
-                radius: 10
-              },
-              padding: 10,
-              textAlign: 'center',
-              tip: true,
-              'font-size': 16,
-              name: 'cream'
-            }
-          });
-          $('.ui-votebox:first').qtip({
-            content: 'Click up or down to set the score of a post.',
-            position: {
-              corner: {
-                tooltip: 'rightMiddle',
-                target: 'leftMiddle'
-              }
-            },
-            show: {
-              when: false,
-              ready: false
-            },
-            hide: false,
-            style: {
-              border: {
-                width: 5,
-                radius: 10
-              },
-              padding: 10,
-              textAlign: 'center',
-              tip: true,
-              'font-size': 16,
-              name: 'cream'
-            }
           });
           $('.ui-tagbox:first').qtip({
             content: 'You can tag a post with a list of topics.',
@@ -335,51 +354,12 @@
             }
           });
           $('#ui-omniContainer').qtip("show");
-          $('#notification-counter').click(function() {
-            if (!_this.notificationTipInvisible) $('#dropdown-panel').qtip("show");
-            $('#notification-counter').qtip("hide");
-            return _this.notificationTipInvisible = true;
-          });
-          $('#dropdown-panel').click(function() {
-            if (!_this.dropdownTipInvisible) $('.ui-votebox:first').qtip("show");
-            $('#dropdown-panel').qtip("hide");
-            return _this.dropdownTipInvisible = true;
-          });
-          $('.ui-votebox').click(function() {
-            if (!_this.voteboxTipInvisible) $('.ui-tagbox:first').qtip("show");
-            $('.ui-votebox:first').qtip("hide");
-            return _this.voteboxTipInvisible = true;
-          });
-          $('.ui-votebox #ui-upvote').click(function() {
-            if (!_this.voteboxTipInvisible) $('.ui-tagbox:first').qtip("show");
-            $('.ui-votebox:first').qtip("hide");
-            return _this.voteboxTipInvisible = true;
-          });
-          $('.ui-votebox #ui-downvote').click(function() {
-            if (!_this.voteboxTipInvisible) $('.ui-tagbox:first').qtip("show");
-            $('.ui-votebox:first').qtip("hide");
-            return _this.voteboxTipInvisible = true;
-          });
-          $('.ui-tagbox:first').keydown(function() {
-            if (event.keyCode === 188 || event.keyCode === 13) {
-              if (!_this.tagboxTip2Invisible) $('#ui-omniContainer').qtip("show");
-              $('.ui-tagbox:first').qtip("hide");
-              return _this.tagboxTip2Invisible = true;
-            }
-          });
-          $('.ui-tagbox:first').click(function() {
-            if (!_this.tagboxTipInvisible) {
-              $('.ui-tagbox:first').qtip('api').updateContent('Tags can be multiple words, and are seperated by pressing enter or the comma key.');
-            }
-            return _this.tagboxTipInvisible = true;
-          });
           $('.ui-omnipost:first').click(function() {
             if (!_this.omniboxTipInvisible) {
-              $('.ui-tagbox:first').qtip("show");
               $('#ui-omniContainer').qtip("hide");
               _this.setStoryPart('#story-part2');
               $('.ui-omnipost:first #ui-omniPostText').val('I remember my mother cooking breakfast while my sister, my father, and I listened to the radio as FDR began another one of his fireside chats. It was september of 1939 and the topic was the European War.');
-              $('.ui-omnipost:first #ui-omniPostText').textareatypewriter(_this.textCompletionCall);
+              $('.ui-omnipost:first #ui-omniPostText').textareatypewriter(_this.storyPart2Done);
             }
             return _this.omniboxTipInvisible = true;
           });
@@ -423,10 +403,18 @@
       };
 
       Workspace.prototype.populate = function() {
-        var data, p, p1;
+        var data, data1, data2, p, p1, p2;
         data = {
           posttext: 'What is your earliest memory of WWII?',
           linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'
+        };
+        data1 = {
+          posttext: 'Does anyone remember these delicious candybars?',
+          linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/PjcDkdfe6tg" frameborder="0" allowfullscreen></iframe>'
+        };
+        data2 = {
+          posttext: '',
+          linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/2F_PxO1QJ1c" frameborder="0" allowfullscreen></iframe>'
         };
         p = new Post({
           id: 1,
@@ -435,23 +423,32 @@
           votecount: 25,
           tags: ["world war II"],
           parents: '',
-          responses: []
+          responses: [],
+          hidden: false
         });
         postCollection.create(p);
-        data = {
-          posttext: 'Does anyone remember these delicious candybars?',
-          linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/PjcDkdfe6tg" frameborder="0" allowfullscreen></iframe>'
-        };
         p1 = new Post({
           id: 2,
           editing: false,
-          content: data,
+          content: data1,
           votecount: 25,
           tags: ["world war II"],
-          parents: '',
-          responses: []
+          parents: [p],
+          responses: [],
+          hidden: true
         });
-        return postCollection.create(p1);
+        postCollection.create(p1);
+        p2 = new Post({
+          id: 3,
+          editing: false,
+          content: data2,
+          votecount: 25,
+          tags: ["world war II"],
+          parents: [p1],
+          responses: [],
+          hidden: true
+        });
+        return postCollection.create(p2);
       };
 
       return Workspace;

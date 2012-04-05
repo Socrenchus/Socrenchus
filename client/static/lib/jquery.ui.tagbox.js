@@ -114,6 +114,7 @@
         deleteiconclass = $('.delete-imageicon');
         deleteicon = $(tagdiv.find(deleteiconclass)[0]);
         deleteicon.remove();
+        this.removeFromArray(this.alltags, tagdiv);
         return tagdiv.focus();
       };
 
