@@ -16,6 +16,7 @@
 .ui-tagtext {
     width: 350px;
     height: 60px;
+    background-color: white;
     position: relative;
     overflow: auto;
     border: 1px solid black;
