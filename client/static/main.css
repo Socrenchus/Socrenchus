@@ -91,15 +91,13 @@ h2 {
 #left-pillar {
   float: left;
   position: relative;
-  right: 65px;  
-  top: 19px;
+  right: 77px;  
 }
 
 #right-pillar {
   float: right;
   position: relative;
-  left: 65px;
-  top: 19px;
+  left: 77px;
 }
 
 #logout {
