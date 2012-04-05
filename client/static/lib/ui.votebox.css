@@ -17,9 +17,8 @@
 }
 
 #ui-votetext {
-    height: 30px;
     width: 30px;
-    margin:0px;
+    margin:0px 0px 3px 0px;
     padding:0px;
     text-align: center;
 }
