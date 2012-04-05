@@ -67,7 +67,6 @@ h2 {
 
 #main {
   width: 576px;
-  border: 2px solid #ebebeb;
   -moz-border-radius-bottomright: 10px;
   -webkit-border-bottom-right-radius: 10px;
   -moz-border-radius-bottomleft: 10px;
@@ -111,7 +110,9 @@ h2 {
   height: 100px;
   position: relative;
   background: url('/images/parchmenttexture.png') repeat;
-  border-bottom: 2px solid black;
+  border-bottom: 2px solid white;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
   z-index: 100;
 }
 
