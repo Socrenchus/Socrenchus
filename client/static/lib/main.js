@@ -115,9 +115,9 @@
           if (this.model.get('parents').length === 0) {
             lockedpostsdiv = $("<div class='locked-posts'></div>");
             progressbardiv = $("<div class='progressbar'></div>");
-            percent = Math.floor(Math.random() * 100);
+            percent = 10;
             textinline = true;
-            indicatortext = $('<p>Unlock ' + Math.floor(2 + Math.random() * 7) + ' posts</p>');
+            indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(1) + ' post</p>');
             if (percent < 100.0 / 350.0 * 100) textinline = false;
             if (textinline) {
               progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
@@ -178,6 +178,7 @@
           _this = this;
         this.setStoryPart('#story-part3');
         $('.ui-omnipost:first #ui-omniPostSubmit').click();
+        $('.progress-indicator:first').css('width', '90%');
         post = postCollection.get(2);
         post.set("hidden", false);
         pv = new PostView({
@@ -226,8 +227,8 @@
           content: 'Now click here',
           position: {
             corner: {
-              tooltip: 'leftMiddle',
-              target: 'rightMiddle'
+              tooltip: 'rightMiddle',
+              target: 'leftMiddle'
             }
           },
           show: {
@@ -259,6 +260,8 @@
         var i, post, pv, _j, _len2, _ref2,
           _this = this;
         if (!this.story4Done) {
+          $('#indicator-text').html('Unlock 3 posts');
+          $('.progress-indicator:first').css('width', '30%');
           this.setStoryPart('#story-part5');
           _ref2 = [3, 4];
           for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
@@ -344,6 +347,8 @@
           e = jQuery.Event('keydown');
           e.keyCode = 13;
           $('.post:first #response2 .ui-tagbox:eq(1) .ui-tagtext').trigger(e);
+          $('#indicator-text').html('Unlock 5 posts');
+          $('.progress-indicator:first').css('width', '80%');
           for (i = 5; i <= 7; i++) {
             post = postCollection.get(i);
             post.set("hidden", false);
@@ -468,13 +473,127 @@
       }
 
       Workspace.prototype.routes = {
-        '': 'populate',
+        '': 'normal',
         'unpopulate': 'unpopulate',
         'populate': 'populate'
       };
 
       Workspace.prototype.deleteOne = function(item) {
         return item.destroy();
+      };
+
+      Workspace.prototype.normal = function() {
+        var data, data1, data2, data3, data4, data5, data6, p, p1, p2, p3, p4, p5, p6;
+        postCollection.fetch();
+        postCollection.each(this.deleteOne);
+        postCollection.reset();
+        $('#assignments').html('');
+        data = {
+          posttext: 'What is your earliest memory of WWII?',
+          linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'
+        };
+        p = new Post({
+          id: 1,
+          editing: false,
+          content: data,
+          votecount: 25,
+          tags: ["world war II"],
+          parents: '',
+          responses: [],
+          hidden: false
+        });
+        postCollection.create(p);
+        data1 = {
+          posttext: 'Does anyone remember these delicious candybars?',
+          linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/PjcDkdfe6tg" frameborder="0" allowfullscreen></iframe>'
+        };
+        p1 = new Post({
+          id: 2,
+          editing: false,
+          content: data1,
+          votecount: 13,
+          tags: ["Reggies candy bar"],
+          parents: [p],
+          responses: [],
+          hidden: true
+        });
+        postCollection.create(p1);
+        data2 = {
+          posttext: '',
+          linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/2F_PxO1QJ1c" frameborder="0" allowfullscreen></iframe>'
+        };
+        p2 = new Post({
+          id: 3,
+          editing: false,
+          content: data2,
+          votecount: 4,
+          tags: ["Reggies candy bar, World war II"],
+          parents: [p1],
+          responses: [],
+          hidden: true
+        });
+        postCollection.create(p2);
+        data3 = {
+          posttext: 'Wow, I completely forgot about this candy.  Its part of a candy wrapper museum now.',
+          linkdata: '<a href="http://www.candywrappermuseum.com/reggiejackson.html">Candy Bar Museum</a>'
+        };
+        p3 = new Post({
+          id: 4,
+          editing: false,
+          content: data3,
+          votecount: 3,
+          tags: ["Reggies candy bar, World war II"],
+          parents: [p1],
+          responses: [],
+          hidden: true
+        });
+        postCollection.create(p3);
+        data4 = {
+          posttext: 'I remember the first time I heard about the war, I couldnt believe my ears.  I drove to my Mothers house to be sure I saw her at least once before I might have been drafted.',
+          linkdata: ''
+        };
+        p4 = new Post({
+          id: 5,
+          editing: false,
+          content: data4,
+          votecount: 19,
+          tags: ["World war II, Heartwarming"],
+          parents: [p],
+          responses: [],
+          hidden: true
+        });
+        postCollection.create(p4);
+        data5 = {
+          posttext: 'i wasnt born yet.. im still waiting for WWIII.',
+          linkdata: ''
+        };
+        p5 = new Post({
+          id: 6,
+          editing: false,
+          content: data5,
+          votecount: -4,
+          tags: ["disrespectful, immature"],
+          parents: [p],
+          responses: [],
+          hidden: true
+        });
+        postCollection.create(p5);
+        data6 = {
+          posttext: 'what is World war II?',
+          linkdata: ''
+        };
+        p6 = new Post({
+          id: 7,
+          editing: false,
+          content: data6,
+          votecount: -6,
+          tags: ["ignorant"],
+          parents: [p],
+          responses: [],
+          hidden: true
+        });
+        postCollection.create(p6);
+        return App.disp();
       };
 
       Workspace.prototype.unpopulate = function() {
