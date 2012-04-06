@@ -109,23 +109,35 @@ h2 {
 }
 
 #story {
-  position: absolute;
-  left: 10;
-  width: 300px;
-  text-shadow: 1px 1px 0px #000000;
-   filter: dropshadow(color=#000000, offx=1, offy=1);
-}
+         -webkit-border-radius: 8px;
+       -moz-border-radius: 8px;
+       border-radius: 8px;
+ padding 2px;
+ position: absolute;
+ left: 10;
+ width: 310px;
+ background: #D1D1D1;
+ font: bold 11px/16px "Lucida Grande", "Verdana", sans-serif;
+       color: rgba(255,255,255,.85);
+ text-shadow: 1px 1px 0px #000000;
+  filter: dropshadow(color=#ABABAB, offx=1, offy=1);
+  font-size: 15px;
 }
 
 #story div {
-  float: left;
-  width: 300px;
-  padding: 5px;
-  margin-bottom: 20px;
+ float: left;
+ width: 302px;
+ padding: 2px;
+ margin-bottom: 20px;
 }
 
 #story-part1 {
-  border: 2px solid yellow;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  padding: 2px;
+  border: 2px solid blue;
+  background: #9999FF;
 }
 
 #view-profile {
