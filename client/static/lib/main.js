@@ -401,7 +401,6 @@
               return $(window).trigger('scroll');
             }));
           });
-          if (postCollection.length === 0) $('#dropdown-panel').click();
           $('#notification-box').hide();
           $('#notification-counter').click(function() {
             return $('#notification-box').toggle();

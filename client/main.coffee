@@ -299,8 +299,8 @@ $ ->
           )
         )
         
-        if postCollection.length is 0
-          $('#dropdown-panel').click()
+        #if postCollection.length is 0
+        #  $('#dropdown-panel').click()
 
         $('#notification-box').hide()
         $('#notification-counter').click( ->
