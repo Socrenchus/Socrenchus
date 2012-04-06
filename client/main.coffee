@@ -99,6 +99,7 @@ $ ->
       $(@selectedStory).css('-webkit-border-radius', '8px')
       $(@selectedStory).css(' -moz-border-radius', '8px')
       $(@selectedStory).css('border-radius', '8px')
+      $('#story').animate({"marginTop": "#{$(@selectedStory).position().top * -1}px"}, "fast")
     
     storyPart2Done: =>
       @setStoryPart('#story-part3')
@@ -282,8 +283,11 @@ $ ->
           windowPosition = $(window).scrollTop()          
           windowHeight = $(window).height()
           scrollDivHeight = @scrollingDiv.height()
-          if windowPosition + windowHeight > scrollDivHeight
-            @scrollingDiv.stop().animate({"marginTop": "#{windowPosition - scrollDivHeight + windowHeight - 20}px"}, "fast")
+          currentElPos = $(@selectedStory).position().top
+          #if windowPosition > currentElPos
+          #  @scrollingDiv.stop().animate({"marginTop": "#{windowPosition - currentElPos - 10}px"}, "fast")
+          #if windowPosition is 0
+          #  @scrollingDiv.stop().animate({"marginTop": "0px"}, "fast")
         )
         $('#collapsible-profile').hide()
         profileshowing = false

@@ -168,7 +168,10 @@
         $(this.selectedStory).css('background', '#9999FF');
         $(this.selectedStory).css('-webkit-border-radius', '8px');
         $(this.selectedStory).css(' -moz-border-radius', '8px');
-        return $(this.selectedStory).css('border-radius', '8px');
+        $(this.selectedStory).css('border-radius', '8px');
+        return $('#story').animate({
+          "marginTop": "" + ($(this.selectedStory).position().top * -1) + "px"
+        }, "fast");
       };
 
       StreamView.prototype.storyPart2Done = function() {
@@ -384,15 +387,11 @@
         if (!this.streamviewRendered) {
           this.scrollingDiv = $('#story');
           $(window).scroll(function() {
-            var scrollDivHeight, windowHeight, windowPosition;
+            var currentElPos, scrollDivHeight, windowHeight, windowPosition;
             windowPosition = $(window).scrollTop();
             windowHeight = $(window).height();
             scrollDivHeight = _this.scrollingDiv.height();
-            if (windowPosition + windowHeight > scrollDivHeight) {
-              return _this.scrollingDiv.stop().animate({
-                "marginTop": "" + (windowPosition - scrollDivHeight + windowHeight - 20) + "px"
-              }, "fast");
-            }
+            return currentElPos = $(_this.selectedStory).position().top;
           });
           $('#collapsible-profile').hide();
           profileshowing = false;
