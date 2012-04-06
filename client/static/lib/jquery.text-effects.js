@@ -50,6 +50,8 @@
             $ele.val('');
             var timer = setInterval(function() {
                 $ele.val(str.substring(0, progress++) + (progress & 1 ? '_' : ''));
+                e = jQuery.Event('keyup')
+                $ele.trigger(e)
                 if (progress >= str.length)  {
                   clearInterval(timer);
                   callback()
