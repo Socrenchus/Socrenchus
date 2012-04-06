@@ -89,11 +89,16 @@ $ ->
       postCollection.fetch()
       @render()
 
-    #FIXME: remove these next 2 functions after the demo.
+    #FIXME: remove these next few functions after the demo.
     setStoryPart: (storyPart) ->
-      $(@selectedStory).css('border-style', 'none');
+      $(@selectedStory).css('border-style', 'none')
+      $(@selectedStory).css('background', 'none')
       @selectedStory = storyPart
-      $(@selectedStory).css('border', '2px solid yellow');
+      $(@selectedStory).css('border', '2px solid blue')
+      $(@selectedStory).css('background', '#9999FF')
+      $(@selectedStory).css('-webkit-border-radius', '8px')
+      $(@selectedStory).css(' -moz-border-radius', '8px')
+      $(@selectedStory).css('border-radius', '8px')
     
     storyPart2Done: =>
       @setStoryPart('#story-part3')
@@ -172,11 +177,41 @@ $ ->
 
     storyPart4Done: =>
       @setStoryPart('#story-part5')
-      post = postCollection.get(3)
-      post.set("hidden", false)
-      pv = new PostView({model:post})
-      $('.post:first #response1 #response2').append(pv.render())
+      for i in [3,4]
+        post = postCollection.get(i)
+        post.set("hidden", false)
+        pv = new PostView({model:post})
+        $('.post:first #response1 #response2').append(pv.render())
       $('.post:first #response1 .ui-omnipost:eq(1)').remove()
+      $('#notification-counter').qtip({
+                 content: 'Now click here',
+                 position: {
+                    corner: {
+                       tooltip: 'rightMiddle',
+                       target: 'leftMiddle'
+                    }
+                 },
+                 show: {
+                    when: false,
+                    ready: true 
+                 },
+                 hide: false,
+                 style: {
+                    border: {
+                       width: 5,
+                       radius: 10
+                    },
+                    padding: 10, 
+                    textAlign: 'center',
+                    tip: true, 
+                    'font-size': 16,
+                    name: 'cream'
+                 }
+              });
+      $('#notification-counter').click( =>
+        $('#notification-counter').qtip("hide")
+      )
+      
     addOne: (item) ->
       post = new PostView(model: item)
       if document.getElementById('response' + item.get('parentID'))
@@ -305,11 +340,6 @@ $ ->
 
     populate: ->
       data = {posttext: 'What is your earliest memory of WWII?', linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'}
-      
-      data1 = {posttext: 'Does anyone remember these delicious candybars?', linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/PjcDkdfe6tg" frameborder="0" allowfullscreen></iframe>'}
-      
-      data2 = {posttext: '', linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/2F_PxO1QJ1c" frameborder="0" allowfullscreen></iframe>'}
-
       p = new Post(
         id: 1
         editing: false
@@ -322,30 +352,45 @@ $ ->
       )
       postCollection.create(p)
 
+      data1 = {posttext: 'Does anyone remember these delicious candybars?', linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/PjcDkdfe6tg" frameborder="0" allowfullscreen></iframe>'}
       p1 = new Post(
         id: 2
         editing: false
         content: data1
-        votecount: 25
-        tags: ["world war II"]
+        votecount: 13
+        tags: ["Reggies candy bar"]
         parents: [p]
         responses: []
         hidden: true
       )
       postCollection.create(p1)
 
+      data2 = {posttext: '', linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/2F_PxO1QJ1c" frameborder="0" allowfullscreen></iframe>'}
       p2 = new Post(
         id: 3
         editing: false
         content: data2
-        votecount: 25
-        tags: ["world war II"]
+        votecount: 4
+        tags: ["Reggies candy bar, World war II"]
         parents: [p1]
         responses: []
         hidden: true
       )
       postCollection.create(p2)
-  
+
+      data3 = {posttext: 'Wow, I completely forgot about this candy.  Its part of a candy wrapper museum now.', linkdata: '<a href="http://www.candywrappermuseum.com/reggiejackson.html">Candy Bar Museum</a>'}
+      p3 = new Post(
+        id: 4
+        editing: false
+        content: data3
+        votecount: 3
+        tags: ["Reggies candy bar, World war II"]
+        parents: [p1]
+        responses: []
+        hidden: true
+      )
+      postCollection.create(p3)
+
   postCollection = new Posts()  
   app_router = new Workspace() 
   Backbone.history.start()  
