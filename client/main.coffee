@@ -210,33 +210,35 @@ $ ->
                       name: 'cream'
                    }
                 });
-        $('#notification-counter').click( =>
+        $('#notification-counter').click( =>         
           $('#notification-counter').qtip("hide")
-          $('.post:first #response2 .ui-tagbox:eq(1)').qtip({
-                   content: 'Now click here',
-                   position: {
-                      corner: {
-                         tooltip: 'rightMiddle',
-                         target: 'leftMiddle'
-                      }
-                   },
-                   show: {
-                      when: false,
-                      ready: true 
-                   },
-                   hide: false,
-                   style: {
-                      border: {
-                         width: 5,
-                         radius: 10
-                      },
-                      padding: 10, 
-                      textAlign: 'center',
-                      tip: true, 
-                      'font-size': 16,
-                      name: 'cream'
-                   }
-          });
+          unless @notificationClicked
+            $('.post:first #response2 .ui-tagbox:eq(1)').qtip({
+                     content: 'Now click here',
+                     position: {
+                        corner: {
+                           tooltip: 'rightMiddle',
+                           target: 'leftMiddle'
+                        }
+                     },
+                     show: {
+                        when: false,
+                        ready: true 
+                     },
+                     hide: false,
+                     style: {
+                        border: {
+                           width: 5,
+                           radius: 10
+                        },
+                        padding: 10, 
+                        textAlign: 'center',
+                        tip: true, 
+                        'font-size': 16,
+                        name: 'cream'
+                     }
+            });
+            @notificationClicked = true
           $('.post:first #response2 .ui-tagbox:eq(1)').click( =>          
             $('.post:first #response2 .ui-tagbox:eq(1)').qtip("destroy")
             $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').text('history of candy ')
