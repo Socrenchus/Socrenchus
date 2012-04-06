@@ -401,8 +401,12 @@
             }));
           });
           if (postCollection.length === 0) $('#dropdown-panel').click();
+          $(document).click(function() {
+            return $('#notification-box').hide();
+          });
           $('#notification-box').hide();
           $('#notification-counter').click(function() {
+            event.stopPropagation();
             return $('#notification-box').toggle();
           });
           $(document).ready(function() {

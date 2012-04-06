@@ -212,7 +212,7 @@ $ ->
                       name: 'cream'
                    }
                 });
-        $('#notification-counter').click( =>         
+        $('#notification-counter').click( =>        
           $('#notification-counter').qtip("hide")
           unless @notificationClicked
             $('.post:first #response2 .ui-tagbox:eq(1)').qtip({
@@ -303,8 +303,13 @@ $ ->
         if postCollection.length is 0
           $('#dropdown-panel').click()
 
+        $(document).click( =>
+          $('#notification-box').hide()
+        )
+
         $('#notification-box').hide()
         $('#notification-counter').click( ->
+          event.stopPropagation() 
           $('#notification-box').toggle()
         )
 
