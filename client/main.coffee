@@ -137,8 +137,10 @@ $ ->
                  }
       });        
       $('.post:first #response1 .ui-tagbox:eq(1)').click( =>
-        $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').text('Reggies candy bar ')
-        $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(@storyPart3Done)
+        unless @candyTagClicked
+          $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').text('Reggies candy bar ')
+          $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(@storyPart3Done)
+          @candyTagClicked = true
       )
 
     storyPart3Done: =>
@@ -246,10 +248,12 @@ $ ->
                      }
             });
             @notificationClicked = true
-          $('.post:first #response2 .ui-tagbox:eq(1)').click( =>          
-            $('.post:first #response2 .ui-tagbox:eq(1)').qtip("destroy")
-            $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').text('history of candy ')
-            $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(@storyPart5Done)
+          $('.post:first #response2 .ui-tagbox:eq(1)').click( =>      
+            unless @historyCandyClicked    
+              $('.post:first #response2 .ui-tagbox:eq(1)').qtip("destroy")
+              $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').text('history of candy ')
+              $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(@storyPart5Done)
+            @historyCandyClicked = true
           )
         )
         @story4Done = true

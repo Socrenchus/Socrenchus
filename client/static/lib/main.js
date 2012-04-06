@@ -211,8 +211,11 @@
           }
         });
         return $('.post:first #response1 .ui-tagbox:eq(1)').click(function() {
-          $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').text('Reggies candy bar ');
-          return $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(_this.storyPart3Done);
+          if (!_this.candyTagClicked) {
+            $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').text('Reggies candy bar ');
+            $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(_this.storyPart3Done);
+            return _this.candyTagClicked = true;
+          }
         });
       };
 
@@ -331,9 +334,12 @@
               _this.notificationClicked = true;
             }
             return $('.post:first #response2 .ui-tagbox:eq(1)').click(function() {
-              $('.post:first #response2 .ui-tagbox:eq(1)').qtip("destroy");
-              $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').text('history of candy ');
-              return $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(_this.storyPart5Done);
+              if (!_this.historyCandyClicked) {
+                $('.post:first #response2 .ui-tagbox:eq(1)').qtip("destroy");
+                $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').text('history of candy ');
+                $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(_this.storyPart5Done);
+              }
+              return _this.historyCandyClicked = true;
             });
           });
           return this.story4Done = true;
