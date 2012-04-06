@@ -84,10 +84,11 @@ $ ->
       @streamviewRendered = false
       @selectedStory = '#story-part1'
       postCollection.bind('add', @addOne, this)
-      postCollection.bind('reset', @addAll, this)
+      #postCollection.bind('reset', @addAll, this)
       #postCollection.bind('all', @render, this)
       postCollection.fetch()
-      @render()
+      @addAll()
+      #@render()
 
     #FIXME: remove these next few functions after the demo.
     setStoryPart: (storyPart) ->
@@ -276,7 +277,7 @@ $ ->
       item.destroy()
     deleteAll: ->
       postCollection.each(@deleteOne)
-    render: =>
+    disp: =>
       if !@streamviewRendered
         @scrollingDiv = $('#story')
         $(window).scroll( =>
@@ -299,8 +300,8 @@ $ ->
           )
         )
         
-        #if postCollection.length is 0
-        #  $('#dropdown-panel').click()
+        if postCollection.length is 0
+          $('#dropdown-panel').click()
 
         $('#notification-box').hide()
         $('#notification-counter').click( ->
@@ -310,61 +311,35 @@ $ ->
         $(document).ready( -> 
           $(window).trigger('scroll')
         )
-
-        $('.ui-tagbox:first').qtip({
-                 content: 'You can tag a post with a list of topics.',
-                 position: {
-                    corner: {
-                       tooltip: 'rightMiddle',
-                       target: 'leftMiddle'
-                    }
-                 },
-                 show: {
-                    when: false,
-                    ready: false 
-                 },
-                 hide: false,
-                 style: {
-                    border: {
-                       width: 5,
-                       radius: 10
-                    },
-                    padding: 10, 
-                    textAlign: 'center',
-                    tip: true, 
-                    'font-size': 16,
-                    name: 'cream'
-                 }
-              });
          
-        $('#ui-omniContainer').qtip({
-                 content: 'Click here first.',
-                 position: {
-                    corner: {
-                       tooltip: 'leftMiddle',
-                       target: 'rightMiddle'
-                    }
-                 },
-                 show: {
-                    when: false,
-                    ready: false 
-                 },
-                 hide: false,
-                 style: {
-                    border: {
-                       width: 5,
-                       radius: 10
-                    },
-                    padding: 10, 
-                    textAlign: 'center',
-                    tip: true, 
-                    'font-size': 16,
-                    name: 'cream'
-                 }
-              });
-        $('#ui-omniContainer').qtip("show")
+        unless $('#ui-omniContainer').length is 0
+          $('#ui-omniContainer').qtip({
+                   content: 'Click here first.',
+                   position: {
+                      corner: {
+                         tooltip: 'leftMiddle',
+                         target: 'rightMiddle'
+                      }
+                   },
+                   show: {
+                      when: false,
+                      ready: true 
+                   },
+                   hide: false,
+                   style: {
+                      border: {
+                         width: 5,
+                         radius: 10
+                      },
+                      padding: 10, 
+                      textAlign: 'center',
+                      tip: true, 
+                      'font-size': 16,
+                      name: 'cream'
+                   }
+                });
 
-        $('.ui-omnipost:first').click( =>
+        $('.ui-omnipost:first #ui-omniContainer').focusin( =>
           if !@omniboxTipInvisible                
             #$('#ui-omniContainer').qtip('api').updateContent('Click the icons to add content such as links, images or video.')
             $('#ui-omniContainer').qtip("hide")
@@ -385,12 +360,13 @@ $ ->
   ###
   class Workspace extends Backbone.Router
     routes:
-      '/:id' : 'assign'
+      #'/:id' : 'assign'
+      ''  : 'populate'
       'unpopulate' : 'unpopulate'
       'populate' : 'populate'
-    assign: (id) ->
-      postCollection.get(id)
-      postCollection.fetch()
+    #assign: (id) ->
+    #  postCollection.get(id)
+    #  postCollection.fetch()
 
     deleteOne: (item) ->
       item.destroy()
@@ -398,8 +374,15 @@ $ ->
     unpopulate: ->
       postCollection.fetch()
       postCollection.each(@deleteOne)
+      postCollection.reset()
+      $('#assignments').html('')
+      App.disp()
 
     populate: ->
+      postCollection.fetch()
+      postCollection.each(@deleteOne)
+      postCollection.reset()
+      $('#assignments').html('')
       data = {posttext: 'What is your earliest memory of WWII?', linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'}
       p = new Post(
         id: 1
@@ -490,8 +473,9 @@ $ ->
         hidden: true
       )
       postCollection.create(p6)
+      App.disp()
 
-  postCollection = new Posts()  
-  app_router = new Workspace() 
-  Backbone.history.start()  
-  App = new StreamView(el: $('#learn')) 
+  postCollection = new Posts()
+  App = new StreamView(el: $('#learn'))        
+  app_router = new Workspace()  
+  Backbone.history.start()    

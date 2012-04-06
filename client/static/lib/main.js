@@ -143,7 +143,7 @@
       __extends(StreamView, _super);
 
       function StreamView() {
-        this.render = __bind(this.render, this);
+        this.disp = __bind(this.disp, this);
         this.storyPart5Done = __bind(this.storyPart5Done, this);
         this.storyPart4Done = __bind(this.storyPart4Done, this);
         this.storyPart3Done = __bind(this.storyPart3Done, this);
@@ -155,9 +155,8 @@
         this.streamviewRendered = false;
         this.selectedStory = '#story-part1';
         postCollection.bind('add', this.addOne, this);
-        postCollection.bind('reset', this.addAll, this);
         postCollection.fetch();
-        return this.render();
+        return this.addAll();
       };
 
       StreamView.prototype.setStoryPart = function(storyPart) {
@@ -381,7 +380,7 @@
         return postCollection.each(this.deleteOne);
       };
 
-      StreamView.prototype.render = function() {
+      StreamView.prototype.disp = function() {
         var profileshowing,
           _this = this;
         if (!this.streamviewRendered) {
@@ -401,6 +400,7 @@
               return $(window).trigger('scroll');
             }));
           });
+          if (postCollection.length === 0) $('#dropdown-panel').click();
           $('#notification-box').hide();
           $('#notification-counter').click(function() {
             return $('#notification-box').toggle();
@@ -408,58 +408,34 @@
           $(document).ready(function() {
             return $(window).trigger('scroll');
           });
-          $('.ui-tagbox:first').qtip({
-            content: 'You can tag a post with a list of topics.',
-            position: {
-              corner: {
-                tooltip: 'rightMiddle',
-                target: 'leftMiddle'
-              }
-            },
-            show: {
-              when: false,
-              ready: false
-            },
-            hide: false,
-            style: {
-              border: {
-                width: 5,
-                radius: 10
+          if ($('#ui-omniContainer').length !== 0) {
+            $('#ui-omniContainer').qtip({
+              content: 'Click here first.',
+              position: {
+                corner: {
+                  tooltip: 'leftMiddle',
+                  target: 'rightMiddle'
+                }
               },
-              padding: 10,
-              textAlign: 'center',
-              tip: true,
-              'font-size': 16,
-              name: 'cream'
-            }
-          });
-          $('#ui-omniContainer').qtip({
-            content: 'Click here first.',
-            position: {
-              corner: {
-                tooltip: 'leftMiddle',
-                target: 'rightMiddle'
-              }
-            },
-            show: {
-              when: false,
-              ready: false
-            },
-            hide: false,
-            style: {
-              border: {
-                width: 5,
-                radius: 10
+              show: {
+                when: false,
+                ready: true
               },
-              padding: 10,
-              textAlign: 'center',
-              tip: true,
-              'font-size': 16,
-              name: 'cream'
-            }
-          });
-          $('#ui-omniContainer').qtip("show");
-          $('.ui-omnipost:first').click(function() {
+              hide: false,
+              style: {
+                border: {
+                  width: 5,
+                  radius: 10
+                },
+                padding: 10,
+                textAlign: 'center',
+                tip: true,
+                'font-size': 16,
+                name: 'cream'
+              }
+            });
+          }
+          $('.ui-omnipost:first #ui-omniContainer').focusin(function() {
             if (!_this.omniboxTipInvisible) {
               $('#ui-omniContainer').qtip("hide");
               _this.setStoryPart('#story-part2');
@@ -488,14 +464,9 @@
       }
 
       Workspace.prototype.routes = {
-        '/:id': 'assign',
+        '': 'populate',
         'unpopulate': 'unpopulate',
         'populate': 'populate'
-      };
-
-      Workspace.prototype.assign = function(id) {
-        postCollection.get(id);
-        return postCollection.fetch();
       };
 
       Workspace.prototype.deleteOne = function(item) {
@@ -504,11 +475,18 @@
 
       Workspace.prototype.unpopulate = function() {
         postCollection.fetch();
-        return postCollection.each(this.deleteOne);
+        postCollection.each(this.deleteOne);
+        postCollection.reset();
+        $('#assignments').html('');
+        return App.disp();
       };
 
       Workspace.prototype.populate = function() {
         var data, data1, data2, data3, data4, data5, data6, p, p1, p2, p3, p4, p5, p6;
+        postCollection.fetch();
+        postCollection.each(this.deleteOne);
+        postCollection.reset();
+        $('#assignments').html('');
         data = {
           posttext: 'What is your earliest memory of WWII?',
           linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'
@@ -613,18 +591,19 @@
           responses: [],
           hidden: true
         });
-        return postCollection.create(p6);
+        postCollection.create(p6);
+        return App.disp();
       };
 
       return Workspace;
 
     })(Backbone.Router);
     postCollection = new Posts();
-    app_router = new Workspace();
-    Backbone.history.start();
-    return App = new StreamView({
+    App = new StreamView({
       el: $('#learn')
     });
+    app_router = new Workspace();
+    return Backbone.history.start();
   });
 
 }).call(this);
