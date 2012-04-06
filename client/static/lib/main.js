@@ -144,6 +144,7 @@
 
       function StreamView() {
         this.render = __bind(this.render, this);
+        this.storyPart5Done = __bind(this.storyPart5Done, this);
         this.storyPart4Done = __bind(this.storyPart4Done, this);
         this.storyPart3Done = __bind(this.storyPart3Done, this);
         this.storyPart2Done = __bind(this.storyPart2Done, this);
@@ -255,46 +256,99 @@
       StreamView.prototype.storyPart4Done = function() {
         var i, post, pv, _j, _len2, _ref2,
           _this = this;
-        this.setStoryPart('#story-part5');
-        _ref2 = [3, 4];
-        for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-          i = _ref2[_j];
-          post = postCollection.get(i);
-          post.set("hidden", false);
-          pv = new PostView({
-            model: post
-          });
-          $('.post:first #response1 #response2').append(pv.render());
-        }
-        $('.post:first #response1 .ui-omnipost:eq(1)').remove();
-        $('#notification-counter').qtip({
-          content: 'Now click here',
-          position: {
-            corner: {
-              tooltip: 'rightMiddle',
-              target: 'leftMiddle'
-            }
-          },
-          show: {
-            when: false,
-            ready: true
-          },
-          hide: false,
-          style: {
-            border: {
-              width: 5,
-              radius: 10
-            },
-            padding: 10,
-            textAlign: 'center',
-            tip: true,
-            'font-size': 16,
-            name: 'cream'
+        if (!this.story4Done) {
+          this.setStoryPart('#story-part5');
+          _ref2 = [3, 4];
+          for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+            i = _ref2[_j];
+            post = postCollection.get(i);
+            post.set("hidden", false);
+            pv = new PostView({
+              model: post
+            });
+            $('.post:first #response1 #response2').append(pv.render());
           }
-        });
-        return $('#notification-counter').click(function() {
-          return $('#notification-counter').qtip("hide");
-        });
+          $('.post:first #response1 .ui-omnipost:eq(1)').qtip("destroy");
+          $('.post:first #response1 .ui-omnipost:eq(1)').remove();
+          $('#notification-counter').qtip({
+            content: 'Now click here',
+            position: {
+              corner: {
+                tooltip: 'rightMiddle',
+                target: 'leftMiddle'
+              }
+            },
+            show: {
+              when: false,
+              ready: true
+            },
+            hide: false,
+            style: {
+              border: {
+                width: 5,
+                radius: 10
+              },
+              padding: 10,
+              textAlign: 'center',
+              tip: true,
+              'font-size': 16,
+              name: 'cream'
+            }
+          });
+          $('#notification-counter').click(function() {
+            $('#notification-counter').qtip("hide");
+            $('.post:first #response2 .ui-tagbox:eq(1)').qtip({
+              content: 'Now click here',
+              position: {
+                corner: {
+                  tooltip: 'rightMiddle',
+                  target: 'leftMiddle'
+                }
+              },
+              show: {
+                when: false,
+                ready: true
+              },
+              hide: false,
+              style: {
+                border: {
+                  width: 5,
+                  radius: 10
+                },
+                padding: 10,
+                textAlign: 'center',
+                tip: true,
+                'font-size': 16,
+                name: 'cream'
+              }
+            });
+            return $('.post:first #response2 .ui-tagbox:eq(1)').click(function() {
+              $('.post:first #response2 .ui-tagbox:eq(1)').qtip("destroy");
+              $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').text('history of candy ');
+              return $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(_this.storyPart5Done);
+            });
+          });
+          return this.story4Done = true;
+        }
+      };
+
+      StreamView.prototype.storyPart5Done = function() {
+        var i, post, pv;
+        if (!this.story5Done) {
+          this.setStoryPart('#story-part6');
+          e = jQuery.Event('keydown');
+          e.keyCode = 13;
+          $('.post:first #response2 .ui-tagbox:eq(1) .ui-tagtext').trigger(e);
+          for (i = 5; i <= 7; i++) {
+            post = postCollection.get(i);
+            post.set("hidden", false);
+            pv = new PostView({
+              model: post
+            });
+            $('.post:first #response1').append(pv.render());
+          }
+          return this.story5Done = true;
+        }
       };
 
       StreamView.prototype.addOne = function(item) {
@@ -325,6 +379,18 @@
         var profileshowing,
           _this = this;
         if (!this.streamviewRendered) {
+          this.scrollingDiv = $('#story');
+          $(window).scroll(function() {
+            var scrollDivHeight, windowHeight, windowPosition;
+            windowPosition = $(window).scrollTop();
+            windowHeight = $(window).height();
+            scrollDivHeight = _this.scrollingDiv.height();
+            if (windowPosition + windowHeight > scrollDivHeight) {
+              return _this.scrollingDiv.stop().animate({
+                "marginTop": "" + (windowPosition - scrollDivHeight + windowHeight - 20) + "px"
+              }, "fast");
+            }
+          });
           $('#collapsible-profile').hide();
           profileshowing = false;
           $('#dropdown-panel').click(function() {
@@ -441,7 +507,7 @@
       };
 
       Workspace.prototype.populate = function() {
-        var data, data1, data2, data3, p, p1, p2, p3;
+        var data, data1, data2, data3, data4, data5, data6, p, p1, p2, p3, p4, p5, p6;
         data = {
           posttext: 'What is your earliest memory of WWII?',
           linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'
@@ -501,7 +567,52 @@
           responses: [],
           hidden: true
         });
-        return postCollection.create(p3);
+        postCollection.create(p3);
+        data4 = {
+          posttext: 'I remember the first time I heard about the war, I couldnt believe my ears.  I drove to my Mothers house to be sure I saw her at least once before I might have been drafted.',
+          linkdata: ''
+        };
+        p4 = new Post({
+          id: 5,
+          editing: false,
+          content: data4,
+          votecount: 19,
+          tags: ["World war II, Heartwarming"],
+          parents: [p],
+          responses: [],
+          hidden: true
+        });
+        postCollection.create(p4);
+        data5 = {
+          posttext: 'i wasnt born yet.. im still waiting for WWIII.',
+          linkdata: ''
+        };
+        p5 = new Post({
+          id: 6,
+          editing: false,
+          content: data5,
+          votecount: -4,
+          tags: ["disrespectful, immature"],
+          parents: [p],
+          responses: [],
+          hidden: true
+        });
+        postCollection.create(p5);
+        data6 = {
+          posttext: 'what is World war II?',
+          linkdata: ''
+        };
+        p6 = new Post({
+          id: 7,
+          editing: false,
+          content: data6,
+          votecount: -6,
+          tags: ["ignorant"],
+          parents: [p],
+          responses: [],
+          hidden: true
+        });
+        return postCollection.create(p6);
       };
 
       return Workspace;

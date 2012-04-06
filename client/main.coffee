@@ -176,42 +176,89 @@ $ ->
       )
 
     storyPart4Done: =>
-      @setStoryPart('#story-part5')
-      for i in [3,4]
-        post = postCollection.get(i)
-        post.set("hidden", false)
-        pv = new PostView({model:post})
-        $('.post:first #response1 #response2').append(pv.render())
-      $('.post:first #response1 .ui-omnipost:eq(1)').remove()
-      $('#notification-counter').qtip({
-                 content: 'Now click here',
-                 position: {
-                    corner: {
-                       tooltip: 'rightMiddle',
-                       target: 'leftMiddle'
-                    }
-                 },
-                 show: {
-                    when: false,
-                    ready: true 
-                 },
-                 hide: false,
-                 style: {
-                    border: {
-                       width: 5,
-                       radius: 10
-                    },
-                    padding: 10, 
-                    textAlign: 'center',
-                    tip: true, 
-                    'font-size': 16,
-                    name: 'cream'
-                 }
-              });
-      $('#notification-counter').click( =>
-        $('#notification-counter').qtip("hide")
-      )
-      
+      unless @story4Done
+        @setStoryPart('#story-part5')
+        for i in [3,4]
+          post = postCollection.get(i)
+          post.set("hidden", false)
+          pv = new PostView({model:post})
+          $('.post:first #response1 #response2').append(pv.render())
+        $('.post:first #response1 .ui-omnipost:eq(1)').qtip("destroy")
+        $('.post:first #response1 .ui-omnipost:eq(1)').remove()
+        $('#notification-counter').qtip({
+                   content: 'Now click here',
+                   position: {
+                      corner: {
+                         tooltip: 'rightMiddle',
+                         target: 'leftMiddle'
+                      }
+                   },
+                   show: {
+                      when: false,
+                      ready: true 
+                   },
+                   hide: false,
+                   style: {
+                      border: {
+                         width: 5,
+                         radius: 10
+                      },
+                      padding: 10, 
+                      textAlign: 'center',
+                      tip: true, 
+                      'font-size': 16,
+                      name: 'cream'
+                   }
+                });
+        $('#notification-counter').click( =>
+          $('#notification-counter').qtip("hide")
+          $('.post:first #response2 .ui-tagbox:eq(1)').qtip({
+                   content: 'Now click here',
+                   position: {
+                      corner: {
+                         tooltip: 'rightMiddle',
+                         target: 'leftMiddle'
+                      }
+                   },
+                   show: {
+                      when: false,
+                      ready: true 
+                   },
+                   hide: false,
+                   style: {
+                      border: {
+                         width: 5,
+                         radius: 10
+                      },
+                      padding: 10, 
+                      textAlign: 'center',
+                      tip: true, 
+                      'font-size': 16,
+                      name: 'cream'
+                   }
+          });
+          $('.post:first #response2 .ui-tagbox:eq(1)').click( =>          
+            $('.post:first #response2 .ui-tagbox:eq(1)').qtip("destroy")
+            $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').text('history of candy ')
+            $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(@storyPart5Done)
+          )
+        )
+        @story4Done = true
+    
+    storyPart5Done: =>
+      unless @story5Done
+        @setStoryPart('#story-part6')
+        e = jQuery.Event('keydown')
+        e.keyCode = 13
+        $('.post:first #response2 .ui-tagbox:eq(1) .ui-tagtext').trigger(e)
+
+        for i in [5..7]
+          post = postCollection.get(i)
+          post.set("hidden", false)
+          pv = new PostView({model:post})
+          $('.post:first #response1').append(pv.render())
+        @story5Done = true
+
     addOne: (item) ->
       post = new PostView(model: item)
       if document.getElementById('response' + item.get('parentID'))
@@ -228,6 +275,14 @@ $ ->
       postCollection.each(@deleteOne)
     render: =>
       if !@streamviewRendered
+        @scrollingDiv = $('#story')
+        $(window).scroll( =>
+          windowPosition = $(window).scrollTop()          
+          windowHeight = $(window).height()
+          scrollDivHeight = @scrollingDiv.height()
+          if windowPosition + windowHeight > scrollDivHeight
+            @scrollingDiv.stop().animate({"marginTop": "#{windowPosition - scrollDivHeight + windowHeight - 20}px"}, "fast")
+        )
         $('#collapsible-profile').hide()
         profileshowing = false
         $('#dropdown-panel').click( ->
@@ -390,6 +445,45 @@ $ ->
         hidden: true
       )
       postCollection.create(p3)
+
+      data4 = {posttext: 'I remember the first time I heard about the war, I couldnt believe my ears.  I drove to my Mothers house to be sure I saw her at least once before I might have been drafted.', linkdata: ''}
+      p4 = new Post(
+        id: 5
+        editing: false
+        content: data4
+        votecount: 19
+        tags: ["World war II, Heartwarming"]
+        parents: [p]
+        responses: []
+        hidden: true
+      )
+      postCollection.create(p4)
+
+      data5 = {posttext: 'i wasnt born yet.. im still waiting for WWIII.', linkdata: ''}
+      p5 = new Post(
+        id: 6
+        editing: false
+        content: data5
+        votecount: -4
+        tags: ["disrespectful, immature"]
+        parents: [p]
+        responses: []
+        hidden: true
+      )
+      postCollection.create(p5)
+      
+      data6 = {posttext: 'what is World war II?', linkdata: ''}
+      p6 = new Post(
+        id: 7
+        editing: false
+        content: data6
+        votecount: -6
+        tags: ["ignorant"]
+        parents: [p]
+        responses: []
+        hidden: true
+      )
+      postCollection.create(p6)
 
   postCollection = new Posts()  
   app_router = new Workspace() 
