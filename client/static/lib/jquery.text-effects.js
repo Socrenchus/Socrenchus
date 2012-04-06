@@ -49,7 +49,9 @@
             var $ele = $(this), str = $ele.val(), progress = 0;
             $ele.val('');
             var timer = setInterval(function() {
-                $ele.val(str.substring(0, progress++) + (progress & 1 ? '_' : ''));
+                $ele.val(str.substring(0, progress++) + (progress & 1 ? '' : ''));
+                e = jQuery.Event('keyup')
+                $ele.trigger(e)
                 if (progress >= str.length)  {
                   clearInterval(timer);
                   callback()
@@ -64,7 +66,7 @@
             var $ele = $(this), str = $ele.text(), progress = 0;
             $ele.text('');
             var timer = setInterval(function() {
-                $ele.text(str.substring(0, progress++) + (progress & 1 ? '_' : ''));
+                $ele.text(str.substring(0, progress++) + (progress & 1 ? '' : ''));
                 if (progress >= str.length) {
                   clearInterval(timer);
                   callback()

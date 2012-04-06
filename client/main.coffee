@@ -62,9 +62,10 @@ $ ->
         if @model.get('parents').length is 0
           lockedpostsdiv = $("<div class='locked-posts'></div>")
           progressbardiv = $("<div class='progressbar'></div>")
-          percent = Math.floor(Math.random()*100)
+          #percent = Math.floor(Math.random()*100)
+          percent = 10
           textinline = true
-          indicatortext = $('<p>Unlock ' + Math.floor(2+Math.random() * 7) + ' posts</p>')
+          indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(1) + ' post</p>')
           if percent < 100.0/350.0 * 100
             textinline = false
           if textinline
@@ -84,10 +85,11 @@ $ ->
       @streamviewRendered = false
       @selectedStory = '#story-part1'
       postCollection.bind('add', @addOne, this)
-      postCollection.bind('reset', @addAll, this)
+      #postCollection.bind('reset', @addAll, this)
       #postCollection.bind('all', @render, this)
       postCollection.fetch()
-      @render()
+      @addAll()
+      #@render()
 
     #FIXME: remove these next few functions after the demo.
     setStoryPart: (storyPart) ->
@@ -99,10 +101,12 @@ $ ->
       $(@selectedStory).css('-webkit-border-radius', '8px')
       $(@selectedStory).css(' -moz-border-radius', '8px')
       $(@selectedStory).css('border-radius', '8px')
+      $('#story').animate({"marginTop": "#{$(@selectedStory).position().top * -1}px"}, "fast")
     
     storyPart2Done: =>
       @setStoryPart('#story-part3')
       $('.ui-omnipost:first #ui-omniPostSubmit').click()
+      $('.progress-indicator:first').css('width', '90%')
       post = postCollection.get(2)
       post.set("hidden", false)
       pv = new PostView({model:post})
@@ -133,12 +137,15 @@ $ ->
                  }
       });        
       $('.post:first #response1 .ui-tagbox:eq(1)').click( =>
-        $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').text('Reggies candy bar ')
-        $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(@storyPart3Done)
+        unless @candyTagClicked
+          $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').text('Reggies candy bar ')
+          $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(@storyPart3Done)
+          @candyTagClicked = true
       )
 
     storyPart3Done: =>
       @setStoryPart('#story-part4')
+      
       e = jQuery.Event('keydown')
       e.keyCode = 13
       $('.post:first #response1 .ui-tagbox:eq(1) .ui-tagtext').trigger(e)
@@ -147,8 +154,8 @@ $ ->
                  content: 'Now click here',
                  position: {
                     corner: {
-                       tooltip: 'leftMiddle',
-                       target: 'rightMiddle'
+                       tooltip: 'rightMiddle',
+                       target: 'leftMiddle'
                     }
                  },
                  show: {
@@ -177,6 +184,8 @@ $ ->
 
     storyPart4Done: =>
       unless @story4Done
+        $('#indicator-text').html('Unlock 3 posts')
+        $('.progress-indicator:first').css('width', '30%')
         @setStoryPart('#story-part5')
         for i in [3,4]
           post = postCollection.get(i)
@@ -210,37 +219,41 @@ $ ->
                       name: 'cream'
                    }
                 });
-        $('#notification-counter').click( =>
+        $('#notification-counter').click( =>        
           $('#notification-counter').qtip("hide")
-          $('.post:first #response2 .ui-tagbox:eq(1)').qtip({
-                   content: 'Now click here',
-                   position: {
-                      corner: {
-                         tooltip: 'rightMiddle',
-                         target: 'leftMiddle'
-                      }
-                   },
-                   show: {
-                      when: false,
-                      ready: true 
-                   },
-                   hide: false,
-                   style: {
-                      border: {
-                         width: 5,
-                         radius: 10
-                      },
-                      padding: 10, 
-                      textAlign: 'center',
-                      tip: true, 
-                      'font-size': 16,
-                      name: 'cream'
-                   }
-          });
-          $('.post:first #response2 .ui-tagbox:eq(1)').click( =>          
-            $('.post:first #response2 .ui-tagbox:eq(1)').qtip("destroy")
-            $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').text('history of candy ')
-            $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(@storyPart5Done)
+          unless @notificationClicked
+            $('.post:first #response2 .ui-tagbox:eq(1)').qtip({
+                     content: 'Now click here',
+                     position: {
+                        corner: {
+                           tooltip: 'rightMiddle',
+                           target: 'leftMiddle'
+                        }
+                     },
+                     show: {
+                        when: false,
+                        ready: true 
+                     },
+                     hide: false,
+                     style: {
+                        border: {
+                           width: 5,
+                           radius: 10
+                        },
+                        padding: 10, 
+                        textAlign: 'center',
+                        tip: true, 
+                        'font-size': 16,
+                        name: 'cream'
+                     }
+            });
+            @notificationClicked = true
+          $('.post:first #response2 .ui-tagbox:eq(1)').click( =>      
+            unless @historyCandyClicked    
+              $('.post:first #response2 .ui-tagbox:eq(1)').qtip("destroy")
+              $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').text('history of candy ')
+              $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(@storyPart5Done)
+            @historyCandyClicked = true
           )
         )
         @story4Done = true
@@ -251,7 +264,8 @@ $ ->
         e = jQuery.Event('keydown')
         e.keyCode = 13
         $('.post:first #response2 .ui-tagbox:eq(1) .ui-tagtext').trigger(e)
-
+        $('#indicator-text').html('Unlock 5 posts')
+        $('.progress-indicator:first').css('width', '80%')
         for i in [5..7]
           post = postCollection.get(i)
           post.set("hidden", false)
@@ -273,15 +287,18 @@ $ ->
       item.destroy()
     deleteAll: ->
       postCollection.each(@deleteOne)
-    render: =>
+    disp: =>
       if !@streamviewRendered
         @scrollingDiv = $('#story')
         $(window).scroll( =>
           windowPosition = $(window).scrollTop()          
           windowHeight = $(window).height()
           scrollDivHeight = @scrollingDiv.height()
-          if windowPosition + windowHeight > scrollDivHeight
-            @scrollingDiv.stop().animate({"marginTop": "#{windowPosition - scrollDivHeight + windowHeight - 20}px"}, "fast")
+          currentElPos = $(@selectedStory).position().top
+          #if windowPosition > currentElPos
+          #  @scrollingDiv.stop().animate({"marginTop": "#{windowPosition - currentElPos - 10}px"}, "fast")
+          #if windowPosition is 0
+          #  @scrollingDiv.stop().animate({"marginTop": "0px"}, "fast")
         )
         $('#collapsible-profile').hide()
         profileshowing = false
@@ -296,69 +313,48 @@ $ ->
         if postCollection.length is 0
           $('#dropdown-panel').click()
 
+        $(document).click( =>
+          $('#notification-box').hide()
+        )
+
         $('#notification-box').hide()
         $('#notification-counter').click( ->
+          event.stopPropagation() 
           $('#notification-box').toggle()
         )
 
         $(document).ready( -> 
           $(window).trigger('scroll')
         )
-
-        $('.ui-tagbox:first').qtip({
-                 content: 'You can tag a post with a list of topics.',
-                 position: {
-                    corner: {
-                       tooltip: 'rightMiddle',
-                       target: 'leftMiddle'
-                    }
-                 },
-                 show: {
-                    when: false,
-                    ready: false 
-                 },
-                 hide: false,
-                 style: {
-                    border: {
-                       width: 5,
-                       radius: 10
-                    },
-                    padding: 10, 
-                    textAlign: 'center',
-                    tip: true, 
-                    'font-size': 16,
-                    name: 'cream'
-                 }
-              });
          
-        $('#ui-omniContainer').qtip({
-                 content: 'Click here first.',
-                 position: {
-                    corner: {
-                       tooltip: 'leftMiddle',
-                       target: 'rightMiddle'
-                    }
-                 },
-                 show: {
-                    when: false,
-                    ready: false 
-                 },
-                 hide: false,
-                 style: {
-                    border: {
-                       width: 5,
-                       radius: 10
-                    },
-                    padding: 10, 
-                    textAlign: 'center',
-                    tip: true, 
-                    'font-size': 16,
-                    name: 'cream'
-                 }
-              });
-        $('#ui-omniContainer').qtip("show")
+        unless $('#ui-omniContainer').length is 0
+          $('#ui-omniContainer').qtip({
+                   content: 'Click here first.',
+                   position: {
+                      corner: {
+                         tooltip: 'leftMiddle',
+                         target: 'rightMiddle'
+                      }
+                   },
+                   show: {
+                      when: false,
+                      ready: true 
+                   },
+                   hide: false,
+                   style: {
+                      border: {
+                         width: 5,
+                         radius: 10
+                      },
+                      padding: 10, 
+                      textAlign: 'center',
+                      tip: true, 
+                      'font-size': 16,
+                      name: 'cream'
+                   }
+                });
 
-        $('.ui-omnipost:first').click( =>
+        $('.ui-omnipost:first #ui-omniContainer').focusin( =>
           if !@omniboxTipInvisible                
             #$('#ui-omniContainer').qtip('api').updateContent('Click the icons to add content such as links, images or video.')
             $('#ui-omniContainer').qtip("hide")
@@ -379,21 +375,22 @@ $ ->
   ###
   class Workspace extends Backbone.Router
     routes:
-      '/:id' : 'assign'
+      #'/:id' : 'assign'
+      ''  : 'normal'
       'unpopulate' : 'unpopulate'
       'populate' : 'populate'
-    assign: (id) ->
-      postCollection.get(id)
-      postCollection.fetch()
+    #assign: (id) ->
+    #  postCollection.get(id)
+    #  postCollection.fetch()
 
     deleteOne: (item) ->
       item.destroy()
 
-    unpopulate: ->
+     normal: ->
       postCollection.fetch()
       postCollection.each(@deleteOne)
-
-    populate: ->
+      postCollection.reset()
+      $('#assignments').html('')
       data = {posttext: 'What is your earliest memory of WWII?', linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'}
       p = new Post(
         id: 1
@@ -484,8 +481,113 @@ $ ->
         hidden: true
       )
       postCollection.create(p6)
+      App.disp()
 
-  postCollection = new Posts()  
-  app_router = new Workspace() 
-  Backbone.history.start()  
-  App = new StreamView(el: $('#learn')) 
+    unpopulate: ->
+      postCollection.fetch()
+      postCollection.each(@deleteOne)
+      postCollection.reset()
+      $('#assignments').html('')
+      App.disp()
+
+    populate: ->
+      postCollection.fetch()
+      postCollection.each(@deleteOne)
+      postCollection.reset()
+      $('#assignments').html('')
+      data = {posttext: 'What is your earliest memory of WWII?', linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'}
+      p = new Post(
+        id: 1
+        editing: false
+        content: data
+        votecount: 25
+        tags: ["world war II"]
+        parents: ''
+        responses: []
+        hidden: false
+      )
+      postCollection.create(p)
+
+      data1 = {posttext: 'Does anyone remember these delicious candybars?', linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/PjcDkdfe6tg" frameborder="0" allowfullscreen></iframe>'}
+      p1 = new Post(
+        id: 2
+        editing: false
+        content: data1
+        votecount: 13
+        tags: ["Reggies candy bar"]
+        parents: [p]
+        responses: []
+        hidden: true
+      )
+      postCollection.create(p1)
+
+      data2 = {posttext: '', linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/2F_PxO1QJ1c" frameborder="0" allowfullscreen></iframe>'}
+      p2 = new Post(
+        id: 3
+        editing: false
+        content: data2
+        votecount: 4
+        tags: ["Reggies candy bar, World war II"]
+        parents: [p1]
+        responses: []
+        hidden: true
+      )
+      postCollection.create(p2)
+
+      data3 = {posttext: 'Wow, I completely forgot about this candy.  Its part of a candy wrapper museum now.', linkdata: '<a href="http://www.candywrappermuseum.com/reggiejackson.html">Candy Bar Museum</a>'}
+      p3 = new Post(
+        id: 4
+        editing: false
+        content: data3
+        votecount: 3
+        tags: ["Reggies candy bar, World war II"]
+        parents: [p1]
+        responses: []
+        hidden: true
+      )
+      postCollection.create(p3)
+
+      data4 = {posttext: 'I remember the first time I heard about the war, I couldnt believe my ears.  I drove to my Mothers house to be sure I saw her at least once before I might have been drafted.', linkdata: ''}
+      p4 = new Post(
+        id: 5
+        editing: false
+        content: data4
+        votecount: 19
+        tags: ["World war II, Heartwarming"]
+        parents: [p]
+        responses: []
+        hidden: true
+      )
+      postCollection.create(p4)
+
+      data5 = {posttext: 'i wasnt born yet.. im still waiting for WWIII.', linkdata: ''}
+      p5 = new Post(
+        id: 6
+        editing: false
+        content: data5
+        votecount: -4
+        tags: ["disrespectful, immature"]
+        parents: [p]
+        responses: []
+        hidden: true
+      )
+      postCollection.create(p5)
+      
+      data6 = {posttext: 'what is World war II?', linkdata: ''}
+      p6 = new Post(
+        id: 7
+        editing: false
+        content: data6
+        votecount: -6
+        tags: ["ignorant"]
+        parents: [p]
+        responses: []
+        hidden: true
+      )
+      postCollection.create(p6)
+      App.disp()
+
+  postCollection = new Posts()
+  App = new StreamView(el: $('#learn'))        
+  app_router = new Workspace()  
+  Backbone.history.start()    

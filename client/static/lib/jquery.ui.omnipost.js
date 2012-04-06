@@ -205,7 +205,7 @@
         omnipostdiv.append(post);
         $(this.element).append(omnipostdiv);
         $(this.element).addClass('ui-omniPost');
-        omnipostdiv.focusin(function() {
+        omnicontainer.focusin(function() {
           if (!text.attr('readonly')) {
             post.show();
             collapse.show();
