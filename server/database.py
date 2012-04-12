@@ -41,23 +41,6 @@ class Post(ndb.Model):
     """
     return ndb.Query(ancestor=self.key).count()
   
-  @property
-  def potential(self):
-    """
-    Quantify the value of a user-post pairing.
-    """
-    # potential is zero unless our response is a sibling
-    # TODO: Calculate the potential points that can be earned by acting on any given post
-      
-    return result
-  
-  @property
-  def visible(self):
-    """
-    Step function to determine if the user can see this post.
-    """
-    pass
-  
   def dereference_experience(self):
     """
     Dereference a user's experience on a post.
@@ -107,12 +90,6 @@ class Post(ndb.Model):
         ref_tag.xp += ((delta * tags_d[tag]) / s)
         ref_tag.put()
     self.put()
-    
-  def children(self):
-    """
-    Poll for the next page of visible children.
-    """
-    # TODO: Finish implementation of this children function
 
 class Tag(ndb.Model):
   """
@@ -157,7 +134,7 @@ class Tag(ndb.Model):
     """
     Check if tag is a base tag.
     """
-    return self.title == 'correct' or self.title == 'incorrect'
+    return self.title == ',correct' or self.title == ',incorrect'
     
   def update_experience(self):
     """
@@ -172,20 +149,17 @@ class Tag(ndb.Model):
     if self.is_base(): # adjust the score for the poster
       # figure out the sign on the score change
       delta = self.xp
-      if self.title == 'incorrect':
+      if self.title == ',incorrect':
         delta = -delta
       # adjust the score
       post = self.key.parent().get()
       post.adjust_score(delta)
     else:
       # adjust the experience for the taggers
-      user = Stream.query(Stream.user==users.get_current_user()).iter(keys_only=True).next()
+      user = Stream.query(Stream.user==users.get_current_user()).get()
       post_tags = Tag.weights(Tag.query(ancestor=self.key.parent()))
       user_tag_count = Tag.query(Tag.user == users.User(), ancestor=self.key.parent()).count()
       all_tags = Tag.weights(Tag.query()) # TODO: cache this query somewhere
-      ref_tag = Tag.query(Tag.title == self.title, ancestor=user).get()
-      if not ref_tag:
-        ref_tag = Tag(title=self.title, parent=user)
       # calculate change in xp for current user
       post_norm = sum(post_tags.values()) + 1
       all_norm = sum(all_tags.values()) + 1
@@ -194,22 +168,17 @@ class Tag(ndb.Model):
         delta = (all_tags[self.title] / all_norm)
         # apply the change to the current user
         if self.title in post_tags.keys():
-          ref_tag.xp += (delta * (post_tags[self.title] / post_norm) / user_norm)
-          ref_tag.put()
+          user.adjust_experience(self.title, (delta * (post_tags[self.title] / post_norm) / user_norm))
           # calculate the change for other taggers
           delta *= (self.xp / post_norm)
           user_counts = Tag.users(Tag.query(ancestor=self.key.parent()))
-          ref_tag = None
           for user in user_counts.keys():
             norm = user_counts[user]
             t = Tag.query(Tag.title == self.title, Tag.user == user, ancestor=self.key.parent()).get()
-            user = Stream.query(Stream.user==user).iter(keys_only=True).next()
-            ref_tag = Tag.query(Tag.title == self.title, ancestor=user).get()
-            if ref_tag and t:
-              ref_tag.xp += (delta / norm)
-              ref_tag.put()
+            user = Stream.query(Stream.user==user).get()
+            if t:
+              user.adjust_experience(self.title, (delta / norm))
           
-  
   def _pre_put_hook(self):
     # call eval_score_changes when tag is created
     if self.xp == 1 and self.key.parent().kind() == 'Post':
@@ -221,6 +190,32 @@ class Stream(ndb.Model):
   Stores data associated with the user's stream.
   """
   user        = ndb.UserProperty(auto_current_user_add=True)
-  posts       = ndb.KeyProperty(kind=Post, repeated=True)
   timestamp   = ndb.DateTimeProperty(auto_now=True)
   
+  @property
+  def assignments(self):
+    """
+    Returns a list of post keys assigned to the user.
+    """
+    def tag_enum(tag):
+      return tag.parent()
+    return Tag.query(Tag.title == ',assignment', ancestor=post_key).map(tag_enum,keys_only=True)
+  
+  def assigned_children(self, post_key):
+    """
+    Returns a list of post keys assigned to the user under the given post key.
+    """
+    def tag_enum(tag):
+      return tag.parent()
+    return Tag.query(Tag.title == ',assignment', ancestor=post_key).map(tag_enum,keys_only=True)
+  
+  def adjust_experience(self, tag_title, delta):
+    """
+    Adjusts the user's experience in a tag.
+    """
+    ref_tag = Tag.query(Tag.title == tag_title, ancestor=self.key).get()
+    if not ref_tag:
+      ref_tag = Tag(title=tag_title, parent=self.key)
+    ref_tag.xp += delta
+    ref_tag.put()
+    

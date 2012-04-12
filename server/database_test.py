@@ -55,7 +55,7 @@ class DatabaseTests(unittest.TestCase):
     xpc = [5,10,15,20,25]
     for x in xpc:
       self.switchToUser(x)
-      t = Tag(parent=post.key, title='correct', xp=x)
+      t = Tag(parent=post.key, title=',correct', xp=x)
       t.eval_score_change()
       t.put()
     # check that the post score is positive
@@ -64,14 +64,14 @@ class DatabaseTests(unittest.TestCase):
     xpi = [6,9,16,19,23,2]
     for x in xpi:
       self.switchToUser(x)
-      t = Tag(parent=post.key, title='incorrect', xp=x)
+      t = Tag(parent=post.key, title=',incorrect', xp=x)
       t.eval_score_change()
       t.put()
     # check that the post score is zero
     self.assertEqual(post.score, 0)
     # now lets make the post score negative
     self.switchToUser(2)
-    t = Tag(parent=post.key, title='incorrect', xp=2)
+    t = Tag(parent=post.key, title=',incorrect', xp=2)
     t.eval_score_change()
     t.put()
     # check it
