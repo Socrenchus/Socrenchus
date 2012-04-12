@@ -55,19 +55,25 @@ class DatabaseTests(unittest.TestCase):
     xpc = [5,10,15,20,25]
     for x in xpc:
       self.switchToUser(x)
-      Tag(parent=post.key, title='correct', xp=x).put()
+      t = Tag(parent=post.key, title='correct', xp=x)
+      t.eval_score_change()
+      t.put()
     # check that the post score is positive
     self.assertEqual(post.score, sum(xpc))
     # create incorrect tags
-    xpi = [6,9,16,19,24,1]
+    xpi = [6,9,16,19,23,2]
     for x in xpi:
       self.switchToUser(x)
-      Tag(parent=post.key, title='incorrect', xp=x).put()
+      t = Tag(parent=post.key, title='incorrect', xp=x)
+      t.eval_score_change()
+      t.put()
     # check that the post score is zero
     self.assertEqual(post.score, 0)
     # now lets make the post score negative
     self.switchToUser(2)
-    Tag(parent=post.key, title='incorrect', xp=2).put()
+    t = Tag(parent=post.key, title='incorrect', xp=2)
+    t.eval_score_change()
+    t.put()
     # check it
     self.assertEqual(post.score, -2)
     
@@ -82,9 +88,9 @@ class DatabaseTests(unittest.TestCase):
     for i in tag_names:
       for j in range(i):
         self.switchToUser(j)
-        t = Tag(parent=post.key, title=str(i))
+        t = Tag(parent=post.key, title=str(i), xp=2)
         t.put()
-        self.assertEqual(round(t.xp), 1) # check that our start xp is the base score
+        self.assertEqual(round(t.xp), 2)
     # adjust the score
     post.adjust_score(100.0)
     # check that the tags were updated properly
@@ -122,3 +128,45 @@ class DatabaseTests(unittest.TestCase):
     t = Tag(parent=p, title='blah')
     t.put()
     self.assertEqual(round(t.xp), 50)
+    
+  def testPointsFromTagging(self):
+    # create the common post
+    self.switchToUser('user')
+    p = Post().put()
+    # give users a starting experience
+    self.switchToUser('A')
+    a = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
+    aa = Tag(parent=a, title='a', xp=500).put()
+    ab = Tag(parent=a, title='b', xp=50).put()
+    ac = Tag(parent=a, title='c', xp=5).put()
+    self.switchToUser('B')
+    b = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
+    ba = Tag(parent=b, title='a', xp=50).put()
+    bb = Tag(parent=b, title='b', xp=500).put()
+    bc = Tag(parent=b, title='c', xp=50).put()
+    self.switchToUser('C')
+    c = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
+    ca = Tag(parent=c, title='a', xp=5).put()
+    cb = Tag(parent=c, title='b', xp=50).put()
+    cc = Tag(parent=c, title='c', xp=500).put()
+    # have users tag posts
+    self.switchToUser('A')
+    Tag(parent=p, title='a').put()
+    self.switchToUser('B')
+    Tag(parent=p, title='a').put()
+    Tag(parent=p, title='b').put()
+    self.switchToUser('C')
+    Tag(parent=p, title='a').put()
+    Tag(parent=p, title='b').put()
+    Tag(parent=p, title='c').put()
+    # check users ending experience
+    self.assertGreater(aa.get().xp, 500)
+    self.assertEqual(ab.get().xp, 50)
+    self.assertEqual(ac.get().xp, 5)
+    self.assertGreater(ba.get().xp, 50)
+    self.assertGreater(bb.get().xp, 500)
+    self.assertGreater(ca.get().xp, 5)
+    self.assertGreater(cb.get().xp, 50)
+    self.assertEqual(cc.get().xp, 500)
+    # check the final post score
+    self.assertEqual(p.get().score, 0)

@@ -98,11 +98,11 @@ class Post(ndb.Model):
     if parent:
       Tag.query(ancestor=parent).map(tags_by_weight)
     tags = tags_d.keys()
+    s = sum(tags_d.values())
     for tag in tags:
       ref_tag = Tag.query(Tag.title == tag, ancestor=user).get()
       if not ref_tag:
         ref_tag = Tag(title=tag, parent=user)
-      s = sum(tags_d.values())
       if s > 0:
         ref_tag.xp += ((delta * tags_d[tag]) / s)
         ref_tag.put()
@@ -163,61 +163,58 @@ class Tag(ndb.Model):
     """
     Update experience points of tag by dereferencing against parent post.
     """
-    # check if experience was manually set
-    if self.xp == 1.0:
-      # if not, dereference the experience
-      self.xp = self.key.parent().get().dereference_experience()
+    self.xp = self.key.parent().get().dereference_experience()
       
   def eval_score_change(self):
     """
     Update our tagged post's score if we are a base tag.
     """
-    # check that we meet the conditions for a score adjustment
-    if self.key.parent().kind() == 'Post':
-      if self.is_base(): # adjust the score for the poster
-        # figure out the sign on the score change
-        delta = self.xp
-        if self.title == 'incorrect':
-          delta = -delta
-        # adjust the score
-        post = self.key.parent().get()
-        post.adjust_score(delta)
-      else: # adjust the experience for the taggers
-        user = Stream.query(Stream.user==users.get_current_user()).iter(keys_only=True).next()
-        post_tags = Tag.weights(Tag.query(ancestor=self.key.parent()))
-        user_tag_count = Tag.query(Tag.user == users.User(), ancestor=self.key.parent()).count()
-        all_tags = Tag.weights(Tag.query()) # TODO: cache this query somewhere
-        ref_tag = Tag.query(Tag.title == self.title, ancestor=user).get()
-        if not ref_tag:
-          ref_tag = Tag(title=self.title, parent=user)
-        # calculate change in xp for current user
-        post_norm = sum(post_tags.values()) + 1
-        all_norm = sum(all_tags.values()) + 1
-        user_norm = user_tag_count + 1
-        if self.title in all_tags:
-          delta = (all_tags[self.title] / all_norm)
-          # apply the change to the current user
-          if self.title in post_tags:
-            ref_tag.xp += (delta * (post_tags[self.title] / post_norm) / user_norm)
-            ref_tag.put()
-            # calculate the change for other taggers
-            delta *= (self.xp / post_norm)
-            user_counts = Tag.users(Tag.query(ancestor=self.key.parent()))
-            ref_tag = None
-            for user in user_counts.keys():
-              norm = user_counts[user] + 1
-              user = Stream.query(Stream.user==user).iter(keys_only=True).next()
-              ref_tag = Tag.query(Tag.title == self.title, ancestor=user).get()
-              if not ref_tag:
-                ref_tag = Tag(title=self.title, parent=user)
+    if self.is_base(): # adjust the score for the poster
+      # figure out the sign on the score change
+      delta = self.xp
+      if self.title == 'incorrect':
+        delta = -delta
+      # adjust the score
+      post = self.key.parent().get()
+      post.adjust_score(delta)
+    else:
+      # adjust the experience for the taggers
+      user = Stream.query(Stream.user==users.get_current_user()).iter(keys_only=True).next()
+      post_tags = Tag.weights(Tag.query(ancestor=self.key.parent()))
+      user_tag_count = Tag.query(Tag.user == users.User(), ancestor=self.key.parent()).count()
+      all_tags = Tag.weights(Tag.query()) # TODO: cache this query somewhere
+      ref_tag = Tag.query(Tag.title == self.title, ancestor=user).get()
+      if not ref_tag:
+        ref_tag = Tag(title=self.title, parent=user)
+      # calculate change in xp for current user
+      post_norm = sum(post_tags.values()) + 1
+      all_norm = sum(all_tags.values()) + 1
+      user_norm = user_tag_count + 1
+      if self.title in all_tags.keys():
+        delta = (all_tags[self.title] / all_norm)
+        # apply the change to the current user
+        if self.title in post_tags.keys():
+          ref_tag.xp += (delta * (post_tags[self.title] / post_norm) / user_norm)
+          ref_tag.put()
+          # calculate the change for other taggers
+          delta *= (self.xp / post_norm)
+          user_counts = Tag.users(Tag.query(ancestor=self.key.parent()))
+          ref_tag = None
+          for user in user_counts.keys():
+            norm = user_counts[user]
+            t = Tag.query(Tag.title == self.title, Tag.user == user, ancestor=self.key.parent()).get()
+            user = Stream.query(Stream.user==user).iter(keys_only=True).next()
+            ref_tag = Tag.query(Tag.title == self.title, ancestor=user).get()
+            if ref_tag and t:
               ref_tag.xp += (delta / norm)
               ref_tag.put()
           
   
   def _pre_put_hook(self):
     # call eval_score_changes when tag is created
-    self.update_experience()
-    self.eval_score_change()
+    if self.xp == 1 and self.key.parent().kind() == 'Post':
+      self.update_experience()
+      self.eval_score_change()
 
 class Stream(ndb.Model):
   """
