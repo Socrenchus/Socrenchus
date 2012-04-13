@@ -18,6 +18,8 @@ from google.appengine.ext import ndb
 
 import random
 
+all_futures = []
+
 class Post(ndb.Model):
   """
   A post can be a question, it can be an answer, it can even be a statement.    
@@ -80,9 +82,9 @@ class Post(ndb.Model):
     s = sum(tags_d.values())
     for tag in tags:
       if s > 0:
-        user.adjust_experience(tag,((delta * tags_d[tag]) / s))
+        user.adjust_experience(tag,((delta * tags_d[tag]) / s)).wait()
         
-    self.put()
+    return self.put_async()
 
 class Tag(ndb.Model):
   """
@@ -172,14 +174,14 @@ class Tag(ndb.Model):
         delta = -delta
       # adjust the score
       post = self.key.parent().get()
-      post.adjust_score(delta)
+      post.adjust_score(delta).wait()
     else:
       # adjust the experience for the taggers
       user = Stream.query(Stream.user==users.get_current_user()).get()
-      user.adjust_experience(self.title, self.weight)
+      all_futures.append(user.adjust_experience(self.title, self.weight))
       def reward_tagger(tag):
         user = Stream.query(Stream.user==tag.user).get()
-        user.adjust_experience(tag.title, tag.weight/tag.local_tally)
+        all_futures.append(user.adjust_experience(tag.title, tag.weight/tag.local_tally))
       Tag.query(Tag.title == self.title, ancestor=self.key.parent()).map(reward_tagger)
           
   def _pre_put_hook(self):
@@ -227,7 +229,7 @@ class Stream(ndb.Model):
     """
     ref_tag = self.get_tag(tag_title)
     ref_tag.xp += delta
-    ref_tag.put()
+    return ref_tag.put_async()
     
   def get_experience(self, tag_title):
     """
