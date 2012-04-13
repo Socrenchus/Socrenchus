@@ -19,12 +19,28 @@ cssSrcFolders = [
     'omnipost/stylesheets'
     'notify/stylesheets'
 ]
+srcWatchFolders = [
+    './'
+    'tagbox'
+    'votebox'
+    'omnipost'
+    'notify'
+]
+
 srcFolders = [
     'main'
     'tagbox'
     'votebox'
     'omnipost'
     'notify'
+]
+
+prodCoffeeFiles = [
+    'main'
+    'jquery.ui.tagbox'
+    'jquery.ui.votebox'
+    'jquery.ui.omnipost'
+    'jquery.ui.notifybox'
 ]
   
 build = (callback) ->
@@ -51,6 +67,17 @@ copyWithDirectory = (path,output) ->
     else if stats.isDirectory()
       copyWithDirectory(currentFile)
 
+getFiles = (path, files) ->
+  files = fs.readdirSync(path)
+  for i in files
+    currentFile = path + '/' + i
+    stats = fs.statSync(currentFile)
+    if stats.isFile()
+      files.push(currentFile)
+    else if stats.isDirectory()
+      getCssFiles(currentFile, files)
+  return files
+
 task 'build', 'Build to static/lib from tagbox, votebox, and omnipost', ->
   build()
 
@@ -63,12 +90,36 @@ task 'cpcss', 'Copy all css files from the respective folders in tagbox, votebox
     copyWithDirectory(cssSrcFolder, outputJSFolder) 
 
 task 'watch', 'Watch for changes in tagbox, votebox, and omnipost, and if there are, build it to static/lib', ->
-  for folder in srcFolders
-    coffee = spawn 'coffee', ['-w', '-c', '-o', outputJSFolder, folder]
-    coffee.stderr.on 'data', (data) ->
-      process.stderr.write data.toString()
-    coffee.stdout.on 'data', (data) ->
-      util.log data.toString()
+
+  invoke 'build'
+  for folder in srcWatchFolders
+    util.log "Watching for changes in #{folder}"
+    for file in prodCoffeeFiles then do (file) ->
+        fs.watchFile "#{folder}/#{file}.coffee", (curr, prev) ->
+            if +curr.mtime isnt +prev.mtime
+                util.log "Saw change in #{file}.coffee"
+                invoke 'build'
+
+  
+  invoke 'cpcss'
+  for folder in cssSrcFolders
+    util.log "Watching for changes in #{folder}"
+    cssFiles = getFiles(folder, [])
+    for file in cssFiles then do (file) ->
+        fs.watchFile "#{file}", (curr, prev) ->
+            if +curr.mtime isnt +prev.mtime
+                util.log "Saw change in #{file}"
+                invoke 'cpcss'
+
+  invoke 'cpimgs'
+  for folder in imageSrcFolders
+    util.log "Watching for changes in #{folder}"
+    imgFiles = getFiles(folder, [])
+    for file in imgFiles then do (file) ->
+        fs.watchFile "#{file}", (curr, prev) ->
+            if +curr.mtime isnt +prev.mtime
+                util.log "Saw change in #{file}"
+                invoke 'cpimgs'
 
 task 'buildAndCpAll', 'build all coffee files and copy all images', ->
   invoke 'build'
