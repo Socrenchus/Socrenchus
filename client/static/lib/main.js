@@ -143,7 +143,7 @@
       __extends(StreamView, _super);
 
       function StreamView() {
-        this.disp = __bind(this.disp, this);
+        this.render = __bind(this.render, this);
         this.storyPart5Done = __bind(this.storyPart5Done, this);
         this.storyPart4Done = __bind(this.storyPart4Done, this);
         this.storyPart3Done = __bind(this.storyPart3Done, this);
@@ -155,8 +155,9 @@
         this.streamviewRendered = false;
         this.selectedStory = '#story-part1';
         postCollection.bind('add', this.addOne, this);
-        postCollection.fetch();
-        return this.addAll();
+        postCollection.bind('reset', this.addAll, this);
+        postCollection.bind('all', this.render, this);
+        return postCollection.fetch();
       };
 
       StreamView.prototype.setStoryPart = function(storyPart) {
@@ -391,7 +392,7 @@
         return postCollection.each(this.deleteOne);
       };
 
-      StreamView.prototype.disp = function() {
+      StreamView.prototype.render = function() {
         var profileshowing,
           _this = this;
         if (!this.streamviewRendered) {
@@ -434,7 +435,7 @@
               },
               show: {
                 when: false,
-                ready: true
+                ready: false
               },
               hide: false,
               style: {
@@ -451,12 +452,7 @@
             });
           }
           $('.ui-omnipost:first #ui-omniContainer').focusin(function() {
-            if (!_this.omniboxTipInvisible) {
-              $('#ui-omniContainer').qtip("hide");
-              _this.setStoryPart('#story-part2');
-              $('.ui-omnipost:first #ui-omniPostText').val('I remember my mother cooking breakfast while my sister, my father, and I listened to the radio as FDR began another one of his fireside chats. It was september of 1939 and the topic was the European War.');
-              $('.ui-omnipost:first #ui-omniPostText').textareatypewriter(_this.storyPart2Done);
-            }
+            if (!_this.omniboxTipInvisible) $('#ui-omniContainer').qtip("hide");
             return _this.omniboxTipInvisible = true;
           });
           $(document).click(function() {});
@@ -481,11 +477,31 @@
       Workspace.prototype.routes = {
         '': 'normal',
         'unpopulate': 'unpopulate',
-        'populate': 'populate'
+        'populate': 'populate',
+        'servertest': 'servertest'
       };
 
       Workspace.prototype.deleteOne = function(item) {
         return item.destroy();
+      };
+
+      Workspace.prototype.servertest = function() {
+        var data, p;
+        data = {
+          posttext: 'What is your earliest memory of WWII?',
+          linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'
+        };
+        p = new Post({
+          id: 1,
+          editing: false,
+          content: data,
+          votecount: 25,
+          tags: ["world war II"],
+          parents: '',
+          responses: [],
+          hidden: false
+        });
+        return postCollection.create(p);
       };
 
       Workspace.prototype.normal = function() {
@@ -598,16 +614,14 @@
           responses: [],
           hidden: true
         });
-        postCollection.create(p6);
-        return App.disp();
+        return postCollection.create(p6);
       };
 
       Workspace.prototype.unpopulate = function() {
         postCollection.fetch();
         postCollection.each(this.deleteOne);
         postCollection.reset();
-        $('#assignments').html('');
-        return App.disp();
+        return $('#assignments').html('');
       };
 
       Workspace.prototype.populate = function() {
@@ -720,8 +734,7 @@
           responses: [],
           hidden: true
         });
-        postCollection.create(p6);
-        return App.disp();
+        return postCollection.create(p6);
       };
 
       return Workspace;

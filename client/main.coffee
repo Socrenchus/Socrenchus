@@ -26,6 +26,7 @@ $ ->
   class Posts extends Backbone.Collection
     model: Post
     localStorage: new Store('posts')
+    #url: '/posts'
     
   ###
   # View
@@ -85,10 +86,10 @@ $ ->
       @streamviewRendered = false
       @selectedStory = '#story-part1'
       postCollection.bind('add', @addOne, this)
-      #postCollection.bind('reset', @addAll, this)
-      #postCollection.bind('all', @render, this)
+      postCollection.bind('reset', @addAll, this)
+      postCollection.bind('all', @render, this)
       postCollection.fetch()
-      @addAll()
+      #@addAll()
       #@render()
 
     #FIXME: remove these next few functions after the demo.
@@ -287,7 +288,7 @@ $ ->
       item.destroy()
     deleteAll: ->
       postCollection.each(@deleteOne)
-    disp: =>
+    render: =>
       if !@streamviewRendered
         @scrollingDiv = $('#story')
         $(window).scroll( =>
@@ -338,7 +339,7 @@ $ ->
                    },
                    show: {
                       when: false,
-                      ready: true 
+                      ready: false 
                    },
                    hide: false,
                    style: {
@@ -358,9 +359,9 @@ $ ->
           if !@omniboxTipInvisible                
             #$('#ui-omniContainer').qtip('api').updateContent('Click the icons to add content such as links, images or video.')
             $('#ui-omniContainer').qtip("hide")
-            @setStoryPart('#story-part2')
-            $('.ui-omnipost:first #ui-omniPostText').val('I remember my mother cooking breakfast while my sister, my father, and I listened to the radio as FDR began another one of his fireside chats. It was september of 1939 and the topic was the European War.')
-            $('.ui-omnipost:first #ui-omniPostText').textareatypewriter(@storyPart2Done)
+            #@setStoryPart('#story-part2')
+            #$('.ui-omnipost:first #ui-omniPostText').val('I remember my mother cooking breakfast while my sister, my father, and I listened to the radio as FDR began another one of his fireside chats. It was september of 1939 and the topic was the European War.')
+            #$('.ui-omnipost:first #ui-omniPostText').textareatypewriter(@storyPart2Done)
           @omniboxTipInvisible = true
         )
 
@@ -379,14 +380,29 @@ $ ->
       ''  : 'normal'
       'unpopulate' : 'unpopulate'
       'populate' : 'populate'
+      'servertest' : 'servertest'
     #assign: (id) ->
     #  postCollection.get(id)
     #  postCollection.fetch()
 
     deleteOne: (item) ->
       item.destroy()
+    
+    servertest: ->
+      data = {posttext: 'What is your earliest memory of WWII?', linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'}
+      p = new Post(
+        id: 1
+        editing: false
+        content: data
+        votecount: 25
+        tags: ["world war II"]
+        parents: ''
+        responses: []
+        hidden: false
+      )
+      postCollection.create(p)
 
-     normal: ->
+    normal: ->
       postCollection.fetch()
       postCollection.each(@deleteOne)
       postCollection.reset()
@@ -481,14 +497,12 @@ $ ->
         hidden: true
       )
       postCollection.create(p6)
-      App.disp()
 
     unpopulate: ->
       postCollection.fetch()
       postCollection.each(@deleteOne)
       postCollection.reset()
       $('#assignments').html('')
-      App.disp()
 
     populate: ->
       postCollection.fetch()
@@ -585,7 +599,6 @@ $ ->
         hidden: true
       )
       postCollection.create(p6)
-      App.disp()
 
   postCollection = new Posts()
   App = new StreamView(el: $('#learn'))        
