@@ -4,20 +4,23 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
   (function($, window, document) {
-    var LinkPanel, Panel, Plugin, VideoPanel, defaults, pluginName;
+    var LinkPanel, Panel, Plugin, VideoPanel, defaults, pluginName, states;
     pluginName = 'omnipost';
     defaults = {
       editing: true,
-      callback: '',
-      postcontent: '',
-      linkedcontent: ''
+      callback: ''
+    };
+    states = {
+      none: 0,
+      open: 1
     };
     Panel = (function() {
 
-      function Panel(id, iconSrc, collapseSrc) {
+      function Panel(id, iconSrc, collapseSrc, removalCallBack) {
         this.id = id;
         this.iconSrc = iconSrc;
         this.collapseSrc = collapseSrc;
+        this.removalCallBack = removalCallBack;
         this.remove = __bind(this.remove, this);
         this.isEmpty = __bind(this.isEmpty, this);
         this.hide = __bind(this.hide, this);
@@ -38,7 +41,7 @@
         this.panelcontainer.append(this.collapseIcon);
         this.panelcontainer.append(this.submitLink);
         return this.collapseIcon.click(function() {
-          return _this.hide();
+          return _this.remove();
         });
       };
 
@@ -61,6 +64,7 @@
       };
 
       Panel.prototype.remove = function() {
+        this.removalCallBack(this);
         return this.panelcontainer.remove();
       };
 
@@ -162,19 +166,22 @@
 
       function Plugin(element, options) {
         this.element = element;
+        this.removeElementFromPanelList = __bind(this.removeElementFromPanelList, this);
+        this.removeAllPanels = __bind(this.removeAllPanels, this);
         this.options = $.extend({}, defaults, options);
         this._defaults = defaults;
         this._name = 'tagbox';
+        this._states = states;
         this.init();
       }
 
       Plugin.prototype.init = function() {
-        var collapse, link, linkPanel, message, omnicontainer, omnipostdiv, panelselectors, post, selectedImageLink, text, videoPanel, videolink,
+        var collapse, link, message, omnicontainer, omnipostdiv, paneldiv, panelselectors, post, selectedImageLink, text, videolink,
           _this = this;
+        this.state = this._states.none;
+        this.panelList = [];
         message = 'Post your reply here...';
         omnipostdiv = $("<div class = 'ui-omnipost'></div>");
-        linkPanel = new LinkPanel('ui-linkbox', '/images/linkAttach.png', '/images/collapse.png');
-        videoPanel = new VideoPanel('ui-videobox', '/images/videoAttach.png', '/images/collapse.png');
         collapse = $("<img alt='x' title='x' id='ui-omniPostCollapse'>");
         collapse.attr('src', '/images/collapse.png');
         link = $("<img alt='a' title='attach a link' id='ui-omniPostAttach'>");
@@ -195,17 +202,15 @@
         omnicontainer.append(collapse);
         omnicontainer.append(panelselectors);
         omnipostdiv.append(omnicontainer);
-        linkPanel.addPanelToContainer(omnipostdiv);
-        linkPanel.hide();
-        videoPanel.addPanelToContainer(omnipostdiv);
-        videoPanel.hide();
         $(this.element).append(selectedImageLink);
+        paneldiv = $("<div id='panels-container'></div>");
+        omnipostdiv.append(paneldiv);
         $(this.element).append($('<br/>'));
         post = $("<button id='ui-omniPostSubmit'>Post</button>");
         omnipostdiv.append(post);
         $(this.element).append(omnipostdiv);
         $(this.element).addClass('ui-omniPost');
-        omnicontainer.focusin(function() {
+        omnicontainer.click(function() {
           if (!text.attr('readonly')) {
             post.show();
             collapse.show();
@@ -213,45 +218,81 @@
             if (text.height() < 50) text.height(50);
           }
           text.removeClass('ui-omniPostActive');
-          if (text.val() === message) return text.val('');
+          if (text.val() === message) text.val('');
+          text.focus();
+          if (_this.state === _this._states.none) _this.state = _this._states.open;
+          return $(_this.element).trigger('omnicontainerOpened', _this.state);
         });
-        collapse.click(function() {
+        collapse.click(function(event) {
           post.hide();
           text.val(message);
           text.addClass('ui-omniPostActive');
           text.height(28);
           collapse.hide();
           panelselectors.hide();
-          linkPanel.hide();
-          return videoPanel.hide();
-        }).click();
-        link.click(function() {
-          event.stopPrapogation();
-          return linkPanel.show();
-        });
-        videolink.click(function() {
+          _this.removeAllPanels();
           event.stopPropagation();
-          return videoPanel.show();
+          _this.state = _this._states.none;
+          return $(_this.element).trigger('omnicontainerClosed', _this.state);
         });
-        ({
-          content: function() {
-            var data;
-            data = {
-              posttext: $.trim(text.val()),
-              linkdata: linkPanel.content()
-            };
-            return data;
-          }
+        collapse.click();
+        link.click(function(event) {
+          var linkPanel;
+          event.stopPropagation();
+          linkPanel = new LinkPanel('ui-linkbox', '/images/linkAttach.png', '/images/collapse.png', _this.removeElementFromPanelList);
+          linkPanel.addPanelToContainer(paneldiv);
+          linkPanel.hide();
+          linkPanel.show();
+          _this.panelList.push(linkPanel);
+          return $(_this.element).trigger('panelsChanged', _this.panelList.length);
+        });
+        videolink.click(function(event) {
+          var videoPanel;
+          event.stopPropagation();
+          videoPanel = new VideoPanel('ui-videobox', '/images/videoAttach.png', '/images/collapse.png', _this.removeElementFromPanelList);
+          videoPanel.addPanelToContainer(paneldiv);
+          videoPanel.hide();
+          videoPanel.show();
+          _this.panelList.push(videoPanel);
+          return $(_this.element).trigger('panelsChanged', _this.panelList.length);
         });
         return post.click(function() {
-          var data;
+          var allPanelContent, data, panel, _i, _len, _ref;
+          allPanelContent = $("<div id='rich-content'></div>");
+          _ref = _this.panelList;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            panel = _ref[_i];
+            allPanelContent.append(panel.content());
+          }
           data = {
             posttext: $.trim(text.val()),
-            linkdata: linkPanel.content()
+            linkdata: allPanelContent[0].outerHTML
           };
           omnipostdiv.remove();
           return _this.options.callback(data);
         });
+      };
+
+      Plugin.prototype.removeAllPanels = function() {
+        var panel, removedPanels, _i, _j, _len, _len2, _ref;
+        removedPanels = [];
+        _ref = this.panelList;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          panel = _ref[_i];
+          removedPanels.push(panel);
+        }
+        for (_j = 0, _len2 = removedPanels.length; _j < _len2; _j++) {
+          panel = removedPanels[_j];
+          panel.remove();
+        }
+        return $(this.element).trigger('panelsChanged', this.panelList.length);
+      };
+
+      Plugin.prototype.removeElementFromPanelList = function(element) {
+        var index;
+        index = this.panelList.indexOf(element);
+        if (index > -1) this.panelList.splice(index, 1);
+        return $(this.element).trigger('panelsChanged', this.panelList.length);
       };
 
       Plugin.prototype.destroy = function() {

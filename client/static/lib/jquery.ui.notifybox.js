@@ -1,11 +1,15 @@
 (function() {
   ;
   (function($, window, document) {
-    var Plugin, defaults, pluginName;
+    var Plugin, defaults, pluginName, states;
     pluginName = 'notify';
     defaults = {
       notificationCount: 0,
       position: 'topleft'
+    };
+    states = {
+      none: 0,
+      open: 1
     };
     Plugin = (function() {
 
@@ -14,12 +18,14 @@
         this.options = $.extend({}, defaults, options);
         this._defaults = defaults;
         this._name = 'notify';
+        this._states = states;
         this.init();
       }
 
       Plugin.prototype.init = function() {
         var imagepanel, notifycounter, notifydiv,
           _this = this;
+        this.state = this._states.none;
         notifydiv = $("<div class = 'ui-notifybox'></div>");
         notifycounter = $("<h3 id='notification-counter' title='Notifications'>" + this.options.notificationCount + "</h3>");
         imagepanel = $("<img id='notification-box' src='/images/notifications.png'>");
@@ -27,12 +33,20 @@
         notifydiv.append(notifycounter);
         notifydiv.append(imagepanel);
         $(this.element).append(notifydiv);
-        notifycounter.click(function() {
+        notifycounter.click(function(event) {
           imagepanel.fadeToggle("slow");
+          if (_this.state === _this._states.none) {
+            _this.state = _this._states.open;
+          } else if (_this.state === _this._states.open) {
+            _this.state = _this._states.none;
+          }
+          $(_this.element).trigger('notifyClicked', _this.state);
           return event.stopPropagation();
         });
         $(document).click(function() {
-          return imagepanel.hide();
+          imagepanel.hide();
+          _this.state = _this._states.none;
+          return $(_this.element).trigger('documentClicked', _this.state);
         });
         return imagepanel.load(function() {
           if (_this.options.position === 'lefttop') {

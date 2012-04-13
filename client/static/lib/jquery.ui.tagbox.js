@@ -3,8 +3,13 @@
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   (function($, window, document) {
-    var Plugin, defaults, pluginName;
+    var Plugin, defaults, pluginName, states;
     pluginName = 'tagbox';
+    states = {
+      none: 0,
+      typing: 1,
+      altering: 2
+    };
     defaults = {
       editing: true,
       tags: []
@@ -17,8 +22,11 @@
         this.deformtag = __bind(this.deformtag, this);
         this.formtag = __bind(this.formtag, this);
         this.makenewtag = __bind(this.makenewtag, this);
+        this.removeFromArray = __bind(this.removeFromArray, this);
         this.options = $.extend({}, defaults, options);
         this._defaults = defaults;
+        this._states = states;
+        this.state = states.none;
         this._name = 'tagbox';
         this.init();
       }
@@ -42,8 +50,10 @@
           this.tagtext.append(this.currenttag);
           this.tagtext.focusout(function() {
             if (_this.alltags.length === 0 && _this.currenttag.text() === '') {
-              return _this.message.show();
+              _this.message.show();
             }
+            _this.state = _this._states.none;
+            return $(_this.element).trigger('unfocusingTagBox', _this.state);
           });
           this.tagtext.keydown(function(event) {
             if (event.keyCode === 13 || event.keyCode === 188) {
@@ -54,7 +64,9 @@
           return this.tagtext.click(function() {
             if (!_this.editingoldtag) {
               _this.message.hide();
-              return _this.currenttag.focus();
+              _this.currenttag.focus();
+              _this.state = _this._states.typing;
+              return $(_this.element).trigger('typingTag', _this.state);
             }
           });
         } else {
@@ -62,10 +74,11 @@
         }
       };
 
-      Plugin.prototype.removeFromArray = function(array, toremove) {
+      Plugin.prototype.removeFromArray = function(toremove) {
         var index;
-        index = array.indexOf(toremove);
-        if (index > -1) return array.splice(index, 1);
+        index = this.alltags.indexOf(toremove);
+        if (index > -1) this.alltags.splice(index, 1);
+        return $(this.element).trigger('tagRemoved', this.alltags.length);
       };
 
       Plugin.prototype.makenewtag = function(tagdiv) {
@@ -91,17 +104,20 @@
         deletetagicon = $("<img width = '16px' class='delete-imageicon' src = '/images/collapse.png'>");
         tagdiv.append(deletetagicon);
         deletetagicon.click(function() {
-          _this.removeFromArray(_this.alltags, deletetagicon.parent());
+          _this.removeFromArray(tagdiv);
           return deletetagicon.parent().remove();
         });
         tagdiv.click(function() {
-          return _this.deformtag(tagdiv);
+          var state;
+          _this.deformtag(tagdiv);
+          return state = states.altering;
         });
         tagdiv.attr('contentEditable', 'false');
         tagdiv.css('background-image', 'url("/images/tagOutline.png")');
         tagdiv.css('background-repeat', 'no-repeat');
         tagdiv.css('background-size', '100% 100%');
-        return this.alltags.push(tagdiv);
+        this.alltags.push(tagdiv);
+        return $(this.element).trigger('tagAdded', this.alltags.length);
       };
 
       Plugin.prototype.deformtag = function(tagdiv) {
@@ -114,8 +130,10 @@
         deleteiconclass = $('.delete-imageicon');
         deleteicon = $(tagdiv.find(deleteiconclass)[0]);
         deleteicon.remove();
-        this.removeFromArray(this.alltags, tagdiv);
-        return tagdiv.focus();
+        this.removeFromArray(tagdiv);
+        tagdiv.focus();
+        this.state = this._states.altering;
+        return $(this.element).trigger('alteringTag', this.state);
       };
 
       Plugin.prototype.createcompletetags = function(tags) {
@@ -132,9 +150,13 @@
         return $(this.element).append(tagsdiv);
       };
 
+      Plugin.setCurrentTag = function(text) {
+        return Plugin.currenttag.text(text);
+      };
+
       return Plugin;
 
-    })();
+    }).call(this);
     return $.fn[pluginName] = function(options) {
       return this.each(function() {
         if (!$.data(this, "plugin_" + pluginName)) {
