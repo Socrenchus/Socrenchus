@@ -45,7 +45,7 @@ class Post(ndb.Model):
     """
     Dereference a user's experience on a post.
     """
-    user = Stream.query(Stream.user==users.get_current_user()).iter(keys_only=True).next()
+    user = Stream.query(Stream.user==users.get_current_user()).get()
     result = 0 # clear the current
     tags_d = Tag.weights(Tag.query(ancestor=self.key))
     # check if parent post exists
@@ -54,14 +54,10 @@ class Post(ndb.Model):
       Tag.query(ancestor=parent).map(tags_by_weight)
     tags = tags_d.keys()
     for tag in tags:
-      # get users experience for each tag
-      ref_tag = Tag.query(Tag.title == tag, ancestor=user).get()
-      if not ref_tag:
-        ref_tag = Tag(title=tag, parent=user)
       # use weights to calculate new experience
       s = sum(tags_d.values())
       if s > 0:
-        result += ((ref_tag.xp * tags_d[tag]) / s)
+        result += ((user.get_experience(tag) * tags_d[tag]) / s)
     if result == 0:
       result = 1 # give it the base score
     
@@ -74,7 +70,7 @@ class Post(ndb.Model):
     # adjust the score by delta
     self.score += delta
     # reference the experience points earned
-    user = Stream.query(Stream.user==self.author).iter(keys_only=True).next()
+    user = Stream.query(Stream.user==self.author).get()
     tags_d = Tag.weights(Tag.query(ancestor=self.key))
     # check if parent post exists
     parent = self.key.parent()
@@ -83,12 +79,9 @@ class Post(ndb.Model):
     tags = tags_d.keys()
     s = sum(tags_d.values())
     for tag in tags:
-      ref_tag = Tag.query(Tag.title == tag, ancestor=user).get()
-      if not ref_tag:
-        ref_tag = Tag(title=tag, parent=user)
       if s > 0:
-        ref_tag.xp += ((delta * tags_d[tag]) / s)
-        ref_tag.put()
+        user.adjust_experience(tag,((delta * tags_d[tag]) / s))
+        
     self.put()
 
 class Tag(ndb.Model):
@@ -101,6 +94,32 @@ class Tag(ndb.Model):
   title       = ndb.StringProperty()
   xp          = ndb.FloatProperty(default=1.0)
   timestamp   = ndb.DateTimeProperty(auto_now=True)
+  
+  @property
+  def weight(self):
+    """
+    Get the normalized weight of a tag.
+    
+    TODO: Layered caching to speed this up.
+    """
+    self.global_tally = 0.0
+    self.global_total = 1.0
+    self.local_tally = 0.0
+    self.local_total = 1.0
+    self.user_total = 1.0
+    def tally_up(tag):
+      self.global_total += tag.xp
+      if tag.key.parent() == self.key.parent():
+        self.local_total += tag.xp
+        if tag.user == self.user:
+          self.user_total += 1
+      if tag.title == self.title:
+        self.global_tally += tag.xp
+        if tag.key.parent() == self.key.parent():
+          self.local_tally += tag.xp
+    Tag.query().map(tally_up)
+    return (self.local_tally*self.global_total) / (self.local_total*self.global_tally+self.user_total)
+      
       
   @classmethod
   def weights(cls, q):
@@ -157,27 +176,11 @@ class Tag(ndb.Model):
     else:
       # adjust the experience for the taggers
       user = Stream.query(Stream.user==users.get_current_user()).get()
-      post_tags = Tag.weights(Tag.query(ancestor=self.key.parent()))
-      user_tag_count = Tag.query(Tag.user == users.User(), ancestor=self.key.parent()).count()
-      all_tags = Tag.weights(Tag.query()) # TODO: cache this query somewhere
-      # calculate change in xp for current user
-      post_norm = sum(post_tags.values()) + 1
-      all_norm = sum(all_tags.values()) + 1
-      user_norm = user_tag_count + 1
-      if self.title in all_tags.keys():
-        delta = (all_tags[self.title] / all_norm)
-        # apply the change to the current user
-        if self.title in post_tags.keys():
-          user.adjust_experience(self.title, (delta * (post_tags[self.title] / post_norm) / user_norm))
-          # calculate the change for other taggers
-          delta *= (self.xp / post_norm)
-          user_counts = Tag.users(Tag.query(ancestor=self.key.parent()))
-          for user in user_counts.keys():
-            norm = user_counts[user]
-            t = Tag.query(Tag.title == self.title, Tag.user == user, ancestor=self.key.parent()).get()
-            user = Stream.query(Stream.user==user).get()
-            if t:
-              user.adjust_experience(self.title, (delta / norm))
+      user.adjust_experience(self.title, self.weight)
+      def reward_tagger(tag):
+        user = Stream.query(Stream.user==tag.user).get()
+        user.adjust_experience(tag.title, tag.weight/tag.local_tally)
+      Tag.query(Tag.title == self.title, ancestor=self.key.parent()).map(reward_tagger)
           
   def _pre_put_hook(self):
     # call eval_score_changes when tag is created
@@ -209,13 +212,26 @@ class Stream(ndb.Model):
       return tag.parent()
     return Tag.query(Tag.title == ',assignment', ancestor=post_key).map(tag_enum,keys_only=True)
   
-  def adjust_experience(self, tag_title, delta):
+  def get_tag(self, tag_title):
     """
-    Adjusts the user's experience in a tag.
+    Returns the experience tag for the user.
     """
     ref_tag = Tag.query(Tag.title == tag_title, ancestor=self.key).get()
     if not ref_tag:
       ref_tag = Tag(title=tag_title, parent=self.key)
+    return ref_tag
+    
+  def adjust_experience(self, tag_title, delta):
+    """
+    Adjusts the user's experience in a tag.
+    """
+    ref_tag = self.get_tag(tag_title)
     ref_tag.xp += delta
     ref_tag.put()
+    
+  def get_experience(self, tag_title):
+    """
+    Returns the user's experience in a tag.
+    """
+    return self.get_tag(tag_title).xp
     
