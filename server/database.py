@@ -102,23 +102,23 @@ class Tag(ndb.Model):
     
     TODO: Layered caching to speed this up.
     """
-    self.global_tally = 0.0
-    self.global_total = 1.0
-    self.local_tally = 0.0
-    self.local_total = 1.0
-    self.user_total = 1.0
+    self._global_xp = 0.0
+    self._global_xp_norm = 1.0
+    self._local_xp = 0.0
+    self._local_xp_norm = 1.0
+    self._local_user_count = 1.0
     def tally_up(tag):
-      self.global_total += tag.xp
+      self._global_xp_norm += tag.xp
       if tag.key.parent() == self.key.parent():
-        self.local_total += tag.xp
+        self._local_xp_norm += tag.xp
         if tag.user == self.user:
-          self.user_total += 1
+          self._local_user_count += 1
       if tag.title == self.title:
-        self.global_tally += tag.xp
+        self._global_xp += tag.xp
         if tag.key.parent() == self.key.parent():
-          self.local_tally += tag.xp
+          self._local_xp += tag.xp
     Tag.query().map(tally_up)
-    return (self.local_tally*self.global_total) / (self.local_total*self.global_tally+self.user_total)
+    return (self._local_xp*self._global_xp_norm) / (self._local_xp_norm*self._global_xp+self._local_user_count)
       
       
   @classmethod
@@ -179,7 +179,7 @@ class Tag(ndb.Model):
       user.adjust_experience(self.title, self.weight)
       def reward_tagger(tag):
         user = Stream.query(Stream.user==tag.user).get()
-        user.adjust_experience(tag.title, tag.weight/tag.local_tally)
+        user.adjust_experience(tag.title, (tag.weight/tag._local_xp)*self.xp)
       Tag.query(Tag.title == self.title, ancestor=self.key.parent()).map(reward_tagger)
           
   def _pre_put_hook(self):
