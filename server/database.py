@@ -18,8 +18,6 @@ from google.appengine.ext import ndb
 
 import random
 
-all_futures = []
-
 class Post(ndb.Model):
   """
   A post can be a question, it can be an answer, it can even be a statement.    
@@ -178,10 +176,10 @@ class Tag(ndb.Model):
     else:
       # adjust the experience for the taggers
       user = Stream.query(Stream.user==users.get_current_user()).get()
-      all_futures.append(user.adjust_experience(self.title, self.weight))
+      user.adjust_experience(self.title, self.weight)
       def reward_tagger(tag):
         user = Stream.query(Stream.user==tag.user).get()
-        all_futures.append(user.adjust_experience(tag.title, tag.weight/tag.local_tally))
+        user.adjust_experience(tag.title, tag.weight/tag.local_tally)
       Tag.query(Tag.title == self.title, ancestor=self.key.parent()).map(reward_tagger)
           
   def _pre_put_hook(self):

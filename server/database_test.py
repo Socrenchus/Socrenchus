@@ -96,7 +96,6 @@ class DatabaseTests(unittest.TestCase):
     # check that the tags were updated properly
     user = Stream.query(Stream.user==post.author).iter(keys_only=True).next()
     tags = Tag.query(ancestor=user).fetch()
-    ndb.Future.wait_all(all_futures)
     self.assertEqual(len(tags),len(tag_names))
     for t in tags:
       self.assertEqual(round(t.xp), round(int(t.title)*(100.0/sum(tag_names))+1))
