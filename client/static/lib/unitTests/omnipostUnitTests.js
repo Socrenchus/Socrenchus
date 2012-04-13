@@ -3,8 +3,12 @@
 
   (function() {});
   testUtils = {
-    state: 'none',
+    state: 0,
     panelCount: 0,
+    states: {
+      none: 0,
+      open: 1
+    },
     defaultTestOptions: {
       selector: '#myPostBox',
       voteboxOptions: {}
@@ -40,7 +44,7 @@
     var omnipost;
     omnipost = testUtils.init();
     omnipost.find('#ui-omniContainer').click();
-    return equal(testUtils.state, 'text', "The omnicontainer has been clicked, state should be text");
+    return equal(testUtils.state, testUtils.states.open, "The omnicontainer has been clicked, state should be open");
   }));
   test("panel length testing", (function() {
     var omnipost;
@@ -54,7 +58,8 @@
     omnipost.find('#ui-omniPostVideoAttach').click();
     equal(testUtils.panelCount, 2, "The video has been clicked again, panel count should be 2");
     omnipost.find('#ui-omniPostCollapse').click();
-    return equal(testUtils.panelCount, 0, "The omnipost window has been closed, panel count should be 0");
+    equal(testUtils.panelCount, 0, "The omnipost window has been closed, panel count should be 0");
+    return equal(testUtils.state, testUtils.states.none, "The state should be none");
   }));
 
 }).call(this);
