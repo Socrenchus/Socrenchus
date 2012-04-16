@@ -83,6 +83,12 @@ class Post(ndb.Model):
         user.adjust_experience(tag,((delta * tags_d[tag]) / s)).wait()
         
     return self.put_async()
+    
+  def assign_children(self):
+    """
+    Checks for children that meet the assignment criteria and assigns them.
+    """
+    pass
 
 class Tag(ndb.Model):
   """
@@ -194,6 +200,17 @@ class Stream(ndb.Model):
   """
   user        = ndb.UserProperty(auto_current_user_add=True)
   timestamp   = ndb.DateTimeProperty(auto_now=True)
+  
+  @classmethod
+  def get_or_create(cls, user):
+    """
+    Creates a new stream or finds the user's stream.
+    """
+    u = Stream.query(Stream.user==user).get()
+    if not u:
+      u = Stream(user=user)
+      u.put()
+    return u
   
   @property
   def assignments(self):
