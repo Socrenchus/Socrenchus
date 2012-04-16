@@ -206,7 +206,7 @@ class Stream(ndb.Model):
     """
     Creates a new stream or finds the user's stream.
     """
-    u = Stream.query(Stream.user=user).get()
+    u = Stream.query(Stream.user==user).get()
     if not u:
       u = Stream(user=user)
       u.put()
