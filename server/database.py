@@ -28,11 +28,19 @@ class Post(ndb.Model):
   score       = ndb.FloatProperty(default=0.0)
   timestamp   = ndb.DateTimeProperty(auto_now=True)
   
+  @property
+  def children(self):
+    """
+    Return a query of children of this post.
+    """
+    return Post.query(ancestor=self.key)
+  
+  @property
   def sibling(self):
     """
     Return a query for a sibling of this post.
     """
-    return ndb.Query(ancestor=self.key.parent())
+    return Post.query(ancestor=self.key.parent())
   
   @ndb.ComputedProperty
   def popularity(self):
@@ -83,12 +91,59 @@ class Post(ndb.Model):
         user.adjust_experience(tag,((delta * tags_d[tag]) / s)).wait()
         
     return self.put_async()
+  
+  def assign_or_die(self):
+    """
+    Assign the current post to the current user or die if already assigned.
+    """
+    me = users.get_current_user()
+    assigned = Tag.query(Tag.title==',assigned', Tag.user==me, ancestor=self.key).count(1)
+    if assigned:
+      return False
+    else:
+      Tag(parent=self, user=me, title=',assigned').put()
+      return True
+  
+  def assign_children(self, num):
+    """
+    Assigns num children to the current user if num children exist.
+    """
+    # TODO: Improve selection of child posts
+    me = users.get_current_user()
+    user = Stream.query(Stream.user==me).get()
+    for child in self.children:
+      if child.assign_or_die():
+        num -= 1
+      if num <= 0:
+        return True
+    return False
     
-  def assign_children(self):
+  def verify_assignment_count(self):
     """
-    Checks for children that meet the assignment criteria and assigns them.
+    Checks if new assignments are due, assigns them if they are.
     """
-    pass
+    me = users.get_current_user()
+    my_reply = self.sibling().filter(Post.author==me).get()
+    if my_reply:
+      # count the current replies visible to the user
+      current = Tag.query(Tag.title==',assigned', Tag.user==me, ancestor=self.key).count()
+      # get our experience in the context of our reply
+      old_xp = Tag.query(Tag.title==',assigned', Tag.user==me, ancestor=my_reply.key).get().xp
+      new_xp = my_reply.dereference_experience()
+      # run our experience points through the magic step function
+      expected = Post.step_reveal(new_xp-old_xp)
+      # assign the newly earned posts
+      if expected > current:
+        self.assign_children(expected-current)
+        
+  @classmethod
+  def step_reveal(cls, delta_xp):
+    """
+    Converts change in experience to expected reponse assignments.
+    """
+    # TODO: Improve step function
+    # show 5 posts for every 25 xp
+    return (delta_xp/25)*5
 
 class Tag(ndb.Model):
   """
@@ -252,3 +307,11 @@ class Stream(ndb.Model):
     """
     return self.get_tag(tag_title).xp
     
+  def create_post(self, content, parent=None):
+    """
+    Creates a post from given content with optional parent.
+    """
+    p = Post(parent=parent,content=content)
+    p.put()
+    Tag(title=',assignment', user=self.user, parent=p).put()
+    return p
