@@ -170,3 +170,6 @@ class DatabaseTests(unittest.TestCase):
     self.assertEqual(cc.get().xp, 500)
     # check the final post score
     self.assertEqual(p.get().score, 0)
+    
+  def testIncrementalAssignment(self):
+    raise NotImplementedError
