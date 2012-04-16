@@ -318,6 +318,8 @@ class Stream(ndb.Model):
     """
     Creates a post from given content with optional parent.
     """
+    if not parent:
+      parent = Post.get_root()
     p = Post(parent=parent,content=content)
     p.put()
     Tag(title=',assignment', user=self.user, parent=p).put()
