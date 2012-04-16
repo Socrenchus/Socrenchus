@@ -16,25 +16,105 @@ This file contains all of the request handlers.
 
 __author__ = 'Bryan Goldstein'
 
-import wsgiref.handlers
-import json
-import os
+#import wsgiref.handlers
+#import json
+
+import os, sys, inspect, Cookie
+import logging
+cmd_folder = os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])
+if cmd_folder not in sys.path:
+  sys.path.insert(0, cmd_folder)
+from database import Stream
 
 from google.appengine.ext import webapp
 from google.appengine.api import users
 from google.appengine.ext.ndb import context
-from rpc import *
+#from rpc import #
+from google.appengine.ext.webapp import template
+from google.appengine.ext import webapp
+from google.appengine.ext import ndb
+from google.appengine.ext.webapp.util import run_wsgi_app
 
-_DEBUG = 'localhost' in users.create_logout_url( "/" )
+from django.utils import simplejson
+
+from datetime import datetime
+#_DEBUG = 'localhost' in users.create_logout_url( "/" )
+
+#class PostList(ndb.Model):
+#  timestamp = ndb.DateTimeProperty(auto_now_add=True)
+
+#class Posts(ndb.Model):
+#  postlist = ndb.KeyProperty(PostList)
+# parentID = ndb.IntegerProperty()
+# content = ndb.StringProperty()
+# votecount = ndb.IntegerProperty()
+# def toDict(self):
+#    post = {
+#      'id': self.key.id(),
+#      'parentID': self.parentID,
+#      'content': self.content,
+#      'votecount': self.votecount
+#      }
+#    return post
     
-class LoginHander(webapp.RequestHandler):
+
+class RESTfulHandler(webapp.RequestHandler):
+  def get(self, id):
+    stream = Stream.get_or_create(users.get_current_user())
+    #postlist = stream.assignments
+    #posts = []
+    #query = Post.all()
+    #query.filter("postlist =", postlist.key)
+    #for post in query:
+    #  posts.append(todo.toDict())
+    #posts = simplejson.dumps(posts)
+    #self.response.out.write(posts)
+
+  def post(self, id):
+    #key = self.request.cookies['posts']
+    #postlist = key.get()
+    post = simplejson.loads(self.request.body)
+    post = Posts(
+  	       parentID   = post['parentID'],
+  	       content = post['content'],
+  	       votecount  = post['votecount'])
+    post.put()
+    #post = simplejson.dumps(post.toDict())
+    #self.response.out.write(post)
+
+  def put(self, id):
+    logging.debug("id: " + str(id))
+    stream = Stream.get_or_create(users.get_current_user())
+    #if post.postlist.key() == postlist.key():
+    tmp = simplejson.loads(self.request.body)
+    if 'parent' in tmp:
+      post = stream.create_post(str(tmp['content']), tmp['parent'])
+    else:
+      post = stream.create_post(str(tmp['content']))
+    #post = simplejson.dumps(post.toDict())
+    #postlist = stream.assignments
+    #self.response.out.write(post)
+    #else:
+    #  self.error(403)
+
+  def delete(self, id):
+    key = self.request.cookies['posts']
+    postlist = db.get(key)
+    post = Posts.get_by_id(int(id))
+    if post.postlist.key() == postlist.key():
+      tmp = post.toDict()
+      post.delete()
+    else:
+      self.error(403)
+
+class LoginHandler(webapp.RequestHandler):
   """
   Logs the user in and redirects.
   """
   def get(self):
-    self.redirect('/')
+    self.redirect('/#servertest')
     
-class LogoutHander(webapp.RequestHandler):
+class LogoutHandler(webapp.RequestHandler):
   """
   Logs the user out and redirects.
   """
@@ -83,18 +163,22 @@ class CollectionHandler(webapp.RequestHandler):
   """
   pass
 
+options = [
+  #(r'/(.*)/report.csv', GradeReport),
+  ('/login', LoginHandler),
+  ('/logout', LogoutHandler),
+  #(r'/rpc/(.*)/(.*)', RPCHandler),
+  #(r'/rpc/(.*)()', RPCHandler),
+  #r'/rpc()()', RPCHandler)
+  ('/posts\/?([0-9]*)', RESTfulHandler)
+]
+#application = webapp.WSGIApplication(options, debug=_DEBUG)
+application = webapp.WSGIApplication(options, debug=True)
+#application = context.toplevel(application.__call__)
+  
 def main():
-  options = [
-    #(r'/(.*)/report.csv', GradeReport),
-    ('/login', LoginHander),
-    ('/logout', LogoutHander),
-    (r'/rpc/(.*)/(.*)', RPCHandler),
-    (r'/rpc/(.*)()', RPCHandler),
-    (r'/rpc()()', RPCHandler)
-  ]
-  application = webapp.WSGIApplication(options, debug=_DEBUG)
-  application = context.toplevel(application.__call__)
-  wsgiref.handlers.CGIHandler().run(application)
+  #wsgiref.handlers.CGIHandler().run(application)
+  run_wsgi_app(application)
 
 if __name__ == '__main__':
   main()
