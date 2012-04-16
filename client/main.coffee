@@ -6,27 +6,22 @@ $ ->
     
   class Post extends Backbone.Model
     respond: (content) =>
-      p = new Post(
-        parentID: @id
-        id: '' + @id + @get('responses').length
-        editing: false
+      p = new Post(        
+        id: 1
+        parent: @id
         content: content
-        votecount: 0
-        tags: ["kaiji", "san"]
-        parents: [@id]
-        responses: []
-        hidden: false
+        score: 0
       )
-      responseArray = @get('responses')
-      responseArray.push(p.get('id'))
-      @save({responses: responseArray})
+      #responseArray = @get('responses')
+      #responseArray.push(p.get('id'))
+      #@save({responses: responseArray})
       postCollection.create(p)
       
     
   class Posts extends Backbone.Collection
     model: Post
-    localStorage: new Store('posts')
-    #url: '/posts'
+    #localStorage: new Store('posts')
+    url: '/posts'
     
   ###
   # View
@@ -52,33 +47,32 @@ $ ->
       $(@el).find('.inner-question').append(postcontentdiv)
     
     render: ->
-      unless @model.get('hidden')
-        $(@el).html(@template)
-        $(@el).find('.inner-question').votebox({votesnum:@model.get('votecount')})
-        @renderPostContent()
-        $(@el).find('.inner-question').tagbox({editing: true, tags:@model.get('tags')})
-        $(@el).find('.inner-question').omnipost({callback: @model.respond, editing:true})
-        responsediv = $("<div id = 'response#{@id}'></div>")
-        $(@el).find('.inner-question').append(responsediv)
-        if @model.get('parents').length is 0
-          lockedpostsdiv = $("<div class='locked-posts'></div>")
-          progressbardiv = $("<div class='progressbar'></div>")
-          #percent = Math.floor(Math.random()*100)
-          percent = 10
-          textinline = true
-          indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(1) + ' post</p>')
-          if percent < 100.0/350.0 * 100
-            textinline = false
-          if textinline
-            progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")
-            progressindicatordiv.append(indicatortext)          
-            progressbardiv.append(progressindicatordiv)
-          else
-            progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")          
-            progressbardiv.append(progressindicatordiv)
-            progressbardiv.append(indicatortext)            
-          lockedpostsdiv.append(progressbardiv)
-          $(@el).find('.inner-question').append(lockedpostsdiv)
+      $(@el).html(@template)
+      $(@el).find('.inner-question').votebox({votesnum:@model.get('score')})
+      @renderPostContent()
+      $(@el).find('.inner-question').tagbox()
+      $(@el).find('.inner-question').omnipost({callback: @model.respond})
+      responsediv = $("<div id = 'response#{@id}'></div>")
+      $(@el).find('.inner-question').append(responsediv)
+      unless @model.get('parent') is 0
+        lockedpostsdiv = $("<div class='locked-posts'></div>")
+        progressbardiv = $("<div class='progressbar'></div>")
+        #percent = Math.floor(Math.random()*100)
+        percent = 10
+        textinline = true
+        indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(1) + ' post</p>')
+        if percent < 100.0/350.0 * 100
+          textinline = false
+        if textinline
+          progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")
+          progressindicatordiv.append(indicatortext)          
+          progressbardiv.append(progressindicatordiv)
+        else
+          progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")          
+          progressbardiv.append(progressindicatordiv)
+          progressbardiv.append(indicatortext)            
+        lockedpostsdiv.append(progressbardiv)
+        $(@el).find('.inner-question').append(lockedpostsdiv)
       return $(@el)
         
   class StreamView extends Backbone.View
@@ -276,8 +270,8 @@ $ ->
 
     addOne: (item) ->
       post = new PostView(model: item)
-      if document.getElementById('response' + item.get('parentID'))
-        $('#response' + item.get('parentID')).prepend(post.render())
+      if document.getElementById('response' + item.get('parent'))
+        $('#response' + item.get('parent')).prepend(post.render())
       else      
         $('#assignments').append(post.render())
       # parents = ()
@@ -380,7 +374,8 @@ $ ->
       ''  : 'normal'
       'unpopulate' : 'unpopulate'
       'populate' : 'populate'
-      'servertest' : 'servertest'
+      'serverpopulate' : 'serverpopulate'
+      'servertest'     : 'servertest'
     #assign: (id) ->
     #  postCollection.get(id)
     #  postCollection.fetch()
@@ -389,16 +384,14 @@ $ ->
       item.destroy()
     
     servertest: ->
+      postCollection.fetch()
+
+    serverpopulate: ->
       data = {posttext: 'What is your earliest memory of WWII?', linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'}
       p = new Post(
         id: 1
-        editing: false
         content: data
-        votecount: 25
-        tags: ["world war II"]
-        parents: ''
-        responses: []
-        hidden: false
+        score: 25
       )
       postCollection.create(p)
 

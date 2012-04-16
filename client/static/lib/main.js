@@ -18,22 +18,12 @@
       }
 
       Post.prototype.respond = function(content) {
-        var p, responseArray;
+        var p;
         p = new Post({
-          parentID: this.id,
-          id: '' + this.id + this.get('responses').length,
-          editing: false,
+          id: 1,
+          parent: this.id,
           content: content,
-          votecount: 0,
-          tags: ["kaiji", "san"],
-          parents: [this.id],
-          responses: [],
-          hidden: false
-        });
-        responseArray = this.get('responses');
-        responseArray.push(p.get('id'));
-        this.save({
-          responses: responseArray
+          score: 0
         });
         return postCollection.create(p);
       };
@@ -51,7 +41,7 @@
 
       Posts.prototype.model = Post;
 
-      Posts.prototype.localStorage = new Store('posts');
+      Posts.prototype.url = '/posts';
 
       return Posts;
 
@@ -96,41 +86,35 @@
 
       PostView.prototype.render = function() {
         var indicatortext, lockedpostsdiv, percent, progressbardiv, progressindicatordiv, responsediv, textinline;
-        if (!this.model.get('hidden')) {
-          $(this.el).html(this.template);
-          $(this.el).find('.inner-question').votebox({
-            votesnum: this.model.get('votecount')
-          });
-          this.renderPostContent();
-          $(this.el).find('.inner-question').tagbox({
-            editing: true,
-            tags: this.model.get('tags')
-          });
-          $(this.el).find('.inner-question').omnipost({
-            callback: this.model.respond,
-            editing: true
-          });
-          responsediv = $("<div id = 'response" + this.id + "'></div>");
-          $(this.el).find('.inner-question').append(responsediv);
-          if (this.model.get('parents').length === 0) {
-            lockedpostsdiv = $("<div class='locked-posts'></div>");
-            progressbardiv = $("<div class='progressbar'></div>");
-            percent = 10;
-            textinline = true;
-            indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(1) + ' post</p>');
-            if (percent < 100.0 / 350.0 * 100) textinline = false;
-            if (textinline) {
-              progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
-              progressindicatordiv.append(indicatortext);
-              progressbardiv.append(progressindicatordiv);
-            } else {
-              progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
-              progressbardiv.append(progressindicatordiv);
-              progressbardiv.append(indicatortext);
-            }
-            lockedpostsdiv.append(progressbardiv);
-            $(this.el).find('.inner-question').append(lockedpostsdiv);
+        $(this.el).html(this.template);
+        $(this.el).find('.inner-question').votebox({
+          votesnum: this.model.get('score')
+        });
+        this.renderPostContent();
+        $(this.el).find('.inner-question').tagbox();
+        $(this.el).find('.inner-question').omnipost({
+          callback: this.model.respond
+        });
+        responsediv = $("<div id = 'response" + this.id + "'></div>");
+        $(this.el).find('.inner-question').append(responsediv);
+        if (this.model.get('parent') !== 0) {
+          lockedpostsdiv = $("<div class='locked-posts'></div>");
+          progressbardiv = $("<div class='progressbar'></div>");
+          percent = 10;
+          textinline = true;
+          indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(1) + ' post</p>');
+          if (percent < 100.0 / 350.0 * 100) textinline = false;
+          if (textinline) {
+            progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
+            progressindicatordiv.append(indicatortext);
+            progressbardiv.append(progressindicatordiv);
+          } else {
+            progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
+            progressbardiv.append(progressindicatordiv);
+            progressbardiv.append(indicatortext);
           }
+          lockedpostsdiv.append(progressbardiv);
+          $(this.el).find('.inner-question').append(lockedpostsdiv);
         }
         return $(this.el);
       };
@@ -373,8 +357,8 @@
         post = new PostView({
           model: item
         });
-        if (document.getElementById('response' + item.get('parentID'))) {
-          return $('#response' + item.get('parentID')).prepend(post.render());
+        if (document.getElementById('response' + item.get('parent'))) {
+          return $('#response' + item.get('parent')).prepend(post.render());
         } else {
           return $('#assignments').append(post.render());
         }
@@ -478,6 +462,7 @@
         '': 'normal',
         'unpopulate': 'unpopulate',
         'populate': 'populate',
+        'serverpopulate': 'serverpopulate',
         'servertest': 'servertest'
       };
 
@@ -486,6 +471,10 @@
       };
 
       Workspace.prototype.servertest = function() {
+        return postCollection.fetch();
+      };
+
+      Workspace.prototype.serverpopulate = function() {
         var data, p;
         data = {
           posttext: 'What is your earliest memory of WWII?',
@@ -493,13 +482,8 @@
         };
         p = new Post({
           id: 1,
-          editing: false,
           content: data,
-          votecount: 25,
-          tags: ["world war II"],
-          parents: '',
-          responses: [],
-          hidden: false
+          score: 25
         });
         return postCollection.create(p);
       };
