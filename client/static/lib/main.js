@@ -18,22 +18,12 @@
       }
 
       Post.prototype.respond = function(content) {
-        var p, responseArray;
+        var p;
         p = new Post({
-          parentID: this.id,
-          id: '' + this.id + this.get('responses').length,
-          editing: false,
+          id: 1,
+          parent: this.id,
           content: content,
-          votecount: 0,
-          tags: ["kaiji", "san"],
-          parents: [this.id],
-          responses: [],
-          hidden: false
-        });
-        responseArray = this.get('responses');
-        responseArray.push(p.get('id'));
-        this.save({
-          responses: responseArray
+          score: 0
         });
         return postCollection.create(p);
       };
@@ -51,7 +41,7 @@
 
       Posts.prototype.model = Post;
 
-      Posts.prototype.localStorage = new Store('posts');
+      Posts.prototype.url = '/posts';
 
       return Posts;
 
@@ -96,41 +86,35 @@
 
       PostView.prototype.render = function() {
         var indicatortext, lockedpostsdiv, percent, progressbardiv, progressindicatordiv, responsediv, textinline;
-        if (!this.model.get('hidden')) {
-          $(this.el).html(this.template);
-          $(this.el).find('.inner-question').votebox({
-            votesnum: this.model.get('votecount')
-          });
-          this.renderPostContent();
-          $(this.el).find('.inner-question').tagbox({
-            editing: true,
-            tags: this.model.get('tags')
-          });
-          $(this.el).find('.inner-question').omnipost({
-            callback: this.model.respond,
-            editing: true
-          });
-          responsediv = $("<div id = 'response" + this.id + "'></div>");
-          $(this.el).find('.inner-question').append(responsediv);
-          if (this.model.get('parents').length === 0) {
-            lockedpostsdiv = $("<div class='locked-posts'></div>");
-            progressbardiv = $("<div class='progressbar'></div>");
-            percent = 10;
-            textinline = true;
-            indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(1) + ' post</p>');
-            if (percent < 100.0 / 350.0 * 100) textinline = false;
-            if (textinline) {
-              progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
-              progressindicatordiv.append(indicatortext);
-              progressbardiv.append(progressindicatordiv);
-            } else {
-              progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
-              progressbardiv.append(progressindicatordiv);
-              progressbardiv.append(indicatortext);
-            }
-            lockedpostsdiv.append(progressbardiv);
-            $(this.el).find('.inner-question').append(lockedpostsdiv);
+        $(this.el).html(this.template);
+        $(this.el).find('.inner-question').votebox({
+          votesnum: this.model.get('score')
+        });
+        this.renderPostContent();
+        $(this.el).find('.inner-question').tagbox();
+        $(this.el).find('.inner-question').omnipost({
+          callback: this.model.respond
+        });
+        responsediv = $("<div id = 'response" + this.id + "'></div>");
+        $(this.el).find('.inner-question').append(responsediv);
+        if (this.model.get('parent') !== 0) {
+          lockedpostsdiv = $("<div class='locked-posts'></div>");
+          progressbardiv = $("<div class='progressbar'></div>");
+          percent = 10;
+          textinline = true;
+          indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(1) + ' post</p>');
+          if (percent < 100.0 / 350.0 * 100) textinline = false;
+          if (textinline) {
+            progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
+            progressindicatordiv.append(indicatortext);
+            progressbardiv.append(progressindicatordiv);
+          } else {
+            progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
+            progressbardiv.append(progressindicatordiv);
+            progressbardiv.append(indicatortext);
           }
+          lockedpostsdiv.append(progressbardiv);
+          $(this.el).find('.inner-question').append(lockedpostsdiv);
         }
         return $(this.el);
       };
@@ -143,7 +127,7 @@
       __extends(StreamView, _super);
 
       function StreamView() {
-        this.disp = __bind(this.disp, this);
+        this.render = __bind(this.render, this);
         this.storyPart5Done = __bind(this.storyPart5Done, this);
         this.storyPart4Done = __bind(this.storyPart4Done, this);
         this.storyPart3Done = __bind(this.storyPart3Done, this);
@@ -155,8 +139,9 @@
         this.streamviewRendered = false;
         this.selectedStory = '#story-part1';
         postCollection.bind('add', this.addOne, this);
-        postCollection.fetch();
-        return this.addAll();
+        postCollection.bind('reset', this.addAll, this);
+        postCollection.bind('all', this.render, this);
+        return postCollection.fetch();
       };
 
       StreamView.prototype.setStoryPart = function(storyPart) {
@@ -372,8 +357,8 @@
         post = new PostView({
           model: item
         });
-        if (document.getElementById('response' + item.get('parentID'))) {
-          return $('#response' + item.get('parentID')).prepend(post.render());
+        if (document.getElementById('response' + item.get('parent'))) {
+          return $('#response' + item.get('parent')).prepend(post.render());
         } else {
           return $('#assignments').append(post.render());
         }
@@ -391,7 +376,7 @@
         return postCollection.each(this.deleteOne);
       };
 
-      StreamView.prototype.disp = function() {
+      StreamView.prototype.render = function() {
         var profileshowing,
           _this = this;
         if (!this.streamviewRendered) {
@@ -434,7 +419,7 @@
               },
               show: {
                 when: false,
-                ready: true
+                ready: false
               },
               hide: false,
               style: {
@@ -451,12 +436,7 @@
             });
           }
           $('.ui-omnipost:first #ui-omniContainer').focusin(function() {
-            if (!_this.omniboxTipInvisible) {
-              $('#ui-omniContainer').qtip("hide");
-              _this.setStoryPart('#story-part2');
-              $('.ui-omnipost:first #ui-omniPostText').val('I remember my mother cooking breakfast while my sister, my father, and I listened to the radio as FDR began another one of his fireside chats. It was september of 1939 and the topic was the European War.');
-              $('.ui-omnipost:first #ui-omniPostText').textareatypewriter(_this.storyPart2Done);
-            }
+            if (!_this.omniboxTipInvisible) $('#ui-omniContainer').qtip("hide");
             return _this.omniboxTipInvisible = true;
           });
           $(document).click(function() {});
@@ -481,11 +461,31 @@
       Workspace.prototype.routes = {
         '': 'normal',
         'unpopulate': 'unpopulate',
-        'populate': 'populate'
+        'populate': 'populate',
+        'serverpopulate': 'serverpopulate',
+        'servertest': 'servertest'
       };
 
       Workspace.prototype.deleteOne = function(item) {
         return item.destroy();
+      };
+
+      Workspace.prototype.servertest = function() {
+        return postCollection.fetch();
+      };
+
+      Workspace.prototype.serverpopulate = function() {
+        var data, p;
+        data = {
+          posttext: 'What is your earliest memory of WWII?',
+          linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'
+        };
+        p = new Post({
+          id: 1,
+          content: data,
+          score: 25
+        });
+        return postCollection.create(p);
       };
 
       Workspace.prototype.normal = function() {
@@ -598,16 +598,14 @@
           responses: [],
           hidden: true
         });
-        postCollection.create(p6);
-        return App.disp();
+        return postCollection.create(p6);
       };
 
       Workspace.prototype.unpopulate = function() {
         postCollection.fetch();
         postCollection.each(this.deleteOne);
         postCollection.reset();
-        $('#assignments').html('');
-        return App.disp();
+        return $('#assignments').html('');
       };
 
       Workspace.prototype.populate = function() {
@@ -720,8 +718,7 @@
           responses: [],
           hidden: true
         });
-        postCollection.create(p6);
-        return App.disp();
+        return postCollection.create(p6);
       };
 
       return Workspace;

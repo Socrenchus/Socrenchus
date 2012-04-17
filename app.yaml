@@ -4,7 +4,6 @@ runtime: python
 api_version: 1
 
 handlers:
-
 - url: /(\#.*)?
   static_files: client/static/index.html
   upload: client/static/index.html
@@ -13,7 +12,7 @@ handlers:
   script: $PYTHON_LIB/apphosting/ext/admin/
   login: admin
 
-- url: /(login|logout|rpc)(.*)
+- url: /(login|logout|posts)(.*)
   script: server/handlers.py
   login: required
   
