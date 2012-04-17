@@ -21,9 +21,6 @@ __author__ = 'Bryan Goldstein'
 
 import os, sys, inspect, Cookie
 import logging
-cmd_folder = os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])
-if cmd_folder not in sys.path:
-  sys.path.insert(0, cmd_folder)
 from database import Stream
 
 from google.appengine.ext import webapp
@@ -62,14 +59,15 @@ class RESTfulHandler(webapp.RequestHandler):
   def get(self, id):
     stream = Stream.get_or_create(users.get_current_user())
     #postlist = stream.assignments
-    #posts = []
+    #logging.debug(postlist)
     #query = Post.all()
     #query.filter("postlist =", postlist.key)
     #for post in query:
     #  posts.append(todo.toDict())
     #posts = simplejson.dumps(posts)
     #self.response.out.write(posts)
-
+    self.response.out.write("GETWORKING")
+  """
   def post(self, id):
     #key = self.request.cookies['posts']
     #postlist = key.get()
@@ -81,7 +79,7 @@ class RESTfulHandler(webapp.RequestHandler):
     post.put()
     #post = simplejson.dumps(post.toDict())
     #self.response.out.write(post)
-
+  """
   def put(self, id):
     logging.debug("id: " + str(id))
     stream = Stream.get_or_create(users.get_current_user())
@@ -96,7 +94,7 @@ class RESTfulHandler(webapp.RequestHandler):
     #self.response.out.write(post)
     #else:
     #  self.error(403)
-
+  """
   def delete(self, id):
     key = self.request.cookies['posts']
     postlist = db.get(key)
@@ -106,7 +104,7 @@ class RESTfulHandler(webapp.RequestHandler):
       post.delete()
     else:
       self.error(403)
-
+  """
 class LoginHandler(webapp.RequestHandler):
   """
   Logs the user in and redirects.
