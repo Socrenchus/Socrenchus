@@ -6,8 +6,8 @@ import unittest2
 
 def main():
     sys.path.insert(0, "/Applications/GoogleAppEngineLauncher.app/Contents/Resources/GoogleAppEngine-default.bundle/Contents/Resources/google_appengine")
-    sys.path.insert(0, "/home/prashn64/Downloads/google_appengine")
-    sys.path.insert(0, "/home/prashn64/Downloads/appengine-ndb-experiment")
+    sys.path.insert(1, "/home/prashn64/Downloads/google_appengine")
+    sys.path.insert(1, "/home/prashn64/Downloads/appengine-ndb-experiment")
     import dev_appserver
     dev_appserver.fix_sys_path()
     suite = unittest2.loader.TestLoader().loadTestsFromName('database_test')

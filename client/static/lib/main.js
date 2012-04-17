@@ -140,8 +140,7 @@
         this.selectedStory = '#story-part1';
         postCollection.bind('add', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
-        postCollection.bind('all', this.render, this);
-        return postCollection.fetch();
+        return postCollection.bind('all', this.render, this);
       };
 
       StreamView.prototype.setStoryPart = function(storyPart) {

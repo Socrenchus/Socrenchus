@@ -82,9 +82,7 @@ $ ->
       postCollection.bind('add', @addOne, this)
       postCollection.bind('reset', @addAll, this)
       postCollection.bind('all', @render, this)
-      postCollection.fetch()
-      #@addAll()
-      #@render()
+      #postCollection.fetch()
 
     #FIXME: remove these next few functions after the demo.
     setStoryPart: (storyPart) ->

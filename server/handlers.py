@@ -16,29 +16,17 @@ This file contains all of the request handlers.
 
 __author__ = 'Bryan Goldstein'
 
-#import wsgiref.handlers
-#import json
-
-import os, sys, inspect, Cookie
-import logging
-from database import Stream
-
+import wsgiref.handlers
+import json
+import os
 from google.appengine.ext import webapp
 from google.appengine.api import users
 from google.appengine.ext.ndb import context
-#from rpc import #
-from google.appengine.ext.webapp import template
-from google.appengine.ext import webapp
 from google.appengine.ext import ndb
+import logging
+from database import *
 from google.appengine.ext.webapp.util import run_wsgi_app
-
-from django.utils import simplejson
-
-from datetime import datetime
 #_DEBUG = 'localhost' in users.create_logout_url( "/" )
-
-#class PostList(ndb.Model):
-#  timestamp = ndb.DateTimeProperty(auto_now_add=True)
 
 class PostToJSON(ndb.Model):
  @classmethod
@@ -56,12 +44,12 @@ class RESTfulHandler(webapp.RequestHandler):
   def get(self, id):
     stream = Stream.get_or_create(users.get_current_user())
     postlist = stream.assignments
-    #posts = []
-    #for post in postlist:
-    #  posts.append(PostToJSON.toDict(post))
-    #posts = simplejson.dumps(posts)
-    #self.response.out.write(posts)
+    posts = []
+    for post in postlist:
+      posts.append(json.encode(post))
+    #posts = json.simplejson.dumps(posts)
     self.response.out.write(posts)
+
   """
   def post(self, id):
     #key = self.request.cookies['posts']
@@ -78,12 +66,12 @@ class RESTfulHandler(webapp.RequestHandler):
   def put(self, id):
     stream = Stream.get_or_create(users.get_current_user())
     #if post.postlist.key() == postlist.key():
-    tmp = simplejson.loads(self.request.body)
+    tmp = json.simplejson.loads(self.request.body)
     if 'parent' in tmp:
       post = stream.create_post(str(tmp['content']), tmp['parent'])
     else:
       post = stream.create_post(str(tmp['content']))
-    post = simplejson.dumps(PostToJSON.toDict(post))
+    post = json.simplejson.dumps(json.encode(post))
     self.response.out.write(post)
     #else:
     #  self.error(403)
@@ -111,12 +99,9 @@ class LogoutHandler(webapp.RequestHandler):
   """
   def get(self):
     self.redirect(users.create_logout_url( "/" ))
-    
+   
+"""
 class RPCHandler(webapp.RequestHandler):
-  """ 
-  Allows access to functions defined in the RPCMethods class.
-  """
-
   def __init__(self):
     webapp.RequestHandler.__init__(self)
     self.methods = RPCMethods()
@@ -147,7 +132,7 @@ class RPCHandler(webapp.RequestHandler):
     
   def put(self, collection, key):
     return self.get(collection, key)
-    
+    """
 class CollectionHandler(webapp.RequestHandler):
   """
   Handle Backbone.js collection sync calls.

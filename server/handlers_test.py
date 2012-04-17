@@ -46,9 +46,6 @@ class HandlerTests(unittest.TestCase):
 
   def testGet(self):
     # get post list
-    #stream = Stream.get_or_create(users.get_current_user())
-    #postlist = stream.assignments
-    
     request = webapp.Request({
       "wsgi.input": StringIO(),
       "CONTENT_LENGTH": 0,
@@ -60,19 +57,6 @@ class HandlerTests(unittest.TestCase):
     handler.initialize(request, response)
     handler.get(1)
 
-  def testPut(self):
-    jsonRequest = {content: "{posttext: 'What is your earliest memory of WWII?', linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'}"}
-      
-    request = webapp.Request({
-      "wsgi.input": jsonRequest,
-      "CONTENT_LENGTH": 0,
-      "METHOD": "PUT",
-      "PATH_INFO": "/",
-    })
-    response = webapp.Response()
-    handler = RESTfulHandler()
-    handler.initialize(request, response)
-    handler.put(1)
 
 
 
