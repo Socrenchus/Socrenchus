@@ -40,33 +40,28 @@ from datetime import datetime
 #class PostList(ndb.Model):
 #  timestamp = ndb.DateTimeProperty(auto_now_add=True)
 
-#class Posts(ndb.Model):
-#  postlist = ndb.KeyProperty(PostList)
-# parentID = ndb.IntegerProperty()
-# content = ndb.StringProperty()
-# votecount = ndb.IntegerProperty()
-# def toDict(self):
-#    post = {
-#      'id': self.key.id(),
-#      'parentID': self.parentID,
-#      'content': self.content,
-#      'votecount': self.votecount
-#      }
-#    return post
+class PostToJSON(ndb.Model):
+ @classmethod
+ def toDict(rawpost):
+    post = {
+      'id': rawpost.key.id(),
+      'parentID': rawpost.parentID,
+      'content': rawpost.content,
+      'votecount': rawpost.votecount
+      }
+    return post
     
 
 class RESTfulHandler(webapp.RequestHandler):
   def get(self, id):
     stream = Stream.get_or_create(users.get_current_user())
-    #postlist = stream.assignments
-    #logging.debug(postlist)
-    #query = Post.all()
-    #query.filter("postlist =", postlist.key)
-    #for post in query:
-    #  posts.append(todo.toDict())
+    postlist = stream.assignments
+    #posts = []
+    #for post in postlist:
+    #  posts.append(PostToJSON.toDict(post))
     #posts = simplejson.dumps(posts)
     #self.response.out.write(posts)
-    self.response.out.write("GETWORKING")
+    self.response.out.write(posts)
   """
   def post(self, id):
     #key = self.request.cookies['posts']
@@ -81,7 +76,6 @@ class RESTfulHandler(webapp.RequestHandler):
     #self.response.out.write(post)
   """
   def put(self, id):
-    logging.debug("id: " + str(id))
     stream = Stream.get_or_create(users.get_current_user())
     #if post.postlist.key() == postlist.key():
     tmp = simplejson.loads(self.request.body)
@@ -89,9 +83,8 @@ class RESTfulHandler(webapp.RequestHandler):
       post = stream.create_post(str(tmp['content']), tmp['parent'])
     else:
       post = stream.create_post(str(tmp['content']))
-    #post = simplejson.dumps(post.toDict())
-    #postlist = stream.assignments
-    #self.response.out.write(post)
+    post = simplejson.dumps(PostToJSON.toDict(post))
+    self.response.out.write(post)
     #else:
     #  self.error(403)
   """

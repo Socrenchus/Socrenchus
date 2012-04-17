@@ -144,13 +144,6 @@ class Post(ndb.Model):
     # TODO: Improve step function
     # show 5 posts for every 25 xp
     return (delta_xp/25)*5
-    
-  @classmethod
-  def root(cls):
-    """
-    Get the root post.
-    """
-    return Post.get_or_insert('root')
 
 class Tag(ndb.Model):
   """
@@ -318,9 +311,6 @@ class Stream(ndb.Model):
     """
     Creates a post from given content with optional parent.
     """
-    if not parent:
-      parent = Post.root()
     p = Post(parent=parent,content=content)
-    p.put()
-    Tag(title=',assignment', user=self.user, parent=p).put()
+    Tag(title=',assignment', user=self.user, parent=p.put()).put()
     return p
