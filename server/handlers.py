@@ -28,18 +28,6 @@ from database import *
 from google.appengine.ext.webapp.util import run_wsgi_app
 #_DEBUG = 'localhost' in users.create_logout_url( "/" )
 
-class PostToJSON(ndb.Model):
- @classmethod
- def toDict(rawpost):
-    post = {
-      'id': rawpost.key.id(),
-      'parentID': rawpost.parentID,
-      'content': rawpost.content,
-      'votecount': rawpost.votecount
-      }
-    return post
-    
-
 class RESTfulHandler(webapp.RequestHandler):
   def get(self, id):
     stream = Stream.get_or_create(users.get_current_user())
@@ -47,7 +35,7 @@ class RESTfulHandler(webapp.RequestHandler):
     posts = []
     for post in postlist:
       posts.append(json.encode(post))
-    #posts = json.simplejson.dumps(posts)
+    posts = json.simplejson.dumps(posts)
     self.response.out.write(posts)
 
   """

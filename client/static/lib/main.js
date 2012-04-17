@@ -76,11 +76,12 @@
       };
 
       PostView.prototype.renderPostContent = function() {
-        var postcontentdiv;
+        var jsondata, postcontentdiv;
+        jsondata = this.model.get('content');
         postcontentdiv = $("<div class = 'ui-postcontent'></div>");
-        postcontentdiv.append($(this.model.get('content').linkdata));
+        postcontentdiv.append($(jsondata.linkdata));
         postcontentdiv.append('<br />');
-        postcontentdiv.append(this.model.get('content').posttext);
+        postcontentdiv.append(jsondata.posttext);
         return $(this.el).find('.inner-question').append(postcontentdiv);
       };
 
@@ -476,8 +477,8 @@
       Workspace.prototype.serverpopulate = function() {
         var data, p;
         data = {
-          posttext: 'What is your earliest memory of WWII?',
-          linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'
+          posttext: "What is your earliest memory of WWII?",
+          linkdata: ""
         };
         p = new Post({
           id: 1,

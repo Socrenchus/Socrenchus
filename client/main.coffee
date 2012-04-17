@@ -40,10 +40,12 @@ $ ->
       @id = @model.id
       
     renderPostContent: ->
+      #stringdata = @model.get('content')
+      jsondata = @model.get('content')
       postcontentdiv = $("<div class = 'ui-postcontent'></div>")
-      postcontentdiv.append($(@model.get('content').linkdata))
+      postcontentdiv.append($(jsondata.linkdata))
       postcontentdiv.append('<br />')
-      postcontentdiv.append(@model.get('content').posttext)
+      postcontentdiv.append(jsondata.posttext)
       $(@el).find('.inner-question').append(postcontentdiv)
     
     render: ->
@@ -385,8 +387,9 @@ $ ->
       postCollection.fetch()
 
     serverpopulate: ->
-      data = {posttext: 'What is your earliest memory of WWII?', linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'}
+      data = {posttext: "What is your earliest memory of WWII?", linkdata: ""}
       p = new Post(
+        #placeholder id until assigned
         id: 1
         content: data
         score: 25
