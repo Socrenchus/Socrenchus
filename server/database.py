@@ -274,7 +274,7 @@ class Stream(ndb.Model):
     """
     def tag_enum(tag):
       return tag.parent()
-    return Tag.query(Tag.title == ',assignment', ancestor=post_key).map(tag_enum,keys_only=True)
+    return Tag.query(Tag.title == ',assignment').map(tag_enum,keys_only=True)
   
   def assigned_children(self, post_key):
     """
