@@ -42,7 +42,7 @@ class Post(ndb.Model):
     """
     return Post.query(ancestor=self.key.parent())
   
-  @ndb.ComputedProperty
+  #@ndb.ComputedProperty
   def popularity(self):
     """
     Count the number of children a post has.
@@ -59,7 +59,9 @@ class Post(ndb.Model):
     # check if parent post exists
     parent = self.key.parent()
     if parent:
-      Tag.query(ancestor=parent).map(tags_by_weight)
+      a = tags_d
+      b = Tag.weights(Tag.query(ancestor=parent))
+      tags_d = dict( (n, a.get(n, 0)+b.get(n, 0)) for n in set(a)|set(b) )
     tags = tags_d.keys()
     for tag in tags:
       # use weights to calculate new experience
@@ -97,11 +99,12 @@ class Post(ndb.Model):
     Assign the current post to the current user or die if already assigned.
     """
     me = users.get_current_user()
-    assigned = Tag.query(Tag.title==',assigned', Tag.user==me, ancestor=self.key).count(1)
+    assigned = Tag.query(Tag.title==',assignment', Tag.user==me, ancestor=self.key).count(1)
     if assigned:
       return False
     else:
-      Tag(parent=self, user=me, title=',assigned').put()
+      t = Tag(parent=self.key, user=me, title=',assignment')
+      t.put()
       return True
   
   def assign_children(self, num):
@@ -123,12 +126,12 @@ class Post(ndb.Model):
     Checks if new assignments are due, assigns them if they are.
     """
     me = users.get_current_user()
-    my_reply = self.sibling().filter(Post.author==me).get()
+    my_reply = self.sibling.filter(Post.author==me).get()
     if my_reply:
       # count the current replies visible to the user
-      current = Tag.query(Tag.title==',assigned', Tag.user==me, ancestor=self.key).count()
+      current = Tag.query(Tag.title==',assignment', Tag.user==me, ancestor=self.key).count()
       # get our experience in the context of our reply
-      old_xp = Tag.query(Tag.title==',assigned', Tag.user==me, ancestor=my_reply.key).get().xp
+      old_xp = 0#Tag.query(Tag.title==',assignment', Tag.user==me, ancestor=my_reply.key).get().xp
       new_xp = my_reply.dereference_experience()
       # run our experience points through the magic step function
       expected = Post.step_reveal(new_xp-old_xp)
@@ -143,7 +146,7 @@ class Post(ndb.Model):
     """
     # TODO: Improve step function
     # show 5 posts for every 25 xp
-    return (delta_xp/25)*5
+    return (int(delta_xp)/25)*5
 
 class Tag(ndb.Model):
   """
@@ -189,10 +192,11 @@ class Tag(ndb.Model):
     """
     result = {}
     def tag_enum(tag):
-      if tag.title in result.keys():
-        result[tag.title] += tag.xp
-      else:
-        result[tag.title] = tag.xp
+      if not tag.is_base():
+        if tag.title in result.keys():
+          result[tag.title] += tag.xp
+        else:
+          result[tag.title] = tag.xp
     q.map(tag_enum)
     return result
   
@@ -203,10 +207,11 @@ class Tag(ndb.Model):
     """
     result = {}
     def tag_enum(tag):
-      if tag.user in result.keys():
-        result[tag.user] += 1
-      else:
-        result[tag.user] = 1
+      if not tag.is_base():
+        if tag.user in result.keys():
+          result[tag.user] += 1
+        else:
+          result[tag.user] = 1
     q.map(tag_enum)
     return result
       
@@ -214,7 +219,7 @@ class Tag(ndb.Model):
     """
     Check if tag is a base tag.
     """
-    return self.title == ',correct' or self.title == ',incorrect'
+    return self.title[0] == ','
     
   def update_experience(self):
     """
@@ -231,6 +236,8 @@ class Tag(ndb.Model):
       delta = self.xp
       if self.title == ',incorrect':
         delta = -delta
+      elif self.title != ',correct':
+        return False
       # adjust the score
       post = self.key.parent().get()
       post.adjust_score(delta).wait()
@@ -267,14 +274,13 @@ class Stream(ndb.Model):
       u.put()
     return u
   
-  @property
   def assignments(self):
     """
     Returns a list of post keys assigned to the user.
     """
     def tag_enum(tag):
       return tag.parent()
-    return Tag.query(Tag.title == ',assignment').map(tag_enum,keys_only=True)
+    return Tag.query(Tag.title == ',assignment', Tag.user == self.user).map(tag_enum,keys_only=True)
   
   def assigned_children(self, post_key):
     """
@@ -282,7 +288,7 @@ class Stream(ndb.Model):
     """
     def tag_enum(tag):
       return tag.parent()
-    return Tag.query(Tag.title == ',assignment', ancestor=post_key).map(tag_enum,keys_only=True)
+    return Tag.query(Tag.title == ',assignment', Tag.user == self.user, ancestor=post_key).map(tag_enum,keys_only=True)
   
   def get_tag(self, tag_title):
     """
@@ -311,6 +317,14 @@ class Stream(ndb.Model):
     """
     Creates a post from given content with optional parent.
     """
+    if parent:
+      parent = parent.key
     p = Post(parent=parent,content=content)
-    Tag(title=',assignment', user=self.user, parent=p.put()).put()
+    p.put()
+    Tag(title=',assignment', user=self.user, parent=p.key).put()
+    if parent:
+      t = Tag(title=',assignment', parent=p.key)
+      t.put()
+      t.user = parent.get().author
+      t.put()
     return p
