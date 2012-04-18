@@ -13,7 +13,6 @@ import os
 import random
 import json
 from google.appengine.ext import ndb
-from google.appengine.ext import db
 from google.appengine.api import users
 from google.appengine.ext import testbed
 from google.appengine.datastore import datastore_stub_util
@@ -41,9 +40,7 @@ class DatabaseTests(unittest.TestCase):
   def switchToUser(self, id):
     os.environ['USER_EMAIL'] = 'test'+str(id)+'@example.com'
     os.environ['USER_ID'] = str(id)
-    stream = Stream.query(Stream.user==users.User()).get()
-    if not stream:
-      Stream().put()
+    return Stream.get_or_create(users.get_current_user())
     
   def testPostScoring(self):
     # create post
@@ -169,7 +166,26 @@ class DatabaseTests(unittest.TestCase):
     self.assertGreater(cb.get().xp, 50)
     self.assertEqual(cc.get().xp, 500)
     # check the final post score
+    # figure out why the post sometimes gets 100 points
     self.assertEqual(p.get().score, 0)
     
   def testIncrementalAssignment(self):
-    raise NotImplementedError
+    # create post
+    self.switchToUser('user')
+    user = self.switchToUser('user')
+    post = user.create_post('my post')
+    Tag(parent=post.key, title='a').put()
+    # create responses
+    resp = []
+    for i in range(10):
+      user = self.switchToUser(str(i))
+      user.create_post(str(i), post)
+    # check assignments
+    stream = self.switchToUser(str(1))
+    for i in range(2):
+      # acquire points
+      stream.adjust_experience('a',25).wait()
+      post.verify_assignment_count()
+      # check assignments
+      self.assertEqual(len(stream.assignments()), (5*(i+1)))
+      
