@@ -41,7 +41,7 @@ $ ->
       
     renderPostContent: ->
       #stringdata = @model.get('content')
-      jsondata = @model.get('content')
+      jsondata = jQuery.parseJSON(@model.get('content'))
       postcontentdiv = $("<div class = 'ui-postcontent'></div>")
       postcontentdiv.append($(jsondata.linkdata))
       postcontentdiv.append('<br />')
@@ -387,7 +387,7 @@ $ ->
       postCollection.fetch()
 
     serverpopulate: ->
-      data = {posttext: "What is your earliest memory of WWII?", linkdata: ""}
+      data = JSON.stringify({posttext: "What is your earliest memory of WWII?", linkdata: "<img src = 'http://www.historyplace.com/unitedstates/pacificwar/2156.jpg' width = '350' height = 'auto'>"})
       p = new Post(
         #placeholder id until assigned
         id: 1

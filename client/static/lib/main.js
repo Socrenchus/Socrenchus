@@ -77,7 +77,7 @@
 
       PostView.prototype.renderPostContent = function() {
         var jsondata, postcontentdiv;
-        jsondata = this.model.get('content');
+        jsondata = jQuery.parseJSON(this.model.get('content'));
         postcontentdiv = $("<div class = 'ui-postcontent'></div>");
         postcontentdiv.append($(jsondata.linkdata));
         postcontentdiv.append('<br />');
@@ -476,10 +476,10 @@
 
       Workspace.prototype.serverpopulate = function() {
         var data, p;
-        data = {
+        data = JSON.stringify({
           posttext: "What is your earliest memory of WWII?",
-          linkdata: ""
-        };
+          linkdata: "<img src = 'http://www.historyplace.com/unitedstates/pacificwar/2156.jpg' width = '350' height = 'auto'>"
+        });
         p = new Post({
           id: 1,
           content: data,

@@ -31,10 +31,12 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 class RESTfulHandler(webapp.RequestHandler):
   def get(self, id):
     stream = Stream.get_or_create(users.get_current_user())
-    postlist = stream.assignments
+    postlist = stream.assignments()
     posts = []
+    logging.debug("starting loop")
     for post in postlist:
-      posts.append(json.encode(post))
+      logging.debug("looping")
+      posts.append(json.simplejson.loads(json.encode(post.get())))
     posts = json.simplejson.dumps(posts)
     self.response.out.write(posts)
 
@@ -56,13 +58,13 @@ class RESTfulHandler(webapp.RequestHandler):
     #if post.postlist.key() == postlist.key():
     tmp = json.simplejson.loads(self.request.body)
     if 'parent' in tmp:
-      post = stream.create_post(str(tmp['content']), tmp['parent'])
+      post = stream.create_post(tmp['content'], tmp['parent'])
     else:
-      post = stream.create_post(str(tmp['content']))
+      post = stream.create_post(tmp['content'])
     post = json.simplejson.dumps(json.encode(post))
     self.response.out.write(post)
     #else:
-    #  self.error(403)
+    # self.error(403)
   """
   def delete(self, id):
     key = self.request.cookies['posts']
