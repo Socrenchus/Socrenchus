@@ -37,19 +37,19 @@ class Post(ndb.Model):
     result['key'] = self.key.urlsafe()
     return result
 
-  @property
-  def children(self):
+  @classmethod
+  def children(cls, key):
     """
     Return a query of children of this post.
     """
-    return Post.query(ancestor=self.key)
+    return Post.query(ancestor=key)
   
-  @property
-  def sibling(self):
+  @classmethod
+  def sibling(cls, key):
     """
     Return a query for a sibling of this post.
     """
-    return Post.query(ancestor=self.key.parent())
+    return Post.query(ancestor=key.parent())
   
   #@ndb.ComputedProperty
   def popularity(self):
@@ -58,15 +58,16 @@ class Post(ndb.Model):
     """
     return ndb.Query(ancestor=self.key).count()
   
-  def dereference_experience(self):
+  @classmethod
+  def dereference_experience(cls, key):
     """
     Dereference a user's experience on a post.
     """
     user = Stream.query(Stream.user==users.get_current_user()).get()
     result = 0 # clear the current
-    tags_d = Tag.weights(Tag.query(ancestor=self.key))
+    tags_d = Tag.weights(Tag.query(ancestor=key))
     # check if parent post exists
-    parent = self.key.parent()
+    parent = key.parent()
     if parent:
       a = tags_d
       b = Tag.weights(Tag.query(ancestor=parent))
@@ -103,51 +104,57 @@ class Post(ndb.Model):
         
     return self.put_async()
   
-  def assign_or_die(self):
+  @classmethod
+  def assign_or_die(cls, key):
     """
     Assign the current post to the current user or die if already assigned.
     """
     me = users.get_current_user()
-    assigned = Tag.query(Tag.title==',assignment', Tag.user==me, ancestor=self.key).count(1)
+    assigned = Tag.query(Tag.title==',assignment', Tag.user==me, ancestor=key).count(1)
     if assigned:
       return False
     else:
-      t = Tag(parent=self.key, user=me, title=',assignment')
+      t = Tag(parent=key, user=me, title=',assignment')
       t.put()
       return True
   
-  def assign_children(self, num):
+  @classmethod
+  def assign_children(cls, key, num):
     """
     Assigns num children to the current user if num children exist.
     """
     # TODO: Improve selection of child posts
     me = users.get_current_user()
     user = Stream.query(Stream.user==me).get()
-    for child in self.children:
-      if child.assign_or_die():
+    for child in Post.children(key).iter(keys_only=True):
+      if Post.assign_or_die(child):
         num -= 1
       if num <= 0:
         return True
     return False
-    
-  def verify_assignment_count(self):
+  
+  @classmethod
+  def verify_assignment_count(cls, key):
     """
     Checks if new assignments are due, assigns them if they are.
     """
     me = users.get_current_user()
-    my_reply = self.sibling.filter(Post.author==me).get()
-    if my_reply:
-      # count the current replies visible to the user
-      current = Tag.query(Tag.title==',assignment', Tag.user==me, ancestor=self.key).count()
-      # get our experience in the context of our reply
-      old_xp = 0#Tag.query(Tag.title==',assignment', Tag.user==me, ancestor=my_reply.key).get().xp
-      new_xp = my_reply.dereference_experience()
-      # run our experience points through the magic step function
-      expected = Post.step_reveal(new_xp-old_xp)
-      # assign the newly earned posts
-      if expected > current:
-        self.assign_children(expected-current)
-        
+    try:
+      my_reply = Post.sibling(key).filter(Post.author==me).iter(keys_only=True).next()
+      if my_reply:
+        # count the current replies visible to the user
+        current = Tag.query(Tag.title==',assignment', Tag.user==me, ancestor=key).count()
+        # get our experience in the context of our reply
+        old_xp = 0#Tag.query(Tag.title==',assignment', Tag.user==me, ancestor=my_reply.key).get().xp
+        new_xp = Post.dereference_experience(my_reply)
+        # run our experience points through the magic step function
+        expected = Post.step_reveal(new_xp-old_xp)
+        # assign the newly earned posts
+        if expected > current:
+          Post.assign_children(key, expected-current)
+    except StopIteration:
+      pass
+
   @classmethod
   def step_reveal(cls, delta_xp):
     """
@@ -156,6 +163,10 @@ class Post(ndb.Model):
     # TODO: Improve step function
     # show 5 posts for every 25 xp
     return (int(delta_xp)/25)*5
+    
+  @classmethod
+  def _pre_get_hook(cls, key):
+    Post.verify_assignment_count(key)
 
 class Tag(ndb.Model):
   """
@@ -234,7 +245,7 @@ class Tag(ndb.Model):
     """
     Update experience points of tag by dereferencing against parent post.
     """
-    self.xp = self.key.parent().get().dereference_experience()
+    self.xp = Post.dereference_experience(self.key.parent())
       
   def eval_score_change(self):
     """

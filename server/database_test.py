@@ -185,7 +185,7 @@ class DatabaseTests(unittest.TestCase):
     for i in range(2):
       # acquire points
       stream.adjust_experience('a',25).wait()
-      post.verify_assignment_count()
+      Post.verify_assignment_count(post.key)
       # check assignments
       self.assertEqual(len(stream.assignments()), (5*(i+1)))
       
