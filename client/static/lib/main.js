@@ -20,10 +20,8 @@
       Post.prototype.respond = function(content) {
         var p;
         p = new Post({
-          id: 1,
-          parent: this.id,
-          content: content,
-          score: 0
+          parent: this.get('key'),
+          content: content
         });
         return postCollection.create(p);
       };
@@ -96,7 +94,7 @@
         $(this.el).find('.inner-question').omnipost({
           callback: this.model.respond
         });
-        responsediv = $("<div id = 'response" + this.id + "'></div>");
+        responsediv = $("<div id = 'response" + (this.model.get('key')) + "'></div>");
         $(this.el).find('.inner-question').append(responsediv);
         if (this.model.get('parent') !== 0) {
           lockedpostsdiv = $("<div class='locked-posts'></div>");
@@ -481,9 +479,7 @@
           linkdata: "<img src = 'http://www.historyplace.com/unitedstates/pacificwar/2156.jpg' width = '350' height = 'auto'>"
         });
         p = new Post({
-          id: 1,
-          content: data,
-          score: 25
+          content: data
         });
         return postCollection.create(p);
       };

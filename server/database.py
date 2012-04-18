@@ -28,6 +28,15 @@ class Post(ndb.Model):
   score       = ndb.FloatProperty(default=0.0)
   timestamp   = ndb.DateTimeProperty(auto_now=True)
   
+  def to_dict(self):
+    result = ndb.Model.to_dict(self)
+    if(self.key.parent() != None):
+      result['parent'] = self.key.parent().urlsafe()
+    else:
+      result['parent'] = ''
+    result['key'] = self.key.urlsafe()
+    return result
+
   @property
   def children(self):
     """
@@ -317,8 +326,6 @@ class Stream(ndb.Model):
     """
     Creates a post from given content with optional parent.
     """
-    if parent:
-      parent = parent.key
     p = Post(parent=parent,content=content)
     p.put()
     Tag(title=',assignment', user=self.user, parent=p.key).put()

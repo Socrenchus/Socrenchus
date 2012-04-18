@@ -6,15 +6,10 @@ $ ->
     
   class Post extends Backbone.Model
     respond: (content) =>
-      p = new Post(        
-        id: 1
-        parent: @id
+      p = new Post(
+        parent: @get('key')
         content: content
-        score: 0
       )
-      #responseArray = @get('responses')
-      #responseArray.push(p.get('id'))
-      #@save({responses: responseArray})
       postCollection.create(p)
       
     
@@ -40,7 +35,6 @@ $ ->
       @id = @model.id
       
     renderPostContent: ->
-      #stringdata = @model.get('content')
       jsondata = jQuery.parseJSON(@model.get('content'))
       postcontentdiv = $("<div class = 'ui-postcontent'></div>")
       postcontentdiv.append($(jsondata.linkdata))
@@ -54,7 +48,7 @@ $ ->
       @renderPostContent()
       $(@el).find('.inner-question').tagbox()
       $(@el).find('.inner-question').omnipost({callback: @model.respond})
-      responsediv = $("<div id = 'response#{@id}'></div>")
+      responsediv = $("<div id = 'response#{@model.get('key')}'></div>")
       $(@el).find('.inner-question').append(responsediv)
       unless @model.get('parent') is 0
         lockedpostsdiv = $("<div class='locked-posts'></div>")
@@ -274,8 +268,7 @@ $ ->
         $('#response' + item.get('parent')).prepend(post.render())
       else      
         $('#assignments').append(post.render())
-      # parents = ()
-      # $(post.render()).appendTo()
+
     addAll: ->
       postCollection.each(@addOne)
     deleteOne: (item) ->
@@ -390,9 +383,7 @@ $ ->
       data = JSON.stringify({posttext: "What is your earliest memory of WWII?", linkdata: "<img src = 'http://www.historyplace.com/unitedstates/pacificwar/2156.jpg' width = '350' height = 'auto'>"})
       p = new Post(
         #placeholder id until assigned
-        id: 1
         content: data
-        score: 25
       )
       postCollection.create(p)
 

@@ -21,6 +21,12 @@ from google.appengine.datastore import datastore_stub_util
 from handlers import *
 from database import *
 
+class FakeFieldStorage(object):
+  def __init__(self, filename, content):
+    self.filename = filename
+    self.content = content
+  def __repr__(self): return self.content
+
 class HandlerTests(unittest.TestCase):
 
   def setUp(self):
@@ -57,6 +63,19 @@ class HandlerTests(unittest.TestCase):
     handler.initialize(request, response)
     handler.get(1)
 
+  def testPost(self):
+    # create a post and sync with database
+    request = webapp.Request({
+      "wsgi.input": StringIO(),
+      "METHOD": "POST"
+    })
+    postData =  '{posttext: "What is your earliest memory of WWII?", linkdata: "<img src = \'http://www.historyplace.com/unitedstates/pacificwar/2156.jpg\' width = \'350\' height = \'auto\'>"})'
+    postContent = FakeFieldStorage('test.txt', postData)
+    request.POST['file'] = postContent
+    response = webapp.Response()
+    handler = MyHandler()
+    handler.initialize(request, response)
+    handler.post()
 
 
 

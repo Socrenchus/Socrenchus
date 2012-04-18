@@ -33,38 +33,31 @@ class RESTfulHandler(webapp.RequestHandler):
     stream = Stream.get_or_create(users.get_current_user())
     postlist = stream.assignments()
     posts = []
-    logging.debug("starting loop")
     for post in postlist:
-      logging.debug("looping")
       posts.append(json.simplejson.loads(json.encode(post.get())))
     posts = json.simplejson.dumps(posts)
     self.response.out.write(posts)
 
-  """
+ 
   def post(self, id):
-    #key = self.request.cookies['posts']
-    #postlist = key.get()
-    post = simplejson.loads(self.request.body)
-    post = Posts(
-  	       parentID   = post['parentID'],
-  	       content = post['content'],
-  	       votecount  = post['votecount'])
-    post.put()
-    #post = simplejson.dumps(post.toDict())
-    #self.response.out.write(post)
-  """
-  def put(self, id):
     stream = Stream.get_or_create(users.get_current_user())
-    #if post.postlist.key() == postlist.key():
     tmp = json.simplejson.loads(self.request.body)
     if 'parent' in tmp:
-      post = stream.create_post(tmp['content'], tmp['parent'])
+      post = stream.create_post(tmp['content'], ndb.Key(urlsafe=tmp['parent']))
     else:
       post = stream.create_post(tmp['content'])
     post = json.simplejson.dumps(json.encode(post))
     self.response.out.write(post)
-    #else:
-    # self.error(403)
+
+  def put(self, id):
+    stream = Stream.get_or_create(users.get_current_user())
+    tmp = json.simplejson.loads(self.request.body)
+    if 'parent' in tmp:
+      post = stream.create_post(tmp['content'], ndb.Key(tmp['parent']))
+    else:
+      post = stream.create_post(tmp['content'])
+    postJSON = json.simplejson.dumps(json.encode(post))
+    self.response.out.write(postJSON)
   """
   def delete(self, id):
     key = self.request.cookies['posts']

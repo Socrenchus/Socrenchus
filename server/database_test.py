@@ -179,7 +179,7 @@ class DatabaseTests(unittest.TestCase):
     resp = []
     for i in range(10):
       user = self.switchToUser(str(i))
-      user.create_post(str(i), post)
+      user.create_post(str(i), post.key)
     # check assignments
     stream = self.switchToUser(str(1))
     for i in range(2):
