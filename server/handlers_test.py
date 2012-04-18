@@ -20,15 +20,7 @@ from google.appengine.ext import webapp
 from google.appengine.datastore import datastore_stub_util
 from handlers import *
 from database import *
-
-class FakeFieldStorage(object):
-  def __init__(self, filename, content):
-    self.filename = filename
-    self.content = content
-  def __repr__(self): return self.content
-
 class HandlerTests(unittest.TestCase):
-
   def setUp(self):
     # Create test bed
     self.testbed = testbed.Testbed()
@@ -65,17 +57,24 @@ class HandlerTests(unittest.TestCase):
 
   def testPost(self):
     # create a post and sync with database
-    request = webapp.Request({
-      "wsgi.input": StringIO(),
-      "METHOD": "POST"
-    })
-    postData =  '{posttext: "What is your earliest memory of WWII?", linkdata: "<img src = \'http://www.historyplace.com/unitedstates/pacificwar/2156.jpg\' width = \'350\' height = \'auto\'>"})'
-    postContent = FakeFieldStorage('test.txt', postData)
-    request.POST['file'] = postContent
-    response = webapp.Response()
-    handler = MyHandler()
-    handler.initialize(request, response)
-    handler.post()
+     postData = {}
+     postData['content'] =  '{posttext: "What is your earliest memory of WWII?", linkdata: "<img src = \'http://www.historyplace.com/unitedstates/pacificwar/2156.jpg\' width = \'350\' height = \'auto\'>"})'
+     postData = json.simplejson.dumps(postData)
+     handler = RESTfulHandler()
+     handler.request = webapp.Request({
+      'REQUEST_METHOD': 'POST',
+      'PATH_INFO': '/',
+      'body': postData,
+      'wsgi.input': StringIO(postData),
+      'CONTENT_LENGTH': len(postData),
+      'SERVER_NAME': 'hi',
+      'SERVER_PORT': '80',
+      'wsgi.url_scheme': 'http',
+     })
+      
+     handler.response = webapp.Response()
+     handler.post(1)
+   
 
 
 
