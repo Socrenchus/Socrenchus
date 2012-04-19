@@ -110,11 +110,11 @@ class Post(ndb.Model):
     Assign the current post to the current user or die if already assigned.
     """
     me = users.get_current_user()
-    assigned = Tag.query(Tag.title==',assignment', Tag.user==me, ancestor=key).count(1)
+    assigned = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==me, ancestor=key).count(1)
     if assigned:
       return False
     else:
-      t = Tag(parent=key, user=me, title=',assignment')
+      t = Tag(parent=key, user=me, title=Tag.base('assignment'))
       t.put()
       return True
   
@@ -143,9 +143,9 @@ class Post(ndb.Model):
       my_reply = Post.sibling(key).filter(Post.author==me).iter(keys_only=True).next()
       if my_reply:
         # count the current replies visible to the user
-        current = Tag.query(Tag.title==',assignment', Tag.user==me, ancestor=key).count()
+        current = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==me, ancestor=key).count()
         # get our experience in the context of our reply
-        old_xp = 0#Tag.query(Tag.title==',assignment', Tag.user==me, ancestor=my_reply.key).get().xp
+        old_xp = 0#Tag.query(Tag.title==Tag.base('assignment'), Tag.user==me, ancestor=my_reply.key).get().xp
         new_xp = Post.dereference_experience(my_reply)
         # run our experience points through the magic step function
         expected = Post.step_reveal(new_xp-old_xp)
@@ -204,7 +204,13 @@ class Tag(ndb.Model):
     Tag.query().map(tally_up)
     return (self._local_xp*self._global_xp_norm) / (self._local_xp_norm*self._global_xp+self._local_user_count)
       
-      
+  @classmethod
+  def base(cls, name):
+    names = ['correct','incorrect','assignment']
+    if not name in names:
+      raise Exception('Base name not found.')
+    return ',' + name
+  
   @classmethod
   def weights(cls, q):
     """
@@ -254,9 +260,9 @@ class Tag(ndb.Model):
     if self.is_base(): # adjust the score for the poster
       # figure out the sign on the score change
       delta = self.xp
-      if self.title == ',incorrect':
+      if self.title == Tag.base('incorrect'):
         delta = -delta
-      elif self.title != ',correct':
+      elif self.title != Tag.base('correct'):
         return False
       # adjust the score
       post = self.key.parent().get()
@@ -300,7 +306,7 @@ class Stream(ndb.Model):
     """
     def tag_enum(tag):
       return tag.parent()
-    return Tag.query(Tag.title == ',assignment', Tag.user == self.user).map(tag_enum,keys_only=True)
+    return Tag.query(Tag.title == Tag.base('assignment'), Tag.user == self.user).map(tag_enum,keys_only=True)
   
   def assigned_children(self, post_key):
     """
@@ -308,7 +314,7 @@ class Stream(ndb.Model):
     """
     def tag_enum(tag):
       return tag.parent()
-    return Tag.query(Tag.title == ',assignment', Tag.user == self.user, ancestor=post_key).map(tag_enum,keys_only=True)
+    return Tag.query(Tag.title == Tag.base('assignment'), Tag.user == self.user, ancestor=post_key).map(tag_enum,keys_only=True)
   
   def get_tag(self, tag_title):
     """
@@ -339,9 +345,9 @@ class Stream(ndb.Model):
     """
     p = Post(parent=parent,content=content)
     p.put()
-    Tag(title=',assignment', user=self.user, parent=p.key).put()
+    Tag(title=Tag.base('assignment'), user=self.user, parent=p.key).put()
     if parent:
-      t = Tag(title=',assignment', parent=p.key)
+      t = Tag(title=Tag.base('assignment'), parent=p.key)
       t.put()
       t.user = parent.get().author
       t.put()
