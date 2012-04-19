@@ -3,7 +3,14 @@ $ ->
   ###
   # Core Model and Logic 
   ###
-    
+  parentSynchMethod = Backbone.sync
+  Backbone.sync = (method, model, success, error) -> 
+    try
+      parentSynchMethod.apply(Backbone, arguments)
+    catch error
+      #window.location.replace("http://localhost:8080/login")
+      x=1
+ 
   class Post extends Backbone.Model
     respond: (content) =>
       p = new Post(
@@ -15,7 +22,6 @@ $ ->
     
   class Posts extends Backbone.Collection
     model: Post
-    #localStorage: new Store('posts')
     url: '/posts'
     
   ###

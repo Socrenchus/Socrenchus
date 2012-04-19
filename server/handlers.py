@@ -78,7 +78,7 @@ class LoginHandler(webapp.RequestHandler):
   Logs the user in and redirects.
   """
   def get(self):
-    self.redirect('/#servertest')
+    self.redirect('/')
     
 class LogoutHandler(webapp.RequestHandler):
   """
@@ -128,7 +128,7 @@ class CollectionHandler(webapp.RequestHandler):
 
 options = [
   #(r'/(.*)/report.csv', GradeReport),
-  ('/login', LoginHandler),
+  ('/login\/#serverpopulate', LoginHandler),
   ('/logout', LogoutHandler),
   ('/posts\/?([0-9]*)', RESTfulHandler)
 ]
