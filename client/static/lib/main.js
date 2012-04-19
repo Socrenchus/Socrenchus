@@ -20,10 +20,8 @@
       Post.prototype.respond = function(content) {
         var p;
         p = new Post({
-          id: 1,
-          parent: this.id,
-          content: content,
-          score: 0
+          parent: this.get('key'),
+          content: content
         });
         return postCollection.create(p);
       };
@@ -76,11 +74,12 @@
       };
 
       PostView.prototype.renderPostContent = function() {
-        var postcontentdiv;
+        var jsondata, postcontentdiv;
+        jsondata = jQuery.parseJSON(this.model.get('content'));
         postcontentdiv = $("<div class = 'ui-postcontent'></div>");
-        postcontentdiv.append($(this.model.get('content').linkdata));
+        postcontentdiv.append($(jsondata.linkdata));
         postcontentdiv.append('<br />');
-        postcontentdiv.append(this.model.get('content').posttext);
+        postcontentdiv.append(jsondata.posttext);
         return $(this.el).find('.inner-question').append(postcontentdiv);
       };
 
@@ -95,7 +94,7 @@
         $(this.el).find('.inner-question').omnipost({
           callback: this.model.respond
         });
-        responsediv = $("<div id = 'response" + this.id + "'></div>");
+        responsediv = $("<div id = 'response" + (this.model.get('key')) + "'></div>");
         $(this.el).find('.inner-question').append(responsediv);
         if (this.model.get('parent') !== 0) {
           lockedpostsdiv = $("<div class='locked-posts'></div>");
@@ -140,8 +139,7 @@
         this.selectedStory = '#story-part1';
         postCollection.bind('add', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
-        postCollection.bind('all', this.render, this);
-        return postCollection.fetch();
+        return postCollection.bind('all', this.render, this);
       };
 
       StreamView.prototype.setStoryPart = function(storyPart) {
@@ -476,14 +474,12 @@
 
       Workspace.prototype.serverpopulate = function() {
         var data, p;
-        data = {
-          posttext: 'What is your earliest memory of WWII?',
-          linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'
-        };
+        data = JSON.stringify({
+          posttext: "What is your earliest memory of WWII?",
+          linkdata: "<img src = 'http://www.historyplace.com/unitedstates/pacificwar/2156.jpg' width = '350' height = 'auto'>"
+        });
         p = new Post({
-          id: 1,
-          content: data,
-          score: 25
+          content: data
         });
         return postCollection.create(p);
       };

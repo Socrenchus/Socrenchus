@@ -6,15 +6,10 @@ $ ->
     
   class Post extends Backbone.Model
     respond: (content) =>
-      p = new Post(        
-        id: 1
-        parent: @id
+      p = new Post(
+        parent: @get('key')
         content: content
-        score: 0
       )
-      #responseArray = @get('responses')
-      #responseArray.push(p.get('id'))
-      #@save({responses: responseArray})
       postCollection.create(p)
       
     
@@ -40,10 +35,11 @@ $ ->
       @id = @model.id
       
     renderPostContent: ->
+      jsondata = jQuery.parseJSON(@model.get('content'))
       postcontentdiv = $("<div class = 'ui-postcontent'></div>")
-      postcontentdiv.append($(@model.get('content').linkdata))
+      postcontentdiv.append($(jsondata.linkdata))
       postcontentdiv.append('<br />')
-      postcontentdiv.append(@model.get('content').posttext)
+      postcontentdiv.append(jsondata.posttext)
       $(@el).find('.inner-question').append(postcontentdiv)
     
     render: ->
@@ -52,7 +48,7 @@ $ ->
       @renderPostContent()
       $(@el).find('.inner-question').tagbox()
       $(@el).find('.inner-question').omnipost({callback: @model.respond})
-      responsediv = $("<div id = 'response#{@id}'></div>")
+      responsediv = $("<div id = 'response#{@model.get('key')}'></div>")
       $(@el).find('.inner-question').append(responsediv)
       unless @model.get('parent') is 0
         lockedpostsdiv = $("<div class='locked-posts'></div>")
@@ -82,9 +78,7 @@ $ ->
       postCollection.bind('add', @addOne, this)
       postCollection.bind('reset', @addAll, this)
       postCollection.bind('all', @render, this)
-      postCollection.fetch()
-      #@addAll()
-      #@render()
+      #postCollection.fetch()
 
     #FIXME: remove these next few functions after the demo.
     setStoryPart: (storyPart) ->
@@ -274,8 +268,7 @@ $ ->
         $('#response' + item.get('parent')).prepend(post.render())
       else      
         $('#assignments').append(post.render())
-      # parents = ()
-      # $(post.render()).appendTo()
+
     addAll: ->
       postCollection.each(@addOne)
     deleteOne: (item) ->
@@ -387,11 +380,10 @@ $ ->
       postCollection.fetch()
 
     serverpopulate: ->
-      data = {posttext: 'What is your earliest memory of WWII?', linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'}
+      data = JSON.stringify({posttext: "What is your earliest memory of WWII?", linkdata: "<img src = 'http://www.historyplace.com/unitedstates/pacificwar/2156.jpg' width = '350' height = 'auto'>"})
       p = new Post(
-        id: 1
+        #placeholder id until assigned
         content: data
-        score: 25
       )
       postCollection.create(p)
 
