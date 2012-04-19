@@ -35,6 +35,7 @@ class RESTfulHandler(webapp.RequestHandler):
     posts = []
     for post in postlist:
       posts.append(json.simplejson.loads(json.encode(post.get())))
+    posts.reverse()
     posts = json.simplejson.dumps(posts)
     self.response.out.write(posts)
 
@@ -53,11 +54,11 @@ class RESTfulHandler(webapp.RequestHandler):
     stream = Stream.get_or_create(users.get_current_user())
     tmp = json.simplejson.loads(self.request.body)
     if 'parent' in tmp:
-      post = stream.create_post(tmp['content'], ndb.Key(tmp['parent']))
+      post = stream.create_post(tmp['content'], ndb.Key(urlsafe=tmp['parent']))
     else:
       post = stream.create_post(tmp['content'])
-    postJSON = json.simplejson.dumps(json.encode(post))
-    self.response.out.write(postJSON)
+    post = json.simplejson.dumps(json.encode(post))
+    self.response.out.write(post)
   """
   def delete(self, id):
     key = self.request.cookies['posts']
@@ -126,9 +127,6 @@ options = [
   #(r'/(.*)/report.csv', GradeReport),
   ('/login', LoginHandler),
   ('/logout', LogoutHandler),
-  #(r'/rpc/(.*)/(.*)', RPCHandler),
-  #(r'/rpc/(.*)()', RPCHandler),
-  #r'/rpc()()', RPCHandler)
   ('/posts\/?([0-9]*)', RESTfulHandler)
 ]
 #application = webapp.WSGIApplication(options, debug=_DEBUG)
