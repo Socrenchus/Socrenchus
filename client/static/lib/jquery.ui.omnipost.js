@@ -268,6 +268,7 @@
             posttext: $.trim(text.val()),
             linkdata: allPanelContent[0].outerHTML
           };
+          data = JSON.stringify(data);
           omnipostdiv.remove();
           return _this.options.callback(data);
         });

@@ -18,7 +18,7 @@
 Utility classes and methods for use with simplejson and appengine.
 
 Provides both a specialized simplejson encoder, ModelEncoder, designed to simplify
-encoding directly from NDB Models and query results to JSON. A helper function, 
+encoding directly from NDB Models and ndb results to JSON. A helper function, 
 encode, is also provided to further simplify usage.
 
   ModelEncoder: Adds support for NDB Models to simplejson.
@@ -30,15 +30,15 @@ import simplejson
 import time
 
 from google.appengine.api import users
-from ndb import model, query
+from google.appengine.ext import ndb
 
 
 class ModelEncoder(simplejson.JSONEncoder):
   
   """
-  Extends JSONEncoder to add support for NDB Models and query results.
+  Extends JSONEncoder to add support for NDB Models and ndb results.
   
-  Adds support to simplejson JSONEncoders for NDB Models and query results by
+  Adds support to simplejson JSONEncoders for NDB Models and ndb results by
   overriding JSONEncoder's default method.
   """
   
@@ -48,7 +48,7 @@ class ModelEncoder(simplejson.JSONEncoder):
     if hasattr(obj, 'to_dict'):
       return getattr(obj, 'to_dict')()
 
-    if isinstance(obj, query.Query):
+    if isinstance(obj, ndb.Query):
       return list(obj)
 
     elif isinstance(obj, datetime.datetime):
@@ -64,7 +64,7 @@ class ModelEncoder(simplejson.JSONEncoder):
         output[method] = getattr(obj, method)()
       return output
 
-    elif isinstance(obj, model.Key):
+    elif isinstance(obj, ndb.Key):
       return obj.get()
 
     return simplejson.JSONEncoder.default(self, obj)
