@@ -34,7 +34,10 @@ class RESTfulHandler(webapp.RequestHandler):
     postlist = stream.assignments()
     posts = []
     for post in postlist:
-      posts.append(json.simplejson.loads(json.encode(post.get())))
+      jsonPost = json.simplejson.loads(json.encode(post.get()))
+      #FIXME: find the real problem rather than removing duplicate posts
+      if jsonPost not in posts:
+        posts.append(jsonPost)    
     posts.reverse()
     posts = json.simplejson.dumps(posts)
     self.response.out.write(posts)

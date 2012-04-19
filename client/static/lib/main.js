@@ -379,13 +379,6 @@
           _this = this;
         if (!this.streamviewRendered) {
           this.scrollingDiv = $('#story');
-          $(window).scroll(function() {
-            var currentElPos, scrollDivHeight, windowHeight, windowPosition;
-            windowPosition = $(window).scrollTop();
-            windowHeight = $(window).height();
-            scrollDivHeight = _this.scrollingDiv.height();
-            return currentElPos = $(_this.selectedStory).position().top;
-          });
           $('#collapsible-profile').hide();
           profileshowing = false;
           $('#dropdown-panel').click(function() {

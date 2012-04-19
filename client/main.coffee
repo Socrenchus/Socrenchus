@@ -278,16 +278,6 @@ $ ->
     render: =>
       if !@streamviewRendered
         @scrollingDiv = $('#story')
-        $(window).scroll( =>
-          windowPosition = $(window).scrollTop()          
-          windowHeight = $(window).height()
-          scrollDivHeight = @scrollingDiv.height()
-          currentElPos = $(@selectedStory).position().top
-          #if windowPosition > currentElPos
-          #  @scrollingDiv.stop().animate({"marginTop": "#{windowPosition - currentElPos - 10}px"}, "fast")
-          #if windowPosition is 0
-          #  @scrollingDiv.stop().animate({"marginTop": "0px"}, "fast")
-        )
         $('#collapsible-profile').hide()
         profileshowing = false
         $('#dropdown-panel').click( ->
