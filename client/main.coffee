@@ -3,16 +3,6 @@ $ ->
   ###
   # Core Model and Logic 
   ###
-  parentSyncMethod = Backbone.sync
-  Backbone.sync = (method, model, options) ->
-    old_error = options.old_error
-    options.error = (xhr, text_status, error_thrown) ->
-      if(xhr.status == 302)
-       window.location.replace('http://localhost:8080/login')
-      else
-       old_error?(xhr, text_status, error_thrown)
-    parentSyncMethod(method, model, options)
-
   class Post extends Backbone.Model
     respond: (content) =>
       p = new Post(
