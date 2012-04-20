@@ -26,6 +26,8 @@ from google.appengine.ext import ndb
 import logging
 from database import *
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.ext.webapp import template
+
 #_DEBUG = 'localhost' in users.create_logout_url( "/" )
 
 class RESTfulHandler(webapp.RequestHandler):
@@ -87,6 +89,24 @@ class LogoutHandler(webapp.RequestHandler):
   def get(self):
     self.redirect(users.create_logout_url( "/" ))
    
+
+class MainPage(webapp.RequestHandler):
+  def get(self):
+    if users.get_current_user():
+      url = users.create_logout_url(self.request.uri)
+      url_linktext = 'Logout'
+    else:
+      url = users.create_login_url(self.request.uri)
+      self.redirect(url)
+      url_linktext = 'Login'
+    template_values = {
+      'url': url,
+      'url_linktext': url_linktext,
+    }
+
+    path = os.path.join(os.path.dirname(__file__), '../client/static/index.html')
+    self.response.out.write(template.render(path, template_values))
+
 """
 class RPCHandler(webapp.RequestHandler):
   def __init__(self):
@@ -128,8 +148,9 @@ class CollectionHandler(webapp.RequestHandler):
 
 options = [
   #(r'/(.*)/report.csv', GradeReport),
-  ('/login\/#serverpopulate', LoginHandler),
+  ('/login', LoginHandler),
   ('/logout', LogoutHandler),
+  ('/', MainPage),
   ('/posts\/?([0-9]*)', RESTfulHandler)
 ]
 #application = webapp.WSGIApplication(options, debug=_DEBUG)

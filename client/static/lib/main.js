@@ -7,7 +7,20 @@
     /*
       # Core Model and Logic
     */
-    var App, Post, PostView, Posts, StreamView, Templates, Workspace, app_router, e, postCollection, _i, _len, _ref;
+    var App, Post, PostView, Posts, StreamView, Templates, Workspace, app_router, e, parentSyncMethod, postCollection, _i, _len, _ref;
+    parentSyncMethod = Backbone.sync;
+    Backbone.sync = function(method, model, options) {
+      var old_error;
+      old_error = options.old_error;
+      options.error = function(xhr, text_status, error_thrown) {
+        if (xhr.status === 302) {
+          return window.location.replace('http://localhost:8080/login');
+        } else {
+          return typeof old_error === "function" ? old_error(xhr, text_status, error_thrown) : void 0;
+        }
+      };
+      return parentSyncMethod(method, model, options);
+    };
     Post = (function(_super) {
 
       __extends(Post, _super);
