@@ -18,6 +18,7 @@
 
       function Plugin(element, options) {
         this.element = element;
+        this.getAllTags = __bind(this.getAllTags, this);
         this.createcompletetags = __bind(this.createcompletetags, this);
         this.deformtag = __bind(this.deformtag, this);
         this.formtag = __bind(this.formtag, this);
@@ -48,9 +49,17 @@
           this.tagtext.append(tagIcon);
           this.tagtext.append(this.message);
           this.tagtext.append(this.currenttag);
+          this.submit = $("<button id='ui-omniPostSubmit'>Submit Tags</button>");
+          tagsdiv.append(this.submit);
+          this.submit.hide();
+          this.submit.click(function() {
+            var tags;
+            return tags = _this.getAllTags();
+          });
           this.tagtext.focusout(function() {
             if (_this.alltags.length === 0 && _this.currenttag.text() === '') {
               _this.message.show();
+              _this.submit.hide();
             }
             _this.state = _this._states.none;
             return $(_this.element).trigger('unfocusingTagBox', _this.state);
@@ -65,6 +74,7 @@
             if (!_this.editingoldtag) {
               _this.message.hide();
               _this.currenttag.focus();
+              _this.submit.show();
               _this.state = _this._states.typing;
               return $(_this.element).trigger('typingTag', _this.state);
             }
@@ -148,6 +158,17 @@
           tagsdiv.append(currenttag);
         }
         return $(this.element).append(tagsdiv);
+      };
+
+      Plugin.prototype.getAllTags = function() {
+        var tag, tags, _i, _len, _ref;
+        tags = [];
+        _ref = this.alltags;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          tag = _ref[_i];
+          tags.push(tag.text());
+        }
+        return tags;
       };
 
       Plugin.setCurrentTag = function(text) {

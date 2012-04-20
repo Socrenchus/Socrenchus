@@ -260,6 +260,12 @@ $ ->
           $('.post:first #response1').append(pv.render())
         @story5Done = true
 
+    makePost: (content) ->
+      p = new Post(
+        content: content
+      )
+      postCollection.create(p)
+
     addOne: (item) ->
       post = new PostView(model: item)
       if document.getElementById('response' + item.get('parent'))
@@ -275,6 +281,8 @@ $ ->
       postCollection.each(@deleteOne)
     render: =>
       if !@streamviewRendered
+        @postingDiv = $('#post-question')
+        @postingDiv.omnipost({callback: @makePost})
         @scrollingDiv = $('#story')
         $('#collapsible-profile').hide()
         profileshowing = false
