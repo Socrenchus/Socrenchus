@@ -30,7 +30,7 @@ from google.appengine.ext.webapp import template
 
 #_DEBUG = 'localhost' in users.create_logout_url( "/" )
 
-class RESTfulHandler(webapp.RequestHandler):
+class PostHandler(webapp.RequestHandler):
   def get(self, id):
     stream = Stream.get_or_create(users.get_current_user())
     postlist = stream.assignments()
@@ -65,9 +65,20 @@ class RESTfulHandler(webapp.RequestHandler):
     post = json.simplejson.dumps(json.encode(post))
     self.response.out.write(post)
 
-class RESTfulTagHandler(webapp.RequestHandler):
+class TagHandler(webapp.RequestHandler):
   def get(self, id):
-    Tag.query()
+    def tag_enum(tag):
+      return tag
+    taglist = Tag.query().map(tag_enum,keys_only=False)
+    tags = []
+    for tag in taglist:
+      jsonTag = json.simplejson.loads(json.encode(tag))
+      #FIXME: find the real problem rather than removing duplicate posts
+      if jsonTag not in tags:
+        tags.append(jsonTag)    
+    tags.reverse()
+    tags = json.simplejson.dumps(tags)
+    self.response.out.write(tags)
  
   def post(self, id):
     tmp = json.simplejson.loads(self.request.body)
@@ -168,8 +179,8 @@ options = [
   ('/login', LoginHandler),
   ('/logout', LogoutHandler),
   ('/', MainPage),
-  ('/posts\/?([0-9]*)', RESTfulHandler),
-  ('/tags\/?([0-9]*)', RESTfulTagHandler)
+  ('/posts\/?([0-9]*)', PostHandler),
+  ('/tags\/?([0-9]*)', TagHandler)
 ]
 #application = webapp.WSGIApplication(options, debug=_DEBUG)
 application = webapp.WSGIApplication(options, debug=True)
