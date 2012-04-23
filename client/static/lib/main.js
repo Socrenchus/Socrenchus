@@ -134,7 +134,8 @@
         var indicatortext, lockedpostsdiv, percent, progressbardiv, progressindicatordiv, responsediv, textinline;
         $(this.el).html(this.template);
         $(this.el).find('.inner-question').votebox({
-          votesnum: this.model.get('score')
+          votesnum: this.model.get('score'),
+          callback: this.model.maketag
         });
         this.renderPostContent();
         $(this.el).find('.inner-question').tagbox({

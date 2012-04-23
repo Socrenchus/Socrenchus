@@ -6,7 +6,8 @@
     var Plugin, defaults, pluginName, states;
     pluginName = 'votebox';
     defaults = {
-      votesnum: 0
+      votesnum: 0,
+      callback: ''
     };
     states = {
       none: 0,
@@ -58,6 +59,7 @@
           votetext.text(_this.voteCount());
           $(_this.element).trigger('votetextChanged', [parseInt(votetext.text()), _this.voteCount()]);
           _this.setImages();
+          if (_this.state === _this._states.up) _this.options.callback(",correct");
           return $(_this.element).trigger('upArrowPressed', _this.state);
         });
         return this.downArrow.click(function() {
@@ -71,6 +73,9 @@
           votetext.text(_this.voteCount());
           $(_this.element).trigger('votetextChanged', [parseInt(votetext.text()), _this.voteCount()]);
           _this.setImages();
+          if (_this.state === _this._states.down) {
+            _this.options.callback(",incorrect");
+          }
           return $(_this.element).trigger('downArrowPressed', _this.state);
         });
       };

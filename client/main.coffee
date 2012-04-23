@@ -64,7 +64,7 @@ $ ->
     
     render: ->
       $(@el).html(@template)
-      $(@el).find('.inner-question').votebox({votesnum:@model.get('score')})
+      $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()
       $(@el).find('.inner-question').tagbox({callback: @model.maketag})
       $(@el).find('.inner-question').omnipost({callback: @model.respond})
