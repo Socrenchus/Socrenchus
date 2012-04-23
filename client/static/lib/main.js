@@ -5,14 +5,15 @@
 
   $(function() {
     /*
-      # Core Model and Logic
+      # Core Models and Logic
     */
-    var App, Post, PostView, Posts, StreamView, Templates, Workspace, app_router, e, postCollection, _i, _len, _ref;
+    var App, Post, PostView, Posts, StreamView, Tag, Tags, Templates, Workspace, app_router, e, postCollection, tagCollection, _i, _len, _ref;
     Post = (function(_super) {
 
       __extends(Post, _super);
 
       function Post() {
+        this.maketag = __bind(this.maketag, this);
         this.respond = __bind(this.respond, this);
         Post.__super__.constructor.apply(this, arguments);
       }
@@ -24,6 +25,16 @@
           content: content
         });
         return postCollection.create(p);
+      };
+
+      Post.prototype.maketag = function(content) {
+        var t;
+        t = new Tag({
+          parent: this.get('key'),
+          title: content,
+          xp: 0
+        });
+        return tagCollection.create(t);
       };
 
       return Post;
@@ -42,6 +53,42 @@
       Posts.prototype.url = '/posts';
 
       return Posts;
+
+    })(Backbone.Collection);
+    Tag = (function(_super) {
+
+      __extends(Tag, _super);
+
+      function Tag() {
+        this.respond = __bind(this.respond, this);
+        Tag.__super__.constructor.apply(this, arguments);
+      }
+
+      Tag.prototype.respond = function(content) {
+        var t;
+        t = new Tag({
+          title: content,
+          xp: 0
+        });
+        return tagCollection.create(t);
+      };
+
+      return Tag;
+
+    })(Backbone.Model);
+    Tags = (function(_super) {
+
+      __extends(Tags, _super);
+
+      function Tags() {
+        Tags.__super__.constructor.apply(this, arguments);
+      }
+
+      Tags.prototype.model = Tag;
+
+      Tags.prototype.url = '/tags';
+
+      return Tags;
 
     })(Backbone.Collection);
     /*
@@ -90,7 +137,9 @@
           votesnum: this.model.get('score')
         });
         this.renderPostContent();
-        $(this.el).find('.inner-question').tagbox();
+        $(this.el).find('.inner-question').tagbox({
+          callback: this.model.maketag
+        });
         $(this.el).find('.inner-question').omnipost({
           callback: this.model.respond
         });
@@ -612,6 +661,7 @@
 
     })(Backbone.Router);
     postCollection = new Posts();
+    tagCollection = new Tags();
     App = new StreamView({
       el: $('#learn')
     });

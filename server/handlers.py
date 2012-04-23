@@ -64,6 +64,23 @@ class RESTfulHandler(webapp.RequestHandler):
       post = stream.create_post(tmp['content'])
     post = json.simplejson.dumps(json.encode(post))
     self.response.out.write(post)
+
+class RESTfulTagHandler(webapp.RequestHandler):
+  def get(self, id):
+    Tag.query()
+ 
+  def post(self, id):
+    tmp = json.simplejson.loads(self.request.body)
+    tag = Tag(parent=ndb.Key(urlsafe=tmp['parent']), user=users.get_current_user(), title=tmp['title'])
+    tag.put()
+    self.response.out.write(tag)
+
+  def put(self, id):
+    tmp = json.simplejson.loads(self.request.body)
+    tag = Tag(parent=ndb.Key(urlsafe=tmp['parent']), user=users.get_current_user(), title=tmp['title'])
+    tag.put()
+    self.response.out.write(tag)
+
   """
   def delete(self, id):
     key = self.request.cookies['posts']
@@ -151,7 +168,8 @@ options = [
   ('/login', LoginHandler),
   ('/logout', LogoutHandler),
   ('/', MainPage),
-  ('/posts\/?([0-9]*)', RESTfulHandler)
+  ('/posts\/?([0-9]*)', RESTfulHandler),
+  ('/tags\/?([0-9]*)', RESTfulTagHandler)
 ]
 #application = webapp.WSGIApplication(options, debug=_DEBUG)
 application = webapp.WSGIApplication(options, debug=True)

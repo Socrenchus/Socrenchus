@@ -10,7 +10,7 @@ handlers:
 - url: /images
   static_dir: client/static/images
 
-- url: /(login|logout|posts)(.*)
+- url: /(login|logout|posts|tags)(.*)
   script: server/handlers.py
   login: required
 

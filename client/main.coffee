@@ -1,7 +1,7 @@
 $ ->
   
   ###
-  # Core Model and Logic 
+  # Core Models and Logic 
   ###
   class Post extends Backbone.Model
     respond: (content) =>
@@ -10,12 +10,34 @@ $ ->
         content: content
       )
       postCollection.create(p)
+
+    maketag: (content) =>
+      t = new Tag(
+        parent: @get('key')
+        title: content
+        xp: 0
+      )
+      tagCollection.create(t)
       
     
   class Posts extends Backbone.Collection
     model: Post
     url: '/posts'
+
+  
+  class Tag extends Backbone.Model
+    respond: (content) =>
+      t = new Tag(
+        title: content
+        xp: 0
+      )
+      tagCollection.create(t)
+      
     
+  class Tags extends Backbone.Collection
+    model: Tag
+    url: '/tags'
+
   ###
   # View
   ###
@@ -44,7 +66,7 @@ $ ->
       $(@el).html(@template)
       $(@el).find('.inner-question').votebox({votesnum:@model.get('score')})
       @renderPostContent()
-      $(@el).find('.inner-question').tagbox()
+      $(@el).find('.inner-question').tagbox({callback: @model.maketag})
       $(@el).find('.inner-question').omnipost({callback: @model.respond})
       responsediv = $("<div id = 'response#{@model.get('key')}'></div>")
       $(@el).find('.inner-question').append(responsediv)
@@ -484,6 +506,7 @@ $ ->
       postCollection.create(p6)
 
   postCollection = new Posts()
+  tagCollection = new Tags()
   App = new StreamView(el: $('#learn'))        
   app_router = new Workspace()  
   Backbone.history.start()

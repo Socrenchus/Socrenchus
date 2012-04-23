@@ -12,12 +12,14 @@
     };
     defaults = {
       editing: true,
-      tags: []
+      tags: [],
+      callback: ''
     };
     Plugin = (function() {
 
       function Plugin(element, options) {
         this.element = element;
+        this.maketags = __bind(this.maketags, this);
         this.getAllTags = __bind(this.getAllTags, this);
         this.createcompletetags = __bind(this.createcompletetags, this);
         this.deformtag = __bind(this.deformtag, this);
@@ -49,12 +51,12 @@
           this.tagtext.append(tagIcon);
           this.tagtext.append(this.message);
           this.tagtext.append(this.currenttag);
-          this.submit = $("<button id='ui-omniPostSubmit'>Submit Tags</button>");
+          this.submit = $("<button id='ui-tagboxSubmit'>Submit Tags</button>");
           tagsdiv.append(this.submit);
           this.submit.hide();
           this.submit.click(function() {
             var tags;
-            return tags = _this.getAllTags();
+            return tags = _this.maketags();
           });
           this.tagtext.focusout(function() {
             if (_this.alltags.length === 0 && _this.currenttag.text() === '') {
@@ -169,6 +171,17 @@
           tags.push(tag.text());
         }
         return tags;
+      };
+
+      Plugin.prototype.maketags = function() {
+        var tag, tags, _i, _len, _results;
+        tags = this.getAllTags();
+        _results = [];
+        for (_i = 0, _len = tags.length; _i < _len; _i++) {
+          tag = tags[_i];
+          _results.push(this.options.callback(tag));
+        }
+        return _results;
       };
 
       Plugin.setCurrentTag = function(text) {
