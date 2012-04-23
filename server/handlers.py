@@ -28,7 +28,7 @@ from database import *
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
 
-#_DEBUG = 'localhost' in users.create_logout_url( "/" )
+_DEBUG = 'localhost' in users.create_logout_url( "/" )
 
 class PostHandler(webapp.RequestHandler):
   def get(self, id):
@@ -182,8 +182,7 @@ options = [
   ('/posts\/?([0-9]*)', PostHandler),
   ('/tags\/?([0-9]*)', TagHandler)
 ]
-#application = webapp.WSGIApplication(options, debug=_DEBUG)
-application = webapp.WSGIApplication(options, debug=True)
+application = webapp.WSGIApplication(options, debug=_DEBUG)
 #application = context.toplevel(application.__call__)
   
 def main():
