@@ -183,7 +183,7 @@ options = [
   ('/tags\/?([0-9]*)', TagHandler)
 ]
 application = webapp.WSGIApplication(options, debug=_DEBUG)
-#application = context.toplevel(application.__call__)
+application = ndb.toplevel(application.__call__)
   
 def main():
   #wsgiref.handlers.CGIHandler().run(application)
