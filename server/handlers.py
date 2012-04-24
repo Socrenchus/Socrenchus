@@ -69,7 +69,7 @@ class TagHandler(webapp.RequestHandler):
   def get(self, id):
     def tag_enum(tag):
       return tag
-    taglist = Tag.query(Tag.title != Tag.base("assignment")).map(tag_enum,keys_only=False)
+    taglist = Tag.query(Tag.title != Tag.base("assignment"), Tag.user == users.get_current_user()).map(tag_enum,keys_only=False)
     tags = []
     for tag in taglist:
       jsonTag = json.simplejson.loads(json.encode(tag))

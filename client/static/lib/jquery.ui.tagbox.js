@@ -174,13 +174,17 @@
       };
 
       Plugin.prototype.maketags = function() {
-        var tag, tags, _i, _len, _results;
+        var individualTag, tag, tags, _i, _j, _len, _len2, _ref, _results;
         tags = this.getAllTags();
-        _results = [];
         for (_i = 0, _len = tags.length; _i < _len; _i++) {
           tag = tags[_i];
-          this.tagsdiv.remove();
-          _results.push(this.options.callback(tag));
+          this.options.callback(tag);
+        }
+        _ref = this.alltags;
+        _results = [];
+        for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
+          individualTag = _ref[_j];
+          _results.push(individualTag.find('.delete-imageicon').click());
         }
         return _results;
       };

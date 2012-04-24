@@ -138,7 +138,7 @@
           callback: this.model.maketag
         });
         this.renderPostContent();
-        tagsdiv = $("<div id = 'tags" + (this.model.get('key')) + "'></div>");
+        tagsdiv = $("<div id='tagscontainer'><div id = 'tags" + (this.model.get('key')) + "'></div></div>");
         $(this.el).find('.inner-question').append(tagsdiv);
         $(this.el).find('.inner-question').tagbox({
           callback: this.model.maketag
@@ -475,7 +475,7 @@
         });
         if (item.get('title') === ',correct') {
           return placeholder = 1;
-        } else if (item.get('title') === 'incorrect') {
+        } else if (item.get('title') === ',incorrect') {
           return placeholder = 2;
         } else if (document.getElementById('tags' + item.get('parent'))) {
           return $('#tags' + item.get('parent')).append(tag.render());

@@ -275,6 +275,14 @@ background-image: linear-gradient(top,white,#ECECEC);
   outline: 0px none transparent;
   color: black;
 }
+
+#tagscontainer {
+  width: 350px;
+  min-height: 100%;
+  margin-left:42px;
+  margin-bottom: 20px;
+}
+
 .ui-tag {
   position: relative;
   top: 0;

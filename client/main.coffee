@@ -24,7 +24,6 @@ $ ->
     model: Post
     url: '/posts'
 
-  
   class Tag extends Backbone.Model
     respond: (content) =>
       t = new Tag(
@@ -66,8 +65,9 @@ $ ->
       $(@el).html(@template)
       $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()
-      tagsdiv = $("<div id = 'tags#{@model.get('key')}'></div>")      
+      tagsdiv = $("<div id='tagscontainer'><div id = 'tags#{@model.get('key')}'></div></div>")      
       $(@el).find('.inner-question').append(tagsdiv)
+      #if tagCollection.indexOf('parent: @model.get('key')) > -1
       $(@el).find('.inner-question').tagbox({callback: @model.maketag})
       $(@el).find('.inner-question').omnipost({callback: @model.respond})
       responsediv = $("<div id = 'response#{@model.get('key')}'></div>")
@@ -326,7 +326,7 @@ $ ->
       tag = new TagView(model: item)
       if item.get('title') == ',correct'
         placeholder = 1        
-      else if item.get('title') == 'incorrect'
+      else if item.get('title') == ',incorrect'
         placeholder = 2       
       else if document.getElementById('tags' + item.get('parent'))
         $('#tags' + item.get('parent')).append(tag.render())
