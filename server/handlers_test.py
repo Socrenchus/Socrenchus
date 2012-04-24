@@ -52,7 +52,7 @@ class HandlerTests(unittest.TestCase):
       "PATH_INFO": "/",
     })
     response = webapp.Response()
-    handler = RESTfulHandler()
+    handler = PostHandler()
     handler.initialize(request, response)
     handler.get(1)
 
@@ -61,7 +61,7 @@ class HandlerTests(unittest.TestCase):
     postData = {}
     postData['content'] =  '{posttext: "What is your earliest memory of WWII?", linkdata: "<img src = \'http://www.historyplace.com/unitedstates/pacificwar/2156.jpg\' width = \'350\' height = \'auto\'>"})'
     postData = json.simplejson.dumps(postData)
-    handler = RESTfulHandler()
+    handler = PostHandler()
     handler.request = webapp.Request({
       'REQUEST_METHOD': 'POST',
       'PATH_INFO': '/',
@@ -77,7 +77,7 @@ class HandlerTests(unittest.TestCase):
     childPost = {}
     childPost['content'] = '{posttext: "My earlliest memory is eating this candy" linkdata: ""}'
     #childPost['parent'] = handler.response['key']
-    handler1 = RESTfulHandler()
+    handler1 = PostHandler()
     handler1.request = webapp.Request({
       'REQUEST_METHOD': 'POST',
       'PATH_INFO': '/',
