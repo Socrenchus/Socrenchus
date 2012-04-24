@@ -20,6 +20,7 @@
         this.element = element;
         this.getState = __bind(this.getState, this);
         this.voteCount = __bind(this.voteCount, this);
+        this.disable = __bind(this.disable, this);
         this.setImages = __bind(this.setImages, this);
         this.options = $.extend({}, defaults, options);
         this._defaults = defaults;
@@ -59,7 +60,10 @@
           votetext.text(_this.voteCount());
           $(_this.element).trigger('votetextChanged', [parseInt(votetext.text()), _this.voteCount()]);
           _this.setImages();
-          if (_this.state === _this._states.up) _this.options.callback(",correct");
+          if (_this.state === _this._states.up) {
+            _this.disable();
+            _this.options.callback(",correct");
+          }
           return $(_this.element).trigger('upArrowPressed', _this.state);
         });
         return this.downArrow.click(function() {
@@ -74,6 +78,7 @@
           $(_this.element).trigger('votetextChanged', [parseInt(votetext.text()), _this.voteCount()]);
           _this.setImages();
           if (_this.state === _this._states.down) {
+            _this.disable();
             _this.options.callback(",incorrect");
           }
           return $(_this.element).trigger('downArrowPressed', _this.state);
@@ -103,6 +108,19 @@
           this.downArrow.attr('onmouseout', 'src="/images/votearrow.png"');
           return this.downArrow.attr('onmouseup', 'src="/images/votearrow.png"');
         }
+      };
+
+      Plugin.prototype.disable = function() {
+        this.upArrow.unbind('click');
+        this.downArrow.unbind('click');
+        this.upArrow.attr('onmouseout', "src={#@upArrow.attr('src')}");
+        this.upArrow.attr('onmouseup', "src={#@upArrow.attr('src')}");
+        this.upArrow.attr('onmouseover', "src={#@upArrow.attr('src')}");
+        this.upArrow.attr('onmousedown', "src={#@upArrow.attr('src')}");
+        this.downArrow.attr('onmouseout', "src={#@downArrow.attr('src')}");
+        this.downArrow.attr('onmouseup', "src={#@downArrow.attr('src')}");
+        this.downArrow.attr('onmouseover', "src={#@downArrow.attr('src')}");
+        return this.downArrow.attr('onmousedown', "src={#@downArrow.attr('src')}");
       };
 
       Plugin.prototype.voteCount = function(newVotesNum) {
