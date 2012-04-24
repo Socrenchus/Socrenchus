@@ -7,7 +7,7 @@
     /*
       # Core Models and Logic
     */
-    var App, Post, PostView, Posts, StreamView, Tag, Tags, Templates, Workspace, app_router, e, postCollection, tagCollection, _i, _len, _ref;
+    var App, Post, PostView, Posts, StreamView, Tag, TagView, Tags, Templates, Workspace, app_router, e, postCollection, tagCollection, _i, _len, _ref;
     Post = (function(_super) {
 
       __extends(Post, _super);
@@ -92,7 +92,7 @@
 
     })(Backbone.Collection);
     /*
-      # View
+      # Views
     */
     Templates = {};
     _ref = $('#templates').children();
@@ -131,13 +131,15 @@
       };
 
       PostView.prototype.render = function() {
-        var indicatortext, lockedpostsdiv, percent, progressbardiv, progressindicatordiv, responsediv, textinline;
+        var indicatortext, lockedpostsdiv, percent, progressbardiv, progressindicatordiv, responsediv, tagsdiv, textinline;
         $(this.el).html(this.template);
         $(this.el).find('.inner-question').votebox({
           votesnum: this.model.get('score'),
           callback: this.model.maketag
         });
         this.renderPostContent();
+        tagsdiv = $("<div id = 'tags" + (this.model.get('key')) + "'></div>");
+        $(this.el).find('.inner-question').append(tagsdiv);
         $(this.el).find('.inner-question').tagbox({
           callback: this.model.maketag
         });
@@ -171,6 +173,38 @@
       return PostView;
 
     })(Backbone.View);
+    TagView = (function(_super) {
+
+      __extends(TagView, _super);
+
+      function TagView() {
+        TagView.__super__.constructor.apply(this, arguments);
+      }
+
+      TagView.prototype.tagName = 'p';
+
+      TagView.prototype.className = 'tag';
+
+      TagView.prototype.template = Templates.post;
+
+      TagView.prototype.events = function() {};
+
+      TagView.prototype.initialize = function() {
+        return this.id = this.model.get('parent');
+      };
+
+      TagView.prototype.render = function() {
+        var tagdiv;
+        tagdiv = $("<div class = 'ui-tag'>" + (this.model.get('title')) + "</div>");
+        tagdiv.css('background-image', 'url("/images/tagOutline.png")');
+        tagdiv.css('background-repeat', 'no-repeat');
+        tagdiv.css('background-size', '100% 100%');
+        return $(this.el).append(tagdiv);
+      };
+
+      return TagView;
+
+    })(Backbone.View);
     StreamView = (function(_super) {
 
       __extends(StreamView, _super);
@@ -189,7 +223,9 @@
         this.selectedStory = '#story-part1';
         postCollection.bind('add', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
-        return postCollection.bind('all', this.render, this);
+        postCollection.bind('all', this.render, this);
+        tagCollection.bind('add', this.addTag, this);
+        return tagCollection.bind('reset', this.addAllTags, this);
       };
 
       StreamView.prototype.setStoryPart = function(storyPart) {
@@ -432,6 +468,24 @@
         return postCollection.each(this.deleteOne);
       };
 
+      StreamView.prototype.addTag = function(item) {
+        var placeholder, tag;
+        tag = new TagView({
+          model: item
+        });
+        if (item.get('title') === ',correct') {
+          return placeholder = 1;
+        } else if (item.get('title') === 'incorrect') {
+          return placeholder = 2;
+        } else if (document.getElementById('tags' + item.get('parent'))) {
+          return $('#tags' + item.get('parent')).append(tag.render());
+        }
+      };
+
+      StreamView.prototype.addAllTags = function() {
+        return tagCollection.each(this.addTag);
+      };
+
       StreamView.prototype.render = function() {
         var profileshowing,
           _this = this;
@@ -535,7 +589,8 @@
       };
 
       Workspace.prototype.normal = function() {
-        return postCollection.fetch();
+        postCollection.fetch();
+        return tagCollection.fetch();
       };
 
       Workspace.prototype.unpopulate = function() {

@@ -69,14 +69,13 @@ class TagHandler(webapp.RequestHandler):
   def get(self, id):
     def tag_enum(tag):
       return tag
-    taglist = Tag.query().map(tag_enum,keys_only=False)
+    taglist = Tag.query(Tag.title != Tag.base("assignment")).map(tag_enum,keys_only=False)
     tags = []
     for tag in taglist:
       jsonTag = json.simplejson.loads(json.encode(tag))
       #FIXME: find the real problem rather than removing duplicate posts
       if jsonTag not in tags:
-        tags.append(jsonTag)    
-    tags.reverse()
+        tags.append(jsonTag)
     tags = json.simplejson.dumps(tags)
     self.response.out.write(tags)
  

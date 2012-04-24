@@ -35,16 +35,16 @@
       }
 
       Plugin.prototype.init = function() {
-        var addtagstext, editingoldtag, tagIcon, tagsdiv,
+        var addtagstext, editingoldtag, tagIcon,
           _this = this;
         this.alltags = [];
         editingoldtag = false;
         addtagstext = 'Tag the above post here...';
         if (this.options.editing) {
-          tagsdiv = $("<div class='ui-tagbox'></div>");
+          this.tagsdiv = $("<div class='ui-tagbox'></div>");
           this.tagtext = $("<div class='ui-tagtext' contentEditable='false'></div>");
-          tagsdiv.append(this.tagtext);
-          $(this.element).append(tagsdiv);
+          this.tagsdiv.append(this.tagtext);
+          $(this.element).append(this.tagsdiv);
           tagIcon = $("<div contentEditable='false'><img src = '/images/tag.png' id = 'ui-tagicon'/></div>");
           this.currenttag = $("<div class='ui-individualtag' contentEditable='true'></div>");
           this.message = $("<div class='ui-tagmessage'>" + addtagstext + "</div>");
@@ -52,7 +52,7 @@
           this.tagtext.append(this.message);
           this.tagtext.append(this.currenttag);
           this.submit = $("<button id='ui-tagboxSubmit'>Submit Tags</button>");
-          tagsdiv.append(this.submit);
+          this.tagsdiv.append(this.submit);
           this.submit.hide();
           this.submit.click(function() {
             var tags;
@@ -179,6 +179,7 @@
         _results = [];
         for (_i = 0, _len = tags.length; _i < _len; _i++) {
           tag = tags[_i];
+          this.tagsdiv.remove();
           _results.push(this.options.callback(tag));
         }
         return _results;

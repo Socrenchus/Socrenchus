@@ -39,7 +39,7 @@ $ ->
     url: '/tags'
 
   ###
-  # View
+  # Views
   ###
   
   Templates = {}
@@ -66,6 +66,8 @@ $ ->
       $(@el).html(@template)
       $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()
+      tagsdiv = $("<div id = 'tags#{@model.get('key')}'></div>")      
+      $(@el).find('.inner-question').append(tagsdiv)
       $(@el).find('.inner-question').tagbox({callback: @model.maketag})
       $(@el).find('.inner-question').omnipost({callback: @model.respond})
       responsediv = $("<div id = 'response#{@model.get('key')}'></div>")
@@ -90,7 +92,23 @@ $ ->
         lockedpostsdiv.append(progressbardiv)
         $(@el).find('.inner-question').append(lockedpostsdiv)
       return $(@el)
-        
+     
+   class TagView extends Backbone.View
+    tagName: 'p'
+    className: 'tag'
+    template: Templates.post
+    events: ->
+      
+    initialize: ->
+      @id = @model.get('parent')
+
+    render: ->
+      tagdiv = $("<div class = 'ui-tag'>#{@model.get('title')}</div>")
+      tagdiv.css('background-image', 'url("/images/tagOutline.png")')
+      tagdiv.css('background-repeat', 'no-repeat')
+      tagdiv.css('background-size', '100% 100%')
+      $(@el).append(tagdiv)
+   
   class StreamView extends Backbone.View
     initialize: ->
       @streamviewRendered = false
@@ -98,6 +116,8 @@ $ ->
       postCollection.bind('add', @addOne, this)
       postCollection.bind('reset', @addAll, this)
       postCollection.bind('all', @render, this)
+      tagCollection.bind('add', @addTag, this)
+      tagCollection.bind('reset', @addAllTags, this)
       #postCollection.fetch()
 
     #FIXME: remove these next few functions after the demo.
@@ -301,6 +321,19 @@ $ ->
       item.destroy()
     deleteAll: ->
       postCollection.each(@deleteOne)
+
+    addTag: (item) ->
+      tag = new TagView(model: item)
+      if item.get('title') == ',correct'
+        placeholder = 1        
+      else if item.get('title') == 'incorrect'
+        placeholder = 2       
+      else if document.getElementById('tags' + item.get('parent'))
+        $('#tags' + item.get('parent')).append(tag.render())
+    
+    addAllTags: ->
+      tagCollection.each(@addTag)
+
     render: =>
       if !@streamviewRendered
         @postingDiv = $('#post-question')
@@ -402,6 +435,7 @@ $ ->
 
     normal: ->
       postCollection.fetch()
+      tagCollection.fetch()
 
     unpopulate: ->
       postCollection.fetch()
