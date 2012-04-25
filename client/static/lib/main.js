@@ -490,6 +490,7 @@
         var profileshowing,
           _this = this;
         if (!this.streamviewRendered) {
+          $('#profile-view').hide();
           this.postingDiv = $('#post-question');
           this.postingDiv.omnipost({
             callback: this.makePost

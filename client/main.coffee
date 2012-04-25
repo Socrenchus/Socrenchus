@@ -336,6 +336,8 @@ $ ->
 
     render: =>
       if !@streamviewRendered
+        # FIXME: remove when the profile is finished
+        $('#profile-view').hide()
         @postingDiv = $('#post-question')
         @postingDiv.omnipost({callback: @makePost})
         @scrollingDiv = $('#story')
