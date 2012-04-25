@@ -333,16 +333,20 @@ $ ->
     
     addAllTags: ->
       tagCollection.each(@addTag)
+    
+    showTopicCreator: (showing) =>
+      if showing
+        $('#post-question').show()
+      else
+        $('#post-question').hide()
 
     render: =>
       if !@streamviewRendered
         # FIXME: remove when the profile is finished
         $('#profile-view').hide()
+
         $('#post-question').omnipost({callback: @makePost, message: 'Post a topic...'})
-        $('#post-question').hide()
-        $('#topic-create').click( ->
-          $('#post-question').toggle()
-        )
+        
         @scrollingDiv = $('#story')
         $('#collapsible-profile').hide()
         profileshowing = false
@@ -422,6 +426,7 @@ $ ->
       #'/:id' : 'assign'
       ''  : 'normal'
       'unpopulate' : 'unpopulate'
+      'topicCreator' : 'topicCreator'      
       'populate' : 'populate'
       'serverpopulate' : 'serverpopulate'
     #assign: (id) ->
@@ -431,6 +436,11 @@ $ ->
     deleteOne: (item) ->
       item.destroy()
 
+    topicCreator: ->
+      App.showTopicCreator(true)
+      postCollection.fetch()
+      tagCollection.fetch()
+
     serverpopulate: ->
       data = JSON.stringify({posttext: "What is your earliest memory of WWII?", linkdata: "<img src = 'http://www.historyplace.com/unitedstates/pacificwar/2156.jpg' width = '350' height = 'auto'>"})
       p = new Post(
@@ -439,6 +449,7 @@ $ ->
       postCollection.create(p)
 
     normal: ->
+      App.showTopicCreator(false)
       postCollection.fetch()
       tagCollection.fetch()
 
