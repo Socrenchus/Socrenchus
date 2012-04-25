@@ -41,8 +41,8 @@ class PostHandler(webapp.RequestHandler):
     for post in postlist:
       jsonPost = json.simplejson.loads(json.encode(post.parent().get()))
       #FIXME: find the real problem rather than removing duplicate posts
-      if jsonPost not in posts:
-        posts.append(jsonPost)    
+      #if jsonPost not in posts:
+      posts.append(jsonPost)    
     posts.reverse()
     posts = json.simplejson.dumps(posts)
     self.response.out.write(posts)
@@ -76,9 +76,7 @@ class TagHandler(webapp.RequestHandler):
     tags = []
     for tag in taglist:
       jsonTag = json.simplejson.loads(json.encode(tag))
-      #FIXME: find the real problem rather than removing duplicate posts
-      if jsonTag not in tags:
-        tags.append(jsonTag)
+      tags.append(jsonTag)
     tags = json.simplejson.dumps(tags)
     self.response.out.write(tags)
  
