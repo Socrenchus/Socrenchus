@@ -17,8 +17,11 @@ This file contains all of the request handlers.
 __author__ = 'Bryan Goldstein'
 
 import wsgiref.handlers
+import os, sys, inspect
+cmd_folder = os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])
+if cmd_folder not in sys.path:
+  sys.path.insert(0, cmd_folder)
 import json
-import os
 from google.appengine.ext import webapp
 from google.appengine.api import users
 from google.appengine.ext.ndb import context
@@ -26,15 +29,21 @@ from google.appengine.ext import ndb
 import logging
 from database import *
 from google.appengine.ext.webapp.util import run_wsgi_app
-#_DEBUG = 'localhost' in users.create_logout_url( "/" )
+from google.appengine.ext.webapp import template
 
-class RESTfulHandler(webapp.RequestHandler):
+_DEBUG = 'localhost' in users.create_logout_url( "/" )
+
+class PostHandler(webapp.RequestHandler):
   def get(self, id):
     stream = Stream.get_or_create(users.get_current_user())
-    postlist = stream.assignments()
+    postlist = stream.assignments().fetch(keys_only=True)
     posts = []
     for post in postlist:
-      posts.append(json.simplejson.loads(json.encode(post.get())))
+      jsonPost = json.simplejson.loads(json.encode(post.parent().get()))
+      #FIXME: find the real problem rather than removing duplicate posts
+      if jsonPost not in posts:
+        posts.append(jsonPost)    
+    posts.reverse()
     posts = json.simplejson.dumps(posts)
     self.response.out.write(posts)
 
@@ -53,11 +62,38 @@ class RESTfulHandler(webapp.RequestHandler):
     stream = Stream.get_or_create(users.get_current_user())
     tmp = json.simplejson.loads(self.request.body)
     if 'parent' in tmp:
-      post = stream.create_post(tmp['content'], ndb.Key(tmp['parent']))
+      post = stream.create_post(tmp['content'], ndb.Key(urlsafe=tmp['parent']))
     else:
       post = stream.create_post(tmp['content'])
-    postJSON = json.simplejson.dumps(json.encode(post))
-    self.response.out.write(postJSON)
+    post = json.simplejson.dumps(json.encode(post))
+    self.response.out.write(post)
+
+class TagHandler(webapp.RequestHandler):
+  def get(self, id):
+    def tag_enum(tag):
+      return tag
+    taglist = Tag.query(Tag.title != Tag.base("assignment"), Tag.user == users.get_current_user()).map(tag_enum,keys_only=False)
+    tags = []
+    for tag in taglist:
+      jsonTag = json.simplejson.loads(json.encode(tag))
+      #FIXME: find the real problem rather than removing duplicate posts
+      if jsonTag not in tags:
+        tags.append(jsonTag)
+    tags = json.simplejson.dumps(tags)
+    self.response.out.write(tags)
+ 
+  def post(self, id):
+    tmp = json.simplejson.loads(self.request.body)
+    tag = Tag(parent=ndb.Key(urlsafe=tmp['parent']), user=users.get_current_user(), title=tmp['title'])
+    tag.put()
+    self.response.out.write(tag)
+
+  def put(self, id):
+    tmp = json.simplejson.loads(self.request.body)
+    tag = Tag(parent=ndb.Key(urlsafe=tmp['parent']), user=users.get_current_user(), title=tmp['title'])
+    tag.put()
+    self.response.out.write(tag)
+
   """
   def delete(self, id):
     key = self.request.cookies['posts']
@@ -74,7 +110,7 @@ class LoginHandler(webapp.RequestHandler):
   Logs the user in and redirects.
   """
   def get(self):
-    self.redirect('/#servertest')
+    self.redirect('/')
     
 class LogoutHandler(webapp.RequestHandler):
   """
@@ -83,6 +119,24 @@ class LogoutHandler(webapp.RequestHandler):
   def get(self):
     self.redirect(users.create_logout_url( "/" ))
    
+
+class MainPage(webapp.RequestHandler):
+  def get(self):
+    if users.get_current_user():
+      url = users.create_logout_url(self.request.uri)
+      url_linktext = 'Logout'
+    else:
+      url = users.create_login_url(self.request.uri)
+      self.redirect(url)
+      url_linktext = 'Login'
+    template_values = {
+      'url': url,
+      'url_linktext': url_linktext,
+    }
+
+    path = os.path.join(os.path.dirname(__file__), '../client/static/index.html')
+    self.response.out.write(template.render(path, template_values))
+
 """
 class RPCHandler(webapp.RequestHandler):
   def __init__(self):
@@ -126,14 +180,12 @@ options = [
   #(r'/(.*)/report.csv', GradeReport),
   ('/login', LoginHandler),
   ('/logout', LogoutHandler),
-  #(r'/rpc/(.*)/(.*)', RPCHandler),
-  #(r'/rpc/(.*)()', RPCHandler),
-  #r'/rpc()()', RPCHandler)
-  ('/posts\/?([0-9]*)', RESTfulHandler)
+  ('/', MainPage),
+  ('/posts\/?([0-9]*)', PostHandler),
+  ('/tags\/?([0-9]*)', TagHandler)
 ]
-#application = webapp.WSGIApplication(options, debug=_DEBUG)
-application = webapp.WSGIApplication(options, debug=True)
-#application = context.toplevel(application.__call__)
+application = webapp.WSGIApplication(options, debug=_DEBUG)
+application = ndb.toplevel(application.__call__)
   
 def main():
   #wsgiref.handlers.CGIHandler().run(application)

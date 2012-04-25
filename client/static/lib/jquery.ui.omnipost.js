@@ -8,7 +8,8 @@
     pluginName = 'omnipost';
     defaults = {
       editing: true,
-      callback: ''
+      callback: '',
+      message: 'Post your reply here...'
     };
     states = {
       none: 0,
@@ -180,7 +181,7 @@
           _this = this;
         this.state = this._states.none;
         this.panelList = [];
-        message = 'Post your reply here...';
+        message = this.options.message;
         omnipostdiv = $("<div class = 'ui-omnipost'></div>");
         collapse = $("<img alt='x' title='x' id='ui-omniPostCollapse'>");
         collapse.attr('src', '/images/collapse.png');
@@ -269,7 +270,7 @@
             linkdata: allPanelContent[0].outerHTML
           };
           data = JSON.stringify(data);
-          omnipostdiv.remove();
+          collapse.click();
           return _this.options.callback(data);
         });
       };

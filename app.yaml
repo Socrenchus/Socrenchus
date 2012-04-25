@@ -4,20 +4,18 @@ runtime: python
 api_version: 1
 
 handlers:
-- url: /(\#.*)?
-  static_files: client/static/index.html
-  upload: client/static/index.html
+- url: /lib
+  static_dir: client/static/lib
+
+- url: /images
+  static_dir: client/static/images
 
 - url: /admin/.*
   script: $PYTHON_LIB/apphosting/ext/admin/
   login: admin
 
-- url: /(login|logout|posts)(.*)
+- url: /.*
   script: server/handlers.py
-  login: required
-  
-- url: /
-  static_dir: client/static
-  
+
 builtins:
 - remote_api: on

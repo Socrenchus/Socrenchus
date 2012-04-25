@@ -5,14 +5,15 @@
 
   $(function() {
     /*
-      # Core Model and Logic
+      # Core Models and Logic
     */
-    var App, Post, PostView, Posts, StreamView, Templates, Workspace, app_router, e, postCollection, _i, _len, _ref;
+    var App, Post, PostView, Posts, StreamView, Tag, TagView, Tags, Templates, Workspace, app_router, e, postCollection, tagCollection, _i, _len, _ref;
     Post = (function(_super) {
 
       __extends(Post, _super);
 
       function Post() {
+        this.maketag = __bind(this.maketag, this);
         this.respond = __bind(this.respond, this);
         Post.__super__.constructor.apply(this, arguments);
       }
@@ -24,6 +25,16 @@
           content: content
         });
         return postCollection.create(p);
+      };
+
+      Post.prototype.maketag = function(content) {
+        var t;
+        t = new Tag({
+          parent: this.get('key'),
+          title: content,
+          xp: 0
+        });
+        return tagCollection.create(t);
       };
 
       return Post;
@@ -44,8 +55,44 @@
       return Posts;
 
     })(Backbone.Collection);
+    Tag = (function(_super) {
+
+      __extends(Tag, _super);
+
+      function Tag() {
+        this.respond = __bind(this.respond, this);
+        Tag.__super__.constructor.apply(this, arguments);
+      }
+
+      Tag.prototype.respond = function(content) {
+        var t;
+        t = new Tag({
+          title: content,
+          xp: 0
+        });
+        return tagCollection.create(t);
+      };
+
+      return Tag;
+
+    })(Backbone.Model);
+    Tags = (function(_super) {
+
+      __extends(Tags, _super);
+
+      function Tags() {
+        Tags.__super__.constructor.apply(this, arguments);
+      }
+
+      Tags.prototype.model = Tag;
+
+      Tags.prototype.url = '/tags';
+
+      return Tags;
+
+    })(Backbone.Collection);
     /*
-      # View
+      # Views
     */
     Templates = {};
     _ref = $('#templates').children();
@@ -84,13 +131,18 @@
       };
 
       PostView.prototype.render = function() {
-        var indicatortext, lockedpostsdiv, percent, progressbardiv, progressindicatordiv, responsediv, textinline;
+        var indicatortext, lockedpostsdiv, percent, progressbardiv, progressindicatordiv, responsediv, tagsdiv, textinline;
         $(this.el).html(this.template);
         $(this.el).find('.inner-question').votebox({
-          votesnum: this.model.get('score')
+          votesnum: this.model.get('score'),
+          callback: this.model.maketag
         });
         this.renderPostContent();
-        $(this.el).find('.inner-question').tagbox();
+        tagsdiv = $("<div id='tagscontainer'><div id = 'tags" + (this.model.get('key')) + "'></div></div>");
+        $(this.el).find('.inner-question').append(tagsdiv);
+        $(this.el).find('.inner-question').tagbox({
+          callback: this.model.maketag
+        });
         $(this.el).find('.inner-question').omnipost({
           callback: this.model.respond
         });
@@ -121,12 +173,45 @@
       return PostView;
 
     })(Backbone.View);
+    TagView = (function(_super) {
+
+      __extends(TagView, _super);
+
+      function TagView() {
+        TagView.__super__.constructor.apply(this, arguments);
+      }
+
+      TagView.prototype.tagName = 'p';
+
+      TagView.prototype.className = 'tag';
+
+      TagView.prototype.template = Templates.post;
+
+      TagView.prototype.events = function() {};
+
+      TagView.prototype.initialize = function() {
+        return this.id = this.model.get('parent');
+      };
+
+      TagView.prototype.render = function() {
+        var tagdiv;
+        tagdiv = $("<div class = 'ui-tag'>" + (this.model.get('title')) + "</div>");
+        tagdiv.css('background-image', 'url("/images/tagOutline.png")');
+        tagdiv.css('background-repeat', 'no-repeat');
+        tagdiv.css('background-size', '100% 100%');
+        return $(this.el).append(tagdiv);
+      };
+
+      return TagView;
+
+    })(Backbone.View);
     StreamView = (function(_super) {
 
       __extends(StreamView, _super);
 
       function StreamView() {
         this.render = __bind(this.render, this);
+        this.showTopicCreator = __bind(this.showTopicCreator, this);
         this.storyPart5Done = __bind(this.storyPart5Done, this);
         this.storyPart4Done = __bind(this.storyPart4Done, this);
         this.storyPart3Done = __bind(this.storyPart3Done, this);
@@ -139,7 +224,9 @@
         this.selectedStory = '#story-part1';
         postCollection.bind('add', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
-        return postCollection.bind('all', this.render, this);
+        postCollection.bind('all', this.render, this);
+        tagCollection.bind('add', this.addTag, this);
+        return tagCollection.bind('reset', this.addAllTags, this);
       };
 
       StreamView.prototype.setStoryPart = function(storyPart) {
@@ -350,6 +437,14 @@
         }
       };
 
+      StreamView.prototype.makePost = function(content) {
+        var p;
+        p = new Post({
+          content: content
+        });
+        return postCollection.create(p);
+      };
+
       StreamView.prototype.addOne = function(item) {
         var post;
         post = new PostView({
@@ -374,18 +469,42 @@
         return postCollection.each(this.deleteOne);
       };
 
+      StreamView.prototype.addTag = function(item) {
+        var placeholder, tag;
+        tag = new TagView({
+          model: item
+        });
+        if (item.get('title') === ',correct') {
+          return placeholder = 1;
+        } else if (item.get('title') === ',incorrect') {
+          return placeholder = 2;
+        } else if (document.getElementById('tags' + item.get('parent'))) {
+          return $('#tags' + item.get('parent')).append(tag.render());
+        }
+      };
+
+      StreamView.prototype.addAllTags = function() {
+        return tagCollection.each(this.addTag);
+      };
+
+      StreamView.prototype.showTopicCreator = function(showing) {
+        if (showing) {
+          return $('#post-question').show();
+        } else {
+          return $('#post-question').hide();
+        }
+      };
+
       StreamView.prototype.render = function() {
         var profileshowing,
           _this = this;
         if (!this.streamviewRendered) {
-          this.scrollingDiv = $('#story');
-          $(window).scroll(function() {
-            var currentElPos, scrollDivHeight, windowHeight, windowPosition;
-            windowPosition = $(window).scrollTop();
-            windowHeight = $(window).height();
-            scrollDivHeight = _this.scrollingDiv.height();
-            return currentElPos = $(_this.selectedStory).position().top;
+          $('#profile-view').hide();
+          $('#post-question').omnipost({
+            callback: this.makePost,
+            message: 'Post a topic...'
           });
+          this.scrollingDiv = $('#story');
           $('#collapsible-profile').hide();
           profileshowing = false;
           $('#dropdown-panel').click(function() {
@@ -459,17 +578,19 @@
       Workspace.prototype.routes = {
         '': 'normal',
         'unpopulate': 'unpopulate',
+        'new': 'new',
         'populate': 'populate',
-        'serverpopulate': 'serverpopulate',
-        'servertest': 'servertest'
+        'serverpopulate': 'serverpopulate'
       };
 
       Workspace.prototype.deleteOne = function(item) {
         return item.destroy();
       };
 
-      Workspace.prototype.servertest = function() {
-        return postCollection.fetch();
+      Workspace.prototype["new"] = function() {
+        App.showTopicCreator(true);
+        postCollection.fetch();
+        return tagCollection.fetch();
       };
 
       Workspace.prototype.serverpopulate = function() {
@@ -485,116 +606,9 @@
       };
 
       Workspace.prototype.normal = function() {
-        var data, data1, data2, data3, data4, data5, data6, p, p1, p2, p3, p4, p5, p6;
+        App.showTopicCreator(false);
         postCollection.fetch();
-        postCollection.each(this.deleteOne);
-        postCollection.reset();
-        $('#assignments').html('');
-        data = {
-          posttext: 'What is your earliest memory of WWII?',
-          linkdata: '<img src = "http://www.historyplace.com/unitedstates/pacificwar/2156.jpg" width = "350" height = "auto">'
-        };
-        p = new Post({
-          id: 1,
-          editing: false,
-          content: data,
-          votecount: 25,
-          tags: ["world war II"],
-          parents: '',
-          responses: [],
-          hidden: false
-        });
-        postCollection.create(p);
-        data1 = {
-          posttext: 'Does anyone remember these delicious candybars?',
-          linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/PjcDkdfe6tg" frameborder="0" allowfullscreen></iframe>'
-        };
-        p1 = new Post({
-          id: 2,
-          editing: false,
-          content: data1,
-          votecount: 13,
-          tags: ["Reggies candy bar"],
-          parents: [p],
-          responses: [],
-          hidden: true
-        });
-        postCollection.create(p1);
-        data2 = {
-          posttext: '',
-          linkdata: '<iframe width="350" height="275" src="http://www.youtube.com/embed/2F_PxO1QJ1c" frameborder="0" allowfullscreen></iframe>'
-        };
-        p2 = new Post({
-          id: 3,
-          editing: false,
-          content: data2,
-          votecount: 4,
-          tags: ["Reggies candy bar, World war II"],
-          parents: [p1],
-          responses: [],
-          hidden: true
-        });
-        postCollection.create(p2);
-        data3 = {
-          posttext: 'Wow, I completely forgot about this candy.  Its part of a candy wrapper museum now.',
-          linkdata: '<a href="http://www.candywrappermuseum.com/reggiejackson.html">Candy Bar Museum</a>'
-        };
-        p3 = new Post({
-          id: 4,
-          editing: false,
-          content: data3,
-          votecount: 3,
-          tags: ["Reggies candy bar, World war II"],
-          parents: [p1],
-          responses: [],
-          hidden: true
-        });
-        postCollection.create(p3);
-        data4 = {
-          posttext: 'I remember the first time I heard about the war, I couldnt believe my ears.  I drove to my Mothers house to be sure I saw her at least once before I might have been drafted.',
-          linkdata: ''
-        };
-        p4 = new Post({
-          id: 5,
-          editing: false,
-          content: data4,
-          votecount: 19,
-          tags: ["World war II, Heartwarming"],
-          parents: [p],
-          responses: [],
-          hidden: true
-        });
-        postCollection.create(p4);
-        data5 = {
-          posttext: 'i wasnt born yet.. im still waiting for WWIII.',
-          linkdata: ''
-        };
-        p5 = new Post({
-          id: 6,
-          editing: false,
-          content: data5,
-          votecount: -4,
-          tags: ["disrespectful, immature"],
-          parents: [p],
-          responses: [],
-          hidden: true
-        });
-        postCollection.create(p5);
-        data6 = {
-          posttext: 'what is World war II?',
-          linkdata: ''
-        };
-        p6 = new Post({
-          id: 7,
-          editing: false,
-          content: data6,
-          votecount: -6,
-          tags: ["ignorant"],
-          parents: [p],
-          responses: [],
-          hidden: true
-        });
-        return postCollection.create(p6);
+        return tagCollection.fetch();
       };
 
       Workspace.prototype.unpopulate = function() {
@@ -721,6 +735,7 @@
 
     })(Backbone.Router);
     postCollection = new Posts();
+    tagCollection = new Tags();
     App = new StreamView({
       el: $('#learn')
     });
