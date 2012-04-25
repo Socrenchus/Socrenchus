@@ -420,14 +420,12 @@ $ ->
   ###
   class Workspace extends Backbone.Router
     routes:
-      #'/:id' : 'assign'
+      '/:id' : 'assign'
       ''  : 'normal'
-      'unpopulate' : 'unpopulate'
       'new' : 'new'
-      'serverpopulate' : 'serverpopulate'
-    #assign: (id) ->
-    #  postCollection.get(id)
-    #  postCollection.fetch()
+    assign: (id) ->
+      postCollection.get(id)
+      postCollection.fetch()
 
     deleteOne: (item) ->
       item.destroy()
@@ -437,23 +435,10 @@ $ ->
       postCollection.fetch()
       tagCollection.fetch()
 
-    serverpopulate: ->
-      data = JSON.stringify({posttext: "What is your earliest memory of WWII?", linkdata: "<img src = 'http://www.historyplace.com/unitedstates/pacificwar/2156.jpg' width = '350' height = 'auto'>"})
-      p = new Post(
-        content: data
-      )
-      postCollection.create(p)
-
     normal: ->
       App.showTopicCreator(false)
       postCollection.fetch()
       tagCollection.fetch()
-
-    unpopulate: ->
-      postCollection.fetch()
-      postCollection.each(@deleteOne)
-      postCollection.reset()
-      $('#assignments').html('')
 
   postCollection = new Posts()
   tagCollection = new Tags()

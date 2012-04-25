@@ -575,10 +575,14 @@
       }
 
       Workspace.prototype.routes = {
+        '/:id': 'assign',
         '': 'normal',
-        'unpopulate': 'unpopulate',
-        'new': 'new',
-        'serverpopulate': 'serverpopulate'
+        'new': 'new'
+      };
+
+      Workspace.prototype.assign = function(id) {
+        postCollection.get(id);
+        return postCollection.fetch();
       };
 
       Workspace.prototype.deleteOne = function(item) {
@@ -591,29 +595,10 @@
         return tagCollection.fetch();
       };
 
-      Workspace.prototype.serverpopulate = function() {
-        var data, p;
-        data = JSON.stringify({
-          posttext: "What is your earliest memory of WWII?",
-          linkdata: "<img src = 'http://www.historyplace.com/unitedstates/pacificwar/2156.jpg' width = '350' height = 'auto'>"
-        });
-        p = new Post({
-          content: data
-        });
-        return postCollection.create(p);
-      };
-
       Workspace.prototype.normal = function() {
         App.showTopicCreator(false);
         postCollection.fetch();
         return tagCollection.fetch();
-      };
-
-      Workspace.prototype.unpopulate = function() {
-        postCollection.fetch();
-        postCollection.each(this.deleteOne);
-        postCollection.reset();
-        return $('#assignments').html('');
       };
 
       return Workspace;
