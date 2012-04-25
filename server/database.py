@@ -95,12 +95,14 @@ class Post(ndb.Model):
     # check if parent post exists
     parent = self.key.parent()
     if parent:
-      Tag.query(ancestor=parent).map(tags_by_weight)
+      a = tags_d
+      b = Tag.weights(Tag.query(ancestor=parent))
+      tags_d = dict( (n, a.get(n, 0)+b.get(n, 0)) for n in set(a)|set(b) )
     tags = tags_d.keys()
     s = sum(tags_d.values())
     for tag in tags:
       if s > 0:
-        user.adjust_experience(tag,((delta * tags_d[tag]) / s)).wait()
+        user.adjust_experience(tag,((delta * tags_d[tag]) / s))#.wait()
         
     return self.put_async()
   
@@ -163,10 +165,6 @@ class Post(ndb.Model):
     # TODO: Improve step function
     # show 5 posts for every 25 xp
     return (int(delta_xp)/25)*5
-    
-  @classmethod
-  def _pre_get_hook(cls, key):
-    Post.verify_assignment_count(key)
 
 class Tag(ndb.Model):
   """
@@ -304,17 +302,13 @@ class Stream(ndb.Model):
     """
     Returns a list of post keys assigned to the user.
     """
-    def tag_enum(tag):
-      return tag.parent()
-    return Tag.query(Tag.title == Tag.base('assignment'), Tag.user == self.user).map(tag_enum,keys_only=True)
+    return Tag.query(Tag.title == Tag.base('assignment'), Tag.user == self.user)
   
   def assigned_children(self, post_key):
     """
     Returns a list of post keys assigned to the user under the given post key.
     """
-    def tag_enum(tag):
-      return tag.parent()
-    return Tag.query(Tag.title == Tag.base('assignment'), Tag.user == self.user, ancestor=post_key).map(tag_enum,keys_only=True)
+    return Tag.query(Tag.title == Tag.base('assignment'), Tag.user == self.user, ancestor=post_key)
   
   def get_tag(self, tag_title):
     """
@@ -329,16 +323,33 @@ class Stream(ndb.Model):
     """
     Adjusts the user's experience in a tag.
     """
+    # update experience
     ref_tag = self.get_tag(tag_title)
     ref_tag.xp += delta
-    return ref_tag.put_async()
+    ref_tag.put()
+    
+    # check for new assignments
+    def filter_assignments(key):
+      parent = key.parent()
+      if Tag.query(Tag.title == tag_title, ancestor=parent).count(1):
+        return parent
+    post_keys = self.assignments().map(filter_assignments,keys_only=True)
+    for key in set(post_keys):
+      if key:
+        Post.verify_assignment_count(key)
     
   def get_experience(self, tag_title):
     """
     Returns the user's experience in a tag.
     """
     return self.get_tag(tag_title).xp
-    
+  
+  def assign_post(self, key):
+    """
+    Assigns a post to a user.
+    """
+    Tag(title=Tag.base('assignment'), user=self.user, parent=key).put()
+  
   def create_post(self, content, parent=None):
     """
     Creates a post from given content with optional parent.
