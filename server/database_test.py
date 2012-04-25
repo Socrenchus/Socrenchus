@@ -188,3 +188,13 @@ class DatabaseTests(unittest.TestCase):
       stream.adjust_experience('a',25)#.wait()
       # check assignments
       self.assertEqual(stream.assignments().count(), (5*(i+1)))
+
+  def testCreateResponse(self):
+    self.switchToUser('user')
+    user = self.switchToUser('user')
+    post = user.create_post('my post')
+    post2 = user.create_post('my second post', post.key)
+    def tag_enum(key):
+      return key.parent()
+    post_keys = user.assignments().map(tag_enum,keys_only=True)
+    self.assertEqual(len(post_keys), len(set(post_keys)))
