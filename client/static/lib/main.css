@@ -96,16 +96,6 @@ h2 {
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=6);
 }
 
-#left-pillar {
-  position: relative;
-  right: 270px;  
-}
-
-#right-pillar {
-  position: relative;
-  left: 270px;
-}
-
 #logout {
   float: right;
   position: relative;
