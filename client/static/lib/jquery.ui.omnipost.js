@@ -270,7 +270,7 @@
             linkdata: allPanelContent[0].outerHTML
           };
           data = JSON.stringify(data);
-          omnipostdiv.remove();
+          collapse.click();
           return _this.options.callback(data);
         });
       };

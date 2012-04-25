@@ -36,10 +36,10 @@ _DEBUG = 'localhost' in users.create_logout_url( "/" )
 class PostHandler(webapp.RequestHandler):
   def get(self, id):
     stream = Stream.get_or_create(users.get_current_user())
-    postlist = stream.assignments()
+    postlist = stream.assignments().fetch(keys_only=True)
     posts = []
     for post in postlist:
-      jsonPost = json.simplejson.loads(json.encode(post.get()))
+      jsonPost = json.simplejson.loads(json.encode(post.parent().get()))
       #FIXME: find the real problem rather than removing duplicate posts
       if jsonPost not in posts:
         posts.append(jsonPost)    

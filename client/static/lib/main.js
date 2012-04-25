@@ -211,6 +211,7 @@
 
       function StreamView() {
         this.render = __bind(this.render, this);
+        this.showTopicCreator = __bind(this.showTopicCreator, this);
         this.storyPart5Done = __bind(this.storyPart5Done, this);
         this.storyPart4Done = __bind(this.storyPart4Done, this);
         this.storyPart3Done = __bind(this.storyPart3Done, this);
@@ -486,6 +487,14 @@
         return tagCollection.each(this.addTag);
       };
 
+      StreamView.prototype.showTopicCreator = function(showing) {
+        if (showing) {
+          return $('#post-question').show();
+        } else {
+          return $('#post-question').hide();
+        }
+      };
+
       StreamView.prototype.render = function() {
         var profileshowing,
           _this = this;
@@ -494,10 +503,6 @@
           $('#post-question').omnipost({
             callback: this.makePost,
             message: 'Post a topic...'
-          });
-          $('#post-question').hide();
-          $('#topic-create').click(function() {
-            return $('#post-question').toggle();
           });
           this.scrollingDiv = $('#story');
           $('#collapsible-profile').hide();
@@ -573,12 +578,19 @@
       Workspace.prototype.routes = {
         '': 'normal',
         'unpopulate': 'unpopulate',
+        'new': 'new',
         'populate': 'populate',
         'serverpopulate': 'serverpopulate'
       };
 
       Workspace.prototype.deleteOne = function(item) {
         return item.destroy();
+      };
+
+      Workspace.prototype["new"] = function() {
+        App.showTopicCreator(true);
+        postCollection.fetch();
+        return tagCollection.fetch();
       };
 
       Workspace.prototype.serverpopulate = function() {
@@ -594,6 +606,7 @@
       };
 
       Workspace.prototype.normal = function() {
+        App.showTopicCreator(false);
         postCollection.fetch();
         return tagCollection.fetch();
       };
