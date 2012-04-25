@@ -339,7 +339,7 @@ $ ->
         # FIXME: remove when the profile is finished
         $('#profile-view').hide()
         @postingDiv = $('#post-question')
-        @postingDiv.omnipost({callback: @makePost})
+        @postingDiv.omnipost({callback: @makePost, message: 'Post a topic...'})
         @scrollingDiv = $('#story')
         $('#collapsible-profile').hide()
         profileshowing = false

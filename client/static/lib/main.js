@@ -493,7 +493,8 @@
           $('#profile-view').hide();
           this.postingDiv = $('#post-question');
           this.postingDiv.omnipost({
-            callback: this.makePost
+            callback: this.makePost,
+            message: 'Post a topic...'
           });
           this.scrollingDiv = $('#story');
           $('#collapsible-profile').hide();
