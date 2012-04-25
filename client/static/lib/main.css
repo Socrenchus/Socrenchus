@@ -167,6 +167,7 @@ h2 {
   height: auto;
   position:relative;
   top: 5px;
+  display: none;
 }
 
 #notification-box {
