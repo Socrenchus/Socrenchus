@@ -18,6 +18,7 @@ from google.appengine.api import users
 from google.appengine.ext import testbed
 from google.appengine.ext import webapp
 from google.appengine.datastore import datastore_stub_util
+import logging
 from handlers import *
 from database import *
 class HandlerTests(unittest.TestCase):
@@ -51,17 +52,17 @@ class HandlerTests(unittest.TestCase):
       "PATH_INFO": "/",
     })
     response = webapp.Response()
-    handler = RESTfulHandler()
+    handler = PostHandler()
     handler.initialize(request, response)
     handler.get(1)
 
   def testPost(self):
     # create a post and sync with database
-     postData = {}
-     postData['content'] =  '{posttext: "What is your earliest memory of WWII?", linkdata: "<img src = \'http://www.historyplace.com/unitedstates/pacificwar/2156.jpg\' width = \'350\' height = \'auto\'>"})'
-     postData = json.simplejson.dumps(postData)
-     handler = RESTfulHandler()
-     handler.request = webapp.Request({
+    postData = {}
+    postData['content'] =  '{posttext: "What is your earliest memory of WWII?", linkdata: "<img src = \'http://www.historyplace.com/unitedstates/pacificwar/2156.jpg\' width = \'350\' height = \'auto\'>"})'
+    postData = json.simplejson.dumps(postData)
+    handler = PostHandler()
+    handler.request = webapp.Request({
       'REQUEST_METHOD': 'POST',
       'PATH_INFO': '/',
       'body': postData,
@@ -70,10 +71,26 @@ class HandlerTests(unittest.TestCase):
       'SERVER_NAME': 'hi',
       'SERVER_PORT': '80',
       'wsgi.url_scheme': 'http',
-     })
-      
-     handler.response = webapp.Response()
-     handler.post(1)
+    })
+    handler.response = webapp.Response()
+    handler.post(1)
+    childPost = {}
+    childPost['content'] = '{posttext: "My earlliest memory is eating this candy" linkdata: ""}'
+    #childPost['parent'] = handler.response['key']
+    handler1 = PostHandler()
+    handler1.request = webapp.Request({
+      'REQUEST_METHOD': 'POST',
+      'PATH_INFO': '/',
+      'body': postData,
+      'wsgi.input': StringIO(postData),
+      'CONTENT_LENGTH': len(postData),
+      'SERVER_NAME': 'hi',
+      'SERVER_PORT': '80',
+      'wsgi.url_scheme': 'http',
+    })
+    logging.debug(str(handler.response))
+    handler1.response = webapp.Response()
+    handler1.post(1)
    
 
 

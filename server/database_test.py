@@ -168,7 +168,7 @@ class DatabaseTests(unittest.TestCase):
     # check the final post score
     # figure out why the post sometimes gets 100 points
     self.assertEqual(p.get().score, 0)
-    
+
   def testIncrementalAssignment(self):
     # create post
     self.switchToUser('user')
@@ -179,13 +179,12 @@ class DatabaseTests(unittest.TestCase):
     resp = []
     for i in range(10):
       user = self.switchToUser(str(i))
+      user.assign_post(post.key)
       user.create_post(str(i), post.key)
     # check assignments
     stream = self.switchToUser(str(1))
     for i in range(2):
       # acquire points
-      stream.adjust_experience('a',25).wait()
-      Post.verify_assignment_count(post.key)
+      stream.adjust_experience('a',25)#.wait()
       # check assignments
-      self.assertEqual(len(stream.assignments()), (5*(i+1)))
-      
+      self.assertEqual(stream.assignments().count(), (5*(i+1)))
