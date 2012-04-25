@@ -201,6 +201,20 @@ class Tag(ndb.Model):
           self._local_xp += tag.xp
     Tag.query().map(tally_up)
     return (self._local_xp*self._global_xp_norm) / (self._local_xp_norm*self._global_xp+self._local_user_count)
+    
+  @classmethod
+  def get_or_create(cls, title, item_key, user):
+    """
+    Create a tag for an item.
+    """
+    result = Tag.query(cls.title == title, cls.user == user, ancestor=item_key).get()
+    if not result:
+      result = Tag(title=title,user=user,parent=item_key)
+    result.put()
+    if result.user != user:
+      result.user = user
+      result.put()
+    return result
       
   @classmethod
   def base(cls, name):
@@ -348,7 +362,7 @@ class Stream(ndb.Model):
     """
     Assigns a post to a user.
     """
-    Tag(title=Tag.base('assignment'), user=self.user, parent=key).put()
+    Tag.get_or_create(Tag.base('assignment'),key,self.user)
   
   def create_post(self, content, parent=None):
     """
@@ -356,10 +370,8 @@ class Stream(ndb.Model):
     """
     p = Post(parent=parent,content=content)
     p.put()
-    Tag(title=Tag.base('assignment'), user=self.user, parent=p.key).put()
+    self.assign_post(p.key)
     if parent:
-      t = Tag(title=Tag.base('assignment'), parent=p.key)
-      t.put()
-      t.user = parent.get().author
-      t.put()
+      Tag.get_or_create(Tag.base('assignment'),p.key,parent.get().author)
+    
     return p

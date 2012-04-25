@@ -71,31 +71,29 @@ h2 {
   text-align: left;
   width: 576px;
   background-color: #F0F0F0;
-  -moz-border-radius: 4px;
-  -webkit-border-radius: 4px;
-  border-left: 2px solid lightGrey;
-  border-right: 2px solid lightGrey;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border: 2px solid lightSlateGrey;
   margin: auto;
 }
 
 #footer {
-  width: 550px;
-  height: 106px;
-  margin-top: -30px;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100%;
+  height: 100px;
   background-image: url('/images/pillarbottommiddle.png');
   background-repeat: repeat-x;
+  margin-bottom:5px;
 }
-
-#left-pillar {
-  position: relative;
-  right: 270px;  
-}
-
-#right-pillar {
-  position: relative;
-  left: 270px;
+#header {
+  width: 100%;
+  height: 100px;
+  background-image: url('/images/pillarbottommiddle.png');
+  background-repeat: repeat-x;
+  /* for firefox, safari, chrome, etc. */
+  -webkit-transform: rotate(180deg);
+  -moz-transform: rotate(180deg);
+  /* for ie */
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=6);
 }
 
 #logout {
