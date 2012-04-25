@@ -17,8 +17,11 @@ This file contains all of the request handlers.
 __author__ = 'Bryan Goldstein'
 
 import wsgiref.handlers
+import os, sys, inspect
+cmd_folder = os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0])
+if cmd_folder not in sys.path:
+  sys.path.insert(0, cmd_folder)
 import json
-import os
 from google.appengine.ext import webapp
 from google.appengine.api import users
 from google.appengine.ext.ndb import context
