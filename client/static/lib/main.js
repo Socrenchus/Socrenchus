@@ -491,10 +491,13 @@
           _this = this;
         if (!this.streamviewRendered) {
           $('#profile-view').hide();
-          this.postingDiv = $('#post-question');
-          this.postingDiv.omnipost({
+          $('#post-question').omnipost({
             callback: this.makePost,
             message: 'Post a topic...'
+          });
+          $('#post-question').hide();
+          $('#topic-create').click(function() {
+            return $('#post-question').toggle();
           });
           this.scrollingDiv = $('#story');
           $('#collapsible-profile').hide();

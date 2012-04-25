@@ -338,8 +338,11 @@ $ ->
       if !@streamviewRendered
         # FIXME: remove when the profile is finished
         $('#profile-view').hide()
-        @postingDiv = $('#post-question')
-        @postingDiv.omnipost({callback: @makePost, message: 'Post a topic...'})
+        $('#post-question').omnipost({callback: @makePost, message: 'Post a topic...'})
+        $('#post-question').hide()
+        $('#topic-create').click( ->
+          $('#post-question').toggle()
+        )
         @scrollingDiv = $('#story')
         $('#collapsible-profile').hide()
         profileshowing = false
