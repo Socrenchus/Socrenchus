@@ -578,7 +578,7 @@
       Workspace.prototype.routes = {
         '': 'normal',
         'unpopulate': 'unpopulate',
-        'topicCreator': 'topicCreator',
+        'new': 'new',
         'populate': 'populate',
         'serverpopulate': 'serverpopulate'
       };
@@ -587,7 +587,7 @@
         return item.destroy();
       };
 
-      Workspace.prototype.topicCreator = function() {
+      Workspace.prototype["new"] = function() {
         App.showTopicCreator(true);
         postCollection.fetch();
         return tagCollection.fetch();

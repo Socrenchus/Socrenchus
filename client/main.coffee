@@ -426,7 +426,7 @@ $ ->
       #'/:id' : 'assign'
       ''  : 'normal'
       'unpopulate' : 'unpopulate'
-      'topicCreator' : 'topicCreator'      
+      'new' : 'new'      
       'populate' : 'populate'
       'serverpopulate' : 'serverpopulate'
     #assign: (id) ->
@@ -436,7 +436,7 @@ $ ->
     deleteOne: (item) ->
       item.destroy()
 
-    topicCreator: ->
+    new: ->
       App.showTopicCreator(true)
       postCollection.fetch()
       tagCollection.fetch()
