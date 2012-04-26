@@ -6,14 +6,14 @@ $ ->
   class Post extends Backbone.Model
     respond: (content) =>
       p = new Post(
-        parent: @get('key')
+        parent: @get('id')
         content: content
       )
       postCollection.create(p)
 
     maketag: (content) =>
       t = new Tag(
-        parent: @get('key')
+        parent: @get('id')
         title: content
         xp: 0
       )
@@ -65,12 +65,12 @@ $ ->
       $(@el).html(@template)
       $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()
-      tagsdiv = $("<div id='tagscontainer'><div id = 'tags#{@model.get('key')}'></div></div>")      
+      tagsdiv = $("<div id='tagscontainer'><div id = 'tags#{@model.get('id')}'></div></div>")      
       $(@el).find('.inner-question').append(tagsdiv)
-      #if tagCollection.indexOf('parent: @model.get('key')) > -1
+      #if tagCollection.indexOf('parent: @model.get('id')) > -1
       $(@el).find('.inner-question').tagbox({callback: @model.maketag})
       $(@el).find('.inner-question').omnipost({callback: @model.respond})
-      responsediv = $("<div id = 'response#{@model.get('key')}'></div>")
+      responsediv = $("<div id = 'response#{@model.get('id')}'></div>")
       $(@el).find('.inner-question').append(responsediv)
       unless @model.get('parent') is 0
         lockedpostsdiv = $("<div class='locked-posts'></div>")
@@ -130,7 +130,7 @@ $ ->
       if document.getElementById('response' + item.get('parent'))
         $('#response' + item.get('parent')).prepend(post.render())
       else      
-        $('#assignments').append(post.render())
+        $('#assignments').prepend(post.render())
 
     addAll: ->
       postCollection.each(@addOne)
@@ -141,11 +141,12 @@ $ ->
 
     addTag: (item) ->
       tag = new TagView(model: item)
+      #TODO add something when the post has been marked correct or incorrect
       if item.get('title') == ',correct'
         placeholder = 1        
       else if item.get('title') == ',incorrect'
-        placeholder = 2       
-      else if document.getElementById('tags' + item.get('parent'))
+        placeholder = 2
+      else if document.getElementById('tags' + item.get('parent')) and item.get('title') != ',assignment'
         $('#tags' + item.get('parent')).append(tag.render())
     
     addAllTags: ->
