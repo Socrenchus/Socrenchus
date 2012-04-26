@@ -367,6 +367,7 @@ class Stream(ndb.Model):
     Assigns a post to a user.
     """
     Tag.get_or_create(Tag.base('assignment'),key,self.user)
+    return key
   
   def create_post(self, content, parent=None):
     """

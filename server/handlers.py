@@ -34,15 +34,23 @@ from google.appengine.ext.webapp import template
 _DEBUG = 'localhost' in users.create_logout_url( "/" )
 
 class PostHandler(webapp.RequestHandler):
-  def get(self, id):
+  def get(self):
+    cookieKey = self.request.cookies["posts"]
+    result = None
     stream = Stream.get_or_create(users.get_current_user())
-    def post_list(key):
-      return key.parent()
-    q = stream.assignments().order(Stream.timestamp).map(post_list,keys_only=True)
-    self.response.out.write(json.encode(q))
+    logging.info("id: " + cookieKey)
+    if cookieKey != 'null':
+      key = ndb.Key(urlsafe=cookieKey)
+      stream.assign_post(key)
+      logging.info(key)
+    else:
+      def post_list(key):
+        return key.parent()
+      result = stream.assignments().order(Stream.timestamp).map(post_list,keys_only=True)
+    self.response.out.write(json.encode(result))
 
  
-  def post(self, id):
+  def post(self):
     stream = Stream.get_or_create(users.get_current_user())
     tmp = json.simplejson.loads(self.request.body)
     if 'parent' in tmp:
@@ -52,7 +60,7 @@ class PostHandler(webapp.RequestHandler):
     post = json.encode(post)
     self.response.out.write(post)
 
-  def put(self, id):
+  def put(self):
     self.post(id)
 
 class TagHandler(webapp.RequestHandler):
@@ -121,8 +129,8 @@ options = [
   ('/login', LoginHandler),
   ('/logout', LogoutHandler),
   ('/', MainPage),
-  ('/posts\/?([0-9]*)', PostHandler),
-  ('/tags\/?([0-9]*)', TagHandler)
+  ('/posts', PostHandler),
+  ('/tags', TagHandler)
 ]
 application = webapp.WSGIApplication(options, debug=_DEBUG)
 application = ndb.toplevel(application.__call__)

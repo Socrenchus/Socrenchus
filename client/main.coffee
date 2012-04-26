@@ -119,6 +119,8 @@ $ ->
       postCollection.bind('all', @render, this)
       tagCollection.bind('add', @addTag, this)
       tagCollection.bind('reset', @addAllTags, this)
+      postCollection.fetch()
+      tagCollection.fetch()
 
     makePost: (content) ->
       p = new Post(
@@ -162,7 +164,7 @@ $ ->
     render: =>
       if !@streamviewRendered
         $('#post-question').omnipost({callback: @makePost, message: 'Post a topic...'})
-        
+        @showTopicCreator(false)        
         @scrollingDiv = $('#story')
         $('#collapsible-profile').hide()
         profileshowing = false
@@ -230,26 +232,19 @@ $ ->
   # Routes
   ###
   class Workspace extends Backbone.Router
-    routes:
-      '/:id' : 'assign'
-      ''  : 'normal'
+    routes:      
       'new' : 'new'
+      ':id' : 'assign'
     assign: (id) ->
-      postCollection.get(id)
-      postCollection.fetch()
+      if id?
+        postCollection.get(id)
+        postCollection.fetch()
 
     deleteOne: (item) ->
       item.destroy()
 
     new: ->
       App.showTopicCreator(true)
-      postCollection.fetch()
-      tagCollection.fetch()
-
-    normal: ->
-      App.showTopicCreator(false)
-      postCollection.fetch()
-      tagCollection.fetch()
 
   postCollection = new Posts()
   tagCollection = new Tags()
