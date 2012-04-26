@@ -52,8 +52,9 @@ $ ->
       
     initialize: ->
       @id = @model.id
-      
-    renderPostContent: ->
+      @model.bind('change', @render)
+
+    renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))
       postcontentdiv = $("<div class = 'ui-postcontent'></div>")
       postcontentdiv.append($(jsondata.linkdata))
@@ -61,7 +62,7 @@ $ ->
       postcontentdiv.append(jsondata.posttext)
       $(@el).find('.inner-question').append(postcontentdiv)
     
-    render: ->
+    render: =>
       $(@el).html(@template)
       $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()

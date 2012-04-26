@@ -105,6 +105,8 @@
       __extends(PostView, _super);
 
       function PostView() {
+        this.render = __bind(this.render, this);
+        this.renderPostContent = __bind(this.renderPostContent, this);
         PostView.__super__.constructor.apply(this, arguments);
       }
 
@@ -117,7 +119,8 @@
       PostView.prototype.events = function() {};
 
       PostView.prototype.initialize = function() {
-        return this.id = this.model.id;
+        this.id = this.model.id;
+        return this.model.bind('change', this.render);
       };
 
       PostView.prototype.renderPostContent = function() {
