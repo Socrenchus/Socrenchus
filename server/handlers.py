@@ -38,7 +38,7 @@ class PostHandler(webapp.RequestHandler):
     stream = Stream.get_or_create(users.get_current_user())
     def post_list(key):
       return key.parent()
-    q = stream.assignments().order(-Stream.timestamp).map(post_list,keys_only=True)
+    q = stream.assignments().order(Stream.timestamp).map(post_list,keys_only=True)
     self.response.out.write(json.encode(q))
 
  
@@ -49,7 +49,7 @@ class PostHandler(webapp.RequestHandler):
       post = stream.create_post(tmp['content'], ndb.Key(urlsafe=tmp['parent']))
     else:
       post = stream.create_post(tmp['content'])
-    post = json.simplejson.dumps(json.encode(post))
+    post = json.encode(post)
     self.response.out.write(post)
 
   def put(self, id):
@@ -63,7 +63,7 @@ class TagHandler(webapp.RequestHandler):
   def post(self, id):
     tmp = json.simplejson.loads(self.request.body)
     t = Tag.get_or_create(tmp['title'],ndb.Key(urlsafe=tmp['parent']))
-    self.response.out.write(t)
+    self.response.out.write(json.encode(t))
 
   def put(self, id):
     self.post(id)
