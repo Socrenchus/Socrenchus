@@ -4,6 +4,7 @@ $ ->
   # Core Models and Logic 
   ###
   class Post extends Backbone.Model
+    urlRoot: '/posts'
     respond: (content) =>
       p = new Post(
         parent: @get('id')
@@ -237,8 +238,9 @@ $ ->
       ':id' : 'assign'
     assign: (id) ->
       if id?
-        postCollection.get(id)
-        postCollection.fetch()
+        p = new Post({'id':id})
+        p.fetch()
+        postCollection.add(p)
 
     deleteOne: (item) ->
       item.destroy()
