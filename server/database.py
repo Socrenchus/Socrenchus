@@ -18,19 +18,7 @@ from google.appengine.ext import ndb
 
 import random
 
-class Model:
-
-  def to_dict(self):
-    result = ndb.Model.to_dict(self)
-    if(self.key.parent() != None):
-      result['parent'] = self.key.parent().urlsafe()
-    else:
-      result['parent'] = ''
-    result['id'] = self.key.urlsafe()
-    return result
-
-
-class Post(ndb.Model, Model):
+class Post(ndb.Model):
   """
   A post can be a question, it can be an answer, it can even be a statement.    
   """
@@ -40,6 +28,15 @@ class Post(ndb.Model, Model):
   score       = ndb.FloatProperty(default=0.0)
   timestamp   = ndb.DateTimeProperty(auto_now=True)
   
+  def to_dict(self):
+    result = ndb.Model.to_dict(self)
+    if(self.key.parent() != None):
+      result['parent'] = self.key.parent().urlsafe()
+    else:
+      result['parent'] = ''
+    result['id'] = self.key.urlsafe()
+    return result
+
   @classmethod
   def children(cls, key):
     """
@@ -169,7 +166,7 @@ class Post(ndb.Model, Model):
     # show 5 posts for every 25 xp
     return (int(delta_xp)/25)*5
 
-class Tag(ndb.Model, Model):
+class Tag(ndb.Model):
   """
   A tag is a byte sized, repeatable, calculable piece of information about  
   something. It can be used to describe a post, or even a user or a tag.
@@ -180,6 +177,15 @@ class Tag(ndb.Model, Model):
   xp          = ndb.FloatProperty(default=1.0)
   timestamp   = ndb.DateTimeProperty(auto_now=True)
   
+  def to_dict(self):
+    result = ndb.Model.to_dict(self)
+    if(self.key.parent() != None):
+      result['parent'] = self.key.parent().urlsafe()
+    else:
+      result['parent'] = ''
+    result['id'] = self.key.urlsafe()
+    return result
+
   @property
   def weight(self):
     """
