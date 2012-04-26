@@ -34,15 +34,13 @@ from google.appengine.ext.webapp import template
 _DEBUG = 'localhost' in users.create_logout_url( "/" )
 
 class PostHandler(webapp.RequestHandler):
-  def get(self):
-    cookieKey = self.request.cookies["posts"]
+  def get(self, id):
     result = None
     stream = Stream.get_or_create(users.get_current_user())
-    logging.info("id: " + cookieKey)
-    if cookieKey != 'null':
-      key = ndb.Key(urlsafe=cookieKey)
+    if id:
+      key = ndb.Key(urlsafe=id)
       stream.assign_post(key)
-      logging.info(key)
+      result = key.get()
     else:
       def post_list(key):
         return key.parent()
