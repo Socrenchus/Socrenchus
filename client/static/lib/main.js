@@ -21,7 +21,7 @@
       Post.prototype.respond = function(content) {
         var p;
         p = new Post({
-          parent: this.get('key'),
+          parent: this.get('id'),
           content: content
         });
         return postCollection.create(p);
@@ -30,7 +30,7 @@
       Post.prototype.maketag = function(content) {
         var t;
         t = new Tag({
-          parent: this.get('key'),
+          parent: this.get('id'),
           title: content,
           xp: 0
         });
@@ -105,6 +105,8 @@
       __extends(PostView, _super);
 
       function PostView() {
+        this.render = __bind(this.render, this);
+        this.renderPostContent = __bind(this.renderPostContent, this);
         PostView.__super__.constructor.apply(this, arguments);
       }
 
@@ -117,7 +119,8 @@
       PostView.prototype.events = function() {};
 
       PostView.prototype.initialize = function() {
-        return this.id = this.model.id;
+        this.id = this.model.id;
+        return this.model.bind('change', this.render);
       };
 
       PostView.prototype.renderPostContent = function() {
@@ -138,7 +141,7 @@
           callback: this.model.maketag
         });
         this.renderPostContent();
-        tagsdiv = $("<div id='tagscontainer'><div id = 'tags" + (this.model.get('key')) + "'></div></div>");
+        tagsdiv = $("<div id='tagscontainer'><div id = 'tags" + (this.model.get('id')) + "'></div></div>");
         $(this.el).find('.inner-question').append(tagsdiv);
         $(this.el).find('.inner-question').tagbox({
           callback: this.model.maketag
@@ -146,7 +149,7 @@
         $(this.el).find('.inner-question').omnipost({
           callback: this.model.respond
         });
-        responsediv = $("<div id = 'response" + (this.model.get('key')) + "'></div>");
+        responsediv = $("<div id = 'response" + (this.model.get('id')) + "'></div>");
         $(this.el).find('.inner-question').append(responsediv);
         if (this.model.get('parent') !== 0) {
           lockedpostsdiv = $("<div class='locked-posts'></div>");
@@ -241,7 +244,7 @@
         if (document.getElementById('response' + item.get('parent'))) {
           return $('#response' + item.get('parent')).prepend(post.render());
         } else {
-          return $('#assignments').append(post.render());
+          return $('#assignments').prepend(post.render());
         }
       };
 
@@ -266,7 +269,7 @@
           return placeholder = 1;
         } else if (item.get('title') === ',incorrect') {
           return placeholder = 2;
-        } else if (document.getElementById('tags' + item.get('parent'))) {
+        } else if (document.getElementById('tags' + item.get('parent')) && item.get('title') !== ',assignment') {
           return $('#tags' + item.get('parent')).append(tag.render());
         }
       };
