@@ -203,10 +203,12 @@ class Tag(ndb.Model):
     return (self._local_xp*self._global_xp_norm) / (self._local_xp_norm*self._global_xp+self._local_user_count)
     
   @classmethod
-  def get_or_create(cls, title, item_key, user):
+  def get_or_create(cls, title, item_key, user=None):
     """
     Create a tag for an item.
     """
+    if not user:
+      user = users.get_current_user()
     result = Tag.query(cls.title == title, cls.user == user, ancestor=item_key).get()
     if not result:
       result = Tag(title=title,user=user,parent=item_key)
