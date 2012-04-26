@@ -73,7 +73,7 @@ class HandlerTests(unittest.TestCase):
       'wsgi.url_scheme': 'http',
     })
     handler.response = webapp.Response()
-    handler.post()
+    handler.post(1)
     childPost = {}
     childPost['content'] = '{posttext: "My earlliest memory is eating this candy" linkdata: ""}'
     #childPost['parent'] = handler.response['key']
@@ -90,7 +90,7 @@ class HandlerTests(unittest.TestCase):
     })
     logging.debug(str(handler.response))
     handler1.response = webapp.Response()
-    handler1.post()
+    handler1.post(1)
    
 
 

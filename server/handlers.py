@@ -37,6 +37,7 @@ class PostHandler(webapp.RequestHandler):
   def get(self, id):
     result = None
     stream = Stream.get_or_create(users.get_current_user())
+    logging.info(id)
     if id:
       key = ndb.Key(urlsafe=id)
       stream.assign_post(key)
@@ -48,7 +49,7 @@ class PostHandler(webapp.RequestHandler):
     self.response.out.write(json.encode(result))
 
  
-  def post(self):
+  def post(self, id):
     stream = Stream.get_or_create(users.get_current_user())
     tmp = json.simplejson.loads(self.request.body)
     if 'parent' in tmp:
@@ -127,8 +128,8 @@ options = [
   ('/login', LoginHandler),
   ('/logout', LogoutHandler),
   ('/', MainPage),
-  ('/posts\/?([0-9]*)'', PostHandler),
-  ('/tags\/?([0-9]*)', TagHandler)
+  (r'/posts/?(.*)', PostHandler),
+  (r'/tags/?(.*)', TagHandler)
 ]
 application = webapp.WSGIApplication(options, debug=_DEBUG)
 application = ndb.toplevel(application.__call__)

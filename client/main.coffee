@@ -164,8 +164,7 @@ $ ->
 
     render: =>
       if !@streamviewRendered
-        $('#post-question').omnipost({callback: @makePost, message: 'Post a topic...'})
-        @showTopicCreator(false)        
+        $('#post-question').omnipost({callback: @makePost, message: 'Post a topic...'})      
         @scrollingDiv = $('#story')
         $('#collapsible-profile').hide()
         profileshowing = false
@@ -236,14 +235,13 @@ $ ->
     routes:      
       'new' : 'new'
       ':id' : 'assign'
+
     assign: (id) ->
       if id?
         p = new Post({'id':id})
-        p.fetch()
-        postCollection.add(p)
-
-    deleteOne: (item) ->
-      item.destroy()
+        p.fetch(success:->
+          postCollection.add(p)
+        )
 
     new: ->
       App.showTopicCreator(true)

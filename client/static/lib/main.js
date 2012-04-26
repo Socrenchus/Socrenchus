@@ -298,7 +298,6 @@
             callback: this.makePost,
             message: 'Post a topic...'
           });
-          this.showTopicCreator(false);
           this.scrollingDiv = $('#story');
           $('#collapsible-profile').hide();
           profileshowing = false;
@@ -380,13 +379,12 @@
           p = new Post({
             'id': id
           });
-          p.fetch();
-          return postCollection.add(p);
+          return p.fetch({
+            success: function() {
+              return postCollection.add(p);
+            }
+          });
         }
-      };
-
-      Workspace.prototype.deleteOne = function(item) {
-        return item.destroy();
       };
 
       Workspace.prototype["new"] = function() {
