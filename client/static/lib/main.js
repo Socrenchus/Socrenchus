@@ -18,6 +18,8 @@
         Post.__super__.constructor.apply(this, arguments);
       }
 
+      Post.prototype.urlRoot = '/posts';
+
       Post.prototype.respond = function(content) {
         var p;
         p = new Post({
@@ -373,9 +375,13 @@
       };
 
       Workspace.prototype.assign = function(id) {
+        var p;
         if (id != null) {
-          postCollection.get(id);
-          return postCollection.fetch();
+          p = new Post({
+            'id': id
+          });
+          p.fetch();
+          return postCollection.add(p);
         }
       };
 
