@@ -54,7 +54,7 @@ class HandlerTests(unittest.TestCase):
     response = webapp.Response()
     handler = PostHandler()
     handler.initialize(request, response)
-    handler.get(1)
+    handler.get("ag5kZXZ-c29jcmVuY2h1c3IKCxIEUG9zdBgLDA")
 
   def testPost(self):
     # create a post and sync with database
@@ -73,7 +73,7 @@ class HandlerTests(unittest.TestCase):
       'wsgi.url_scheme': 'http',
     })
     handler.response = webapp.Response()
-    handler.post(1)
+    handler.post()
     childPost = {}
     childPost['content'] = '{posttext: "My earlliest memory is eating this candy" linkdata: ""}'
     #childPost['parent'] = handler.response['key']
@@ -90,7 +90,7 @@ class HandlerTests(unittest.TestCase):
     })
     logging.debug(str(handler.response))
     handler1.response = webapp.Response()
-    handler1.post(1)
+    handler1.post()
    
 
 
