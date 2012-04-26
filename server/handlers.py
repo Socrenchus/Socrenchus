@@ -127,8 +127,8 @@ options = [
   ('/login', LoginHandler),
   ('/logout', LogoutHandler),
   ('/', MainPage),
-  ('/posts', PostHandler),
-  ('/tags', TagHandler)
+  ('/posts\/?([0-9]*)'', PostHandler),
+  ('/tags\/?([0-9]*)', TagHandler)
 ]
 application = webapp.WSGIApplication(options, debug=_DEBUG)
 application = ndb.toplevel(application.__call__)
