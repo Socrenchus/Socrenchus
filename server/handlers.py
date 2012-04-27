@@ -33,9 +33,9 @@ from google.appengine.ext.webapp import template
 #TODO: figure out why this doesn't get rid of the warning
 from google.appengine.dist import use_library
 use_library('django', '0.96')
+from database_test import DatabaseTests
 
 _DEBUG = 'localhost' in users.create_logout_url( "/" )
-
 class PostHandler(webapp.RequestHandler):
   def get(self, id):
     result = None
@@ -88,20 +88,6 @@ class TagHandler(webapp.RequestHandler):
     else:
       self.error(403)
   """
-class LoginHandler(webapp.RequestHandler):
-  """
-  Logs the user in and redirects.
-  """
-  def get(self):
-    self.redirect('/')
-    
-class LogoutHandler(webapp.RequestHandler):
-  """
-  Logs the user out and redirects.
-  """
-  def get(self):
-    self.redirect(users.create_logout_url( "/" ))
-   
 
 class MainPage(webapp.RequestHandler):
   def get(self):
@@ -120,16 +106,11 @@ class MainPage(webapp.RequestHandler):
     path = os.path.join(os.path.dirname(__file__), '../client/static/index.html')
     self.response.out.write(template.render(path, template_values))
 
-class CollectionHandler(webapp.RequestHandler):
-  """
-  Handle Backbone.js collection sync calls.
-  """
-  pass
-
 options = [
   ('/login', LoginHandler),
   ('/logout', LogoutHandler),
   ('/', MainPage),
+  ('/test', TestHandler),
   (r'/posts/?(.*)', PostHandler),
   (r'/tags/?(.*)', TagHandler)
 ]
