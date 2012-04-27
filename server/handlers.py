@@ -30,6 +30,9 @@ import logging
 from database import *
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
+#TODO: figure out why this doesn't get rid of the warning
+from google.appengine.dist import use_library
+use_library('django', '0.96')
 
 _DEBUG = 'localhost' in users.create_logout_url( "/" )
 
@@ -56,8 +59,7 @@ class PostHandler(webapp.RequestHandler):
       post = stream.create_post(tmp['content'], ndb.Key(urlsafe=tmp['parent']))
     else:
       post = stream.create_post(tmp['content'])
-    post = json.encode(post)
-    self.response.out.write(post)
+    self.response.out.write(json.encode(post))
 
   def put(self):
     self.post(id)

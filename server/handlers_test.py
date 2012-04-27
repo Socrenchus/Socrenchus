@@ -45,16 +45,29 @@ class HandlerTests(unittest.TestCase):
 
   def testGet(self):
     # get post list
+    self.switchToUser(100)
+    tmp = {}
+    tmp['content'] = "{posttext: 'sample', linkdata: 'reddit.com'}"
+    stream = Stream.get_or_create(users.get_current_user())
+    if 'parent' in tmp:
+      post = stream.create_post(tmp['content'], ndb.Key(urlsafe=tmp['parent']))
+    else:
+      post = stream.create_post(tmp['content'])
+    id = post.key.urlsafe()
+    self.switchToUser(200)
     request = webapp.Request({
       "wsgi.input": StringIO(),
       "CONTENT_LENGTH": 0,
       "METHOD": "GET",
-      "PATH_INFO": "/",
+      "PATH_INFO": "/"
     })
     response = webapp.Response()
     handler = PostHandler()
     handler.initialize(request, response)
-    handler.get("ag5kZXZ-c29jcmVuY2h1c3IKCxIEUG9zdBgLDA")
+    handler.get(id)
+    jsonResponse = json.simplejson.loads(response.out.getvalue())
+    self.assertEqual(jsonResponse['content'], tmp['content'])
+    
 
   def testPost(self):
     # create a post and sync with database
@@ -91,7 +104,6 @@ class HandlerTests(unittest.TestCase):
     logging.debug(str(handler.response))
     handler1.response = webapp.Response()
     handler1.post(1)
-   
 
 
 
