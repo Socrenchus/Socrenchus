@@ -89,7 +89,7 @@ class TagHandler(webapp.RequestHandler):
       self.error(403)
   """
 
-class MainPage(webapp.RequestHandler):
+class AccountHandler(webapp.RequestHandler):
   def get(self):
     if users.get_current_user():
       url = users.create_logout_url(self.request.uri)
@@ -100,17 +100,14 @@ class MainPage(webapp.RequestHandler):
       url_linktext = 'Login'
     template_values = {
       'url': url,
-      'url_linktext': url_linktext,
+      'url_linktext': url_linktext
     }
 
     path = os.path.join(os.path.dirname(__file__), '../client/static/index.html')
     self.response.out.write(template.render(path, template_values))
 
 options = [
-  ('/login', LoginHandler),
-  ('/logout', LogoutHandler),
-  ('/', MainPage),
-  ('/test', TestHandler),
+  ('/', AccountHandler),
   (r'/posts/?(.*)', PostHandler),
   (r'/tags/?(.*)', TagHandler)
 ]
