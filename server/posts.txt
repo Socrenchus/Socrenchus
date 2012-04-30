@@ -1,0 +1,1 @@
+[{"user":"100", "content":"{\"posttext\":\"What do you think of the current educational system?\",\"linkdata\":\"\"}"}, {"user":"100", "content":"{\"posttext\":\"Is Google going to take over the world?\",\"linkdata\":\"\"}"}]

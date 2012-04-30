@@ -34,13 +34,17 @@ from google.appengine.ext.webapp import template
 from google.appengine.dist import use_library
 use_library('django', '0.96')
 from database_test import DatabaseTests
+from boot_strap import BootStrap
 
 _DEBUG = 'localhost' in users.create_logout_url( "/" )
+class AssignHandler(webapp.RequestHandler):
+  def get(self):
+    BootStrap.loadconfiguration("posts.txt")
+
 class PostHandler(webapp.RequestHandler):
   def get(self, id):
     result = None
     stream = Stream.get_or_create(users.get_current_user())
-    logging.info(id)
     if id:
       key = ndb.Key(urlsafe=id)
       stream.assign_post(key)
@@ -106,7 +110,8 @@ class AccountHandler(webapp.RequestHandler):
     path = os.path.join(os.path.dirname(__file__), '../client/static/index.html')
     self.response.out.write(template.render(path, template_values))
 
-options = [
+options = [  
+  ('/assign', AssignHandler),
   ('/', AccountHandler),
   (r'/posts/?(.*)', PostHandler),
   (r'/tags/?(.*)', TagHandler)
