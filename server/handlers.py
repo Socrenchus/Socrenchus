@@ -37,9 +37,11 @@ from database_test import DatabaseTests
 from boot_strap import BootStrap
 
 _DEBUG = 'localhost' in users.create_logout_url( "/" )
-class AssignHandler(webapp.RequestHandler):
-  def get(self):
-    BootStrap.loadconfiguration("posts.txt")
+class BootstrapHandler(webapp.RequestHandler):
+  def get(self, id):
+    if _DEBUG:
+      BootStrap.loadconfiguration(id)
+    self.redirect('/')
 
 class PostHandler(webapp.RequestHandler):
   def get(self, id):
@@ -111,7 +113,7 @@ class AccountHandler(webapp.RequestHandler):
     self.response.out.write(template.render(path, template_values))
 
 options = [  
-  ('/assign', AssignHandler),
+  ('/load/?(.*)', BootstrapHandler),
   ('/', AccountHandler),
   (r'/posts/?(.*)', PostHandler),
   (r'/tags/?(.*)', TagHandler)
