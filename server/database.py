@@ -149,8 +149,12 @@ class Post(Model, ndb.Model):
         # count the current replies visible to the user
         current = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==me, ancestor=key).count()
         # get our experience in the context of our reply
-        old_xp = 0#Tag.query(Tag.title==Tag.base('assignment'), Tag.user==me, ancestor=my_reply.key).get().xp
+        old_xp = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==me, ancestor=my_reply).get()
         new_xp = Post.dereference_experience(my_reply)
+        if old_xp.xp == 1:
+          old_xp.xp = new_xp
+          old_xp.put()
+        old_xp = old_xp.xp
         # run our experience points through the magic step function
         expected = Post.step_reveal(new_xp-old_xp)
         # assign the newly earned posts
@@ -166,7 +170,7 @@ class Post(Model, ndb.Model):
     """
     # TODO: Improve step function
     # show 5 posts for every 25 xp
-    return (int(delta_xp)/25)*5
+    return ((int(delta_xp)/25)+1)*5
 
 class Tag(Model, ndb.Model):
   """
@@ -214,10 +218,10 @@ class Tag(Model, ndb.Model):
     result = Tag.query(cls.title == title, cls.user == user, ancestor=item_key).get()
     if not result:
       result = Tag(title=title,user=user,parent=item_key)
-    result.put()
-    if result.user != user:
-      result.user = user
       result.put()
+      if result.user != user:
+        result.user = user
+        result.put()
     return result
       
   @classmethod
@@ -274,13 +278,12 @@ class Tag(Model, ndb.Model):
     Update our tagged post's score if we are a base tag.
     """
     if self.is_base(): # adjust the score for the poster
-      # figure out the sign on the score change
       delta = self.xp
+      # figure out the sign on the score change
       if self.title == Tag.base('incorrect'):
         delta = -delta
       elif self.title != Tag.base('correct'):
         return False
-      # adjust the score
       post = self.key.parent().get()
       post.adjust_score(delta).wait()
     else:

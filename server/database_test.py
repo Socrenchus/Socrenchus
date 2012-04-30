@@ -176,16 +176,18 @@ class DatabaseTests(unittest.TestCase):
     post = user.create_post('my post')
     Tag(parent=post.key, title='a').put()
     # create responses
-    resp = []
+    resp = None
     for i in range(10):
       user = self.switchToUser(str(i))
       user.assign_post(post.key)
-      user.create_post(str(i), post.key)
+      p = user.create_post(str(i), post.key)
+      if i == 1:
+        resp = p
     # check assignments
     stream = self.switchToUser(str(1))
     for i in range(2):
       # acquire points
-      stream.adjust_experience('a',25)#.wait()
+      stream.adjust_experience('a',25)
       # check assignments
       self.assertEqual(stream.assignments().count(), (5*(i+1)))
 
