@@ -177,17 +177,19 @@ class DatabaseTests(unittest.TestCase):
     Tag(parent=post.key, title='a').put()
     # create responses
     resp = []
-    for i in range(10):
+    for i in range(15):
       user = self.switchToUser(str(i))
       user.assign_post(post.key)
       resp.append(user.create_post(str(i), post.key).key)
     # check assignments
     stream = self.switchToUser(str(1))
-    for i in range(2):
+    for i in range(3):
+      # check assignments
+      Post.verify_assignment_count(post.key, stream.user)
+      self.assertEqual(stream.assignments().count(), (5*(i+1))+1)
       # acquire points
       stream.adjust_experience('a',25)
-      # check assignments
-      self.assertEqual(stream.assignments().count(), (5*(i+1))+1)
+
     # check that grandchildren don't get assigned
     count = stream.assignments().count()
     user = self.switchToUser(str(2))
