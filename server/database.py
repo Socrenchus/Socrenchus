@@ -42,6 +42,10 @@ class Post(Model, ndb.Model):
   def to_dict(self):
     result = Model.to_dict(self)
     result['newxp'] = Post.dereference_experience(self.key)
+    result['expstep'] = 25
+    postsrevealed = result['newxp'] / result['expstep']
+    childrencount =  Post.children(self.key).count(None)
+    result['postsleft'] = 5 if childrencount - postsrevealed >= 5 else childrencount - postsrevealed
     return result
 
   @classmethod

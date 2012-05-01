@@ -54,8 +54,6 @@ $ ->
     initialize: ->
       @id = @model.id
       @model.bind('change', @render)
-      @expstep = 25
-      @postreveal = 5
 
     renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))
@@ -70,9 +68,9 @@ $ ->
         lockedpostsdiv = $("<div class='locked-posts'></div>")
         progressbardiv = $("<div class='progressbar'></div>")
         #percent = Math.floor(Math.random()*100)
-        percent = @model.get('newxp') % @expstep / @expstep * 100
+        percent = @model.get('newxp') % @model.get('expstep') / @model.get('expstep') * 100
         textinline = true
-        indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(5) + ' posts</p>')
+        indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(@model.get('postsleft')) + ' posts</p>')
         if percent < 100.0/350.0 * 100
           textinline = false
         if textinline
@@ -94,11 +92,12 @@ $ ->
       $(@el).find('.inner-question').append(tagsdiv)
       $(@el).find('.inner-question').tagbox({callback: @model.maketag})
       responsediv = $("<div id = 'response#{@model.get('id')}'></div>")
+      responsediv.css('border-left', 'solid 1px black')
       $(@el).find('.inner-question').append(responsediv)
       if postCollection.where({parent: @id}).length > 0
         @renderProgressBar()
       else        
-        $(@el).find('.inner-question').omnipost({callback: @model.respond})
+        $(@el).find('.inner-question').omnipost({removeOnSubmit: true, callback: @model.respond})
       return $(@el)
      
    class TagView extends Backbone.View

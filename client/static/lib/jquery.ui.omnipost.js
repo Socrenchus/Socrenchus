@@ -8,6 +8,7 @@
     pluginName = 'omnipost';
     defaults = {
       editing: true,
+      removeOnSubmit: false,
       callback: '',
       message: 'Post your reply here...'
     };
@@ -271,6 +272,7 @@
           };
           data = JSON.stringify(data);
           collapse.click();
+          if (_this.options.removeOnSubmit) omnipostdiv.remove();
           return _this.options.callback(data);
         });
       };

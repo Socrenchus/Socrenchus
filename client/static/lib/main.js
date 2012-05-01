@@ -123,9 +123,7 @@
 
       PostView.prototype.initialize = function() {
         this.id = this.model.id;
-        this.model.bind('change', this.render);
-        this.expstep = 25;
-        return this.postreveal = 5;
+        return this.model.bind('change', this.render);
       };
 
       PostView.prototype.renderPostContent = function() {
@@ -143,9 +141,9 @@
         if (this.model.get('parent') === '') {
           lockedpostsdiv = $("<div class='locked-posts'></div>");
           progressbardiv = $("<div class='progressbar'></div>");
-          percent = this.model.get('newxp') % this.expstep / this.expstep * 100;
+          percent = this.model.get('newxp') % this.model.get('expstep') / this.model.get('expstep') * 100;
           textinline = true;
-          indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(5) + ' posts</p>');
+          indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(this.model.get('postsleft')) + ' posts</p>');
           if (percent < 100.0 / 350.0 * 100) textinline = false;
           if (textinline) {
             progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
@@ -175,6 +173,7 @@
           callback: this.model.maketag
         });
         responsediv = $("<div id = 'response" + (this.model.get('id')) + "'></div>");
+        responsediv.css('border-left', 'solid 1px black');
         $(this.el).find('.inner-question').append(responsediv);
         if (postCollection.where({
           parent: this.id
@@ -182,6 +181,7 @@
           this.renderProgressBar();
         } else {
           $(this.el).find('.inner-question').omnipost({
+            removeOnSubmit: true,
             callback: this.model.respond
           });
         }
