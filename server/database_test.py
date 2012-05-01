@@ -176,13 +176,11 @@ class DatabaseTests(unittest.TestCase):
     post = user.create_post('my post')
     Tag(parent=post.key, title='a').put()
     # create responses
-    resp = None
+    resp = []
     for i in range(10):
       user = self.switchToUser(str(i))
       user.assign_post(post.key)
-      p = user.create_post(str(i), post.key)
-      if i == 1:
-        resp = p
+      resp.append(user.create_post(str(i), post.key).key)
     # check assignments
     stream = self.switchToUser(str(1))
     for i in range(2):
@@ -190,6 +188,15 @@ class DatabaseTests(unittest.TestCase):
       stream.adjust_experience('a',25)
       # check assignments
       self.assertEqual(stream.assignments().count(), (5*(i+1)))
+    # check that grandchildren don't get assigned
+    user = self.switchToUser(str(2))
+    user.assign_post(resp[1])
+    p = user.create_post(str(i), resp[1])
+    stream = self.switchToUser(str(1))
+    stream.adjust_experience('a',25)
+    m = "Grandchildren are being assigned mistakenly."
+    for a in stream.assignments().iter(keys_only=True):
+      self.assertNotEqual(a.parent(), p.key,msg=m)
 
   def testCreateResponse(self):
     self.switchToUser('user')
