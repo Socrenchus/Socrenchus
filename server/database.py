@@ -19,6 +19,13 @@ from google.appengine.ext import ndb
 import random
 
 class Model:
+  @ndb.ComputedProperty
+  def depth(self):
+    if self.key:
+      return len(self.key.pairs())
+    else:
+      return 0
+
   def to_dict(self):
     result = ndb.Model.to_dict(self)
     if(self.key.parent() != None):
@@ -33,7 +40,6 @@ class Post(Model, ndb.Model):
   """
   A post can be a question, it can be an answer, it can even be a statement.    
   """
-# parent      = parent post (optional)
   author      = ndb.UserProperty(auto_current_user_add=True)
   content     = ndb.TextProperty()
   score       = ndb.FloatProperty(default=0.0)
@@ -53,14 +59,14 @@ class Post(Model, ndb.Model):
     """
     Return a query of children of this post.
     """
-    return Post.query(ancestor=key)
+    return Post.query(cls.depth == len(key.pairs())+1, ancestor=key)
   
   @classmethod
   def sibling(cls, key):
     """
     Return a query for a sibling of this post.
     """
-    return Post.query(ancestor=key.parent())
+    return Post.query(cls.depth == len(key.pairs()), ancestor=key.parent())
   
   #@ndb.ComputedProperty
   def popularity(self):
@@ -153,12 +159,14 @@ class Post(Model, ndb.Model):
     """
     me = users.get_current_user()
     try:
-      my_reply = Post.sibling(key).filter(Post.author==me).iter(keys_only=True).next()
+      my_reply = Post.children(key).filter(Post.author==me).iter(keys_only=True).next()
       if my_reply:
+        # current post depth
+        depth = len(key.pairs())
         # count the current replies visible to the user
-        current = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==me, ancestor=key).count()
+        current = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==me,  Tag.depth==depth+2, ancestor=key).count()
         # get our experience in the context of our reply
-        old_xp = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==me, ancestor=my_reply).get()
+        old_xp = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==me,  Tag.depth==depth+2, ancestor=my_reply).get()
         new_xp = Post.dereference_experience(my_reply)
         if old_xp.xp == 1:
           old_xp.xp = new_xp
