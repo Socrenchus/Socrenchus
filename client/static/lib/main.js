@@ -15,10 +15,33 @@
       function Post() {
         this.maketag = __bind(this.maketag, this);
         this.respond = __bind(this.respond, this);
+        this.calcDepth = __bind(this.calcDepth, this);
+        this.initialize = __bind(this.initialize, this);
         Post.__super__.constructor.apply(this, arguments);
       }
 
       Post.prototype.urlRoot = '/posts';
+
+      Post.prototype.initialize = function() {
+        this.view = null;
+        this.level = 0;
+        return this.currentlevel = 0;
+      };
+
+      Post.prototype.calcDepth = function() {
+        var parentposts, _results;
+        parentposts = postCollection.where({
+          id: this.get('parent')
+        });
+        _results = [];
+        while (parentposts.length > 0) {
+          this.level++;
+          _results.push(parentposts = postCollection.where({
+            id: parentposts[0].get('parent')
+          }));
+        }
+        return _results;
+      };
 
       Post.prototype.respond = function(content) {
         var p;
@@ -108,6 +131,7 @@
 
       function PostView() {
         this.render = __bind(this.render, this);
+        this.renderInnerContents = __bind(this.renderInnerContents, this);
         this.renderProgressBar = __bind(this.renderProgressBar, this);
         this.renderPostContent = __bind(this.renderPostContent, this);
         PostView.__super__.constructor.apply(this, arguments);
@@ -123,7 +147,9 @@
 
       PostView.prototype.initialize = function() {
         this.id = this.model.id;
-        return this.model.bind('change', this.render);
+        this.model.bind('change', this.render);
+        this.model.view = this;
+        return this.hidden = false;
       };
 
       PostView.prototype.renderPostContent = function() {
@@ -143,7 +169,7 @@
           progressbardiv = $("<div class='progressbar'></div>");
           percent = this.model.get('newxp') % this.model.get('expstep') / this.model.get('expstep') * 100;
           textinline = true;
-          indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(this.model.get('postsleft')) + ' posts</p>');
+          indicatortext = $('<p id="indicator-text">Unlock More Posts</p>');
           if (percent < 100.0 / 350.0 * 100) textinline = false;
           if (textinline) {
             progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
@@ -159,9 +185,8 @@
         }
       };
 
-      PostView.prototype.render = function() {
+      PostView.prototype.renderInnerContents = function() {
         var responsediv, tagsdiv;
-        $(this.el).html(this.template);
         $(this.el).find('.inner-question').votebox({
           votesnum: this.model.get('score'),
           callback: this.model.maketag
@@ -173,17 +198,40 @@
           callback: this.model.maketag
         });
         responsediv = $("<div id = 'response" + (this.model.get('id')) + "'></div>");
-        responsediv.css('border-left', 'solid 1px black');
+        responsediv.css('border-left', 'dotted 1px black');
         $(this.el).find('.inner-question').append(responsediv);
         if (postCollection.where({
           parent: this.id
         }).length > 0) {
-          this.renderProgressBar();
+          return this.renderProgressBar();
         } else {
-          $(this.el).find('.inner-question').omnipost({
+          return $(this.el).find('.inner-question').omnipost({
             removeOnSubmit: true,
             callback: this.model.respond
           });
+        }
+      };
+
+      PostView.prototype.render = function() {
+        var loadmorediv,
+          _this = this;
+        $(this.el).html(this.template);
+        this.renderInnerContents();
+        if (!this.hidden) {
+          $(this.el).find('.inner-question').show();
+        } else {
+          $(this.el).find('.inner-question').hide();
+          loadmorediv = $("<div id='more-comments'>Load More Comments</div>");
+          loadmorediv.click(function() {
+            $(_this.el).find('.inner-question').toggle();
+            _this.hidden = !_this.hidden;
+            if (_this.hidden) {
+              return loadmorediv.html("Load More Contents");
+            } else {
+              return loadmorediv.html("Collapse Comments");
+            }
+          });
+          $(this.el).append(loadmorediv);
         }
         return $(this.el);
       };
@@ -258,6 +306,8 @@
         post = new PostView({
           model: item
         });
+        item.calcDepth();
+        if (item.level === 1) post.hidden = true;
         if (document.getElementById('response' + item.get('parent'))) {
           return $('#response' + item.get('parent')).prepend(post.render());
         } else {

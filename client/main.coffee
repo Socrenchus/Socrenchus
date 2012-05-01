@@ -5,6 +5,17 @@ $ ->
   ###
   class Post extends Backbone.Model
     urlRoot: '/posts'
+    initialize: =>
+      @view = null
+      @level = 0
+      @currentlevel = 0
+      
+    calcDepth: =>
+      parentposts = postCollection.where({id:@get('parent')})
+      while parentposts.length > 0
+        @level++
+        parentposts = postCollection.where({id:parentposts[0].get('parent')})
+
     respond: (content) =>
       p = new Post(
         parent: @get('id')
@@ -54,6 +65,8 @@ $ ->
     initialize: ->
       @id = @model.id
       @model.bind('change', @render)
+      @model.view = @      
+      @hidden = false
 
     renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))
@@ -70,7 +83,7 @@ $ ->
         #percent = Math.floor(Math.random()*100)
         percent = @model.get('newxp') % @model.get('expstep') / @model.get('expstep') * 100
         textinline = true
-        indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(@model.get('postsleft')) + ' posts</p>')
+        indicatortext = $('<p id="indicator-text">Unlock More Posts</p>')
         if percent < 100.0/350.0 * 100
           textinline = false
         if textinline
@@ -84,20 +97,38 @@ $ ->
         lockedpostsdiv.append(progressbardiv)
         $(@el).find('.inner-question').append(lockedpostsdiv)
 
-    render: =>
-      $(@el).html(@template)
+    renderInnerContents: =>
       $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()
-      tagsdiv = $("<div id='tagscontainer'><div id = 'tags#{@model.get('id')}'></div></div>")      
+      tagsdiv = $("<div id='tagscontainer'><div id = 'tags#{@model.get('id')}'></div></div>")
       $(@el).find('.inner-question').append(tagsdiv)
       $(@el).find('.inner-question').tagbox({callback: @model.maketag})
       responsediv = $("<div id = 'response#{@model.get('id')}'></div>")
-      responsediv.css('border-left', 'solid 1px black')
-      $(@el).find('.inner-question').append(responsediv)
+      responsediv.css('border-left', 'dotted 1px black')
+      $(@el).find('.inner-question').append(responsediv)  
       if postCollection.where({parent: @id}).length > 0
         @renderProgressBar()
-      else        
+      else
         $(@el).find('.inner-question').omnipost({removeOnSubmit: true, callback: @model.respond})
+
+    render: =>      
+      $(@el).html(@template)
+      
+      @renderInnerContents()
+      if !@hidden
+        $(@el).find('.inner-question').show()
+      else
+        $(@el).find('.inner-question').hide()
+        loadmorediv = $("<div id='more-comments'>Load More Comments</div>")     
+        loadmorediv.click( =>      
+          $(@el).find('.inner-question').toggle()
+          @hidden = !@hidden
+          if @hidden
+            loadmorediv.html("Load More Contents")
+          else
+            loadmorediv.html("Collapse Comments")
+        )
+        $(@el).append(loadmorediv)  
       return $(@el)
      
    class TagView extends Backbone.View
@@ -136,6 +167,10 @@ $ ->
 
     addOne: (item) ->
       post = new PostView(model: item)
+      item.calcDepth()
+      if item.level == 1
+        post.hidden = true
+
       if document.getElementById('response' + item.get('parent'))
         $('#response' + item.get('parent')).prepend(post.render())
       else      
@@ -166,7 +201,7 @@ $ ->
         $('#post-question').show()
       else
         $('#post-question').hide()
-
+        
     render: =>
       if !@streamviewRendered
         $('#post-question').omnipost({callback: @makePost, message: 'Post a topic...'})      
