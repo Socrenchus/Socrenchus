@@ -108,6 +108,7 @@
 
       function PostView() {
         this.render = __bind(this.render, this);
+        this.renderProgressBar = __bind(this.renderProgressBar, this);
         this.renderPostContent = __bind(this.renderPostContent, this);
         PostView.__super__.constructor.apply(this, arguments);
       }
@@ -122,7 +123,9 @@
 
       PostView.prototype.initialize = function() {
         this.id = this.model.id;
-        return this.model.bind('change', this.render);
+        this.model.bind('change', this.render);
+        this.expstep = 25;
+        return this.postreveal = 5;
       };
 
       PostView.prototype.renderPostContent = function() {
@@ -135,30 +138,14 @@
         return $(this.el).find('.inner-question').append(postcontentdiv);
       };
 
-      PostView.prototype.render = function() {
-        var indicatortext, lockedpostsdiv, percent, progressbardiv, progressindicatordiv, responsediv, tagsdiv, textinline;
-        $(this.el).html(this.template);
-        $(this.el).find('.inner-question').votebox({
-          votesnum: this.model.get('score'),
-          callback: this.model.maketag
-        });
-        this.renderPostContent();
-        tagsdiv = $("<div id='tagscontainer'><div id = 'tags" + (this.model.get('id')) + "'></div></div>");
-        $(this.el).find('.inner-question').append(tagsdiv);
-        $(this.el).find('.inner-question').tagbox({
-          callback: this.model.maketag
-        });
-        $(this.el).find('.inner-question').omnipost({
-          callback: this.model.respond
-        });
-        responsediv = $("<div id = 'response" + (this.model.get('id')) + "'></div>");
-        $(this.el).find('.inner-question').append(responsediv);
-        if (this.model.get('parent') !== 0) {
+      PostView.prototype.renderProgressBar = function() {
+        var indicatortext, lockedpostsdiv, percent, progressbardiv, progressindicatordiv, textinline;
+        if (this.model.get('parent') === '') {
           lockedpostsdiv = $("<div class='locked-posts'></div>");
           progressbardiv = $("<div class='progressbar'></div>");
-          percent = 10;
+          percent = this.model.get('newxp') % this.expstep / this.expstep * 100;
           textinline = true;
-          indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(1) + ' post</p>');
+          indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(5) + ' posts</p>');
           if (percent < 100.0 / 350.0 * 100) textinline = false;
           if (textinline) {
             progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
@@ -170,7 +157,33 @@
             progressbardiv.append(indicatortext);
           }
           lockedpostsdiv.append(progressbardiv);
-          $(this.el).find('.inner-question').append(lockedpostsdiv);
+          return $(this.el).find('.inner-question').append(lockedpostsdiv);
+        }
+      };
+
+      PostView.prototype.render = function() {
+        var responsediv, tagsdiv;
+        $(this.el).html(this.template);
+        $(this.el).find('.inner-question').votebox({
+          votesnum: this.model.get('score'),
+          callback: this.model.maketag
+        });
+        this.renderPostContent();
+        tagsdiv = $("<div id='tagscontainer'><div id = 'tags" + (this.model.get('id')) + "'></div></div>");
+        $(this.el).find('.inner-question').append(tagsdiv);
+        $(this.el).find('.inner-question').tagbox({
+          callback: this.model.maketag
+        });
+        responsediv = $("<div id = 'response" + (this.model.get('id')) + "'></div>");
+        $(this.el).find('.inner-question').append(responsediv);
+        if (postCollection.where({
+          parent: this.id
+        }).length > 0) {
+          this.renderProgressBar();
+        } else {
+          $(this.el).find('.inner-question').omnipost({
+            callback: this.model.respond
+          });
         }
         return $(this.el);
       };

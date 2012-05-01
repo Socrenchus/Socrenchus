@@ -39,6 +39,11 @@ class Post(Model, ndb.Model):
   score       = ndb.FloatProperty(default=0.0)
   timestamp   = ndb.DateTimeProperty(auto_now=True)
   
+  def to_dict(self):
+    result = Model.to_dict(self)
+    result['newxp'] = Post.dereference_experience(self.key)
+    return result
+
   @classmethod
   def children(cls, key):
     """

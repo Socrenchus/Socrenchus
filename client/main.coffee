@@ -54,6 +54,8 @@ $ ->
     initialize: ->
       @id = @model.id
       @model.bind('change', @render)
+      @expstep = 25
+      @postreveal = 5
 
     renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))
@@ -63,24 +65,14 @@ $ ->
       postcontentdiv.append(jsondata.posttext)
       $(@el).find('.inner-question').append(postcontentdiv)
     
-    render: =>
-      $(@el).html(@template)
-      $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
-      @renderPostContent()
-      tagsdiv = $("<div id='tagscontainer'><div id = 'tags#{@model.get('id')}'></div></div>")      
-      $(@el).find('.inner-question').append(tagsdiv)
-      #if tagCollection.indexOf('parent: @model.get('id')) > -1
-      $(@el).find('.inner-question').tagbox({callback: @model.maketag})
-      $(@el).find('.inner-question').omnipost({callback: @model.respond})
-      responsediv = $("<div id = 'response#{@model.get('id')}'></div>")
-      $(@el).find('.inner-question').append(responsediv)
-      unless @model.get('parent') is 0
+    renderProgressBar: =>
+      if @model.get('parent') is ''
         lockedpostsdiv = $("<div class='locked-posts'></div>")
         progressbardiv = $("<div class='progressbar'></div>")
         #percent = Math.floor(Math.random()*100)
-        percent = 10
+        percent = @model.get('newxp') % @expstep / @expstep * 100
         textinline = true
-        indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(1) + ' post</p>')
+        indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(5) + ' posts</p>')
         if percent < 100.0/350.0 * 100
           textinline = false
         if textinline
@@ -93,6 +85,20 @@ $ ->
           progressbardiv.append(indicatortext)            
         lockedpostsdiv.append(progressbardiv)
         $(@el).find('.inner-question').append(lockedpostsdiv)
+
+    render: =>
+      $(@el).html(@template)
+      $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
+      @renderPostContent()
+      tagsdiv = $("<div id='tagscontainer'><div id = 'tags#{@model.get('id')}'></div></div>")      
+      $(@el).find('.inner-question').append(tagsdiv)
+      $(@el).find('.inner-question').tagbox({callback: @model.maketag})
+      responsediv = $("<div id = 'response#{@model.get('id')}'></div>")
+      $(@el).find('.inner-question').append(responsediv)
+      if postCollection.where({parent: @id}).length > 0
+        @renderProgressBar()
+      else        
+        $(@el).find('.inner-question').omnipost({callback: @model.respond})
       return $(@el)
      
    class TagView extends Backbone.View
