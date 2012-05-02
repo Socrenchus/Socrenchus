@@ -52,7 +52,6 @@ class PostHandler(webapp.RequestHandler):
       stream.assign_post(key)
       result = key.get()
     else:
-      stream.verify_assignment_counts()
       def post_list(key):
         return key.parent()
       result = stream.assignments().order(Stream.timestamp).map(post_list,keys_only=True)

@@ -47,11 +47,7 @@ class Post(Model, ndb.Model):
   
   def to_dict(self):
     result = Model.to_dict(self)
-    result['newxp'] = Post.dereference_experience(self.key)
-    result['expstep'] = 25
-    postsrevealed = result['newxp'] / result['expstep']
-    childrencount =  Post.children(self.key).count(None)
-    result['postsleft'] = 5 if childrencount - postsrevealed >= 5 else childrencount - postsrevealed
+    result['progress'] = self.get_progress(users.get_current_user())
     return result
 
   @classmethod
@@ -151,11 +147,11 @@ class Post(Model, ndb.Model):
         return True
     return False
   
-  @classmethod
-  def verify_assignment_count(cls, key, user):
+  def get_progress(self, user):
     """
     Checks if new assignments are due, assigns them if they are.
     """
+    key = self.key
     try:
       my_reply = Post.children(key).filter(Post.author==user).iter(keys_only=True).next()
       if my_reply:
@@ -174,12 +170,14 @@ class Post(Model, ndb.Model):
           old_xp.put()
         old_xp = old_xp.xp
         # run our experience points through the magic step function
-        expected = Post.step_reveal(new_xp-old_xp)
+        summary = Post.step_reveal(new_xp-old_xp)
+        expected = summary[0]
         # assign the newly earned posts
         if expected > current:
           Post.assign_children(key, user, expected-current)
+        return summary[1]
     except StopIteration:
-      pass
+      return 0
     except:
       raise
 
@@ -190,7 +188,9 @@ class Post(Model, ndb.Model):
     """
     # TODO: Improve step function
     # show 5 posts for every 25 xp
-    return ((int(delta_xp)/25)+1)*5
+    point_step = 25
+    post_step = 5
+    return (((int(delta_xp)/point_step)+1)*post_step, float(delta_xp%point_step)/float(point_step))
 
 class Tag(Model, ndb.Model):
   """
@@ -350,14 +350,6 @@ class Stream(ndb.Model):
     Returns a list of post keys assigned to the user under the given post key.
     """
     return Tag.query(Tag.title == Tag.base('assignment'), Tag.user == self.user, ancestor=post_key)
-
-  def verify_assignment_counts(self):
-    """
-    Checks if experience thresholds have been met for new assignments.
-    """
-    def post_list(key):
-      Post.verify_assignment_count(key.parent(), self.user)
-    result = self.assignments().map(post_list,keys_only=True)
   
   def get_tag(self, tag_title):
     """

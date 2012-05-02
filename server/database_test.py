@@ -185,7 +185,7 @@ class DatabaseTests(unittest.TestCase):
     stream = self.switchToUser(str(1))
     for i in range(3):
       # check assignments
-      Post.verify_assignment_count(post.key, stream.user)
+      post.get_progress(stream.user)
       self.assertEqual(stream.assignments().count(), (5*(i+1))+1)
       # acquire points
       stream.adjust_experience('a',25)
