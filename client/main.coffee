@@ -22,6 +22,7 @@ $ ->
         content: content
       )
       postCollection.create(p)
+      postCollection.fetch()
 
     maketag: (content) =>
       t = new Tag(
@@ -66,7 +67,7 @@ $ ->
       @id = @model.id
       @model.bind('change', @render)
       @model.view = @      
-      @hidden = false
+      @overflowing = false
 
     renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))
@@ -74,13 +75,12 @@ $ ->
       postcontentdiv.append($(jsondata.linkdata))
       postcontentdiv.append('<br />')
       postcontentdiv.append(jsondata.posttext)
-      $(@el).find('.inner-question').append(postcontentdiv)
+      @fullPostDiv.append(postcontentdiv)
     
     renderProgressBar: =>
       if @model.get('parent') is ''
         lockedpostsdiv = $("<div class='locked-posts'></div>")
         progressbardiv = $("<div class='progressbar'></div>")
-        #percent = Math.floor(Math.random()*100)
         percent = @model.get('newxp') % @model.get('expstep') / @model.get('expstep') * 100
         textinline = true
         indicatortext = $('<p id="indicator-text">Unlock More Posts</p>')
@@ -98,37 +98,39 @@ $ ->
         $(@el).find('.inner-question').append(lockedpostsdiv)
 
     renderInnerContents: =>
-      $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
+      @fullPostDiv.votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()
       tagsdiv = $("<div id='tagscontainer'><div id = 'tags#{@model.get('id')}'></div></div>")
-      $(@el).find('.inner-question').append(tagsdiv)
-      $(@el).find('.inner-question').tagbox({callback: @model.maketag})
+      @fullPostDiv.append(tagsdiv)
+      @fullPostDiv.tagbox({callback: @model.maketag})
       responsediv = $("<div id = 'response#{@model.get('id')}'></div>")
       responsediv.css('border-left', 'dotted 1px black')
-      $(@el).find('.inner-question').append(responsediv)  
+      @fullPostDiv.append(responsediv)  
       if postCollection.where({parent: @id}).length > 0
         @renderProgressBar()
       else
-        $(@el).find('.inner-question').omnipost({removeOnSubmit: true, callback: @model.respond})
+        @fullPostDiv.omnipost({removeOnSubmit: true, callback: @model.respond})
 
-    render: =>      
+    renderLineToParent: =>
+      x1 = @fullPostDiv.position().left
+      y1 = @fullPostDiv.position().top
+      x2 = $('#response'+@model.get('parent')).position().left
+      y2 = $('#response'+@model.get('parent')).position().top
+      linediv = $("<img src='/images/diagonalLine.png'></img>")
+      linediv.css("position", "absolute")
+      linediv.css("left", x1)
+      linediv.css("top", y1)
+      linediv.css("width", x2 - x1)
+      linediv.css("height", y2 - y1)
+      $('body').append(linediv)
+
+    render: =>
       $(@el).html(@template)
-      
+      @fullPostDiv = $("<div id=#{@model.get('id')}></div>")
+      $(@el).find('.inner-question').append(@fullPostDiv)
       @renderInnerContents()
-      if !@hidden
-        $(@el).find('.inner-question').show()
-      else
-        $(@el).find('.inner-question').hide()
-        loadmorediv = $("<div id='more-comments'>Load More Comments</div>")     
-        loadmorediv.click( =>      
-          $(@el).find('.inner-question').toggle()
-          @hidden = !@hidden
-          if @hidden
-            loadmorediv.html("Load More Contents")
-          else
-            loadmorediv.html("Collapse Comments")
-        )
-        $(@el).append(loadmorediv)  
+      #if @overflowing
+        #$(@el).find('.inner-question').hide()
       return $(@el)
      
    class TagView extends Backbone.View
@@ -168,16 +170,21 @@ $ ->
     addOne: (item) ->
       post = new PostView(model: item)
       item.calcDepth()
-      if item.level == 1
-        post.hidden = true
+      if item.level == 2
+        post.overflowing = true
+      if !document.getElementById(item.get('id'))
+        if document.getElementById('response' + item.get('parent')) and !post.overflowing
+          $('#response' + item.get('parent')).prepend(post.render())
+        else      
+          $('#assignments').prepend(post.render())
 
-      if document.getElementById('response' + item.get('parent'))
-        $('#response' + item.get('parent')).prepend(post.render())
-      else      
-        $('#assignments').prepend(post.render())
+    addLines: (item) ->
+      if item.view.overflowing
+        item.view.renderLineToParent()
 
     addAll: ->
       postCollection.each(@addOne)
+      postCollection.each(@addLines)
     deleteOne: (item) ->
       item.destroy()
     deleteAll: ->

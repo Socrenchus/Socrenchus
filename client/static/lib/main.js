@@ -49,7 +49,8 @@
           parent: this.get('id'),
           content: content
         });
-        return postCollection.create(p);
+        postCollection.create(p);
+        return postCollection.fetch();
       };
 
       Post.prototype.maketag = function(content) {
@@ -131,6 +132,7 @@
 
       function PostView() {
         this.render = __bind(this.render, this);
+        this.renderLineToParent = __bind(this.renderLineToParent, this);
         this.renderInnerContents = __bind(this.renderInnerContents, this);
         this.renderProgressBar = __bind(this.renderProgressBar, this);
         this.renderPostContent = __bind(this.renderPostContent, this);
@@ -149,7 +151,7 @@
         this.id = this.model.id;
         this.model.bind('change', this.render);
         this.model.view = this;
-        return this.hidden = false;
+        return this.overflowing = false;
       };
 
       PostView.prototype.renderPostContent = function() {
@@ -159,7 +161,7 @@
         postcontentdiv.append($(jsondata.linkdata));
         postcontentdiv.append('<br />');
         postcontentdiv.append(jsondata.posttext);
-        return $(this.el).find('.inner-question').append(postcontentdiv);
+        return this.fullPostDiv.append(postcontentdiv);
       };
 
       PostView.prototype.renderProgressBar = function() {
@@ -187,52 +189,51 @@
 
       PostView.prototype.renderInnerContents = function() {
         var responsediv, tagsdiv;
-        $(this.el).find('.inner-question').votebox({
+        this.fullPostDiv.votebox({
           votesnum: this.model.get('score'),
           callback: this.model.maketag
         });
         this.renderPostContent();
         tagsdiv = $("<div id='tagscontainer'><div id = 'tags" + (this.model.get('id')) + "'></div></div>");
-        $(this.el).find('.inner-question').append(tagsdiv);
-        $(this.el).find('.inner-question').tagbox({
+        this.fullPostDiv.append(tagsdiv);
+        this.fullPostDiv.tagbox({
           callback: this.model.maketag
         });
         responsediv = $("<div id = 'response" + (this.model.get('id')) + "'></div>");
         responsediv.css('border-left', 'dotted 1px black');
-        $(this.el).find('.inner-question').append(responsediv);
+        this.fullPostDiv.append(responsediv);
         if (postCollection.where({
           parent: this.id
         }).length > 0) {
           return this.renderProgressBar();
         } else {
-          return $(this.el).find('.inner-question').omnipost({
+          return this.fullPostDiv.omnipost({
             removeOnSubmit: true,
             callback: this.model.respond
           });
         }
       };
 
+      PostView.prototype.renderLineToParent = function() {
+        var linediv, x1, x2, y1, y2;
+        x1 = this.fullPostDiv.position().left;
+        y1 = this.fullPostDiv.position().top;
+        x2 = $('#response' + this.model.get('parent')).position().left;
+        y2 = $('#response' + this.model.get('parent')).position().top;
+        linediv = $("<img src='/images/diagonalLine.png'></img>");
+        linediv.css("position", "absolute");
+        linediv.css("left", x1);
+        linediv.css("top", y1);
+        linediv.css("width", x2 - x1);
+        linediv.css("height", y2 - y1);
+        return $('body').append(linediv);
+      };
+
       PostView.prototype.render = function() {
-        var loadmorediv,
-          _this = this;
         $(this.el).html(this.template);
+        this.fullPostDiv = $("<div id=" + (this.model.get('id')) + "></div>");
+        $(this.el).find('.inner-question').append(this.fullPostDiv);
         this.renderInnerContents();
-        if (!this.hidden) {
-          $(this.el).find('.inner-question').show();
-        } else {
-          $(this.el).find('.inner-question').hide();
-          loadmorediv = $("<div id='more-comments'>Load More Comments</div>");
-          loadmorediv.click(function() {
-            $(_this.el).find('.inner-question').toggle();
-            _this.hidden = !_this.hidden;
-            if (_this.hidden) {
-              return loadmorediv.html("Load More Contents");
-            } else {
-              return loadmorediv.html("Collapse Comments");
-            }
-          });
-          $(this.el).append(loadmorediv);
-        }
         return $(this.el);
       };
 
@@ -307,16 +308,23 @@
           model: item
         });
         item.calcDepth();
-        if (item.level === 1) post.hidden = true;
-        if (document.getElementById('response' + item.get('parent'))) {
-          return $('#response' + item.get('parent')).prepend(post.render());
-        } else {
-          return $('#assignments').prepend(post.render());
+        if (item.level === 2) post.overflowing = true;
+        if (!document.getElementById(item.get('id'))) {
+          if (document.getElementById('response' + item.get('parent')) && !post.overflowing) {
+            return $('#response' + item.get('parent')).prepend(post.render());
+          } else {
+            return $('#assignments').prepend(post.render());
+          }
         }
       };
 
+      StreamView.prototype.addLines = function(item) {
+        if (item.view.overflowing) return item.view.renderLineToParent();
+      };
+
       StreamView.prototype.addAll = function() {
-        return postCollection.each(this.addOne);
+        postCollection.each(this.addOne);
+        return postCollection.each(this.addLines);
       };
 
       StreamView.prototype.deleteOne = function(item) {
