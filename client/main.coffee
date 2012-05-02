@@ -8,13 +8,18 @@ $ ->
     initialize: =>
       @view = null
       @level = 0
+      @maxlevel = 2
+      @relativelevel = 0
       @currentlevel = 0
       
     calcDepth: =>
       parentposts = postCollection.where({id:@get('parent')})
-      while parentposts.length > 0
-        @level++
+      if parentposts.length > 0
+        @level = parentposts[0].level + 1
         parentposts = postCollection.where({id:parentposts[0].get('parent')})
+      else
+        @level = 0
+        @relativelevel = 0
 
     respond: (content) =>
       p = new Post(
@@ -78,24 +83,23 @@ $ ->
       @fullPostDiv.append(postcontentdiv)
     
     renderProgressBar: =>
-      if @model.get('parent') is ''
-        lockedpostsdiv = $("<div class='locked-posts'></div>")
-        progressbardiv = $("<div class='progressbar'></div>")
-        percent = @model.get('newxp') % @model.get('expstep') / @model.get('expstep') * 100
-        textinline = true
-        indicatortext = $('<p id="indicator-text">Unlock More Posts</p>')
-        if percent < 100.0/350.0 * 100
-          textinline = false
-        if textinline
-          progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")
-          progressindicatordiv.append(indicatortext)          
-          progressbardiv.append(progressindicatordiv)
-        else
-          progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")          
-          progressbardiv.append(progressindicatordiv)
-          progressbardiv.append(indicatortext)            
-        lockedpostsdiv.append(progressbardiv)
-        $(@el).find('.inner-question').append(lockedpostsdiv)
+      lockedpostsdiv = $("<div class='locked-posts'></div>")
+      progressbardiv = $("<div class='progressbar'></div>")
+      percent = @model.get('newxp') % @model.get('expstep') / @model.get('expstep') * 100
+      textinline = true
+      indicatortext = $('<p id="indicator-text">Unlock More Posts</p>')
+      if percent < 100.0/350.0 * 100
+        textinline = false
+      if textinline
+        progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")
+        progressindicatordiv.append(indicatortext)          
+        progressbardiv.append(progressindicatordiv)
+      else
+        progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")          
+        progressbardiv.append(progressindicatordiv)
+        progressbardiv.append(indicatortext)            
+      lockedpostsdiv.append(progressbardiv)
+      @fullPostDiv.append(lockedpostsdiv)
 
     renderInnerContents: =>
       @fullPostDiv.votebox({votesnum:@model.get('score'), callback: @model.maketag})
@@ -103,25 +107,29 @@ $ ->
       tagsdiv = $("<div id='tagscontainer'><div id = 'tags#{@model.get('id')}'></div></div>")
       @fullPostDiv.append(tagsdiv)
       @fullPostDiv.tagbox({callback: @model.maketag})
-      responsediv = $("<div id = 'response#{@model.get('id')}'></div>")
-      responsediv.css('border-left', 'dotted 1px black')
-      @fullPostDiv.append(responsediv)  
       if postCollection.where({parent: @id}).length > 0
         @renderProgressBar()
       else
         @fullPostDiv.omnipost({removeOnSubmit: true, callback: @model.respond})
+      responsediv = $("<div id = 'response#{@model.get('id')}'></div>")
+      responsediv.css('border-left', 'dotted 1px black')
+      @fullPostDiv.append(responsediv)
 
     renderLineToParent: =>
-      x1 = @fullPostDiv.position().left
-      y1 = @fullPostDiv.position().top
-      x2 = $('#response'+@model.get('parent')).position().left
-      y2 = $('#response'+@model.get('parent')).position().top
+      x1 = @fullPostDiv.offset().left
+      #FIXME: figure out why the top is not quite correct
+      y1 = @fullPostDiv.offset().top + 50
+      x2 = $('#' + @model.get('parent')).offset().left + $('#' + @model.get('parent')).width()
+      #FIXME: figure out why the top is not quite correct
+      y2 = $('#'+@model.get('parent')).offset().top + 
+      $('#'+@model.get('parent')).height() + 50
       linediv = $("<img src='/images/diagonalLine.png'></img>")
       linediv.css("position", "absolute")
       linediv.css("left", x1)
       linediv.css("top", y1)
       linediv.css("width", x2 - x1)
       linediv.css("height", y2 - y1)
+      linediv.css("z-index", 0)
       $('body').append(linediv)
 
     render: =>
@@ -166,12 +174,25 @@ $ ->
         content: content
       )
       postCollection.create(p)
+    
+    reduceRelativeLevels: (id) =>
+      posts = postCollection.where({parent:id})
+      for post in posts
+        post.relativelevel -= post.maxlevel
+        @reduceRelativeLevels(post.id)
+        if post.relativelevel == post.maxlevel
+          post.overflowing = true
+          post.relativelevel = 0
+          @reduceRelativeLevels(post.id)
 
-    addOne: (item) ->
+    addOne: (item) =>
       post = new PostView(model: item)
       item.calcDepth()
-      if item.level == 2
+      if item.relativelevel == item.maxlevel
         post.overflowing = true
+        item.relativelevel = 0
+        @reduceRelativeLevels(item.id)
+        
       if !document.getElementById(item.get('id'))
         if document.getElementById('response' + item.get('parent')) and !post.overflowing
           $('#response' + item.get('parent')).prepend(post.render())
