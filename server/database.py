@@ -320,12 +320,6 @@ class Tag(Model, ndb.Model):
     if self.xp == 1 and self.key.parent().kind() == 'Post':
       self.update_experience()
       self.eval_score_change()
-      
-  @classmethod
-  def _post_get_hook(cls, key, future):
-    self = future.get_result()
-    if self.title == Tag.base('assignment'):
-      Post.verify_assignment_count(key.parent(), self.user)
 
 class Stream(ndb.Model):
   """
@@ -356,6 +350,14 @@ class Stream(ndb.Model):
     Returns a list of post keys assigned to the user under the given post key.
     """
     return Tag.query(Tag.title == Tag.base('assignment'), Tag.user == self.user, ancestor=post_key)
+
+  def verify_assignment_counts(self):
+    """
+    Checks if experience thresholds have been met for new assignments.
+    """
+    def post_list(key):
+      Post.verify_assignment_count(key.parent(), self.user)
+    result = self.assignments().map(post_list,keys_only=True)
   
   def get_tag(self, tag_title):
     """
