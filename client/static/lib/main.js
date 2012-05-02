@@ -37,6 +37,7 @@
         });
         if (parentposts.length > 0) {
           this.level = parentposts[0].level + 1;
+          this.relativelevel = parentposts[0].relativelevel + 1;
           return parentposts = postCollection.where({
             id: parentposts[0].get('parent')
           });
@@ -154,7 +155,8 @@
         this.id = this.model.id;
         this.model.bind('change', this.render);
         this.model.view = this;
-        return this.overflowing = false;
+        this.overflowing = false;
+        return this.fullPostDiv = null;
       };
 
       PostView.prototype.renderPostContent = function() {
@@ -169,42 +171,43 @@
 
       PostView.prototype.renderProgressBar = function() {
         var indicatortext, lockedpostsdiv, percent, progressbardiv, progressindicatordiv, textinline;
-        lockedpostsdiv = $("<div class='locked-posts'></div>");
-        progressbardiv = $("<div class='progressbar'></div>");
-        percent = this.model.get('newxp') % this.model.get('expstep') / this.model.get('expstep') * 100;
-        textinline = true;
-        indicatortext = $('<p id="indicator-text">Unlock More Posts</p>');
-        if (percent < 100.0 / 350.0 * 100) textinline = false;
-        if (textinline) {
-          progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
-          progressindicatordiv.append(indicatortext);
-          progressbardiv.append(progressindicatordiv);
-        } else {
-          progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
-          progressbardiv.append(progressindicatordiv);
-          progressbardiv.append(indicatortext);
+        if (postCollection.where({
+          parent: this.id
+        }).length > 0) {
+          lockedpostsdiv = $("<div class='locked-posts'></div>");
+          progressbardiv = $("<div class='progressbar'></div>");
+          percent = this.model.get('progress') * 100;
+          textinline = true;
+          indicatortext = $('<p id="indicator-text">Unlock More Posts</p>');
+          if (percent < 100.0 / 350.0 * 100) textinline = false;
+          if (textinline) {
+            progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
+            progressindicatordiv.append(indicatortext);
+            progressbardiv.append(progressindicatordiv);
+          } else {
+            progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
+            progressbardiv.append(progressindicatordiv);
+            progressbardiv.append(indicatortext);
+          }
+          lockedpostsdiv.append(progressbardiv);
+          return this.fullPostDiv.append(lockedpostsdiv);
         }
-        lockedpostsdiv.append(progressbardiv);
-        return this.fullPostDiv.append(lockedpostsdiv);
       };
 
       PostView.prototype.renderInnerContents = function() {
-        var responsediv, tagsdiv;
+        var responsediv;
         this.fullPostDiv.votebox({
           votesnum: this.model.get('score'),
           callback: this.model.maketag
         });
         this.renderPostContent();
-        tagsdiv = $("<div id='tagscontainer'><div id = 'tags" + (this.model.get('id')) + "'></div></div>");
-        this.fullPostDiv.append(tagsdiv);
         this.fullPostDiv.tagbox({
           callback: this.model.maketag
         });
-        if (postCollection.where({
+        this.renderProgressBar();
+        if (!(postCollection.where({
           parent: this.id
-        }).length > 0) {
-          this.renderProgressBar();
-        } else {
+        }).length > 0)) {
           this.fullPostDiv.omnipost({
             removeOnSubmit: true,
             callback: this.model.respond
@@ -282,7 +285,6 @@
         this.render = __bind(this.render, this);
         this.showTopicCreator = __bind(this.showTopicCreator, this);
         this.addOne = __bind(this.addOne, this);
-        this.reduceRelativeLevels = __bind(this.reduceRelativeLevels, this);
         StreamView.__super__.constructor.apply(this, arguments);
       }
 
@@ -306,27 +308,6 @@
         return postCollection.create(p);
       };
 
-      StreamView.prototype.reduceRelativeLevels = function(id) {
-        var post, posts, _j, _len2, _results;
-        posts = postCollection.where({
-          parent: id
-        });
-        _results = [];
-        for (_j = 0, _len2 = posts.length; _j < _len2; _j++) {
-          post = posts[_j];
-          post.relativelevel -= post.maxlevel;
-          this.reduceRelativeLevels(post.id);
-          if (post.relativelevel === post.maxlevel) {
-            post.overflowing = true;
-            post.relativelevel = 0;
-            _results.push(this.reduceRelativeLevels(post.id));
-          } else {
-            _results.push(void 0);
-          }
-        }
-        return _results;
-      };
-
       StreamView.prototype.addOne = function(item) {
         var post;
         post = new PostView({
@@ -336,7 +317,6 @@
         if (item.relativelevel === item.maxlevel) {
           post.overflowing = true;
           item.relativelevel = 0;
-          this.reduceRelativeLevels(item.id);
         }
         if (!document.getElementById(item.get('id'))) {
           if (document.getElementById('response' + item.get('parent')) && !post.overflowing) {
@@ -344,6 +324,8 @@
           } else {
             return $('#assignments').prepend(post.render());
           }
+        } else {
+          return post.renderProgressBar();
         }
       };
 

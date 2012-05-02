@@ -16,6 +16,7 @@ $ ->
       parentposts = postCollection.where({id:@get('parent')})
       if parentposts.length > 0
         @level = parentposts[0].level + 1
+        @relativelevel = parentposts[0].relativelevel + 1
         parentposts = postCollection.where({id:parentposts[0].get('parent')})
       else
         @level = 0
@@ -73,6 +74,7 @@ $ ->
       @model.bind('change', @render)
       @model.view = @      
       @overflowing = false
+      @fullPostDiv = null
 
     renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))
@@ -82,34 +84,32 @@ $ ->
       postcontentdiv.append(jsondata.posttext)
       @fullPostDiv.append(postcontentdiv)
     
-    renderProgressBar: =>
-      lockedpostsdiv = $("<div class='locked-posts'></div>")
-      progressbardiv = $("<div class='progressbar'></div>")
-      percent = @model.get('newxp') % @model.get('expstep') / @model.get('expstep') * 100
-      textinline = true
-      indicatortext = $('<p id="indicator-text">Unlock More Posts</p>')
-      if percent < 100.0/350.0 * 100
-        textinline = false
-      if textinline
-        progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")
-        progressindicatordiv.append(indicatortext)          
-        progressbardiv.append(progressindicatordiv)
-      else
-        progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")          
-        progressbardiv.append(progressindicatordiv)
-        progressbardiv.append(indicatortext)            
-      lockedpostsdiv.append(progressbardiv)
-      @fullPostDiv.append(lockedpostsdiv)
+    renderProgressBar: => 
+      if postCollection.where({parent: @id}).length > 0
+        lockedpostsdiv = $("<div class='locked-posts'></div>")
+        progressbardiv = $("<div class='progressbar'></div>")
+        percent = @model.get('progress') * 100
+        textinline = true
+        indicatortext = $('<p id="indicator-text">Unlock More Posts</p>')
+        if percent < 100.0/350.0 * 100
+          textinline = false
+        if textinline
+          progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")
+          progressindicatordiv.append(indicatortext)          
+          progressbardiv.append(progressindicatordiv)
+        else
+          progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")          
+          progressbardiv.append(progressindicatordiv)
+          progressbardiv.append(indicatortext)            
+        lockedpostsdiv.append(progressbardiv)
+        @fullPostDiv.append(lockedpostsdiv)
 
     renderInnerContents: =>
       @fullPostDiv.votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()
-      tagsdiv = $("<div id='tagscontainer'><div id = 'tags#{@model.get('id')}'></div></div>")
-      @fullPostDiv.append(tagsdiv)
       @fullPostDiv.tagbox({callback: @model.maketag})
-      if postCollection.where({parent: @id}).length > 0
-        @renderProgressBar()
-      else
+      @renderProgressBar()
+      unless postCollection.where({parent: @id}).length > 0
         @fullPostDiv.omnipost({removeOnSubmit: true, callback: @model.respond})
       responsediv = $("<div id = 'response#{@model.get('id')}'></div>")
       responsediv.css('border-left', 'dotted 1px black')
@@ -174,16 +174,6 @@ $ ->
         content: content
       )
       postCollection.create(p)
-    
-    reduceRelativeLevels: (id) =>
-      posts = postCollection.where({parent:id})
-      for post in posts
-        post.relativelevel -= post.maxlevel
-        @reduceRelativeLevels(post.id)
-        if post.relativelevel == post.maxlevel
-          post.overflowing = true
-          post.relativelevel = 0
-          @reduceRelativeLevels(post.id)
 
     addOne: (item) =>
       post = new PostView(model: item)
@@ -191,13 +181,14 @@ $ ->
       if item.relativelevel == item.maxlevel
         post.overflowing = true
         item.relativelevel = 0
-        @reduceRelativeLevels(item.id)
         
       if !document.getElementById(item.get('id'))
         if document.getElementById('response' + item.get('parent')) and !post.overflowing
           $('#response' + item.get('parent')).prepend(post.render())
         else      
           $('#assignments').prepend(post.render())
+      else
+        post.renderProgressBar()
 
     addLines: (item) ->
       if item.view.overflowing
