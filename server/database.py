@@ -124,61 +124,64 @@ class Post(Model, ndb.Model):
     return self.put_async()
   
   @classmethod
-  def assign_or_die(cls, key):
+  def assign_or_die(cls, key, user=None):
     """
     Assign the current post to the current user or die if already assigned.
     """
-    me = users.get_current_user()
-    assigned = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==me, ancestor=key).count(1)
+    if not user:
+      user = users.get_current_user()
+    assigned = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==user, ancestor=key).count(1)
     if assigned:
       return False
     else:
-      t = Tag(parent=key, user=me, title=Tag.base('assignment'))
+      t = Tag(parent=key, user=user, title=Tag.base('assignment'))
       t.put()
       return True
   
   @classmethod
-  def assign_children(cls, key, num):
+  def assign_children(cls, key, user, num):
     """
     Assigns num children to the current user if num children exist.
     """
     # TODO: Improve selection of child posts
-    me = users.get_current_user()
-    user = Stream.query(Stream.user==me).get()
     for child in Post.children(key).iter(keys_only=True):
-      if Post.assign_or_die(child):
+      if Post.assign_or_die(child, user):
         num -= 1
       if num <= 0:
         return True
     return False
   
   @classmethod
-  def verify_assignment_count(cls, key):
+  def verify_assignment_count(cls, key, user):
     """
     Checks if new assignments are due, assigns them if they are.
     """
-    me = users.get_current_user()
     try:
-      my_reply = Post.children(key).filter(Post.author==me).iter(keys_only=True).next()
+      my_reply = Post.children(key).filter(Post.author==user).iter(keys_only=True).next()
       if my_reply:
         # current post depth
         depth = len(key.pairs())
         # count the current replies visible to the user
-        current = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==me,  Tag.depth==depth+2, ancestor=key).count()
+        current = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==user,  Tag.depth==depth+2, ancestor=key).count()
         # get our experience in the context of our reply
-        old_xp = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==me,  Tag.depth==depth+2, ancestor=my_reply).get()
+        old_xp = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==user,  Tag.depth==depth+2, ancestor=my_reply).get()
         new_xp = Post.dereference_experience(my_reply)
         if old_xp.xp == 1:
-          old_xp.xp = new_xp
+          if new_xp == 1:
+            old_xp.xp = 0.9
+          else:
+            old_xp.xp = new_xp
           old_xp.put()
         old_xp = old_xp.xp
         # run our experience points through the magic step function
         expected = Post.step_reveal(new_xp-old_xp)
         # assign the newly earned posts
         if expected > current:
-          Post.assign_children(key, expected-current)
+          Post.assign_children(key, user, expected-current)
     except StopIteration:
       pass
+    except:
+      raise
 
   @classmethod
   def step_reveal(cls, delta_xp):
@@ -317,6 +320,12 @@ class Tag(Model, ndb.Model):
     if self.xp == 1 and self.key.parent().kind() == 'Post':
       self.update_experience()
       self.eval_score_change()
+      
+  @classmethod
+  def _post_get_hook(cls, key, future):
+    self = future.get_result()
+    if self.title == Tag.base('assignment'):
+      Post.verify_assignment_count(key.parent(), self.user)
 
 class Stream(ndb.Model):
   """
@@ -366,16 +375,6 @@ class Stream(ndb.Model):
     ref_tag.xp += delta
     ref_tag.put()
     
-    # check for new assignments
-    def filter_assignments(key):
-      parent = key.parent()
-      if Tag.query(Tag.title == tag_title, ancestor=parent).count(1):
-        return parent
-    post_keys = self.assignments().map(filter_assignments,keys_only=True)
-    for key in set(post_keys):
-      if key:
-        Post.verify_assignment_count(key)
-    
   def get_experience(self, tag_title):
     """
     Returns the user's experience in a tag.
@@ -397,6 +396,7 @@ class Stream(ndb.Model):
     p.put()
     self.assign_post(p.key)
     if parent:
-      Tag.get_or_create(Tag.base('assignment'),p.key,parent.get().author)
+      parent = parent.get()
+      Tag.get_or_create(Tag.base('assignment'),p.key,parent.author)
     
     return p
