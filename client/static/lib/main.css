@@ -413,6 +413,8 @@ background-image: linear-gradient(top,white,#ECECEC);
 .inner-question {
   margin-left: 36px;
   margin-right: 44px;
+  position: relative;
+  z-index: 2;
 }
 
 #templates {
