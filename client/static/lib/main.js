@@ -155,8 +155,7 @@
         this.id = this.model.id;
         this.model.bind('change', this.render);
         this.model.view = this;
-        this.overflowing = false;
-        return this.fullPostDiv = null;
+        return this.overflowing = false;
       };
 
       PostView.prototype.renderPostContent = function() {
@@ -166,7 +165,7 @@
         postcontentdiv.append($(jsondata.linkdata));
         postcontentdiv.append('<br />');
         postcontentdiv.append(jsondata.posttext);
-        return this.fullPostDiv.append(postcontentdiv);
+        return $(this.el).find('.inner-question').append(postcontentdiv);
       };
 
       PostView.prototype.renderProgressBar = function() {
@@ -190,38 +189,38 @@
             progressbardiv.append(indicatortext);
           }
           lockedpostsdiv.append(progressbardiv);
-          return this.fullPostDiv.append(lockedpostsdiv);
+          return $(this.el).find('.inner-question').append(lockedpostsdiv);
         }
       };
 
       PostView.prototype.renderInnerContents = function() {
         var responsediv;
-        this.fullPostDiv.votebox({
+        $(this.el).find('.inner-question').votebox({
           votesnum: this.model.get('score'),
           callback: this.model.maketag
         });
         this.renderPostContent();
-        this.fullPostDiv.tagbox({
+        $(this.el).find('.inner-question').tagbox({
           callback: this.model.maketag
         });
         this.renderProgressBar();
         if (!(postCollection.where({
           parent: this.id
         }).length > 0)) {
-          this.fullPostDiv.omnipost({
+          $(this.el).find('.inner-question').omnipost({
             removeOnSubmit: true,
             callback: this.model.respond
           });
         }
         responsediv = $("<div id = 'response" + (this.model.get('id')) + "'></div>");
         responsediv.css('border-left', 'dotted 1px black');
-        return this.fullPostDiv.append(responsediv);
+        return $(this.el).find('.inner-question').append(responsediv);
       };
 
       PostView.prototype.renderLineToParent = function() {
         var linediv, x1, x2, y1, y2;
-        x1 = this.fullPostDiv.offset().left;
-        y1 = this.fullPostDiv.offset().top + 50;
+        x1 = $(this.el).find('.inner-question').offset().left;
+        y1 = $(this.el).find('.inner-question').offset().top + 50;
         x2 = $('#' + this.model.get('parent')).offset().left + $('#' + this.model.get('parent')).width();
         y2 = $('#' + this.model.get('parent')).offset().top + $('#' + this.model.get('parent')).height() + 50;
         linediv = $("<img src='/images/diagonalLine.png'></img>");
@@ -236,8 +235,7 @@
 
       PostView.prototype.render = function() {
         $(this.el).html(this.template);
-        this.fullPostDiv = $("<div id=" + (this.model.get('id')) + "></div>");
-        $(this.el).find('.inner-question').append(this.fullPostDiv);
+        $(this.el).find('.inner-question').attr('id', this.model.get('id'));
         this.renderInnerContents();
         return $(this.el);
       };

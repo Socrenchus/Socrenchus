@@ -74,7 +74,6 @@ $ ->
       @model.bind('change', @render)
       @model.view = @      
       @overflowing = false
-      @fullPostDiv = null
 
     renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))
@@ -82,7 +81,7 @@ $ ->
       postcontentdiv.append($(jsondata.linkdata))
       postcontentdiv.append('<br />')
       postcontentdiv.append(jsondata.posttext)
-      @fullPostDiv.append(postcontentdiv)
+      $(@el).find('.inner-question').append(postcontentdiv)
     
     renderProgressBar: => 
       if postCollection.where({parent: @id}).length > 0
@@ -102,23 +101,23 @@ $ ->
           progressbardiv.append(progressindicatordiv)
           progressbardiv.append(indicatortext)            
         lockedpostsdiv.append(progressbardiv)
-        @fullPostDiv.append(lockedpostsdiv)
+        $(@el).find('.inner-question').append(lockedpostsdiv)
 
     renderInnerContents: =>
-      @fullPostDiv.votebox({votesnum:@model.get('score'), callback: @model.maketag})
+      $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()
-      @fullPostDiv.tagbox({callback: @model.maketag})
+      $(@el).find('.inner-question').tagbox({callback: @model.maketag})
       @renderProgressBar()
       unless postCollection.where({parent: @id}).length > 0
-        @fullPostDiv.omnipost({removeOnSubmit: true, callback: @model.respond})
+        $(@el).find('.inner-question').omnipost({removeOnSubmit: true, callback: @model.respond})
       responsediv = $("<div id = 'response#{@model.get('id')}'></div>")
       responsediv.css('border-left', 'dotted 1px black')
-      @fullPostDiv.append(responsediv)
+      $(@el).find('.inner-question').append(responsediv)
 
     renderLineToParent: =>
-      x1 = @fullPostDiv.offset().left
+      x1 = $(@el).find('.inner-question').offset().left
       #FIXME: figure out why the top is not quite correct
-      y1 = @fullPostDiv.offset().top + 50
+      y1 = $(@el).find('.inner-question').offset().top + 50
       x2 = $('#' + @model.get('parent')).offset().left + $('#' + @model.get('parent')).width()
       #FIXME: figure out why the top is not quite correct
       y2 = $('#'+@model.get('parent')).offset().top + 
@@ -134,8 +133,7 @@ $ ->
 
     render: =>
       $(@el).html(@template)
-      @fullPostDiv = $("<div id=#{@model.get('id')}></div>")
-      $(@el).find('.inner-question').append(@fullPostDiv)
+      $(@el).find('.inner-question').attr('id', @model.get('id'))
       @renderInnerContents()
       return $(@el)
      
