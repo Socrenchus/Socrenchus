@@ -4,16 +4,35 @@ $ ->
   # Core Models and Logic 
   ###
   class Post extends Backbone.Model
+    urlRoot: '/posts'
+    initialize: =>
+      @view = null
+      @level = 0
+      @maxlevel = 2
+      @relativelevel = 0
+      @currentlevel = 0
+      
+    calcDepth: =>
+      parentposts = postCollection.where({id:@get('parent')})
+      if parentposts.length > 0
+        @level = parentposts[0].level + 1
+        @relativelevel = parentposts[0].relativelevel + 1
+        parentposts = postCollection.where({id:parentposts[0].get('parent')})
+      else
+        @level = 0
+        @relativelevel = 0
+
     respond: (content) =>
       p = new Post(
-        parent: @get('key')
+        parent: @get('id')
         content: content
       )
       postCollection.create(p)
+      postCollection.fetch()
 
     maketag: (content) =>
       t = new Tag(
-        parent: @get('key')
+        parent: @get('id')
         title: content
         xp: 0
       )
@@ -52,8 +71,11 @@ $ ->
       
     initialize: ->
       @id = @model.id
-      
-    renderPostContent: ->
+      @model.bind('change', @render)
+      @model.view = @      
+      @overflowing = false
+
+    renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))
       postcontentdiv = $("<div class = 'ui-postcontent'></div>")
       postcontentdiv.append($(jsondata.linkdata))
@@ -61,24 +83,13 @@ $ ->
       postcontentdiv.append(jsondata.posttext)
       $(@el).find('.inner-question').append(postcontentdiv)
     
-    render: ->
-      $(@el).html(@template)
-      $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
-      @renderPostContent()
-      tagsdiv = $("<div id='tagscontainer'><div id = 'tags#{@model.get('key')}'></div></div>")      
-      $(@el).find('.inner-question').append(tagsdiv)
-      #if tagCollection.indexOf('parent: @model.get('key')) > -1
-      $(@el).find('.inner-question').tagbox({callback: @model.maketag})
-      $(@el).find('.inner-question').omnipost({callback: @model.respond})
-      responsediv = $("<div id = 'response#{@model.get('key')}'></div>")
-      $(@el).find('.inner-question').append(responsediv)
-      unless @model.get('parent') is 0
+    renderProgressBar: => 
+      if postCollection.where({parent: @id}).length > 0
         lockedpostsdiv = $("<div class='locked-posts'></div>")
         progressbardiv = $("<div class='progressbar'></div>")
-        #percent = Math.floor(Math.random()*100)
-        percent = 10
+        percent = @model.get('progress') * 100
         textinline = true
-        indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(1) + ' post</p>')
+        indicatortext = $('<p id="indicator-text">Unlock More Posts</p>')
         if percent < 100.0/350.0 * 100
           textinline = false
         if textinline
@@ -91,6 +102,42 @@ $ ->
           progressbardiv.append(indicatortext)            
         lockedpostsdiv.append(progressbardiv)
         $(@el).find('.inner-question').append(lockedpostsdiv)
+
+    renderInnerContents: =>
+      overflowedresponsediv = $("<div id = 'overflowedresponses#{@model.get('id')}'></div>")
+      overflowedresponsediv.attr('class', 'overflowed-posts')
+      $(@el).find('.inner-question').append(overflowedresponsediv)
+      $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
+      @renderPostContent()
+      $(@el).find('.inner-question').tagbox({callback: @model.maketag})
+      @renderProgressBar()
+      unless postCollection.where({parent: @id}).length > 0
+        $(@el).find('.inner-question').omnipost({removeOnSubmit: true, callback: @model.respond})
+      responsediv = $("<div id = 'response#{@model.get('id')}'></div>")
+      responsediv.css('border-left', 'dotted 1px black')
+      $(@el).find('.inner-question').append(responsediv)
+
+    renderLineToParent: =>
+      x1 = $(@el).find('.inner-question').offset().left
+      #FIXME: figure out why the top is not quite correct
+      y1 = $(@el).find('.inner-question').offset().top + 50
+      x2 = $('#' + @model.get('parent')).offset().left + $('#' + @model.get('parent')).width()
+      #FIXME: figure out why the top is not quite correct
+      y2 = $('#'+@model.get('parent')).offset().top + 
+      $('#'+@model.get('parent')).height() + 50
+      linediv = $("<img src='/images/diagonalLine.png'></img>")
+      linediv.css("position", "absolute")
+      linediv.css("left", x1)
+      linediv.css("top", y1)
+      linediv.css("width", x2 - x1)
+      linediv.css("height", y2 - y1)
+      linediv.css("z-index", 0)
+      $('body').append(linediv)
+
+    render: =>
+      $(@el).html(@template)
+      $(@el).find('.inner-question').attr('id', @model.get('id'))
+      @renderInnerContents()
       return $(@el)
      
    class TagView extends Backbone.View
@@ -112,195 +159,15 @@ $ ->
   class StreamView extends Backbone.View
     initialize: ->
       @streamviewRendered = false
+      @topic_creator_showing = false
       @selectedStory = '#story-part1'
       postCollection.bind('add', @addOne, this)
       postCollection.bind('reset', @addAll, this)
       postCollection.bind('all', @render, this)
       tagCollection.bind('add', @addTag, this)
       tagCollection.bind('reset', @addAllTags, this)
-      #postCollection.fetch()
-
-    #FIXME: remove these next few functions after the demo.
-    setStoryPart: (storyPart) ->
-      $(@selectedStory).css('border-style', 'none')
-      $(@selectedStory).css('background', 'none')
-      @selectedStory = storyPart
-      $(@selectedStory).css('border', '2px solid blue')
-      $(@selectedStory).css('background', '#9999FF')
-      $(@selectedStory).css('-webkit-border-radius', '8px')
-      $(@selectedStory).css(' -moz-border-radius', '8px')
-      $(@selectedStory).css('border-radius', '8px')
-      $('#story').animate({"marginTop": "#{$(@selectedStory).position().top * -1}px"}, "fast")
-    
-    storyPart2Done: =>
-      @setStoryPart('#story-part3')
-      $('.ui-omnipost:first #ui-omniPostSubmit').click()
-      $('.progress-indicator:first').css('width', '90%')
-      post = postCollection.get(2)
-      post.set("hidden", false)
-      pv = new PostView({model:post})
-      $('.post:first #response1').append(pv.render())
-      $('.post:first #response1 .ui-tagbox:eq(1)').qtip({
-                 content: 'Click here next.',
-                 position: {
-                    corner: {
-                       tooltip: 'rightMiddle',
-                       target: 'leftMiddle'
-                    }
-                 },
-                 show: {
-                    when: false,
-                    ready: true 
-                 },
-                 hide: false,
-                 style: {
-                    border: {
-                       width: 5,
-                       radius: 10
-                    },
-                    padding: 10, 
-                    textAlign: 'center',
-                    tip: true, 
-                    'font-size': 16,
-                    name: 'cream'
-                 }
-      });        
-      $('.post:first #response1 .ui-tagbox:eq(1)').click( =>
-        unless @candyTagClicked
-          $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').text('Reggies candy bar ')
-          $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(@storyPart3Done)
-          @candyTagClicked = true
-      )
-
-    storyPart3Done: =>
-      @setStoryPart('#story-part4')
-      
-      e = jQuery.Event('keydown')
-      e.keyCode = 13
-      $('.post:first #response1 .ui-tagbox:eq(1) .ui-tagtext').trigger(e)
-      $('.post:first #response1 .ui-tagbox:eq(1)').qtip("hide")
-      $('.post:first #response1 .ui-omnipost:eq(1)').qtip({
-                 content: 'Now click here',
-                 position: {
-                    corner: {
-                       tooltip: 'rightMiddle',
-                       target: 'leftMiddle'
-                    }
-                 },
-                 show: {
-                    when: false,
-                    ready: true 
-                 },
-                 hide: false,
-                 style: {
-                    border: {
-                       width: 5,
-                       radius: 10
-                    },
-                    padding: 10, 
-                    textAlign: 'center',
-                    tip: true, 
-                    'font-size': 16,
-                    name: 'cream'
-                 }
-              });
-      $('.post:first #response1 .ui-omnipost:eq(1)').focusin( =>
-        event.stopPropagation()
-        $('.post:first #response1 .ui-omnipost:eq(1) #ui-omniPostVideoAttach').click()
-        $('.post:first #response1 .ui-omnipost:eq(1) .ui-videobox .ui-omniPostLink').val('http://www.youtube.com/watch?v=2F_PxO1QJ1c')
-        $('.post:first #response1 .ui-omnipost:eq(1) .ui-videobox .ui-omniPostLink').textareatypewriter(@storyPart4Done)
-      )
-
-    storyPart4Done: =>
-      unless @story4Done
-        $('#indicator-text').html('Unlock 3 posts')
-        $('.progress-indicator:first').css('width', '30%')
-        @setStoryPart('#story-part5')
-        for i in [3,4]
-          post = postCollection.get(i)
-          post.set("hidden", false)
-          pv = new PostView({model:post})
-          $('.post:first #response1 #response2').append(pv.render())
-        $('.post:first #response1 .ui-omnipost:eq(1)').qtip("destroy")
-        $('.post:first #response1 .ui-omnipost:eq(1)').remove()
-        $('#notification-counter').qtip({
-                   content: 'Now click here',
-                   position: {
-                      corner: {
-                         tooltip: 'rightMiddle',
-                         target: 'leftMiddle'
-                      }
-                   },
-                   show: {
-                      when: false,
-                      ready: true 
-                   },
-                   hide: false,
-                   style: {
-                      border: {
-                         width: 5,
-                         radius: 10
-                      },
-                      padding: 10, 
-                      textAlign: 'center',
-                      tip: true, 
-                      'font-size': 16,
-                      name: 'cream'
-                   }
-                });
-        $('#notification-counter').click( =>        
-          $('#notification-counter').qtip("hide")
-          unless @notificationClicked
-            $('.post:first #response2 .ui-tagbox:eq(1)').qtip({
-                     content: 'Now click here',
-                     position: {
-                        corner: {
-                           tooltip: 'rightMiddle',
-                           target: 'leftMiddle'
-                        }
-                     },
-                     show: {
-                        when: false,
-                        ready: true 
-                     },
-                     hide: false,
-                     style: {
-                        border: {
-                           width: 5,
-                           radius: 10
-                        },
-                        padding: 10, 
-                        textAlign: 'center',
-                        tip: true, 
-                        'font-size': 16,
-                        name: 'cream'
-                     }
-            });
-            @notificationClicked = true
-          $('.post:first #response2 .ui-tagbox:eq(1)').click( =>      
-            unless @historyCandyClicked    
-              $('.post:first #response2 .ui-tagbox:eq(1)').qtip("destroy")
-              $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').text('history of candy ')
-              $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(@storyPart5Done)
-            @historyCandyClicked = true
-          )
-        )
-        @story4Done = true
-    
-    storyPart5Done: =>
-      unless @story5Done
-        @setStoryPart('#story-part6')
-        e = jQuery.Event('keydown')
-        e.keyCode = 13
-        $('.post:first #response2 .ui-tagbox:eq(1) .ui-tagtext').trigger(e)
-        $('#indicator-text').html('Unlock 5 posts')
-        $('.progress-indicator:first').css('width', '80%')
-        for i in [5..7]
-          post = postCollection.get(i)
-          post.set("hidden", false)
-          pv = new PostView({model:post})
-          $('.post:first #response1').append(pv.render())
-        @story5Done = true
+      postCollection.fetch()
+      tagCollection.fetch()
 
     makePost: (content) ->
       p = new Post(
@@ -308,15 +175,30 @@ $ ->
       )
       postCollection.create(p)
 
-    addOne: (item) ->
+    addOne: (item) =>
       post = new PostView(model: item)
-      if document.getElementById('response' + item.get('parent'))
-        $('#response' + item.get('parent')).prepend(post.render())
-      else      
-        $('#assignments').append(post.render())
+      item.calcDepth()
+      if item.relativelevel == item.maxlevel
+        post.overflowing = true
+        item.relativelevel = 0
+        
+      if !document.getElementById(item.get('id'))
+        if document.getElementById('response' + item.get('parent')) and !post.overflowing
+          $('#response' + item.get('parent')).prepend(post.render())
+        else if post.overflowing
+          $('#overflowedresponses' + item.get('parent')).prepend(post.render())
+        else      
+          $('#assignments').prepend(post.render())
+      else
+        post.renderProgressBar()
+
+    addLines: (item) ->
+      if item.view.overflowing
+        item.view.renderLineToParent()
 
     addAll: ->
       postCollection.each(@addOne)
+      postCollection.each(@addLines)
     deleteOne: (item) ->
       item.destroy()
     deleteAll: ->
@@ -324,26 +206,24 @@ $ ->
 
     addTag: (item) ->
       tag = new TagView(model: item)
-      if item.get('title') == ',correct'
-        placeholder = 1        
-      else if item.get('title') == ',incorrect'
-        placeholder = 2       
-      else if document.getElementById('tags' + item.get('parent'))
-        $('#tags' + item.get('parent')).append(tag.render())
     
     addAllTags: ->
       tagCollection.each(@addTag)
     
-    showTopicCreator: (showing) =>
-      if showing
-        $('#post-question').show()
+    setTopicCreatorVisibility: =>
+      if @topic_creator_showing
+        $('#post-question').show() 
       else
         $('#post-question').hide()
 
+    showTopicCreator: (showing) =>
+      @topic_creator_showing = showing
+      @setTopicCreatorVisibility()
+        
     render: =>
       if !@streamviewRendered
         $('#post-question').omnipost({callback: @makePost, message: 'Post a topic...'})
-        
+        @setTopicCreatorVisibility()
         @scrollingDiv = $('#story')
         $('#collapsible-profile').hide()
         profileshowing = false
@@ -401,44 +281,29 @@ $ ->
 
         $('.ui-omnipost:first #ui-omniContainer').focusin( =>
           if !@omniboxTipInvisible                
-            #$('#ui-omniContainer').qtip('api').updateContent('Click the icons to add content such as links, images or video.')
             $('#ui-omniContainer').qtip("hide")
-            #@setStoryPart('#story-part2')
-            #$('.ui-omnipost:first #ui-omniPostText').val('I remember my mother cooking breakfast while my sister, my father, and I listened to the radio as FDR began another one of his fireside chats. It was september of 1939 and the topic was the European War.')
-            #$('.ui-omnipost:first #ui-omniPostText').textareatypewriter(@storyPart2Done)
           @omniboxTipInvisible = true
         )
 
-        $(document).click( ->
-          #unless event.target is $('.ui-omnipost:first')               
-          #  $('#ui-omniContainer').qtip('hide')
-        )  
         @streamviewRendered = true
         
   ###
   # Routes
   ###
   class Workspace extends Backbone.Router
-    routes:
-      '/:id' : 'assign'
-      ''  : 'normal'
+    routes:      
       'new' : 'new'
-    assign: (id) ->
-      postCollection.get(id)
-      postCollection.fetch()
+      ':id' : 'assign'
 
-    deleteOne: (item) ->
-      item.destroy()
+    assign: (id) ->
+      if id?
+        p = new Post({'id':id})
+        p.fetch(success:->
+          postCollection.add(p)
+        )
 
     new: ->
       App.showTopicCreator(true)
-      postCollection.fetch()
-      tagCollection.fetch()
-
-    normal: ->
-      App.showTopicCreator(false)
-      postCollection.fetch()
-      tagCollection.fetch()
 
   postCollection = new Posts()
   tagCollection = new Tags()

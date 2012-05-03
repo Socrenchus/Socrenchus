@@ -8,12 +8,11 @@
 
 #ui-downvote {
     height: 30px;
-    -moz-transform: scaleY(-1);
-    -webkit-backface-visibility: hidden;
-    -webkit-transform: scaleY(-1);
-    -o-transform: scaleY(-1);
-    transform: scaleY(-1);
-    filter: flipv; /*IE*/
+    /* for firefox, safari, chrome, etc. */
+    -webkit-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    /* for ie */
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2);
 }
 
 #ui-votetext {

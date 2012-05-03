@@ -29,6 +29,7 @@ srcWatchFolders = [
 
 srcFolders = [
     'main'
+    'main_test'
     'tagbox'
     'votebox'
     'omnipost'
