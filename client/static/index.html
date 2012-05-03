@@ -36,53 +36,9 @@
     </title>
   </head>
   <body>
-    <!--
-    <div id='story'>
-        <div id='story-part1'>
-          An old man wants to record his oral history and doesn't know where to begin...
-
-He finds NewCo (a custom instance of Socrenchus) and immediately sees questions designed to get him thinking about his past.
-
-He notices that there are questions the he can't yet see until he gains more points and is intrigued.
-
-He finds the seed question associated with his birth year and answers it.
-
-What is your earliest memory of WWII?
-        </div>
-        <div id='story-part2'>
-          The man eagerly answers:
-
-I remember my mother cooking breakfast while my sister, my father, and I listened to the radio as FDR began another one of his fireside chats. It was september of 1939 and the topic was the European War.
-        </div>
-        <div id='story-part3'>
-          He notices his points go up just from posting a response, and that he is now able to see another response.
-
-He watches the response and becomes nostalgic. The person recording their response to the WWII question mentioned his favorite candy bar that has since disappeared.
-
-The man notices that there is a box to tag other people's responses and immediately tags the video with the candy bar.
-        </div>
-        <div id='story-part4'>
-          When he does this, he can see that six other people tagged the video with the same candy bar and he gets points which he can see bringing him closer to unlocking more posts.
-
-In an effort to get those points, he replies to the video mentioning the candy bar, but this time he chooses to use the custom built NewCo video editing tool.
-
-After talking about his first experience with this candy bar, he goes into the memories it brings back for him. He is given tools to edit the video that have been developed by NewCo and integrated with the Socrenchus API and when he is done he posts the video along with a few tags he thinks fit.
-        </div>
-        <div id='story-part5'>
-          Some people vote up his video, others add tags that end up being the same as the ones he added. In time he notices notification of these events, informing him that he has earned points for them.
-
-Realizing that he is very close to unlocking more responses of the WWII question, he tags another post.
-        </div>
-        <div id='story-part6'>
-          Lo and behold, the new posts are unlocked, and this time they target his interests giving him a mix of less mature posts he can help with, to more mature posts he can explore responses to.
-
-He is hooked and spends the rest of his days exploring the past and making his contributions.
-        </div>
-    </div>
-    -->
     <div id='main'>
-      <div id='table-top'>
-        <a id='logout' name='logout' href='/login'></a>
+      <div id='table-top'>     
+        <a id='logout-link' href="{{ url }}">{{ url_linktext }}</a>
         <img onclick='location.href = "/" 'style="cursor:pointer"' id='logo' src='/images/logo.png'>
         <ul id='classes' class='ui-helper-reset'>
           <li class='ui-selected'>Your classes...</li>

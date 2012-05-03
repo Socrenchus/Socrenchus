@@ -85,6 +85,7 @@ h2 {
   margin-bottom:5px;
 }
 #header {
+  margin-top: -6px;
   width: 100%;
   height: 100px;
   background-image: url('/images/pillarbottommiddle.png');
@@ -96,8 +97,11 @@ h2 {
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=6);
 }
 
-#logout {
+#logout-link {
   float: right;
+  font-size: 16px;
+  margin-top: auto;
+  margin-bottom: auto;
   position: relative;
   color: #ebebeb;
   top: 0px;
@@ -154,7 +158,6 @@ h2 {
   height: 90px;
   position: relative;
   background: url('/images/parchmenttexture.png') repeat;
-  border-bottom: 2px solid #ebebeb;
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
   z-index: 100;
@@ -264,6 +267,10 @@ background-image: linear-gradient(top,white,#ECECEC);
 
 .submitArea {
   float: right;
+}
+
+.overflowed-posts {
+  margin-left: -36px;
 }
 
 #question-text, #assignment-text {
@@ -413,6 +420,8 @@ background-image: linear-gradient(top,white,#ECECEC);
 .inner-question {
   margin-left: 36px;
   margin-right: 44px;
+  position: relative;
+  z-index: 2;
 }
 
 #templates {

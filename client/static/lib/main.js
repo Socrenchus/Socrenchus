@@ -15,22 +15,52 @@
       function Post() {
         this.maketag = __bind(this.maketag, this);
         this.respond = __bind(this.respond, this);
+        this.calcDepth = __bind(this.calcDepth, this);
+        this.initialize = __bind(this.initialize, this);
         Post.__super__.constructor.apply(this, arguments);
       }
+
+      Post.prototype.urlRoot = '/posts';
+
+      Post.prototype.initialize = function() {
+        this.view = null;
+        this.level = 0;
+        this.maxlevel = 2;
+        this.relativelevel = 0;
+        return this.currentlevel = 0;
+      };
+
+      Post.prototype.calcDepth = function() {
+        var parentposts;
+        parentposts = postCollection.where({
+          id: this.get('parent')
+        });
+        if (parentposts.length > 0) {
+          this.level = parentposts[0].level + 1;
+          this.relativelevel = parentposts[0].relativelevel + 1;
+          return parentposts = postCollection.where({
+            id: parentposts[0].get('parent')
+          });
+        } else {
+          this.level = 0;
+          return this.relativelevel = 0;
+        }
+      };
 
       Post.prototype.respond = function(content) {
         var p;
         p = new Post({
-          parent: this.get('key'),
+          parent: this.get('id'),
           content: content
         });
-        return postCollection.create(p);
+        postCollection.create(p);
+        return postCollection.fetch();
       };
 
       Post.prototype.maketag = function(content) {
         var t;
         t = new Tag({
-          parent: this.get('key'),
+          parent: this.get('id'),
           title: content,
           xp: 0
         });
@@ -105,6 +135,11 @@
       __extends(PostView, _super);
 
       function PostView() {
+        this.render = __bind(this.render, this);
+        this.renderLineToParent = __bind(this.renderLineToParent, this);
+        this.renderInnerContents = __bind(this.renderInnerContents, this);
+        this.renderProgressBar = __bind(this.renderProgressBar, this);
+        this.renderPostContent = __bind(this.renderPostContent, this);
         PostView.__super__.constructor.apply(this, arguments);
       }
 
@@ -117,7 +152,10 @@
       PostView.prototype.events = function() {};
 
       PostView.prototype.initialize = function() {
-        return this.id = this.model.id;
+        this.id = this.model.id;
+        this.model.bind('change', this.render);
+        this.model.view = this;
+        return this.overflowing = false;
       };
 
       PostView.prototype.renderPostContent = function() {
@@ -130,30 +168,16 @@
         return $(this.el).find('.inner-question').append(postcontentdiv);
       };
 
-      PostView.prototype.render = function() {
-        var indicatortext, lockedpostsdiv, percent, progressbardiv, progressindicatordiv, responsediv, tagsdiv, textinline;
-        $(this.el).html(this.template);
-        $(this.el).find('.inner-question').votebox({
-          votesnum: this.model.get('score'),
-          callback: this.model.maketag
-        });
-        this.renderPostContent();
-        tagsdiv = $("<div id='tagscontainer'><div id = 'tags" + (this.model.get('key')) + "'></div></div>");
-        $(this.el).find('.inner-question').append(tagsdiv);
-        $(this.el).find('.inner-question').tagbox({
-          callback: this.model.maketag
-        });
-        $(this.el).find('.inner-question').omnipost({
-          callback: this.model.respond
-        });
-        responsediv = $("<div id = 'response" + (this.model.get('key')) + "'></div>");
-        $(this.el).find('.inner-question').append(responsediv);
-        if (this.model.get('parent') !== 0) {
+      PostView.prototype.renderProgressBar = function() {
+        var indicatortext, lockedpostsdiv, percent, progressbardiv, progressindicatordiv, textinline;
+        if (postCollection.where({
+          parent: this.id
+        }).length > 0) {
           lockedpostsdiv = $("<div class='locked-posts'></div>");
           progressbardiv = $("<div class='progressbar'></div>");
-          percent = 10;
+          percent = this.model.get('progress') * 100;
           textinline = true;
-          indicatortext = $('<p id="indicator-text">Unlock ' + Math.floor(1) + ' post</p>');
+          indicatortext = $('<p id="indicator-text">Unlock More Posts</p>');
           if (percent < 100.0 / 350.0 * 100) textinline = false;
           if (textinline) {
             progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
@@ -165,8 +189,57 @@
             progressbardiv.append(indicatortext);
           }
           lockedpostsdiv.append(progressbardiv);
-          $(this.el).find('.inner-question').append(lockedpostsdiv);
+          return $(this.el).find('.inner-question').append(lockedpostsdiv);
         }
+      };
+
+      PostView.prototype.renderInnerContents = function() {
+        var overflowedresponsediv, responsediv;
+        overflowedresponsediv = $("<div id = 'overflowedresponses" + (this.model.get('id')) + "'></div>");
+        overflowedresponsediv.attr('class', 'overflowed-posts');
+        $(this.el).find('.inner-question').append(overflowedresponsediv);
+        $(this.el).find('.inner-question').votebox({
+          votesnum: this.model.get('score'),
+          callback: this.model.maketag
+        });
+        this.renderPostContent();
+        $(this.el).find('.inner-question').tagbox({
+          callback: this.model.maketag
+        });
+        this.renderProgressBar();
+        if (!(postCollection.where({
+          parent: this.id
+        }).length > 0)) {
+          $(this.el).find('.inner-question').omnipost({
+            removeOnSubmit: true,
+            callback: this.model.respond
+          });
+        }
+        responsediv = $("<div id = 'response" + (this.model.get('id')) + "'></div>");
+        responsediv.css('border-left', 'dotted 1px black');
+        return $(this.el).find('.inner-question').append(responsediv);
+      };
+
+      PostView.prototype.renderLineToParent = function() {
+        var linediv, x1, x2, y1, y2;
+        x1 = $(this.el).find('.inner-question').offset().left;
+        y1 = $(this.el).find('.inner-question').offset().top + 50;
+        x2 = $('#' + this.model.get('parent')).offset().left + $('#' + this.model.get('parent')).width();
+        y2 = $('#' + this.model.get('parent')).offset().top + $('#' + this.model.get('parent')).height() + 50;
+        linediv = $("<img src='/images/diagonalLine.png'></img>");
+        linediv.css("position", "absolute");
+        linediv.css("left", x1);
+        linediv.css("top", y1);
+        linediv.css("width", x2 - x1);
+        linediv.css("height", y2 - y1);
+        linediv.css("z-index", 0);
+        return $('body').append(linediv);
+      };
+
+      PostView.prototype.render = function() {
+        $(this.el).html(this.template);
+        $(this.el).find('.inner-question').attr('id', this.model.get('id'));
+        this.renderInnerContents();
         return $(this.el);
       };
 
@@ -212,229 +285,22 @@
       function StreamView() {
         this.render = __bind(this.render, this);
         this.showTopicCreator = __bind(this.showTopicCreator, this);
-        this.storyPart5Done = __bind(this.storyPart5Done, this);
-        this.storyPart4Done = __bind(this.storyPart4Done, this);
-        this.storyPart3Done = __bind(this.storyPart3Done, this);
-        this.storyPart2Done = __bind(this.storyPart2Done, this);
+        this.setTopicCreatorVisibility = __bind(this.setTopicCreatorVisibility, this);
+        this.addOne = __bind(this.addOne, this);
         StreamView.__super__.constructor.apply(this, arguments);
       }
 
       StreamView.prototype.initialize = function() {
         this.streamviewRendered = false;
+        this.topic_creator_showing = false;
         this.selectedStory = '#story-part1';
         postCollection.bind('add', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
         postCollection.bind('all', this.render, this);
         tagCollection.bind('add', this.addTag, this);
-        return tagCollection.bind('reset', this.addAllTags, this);
-      };
-
-      StreamView.prototype.setStoryPart = function(storyPart) {
-        $(this.selectedStory).css('border-style', 'none');
-        $(this.selectedStory).css('background', 'none');
-        this.selectedStory = storyPart;
-        $(this.selectedStory).css('border', '2px solid blue');
-        $(this.selectedStory).css('background', '#9999FF');
-        $(this.selectedStory).css('-webkit-border-radius', '8px');
-        $(this.selectedStory).css(' -moz-border-radius', '8px');
-        $(this.selectedStory).css('border-radius', '8px');
-        return $('#story').animate({
-          "marginTop": "" + ($(this.selectedStory).position().top * -1) + "px"
-        }, "fast");
-      };
-
-      StreamView.prototype.storyPart2Done = function() {
-        var post, pv,
-          _this = this;
-        this.setStoryPart('#story-part3');
-        $('.ui-omnipost:first #ui-omniPostSubmit').click();
-        $('.progress-indicator:first').css('width', '90%');
-        post = postCollection.get(2);
-        post.set("hidden", false);
-        pv = new PostView({
-          model: post
-        });
-        $('.post:first #response1').append(pv.render());
-        $('.post:first #response1 .ui-tagbox:eq(1)').qtip({
-          content: 'Click here next.',
-          position: {
-            corner: {
-              tooltip: 'rightMiddle',
-              target: 'leftMiddle'
-            }
-          },
-          show: {
-            when: false,
-            ready: true
-          },
-          hide: false,
-          style: {
-            border: {
-              width: 5,
-              radius: 10
-            },
-            padding: 10,
-            textAlign: 'center',
-            tip: true,
-            'font-size': 16,
-            name: 'cream'
-          }
-        });
-        return $('.post:first #response1 .ui-tagbox:eq(1)').click(function() {
-          if (!_this.candyTagClicked) {
-            $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').text('Reggies candy bar ');
-            $('.post:first #response1 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(_this.storyPart3Done);
-            return _this.candyTagClicked = true;
-          }
-        });
-      };
-
-      StreamView.prototype.storyPart3Done = function() {
-        var _this = this;
-        this.setStoryPart('#story-part4');
-        e = jQuery.Event('keydown');
-        e.keyCode = 13;
-        $('.post:first #response1 .ui-tagbox:eq(1) .ui-tagtext').trigger(e);
-        $('.post:first #response1 .ui-tagbox:eq(1)').qtip("hide");
-        $('.post:first #response1 .ui-omnipost:eq(1)').qtip({
-          content: 'Now click here',
-          position: {
-            corner: {
-              tooltip: 'rightMiddle',
-              target: 'leftMiddle'
-            }
-          },
-          show: {
-            when: false,
-            ready: true
-          },
-          hide: false,
-          style: {
-            border: {
-              width: 5,
-              radius: 10
-            },
-            padding: 10,
-            textAlign: 'center',
-            tip: true,
-            'font-size': 16,
-            name: 'cream'
-          }
-        });
-        return $('.post:first #response1 .ui-omnipost:eq(1)').focusin(function() {
-          event.stopPropagation();
-          $('.post:first #response1 .ui-omnipost:eq(1) #ui-omniPostVideoAttach').click();
-          $('.post:first #response1 .ui-omnipost:eq(1) .ui-videobox .ui-omniPostLink').val('http://www.youtube.com/watch?v=2F_PxO1QJ1c');
-          return $('.post:first #response1 .ui-omnipost:eq(1) .ui-videobox .ui-omniPostLink').textareatypewriter(_this.storyPart4Done);
-        });
-      };
-
-      StreamView.prototype.storyPart4Done = function() {
-        var i, post, pv, _j, _len2, _ref2,
-          _this = this;
-        if (!this.story4Done) {
-          $('#indicator-text').html('Unlock 3 posts');
-          $('.progress-indicator:first').css('width', '30%');
-          this.setStoryPart('#story-part5');
-          _ref2 = [3, 4];
-          for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-            i = _ref2[_j];
-            post = postCollection.get(i);
-            post.set("hidden", false);
-            pv = new PostView({
-              model: post
-            });
-            $('.post:first #response1 #response2').append(pv.render());
-          }
-          $('.post:first #response1 .ui-omnipost:eq(1)').qtip("destroy");
-          $('.post:first #response1 .ui-omnipost:eq(1)').remove();
-          $('#notification-counter').qtip({
-            content: 'Now click here',
-            position: {
-              corner: {
-                tooltip: 'rightMiddle',
-                target: 'leftMiddle'
-              }
-            },
-            show: {
-              when: false,
-              ready: true
-            },
-            hide: false,
-            style: {
-              border: {
-                width: 5,
-                radius: 10
-              },
-              padding: 10,
-              textAlign: 'center',
-              tip: true,
-              'font-size': 16,
-              name: 'cream'
-            }
-          });
-          $('#notification-counter').click(function() {
-            $('#notification-counter').qtip("hide");
-            if (!_this.notificationClicked) {
-              $('.post:first #response2 .ui-tagbox:eq(1)').qtip({
-                content: 'Now click here',
-                position: {
-                  corner: {
-                    tooltip: 'rightMiddle',
-                    target: 'leftMiddle'
-                  }
-                },
-                show: {
-                  when: false,
-                  ready: true
-                },
-                hide: false,
-                style: {
-                  border: {
-                    width: 5,
-                    radius: 10
-                  },
-                  padding: 10,
-                  textAlign: 'center',
-                  tip: true,
-                  'font-size': 16,
-                  name: 'cream'
-                }
-              });
-              _this.notificationClicked = true;
-            }
-            return $('.post:first #response2 .ui-tagbox:eq(1)').click(function() {
-              if (!_this.historyCandyClicked) {
-                $('.post:first #response2 .ui-tagbox:eq(1)').qtip("destroy");
-                $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').text('history of candy ');
-                $('.post:first #response2 .ui-tagbox:eq(1) .ui-individualtag:first').typewriter(_this.storyPart5Done);
-              }
-              return _this.historyCandyClicked = true;
-            });
-          });
-          return this.story4Done = true;
-        }
-      };
-
-      StreamView.prototype.storyPart5Done = function() {
-        var i, post, pv;
-        if (!this.story5Done) {
-          this.setStoryPart('#story-part6');
-          e = jQuery.Event('keydown');
-          e.keyCode = 13;
-          $('.post:first #response2 .ui-tagbox:eq(1) .ui-tagtext').trigger(e);
-          $('#indicator-text').html('Unlock 5 posts');
-          $('.progress-indicator:first').css('width', '80%');
-          for (i = 5; i <= 7; i++) {
-            post = postCollection.get(i);
-            post.set("hidden", false);
-            pv = new PostView({
-              model: post
-            });
-            $('.post:first #response1').append(pv.render());
-          }
-          return this.story5Done = true;
-        }
+        tagCollection.bind('reset', this.addAllTags, this);
+        postCollection.fetch();
+        return tagCollection.fetch();
       };
 
       StreamView.prototype.makePost = function(content) {
@@ -450,15 +316,31 @@
         post = new PostView({
           model: item
         });
-        if (document.getElementById('response' + item.get('parent'))) {
-          return $('#response' + item.get('parent')).prepend(post.render());
+        item.calcDepth();
+        if (item.relativelevel === item.maxlevel) {
+          post.overflowing = true;
+          item.relativelevel = 0;
+        }
+        if (!document.getElementById(item.get('id'))) {
+          if (document.getElementById('response' + item.get('parent')) && !post.overflowing) {
+            return $('#response' + item.get('parent')).prepend(post.render());
+          } else if (post.overflowing) {
+            return $('#overflowedresponses' + item.get('parent')).prepend(post.render());
+          } else {
+            return $('#assignments').prepend(post.render());
+          }
         } else {
-          return $('#assignments').append(post.render());
+          return post.renderProgressBar();
         }
       };
 
+      StreamView.prototype.addLines = function(item) {
+        if (item.view.overflowing) return item.view.renderLineToParent();
+      };
+
       StreamView.prototype.addAll = function() {
-        return postCollection.each(this.addOne);
+        postCollection.each(this.addOne);
+        return postCollection.each(this.addLines);
       };
 
       StreamView.prototype.deleteOne = function(item) {
@@ -470,29 +352,27 @@
       };
 
       StreamView.prototype.addTag = function(item) {
-        var placeholder, tag;
-        tag = new TagView({
+        var tag;
+        return tag = new TagView({
           model: item
         });
-        if (item.get('title') === ',correct') {
-          return placeholder = 1;
-        } else if (item.get('title') === ',incorrect') {
-          return placeholder = 2;
-        } else if (document.getElementById('tags' + item.get('parent'))) {
-          return $('#tags' + item.get('parent')).append(tag.render());
-        }
       };
 
       StreamView.prototype.addAllTags = function() {
         return tagCollection.each(this.addTag);
       };
 
-      StreamView.prototype.showTopicCreator = function(showing) {
-        if (showing) {
+      StreamView.prototype.setTopicCreatorVisibility = function() {
+        if (this.topic_creator_showing) {
           return $('#post-question').show();
         } else {
           return $('#post-question').hide();
         }
+      };
+
+      StreamView.prototype.showTopicCreator = function(showing) {
+        this.topic_creator_showing = showing;
+        return this.setTopicCreatorVisibility();
       };
 
       StreamView.prototype.render = function() {
@@ -503,6 +383,7 @@
             callback: this.makePost,
             message: 'Post a topic...'
           });
+          this.setTopicCreatorVisibility();
           this.scrollingDiv = $('#story');
           $('#collapsible-profile').hide();
           profileshowing = false;
@@ -555,7 +436,6 @@
             if (!_this.omniboxTipInvisible) $('#ui-omniContainer').qtip("hide");
             return _this.omniboxTipInvisible = true;
           });
-          $(document).click(function() {});
           return this.streamviewRendered = true;
         }
       };
@@ -575,30 +455,26 @@
       }
 
       Workspace.prototype.routes = {
-        '/:id': 'assign',
-        '': 'normal',
-        'new': 'new'
+        'new': 'new',
+        ':id': 'assign'
       };
 
       Workspace.prototype.assign = function(id) {
-        postCollection.get(id);
-        return postCollection.fetch();
-      };
-
-      Workspace.prototype.deleteOne = function(item) {
-        return item.destroy();
+        var p;
+        if (id != null) {
+          p = new Post({
+            'id': id
+          });
+          return p.fetch({
+            success: function() {
+              return postCollection.add(p);
+            }
+          });
+        }
       };
 
       Workspace.prototype["new"] = function() {
-        App.showTopicCreator(true);
-        postCollection.fetch();
-        return tagCollection.fetch();
-      };
-
-      Workspace.prototype.normal = function() {
-        App.showTopicCreator(false);
-        postCollection.fetch();
-        return tagCollection.fetch();
+        return App.showTopicCreator(true);
       };
 
       return Workspace;
