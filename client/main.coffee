@@ -137,8 +137,6 @@ $ ->
       @fullPostDiv = $("<div id=#{@model.get('id')}></div>")
       $(@el).find('.inner-question').append(@fullPostDiv)
       @renderInnerContents()
-      #if @overflowing
-        #$(@el).find('.inner-question').hide()
       return $(@el)
      
    class TagView extends Backbone.View
