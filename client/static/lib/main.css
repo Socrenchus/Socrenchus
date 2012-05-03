@@ -97,8 +97,11 @@ h2 {
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=6);
 }
 
-#logout {
+#logout-link {
   float: right;
+  font-size: 16px;
+  margin-top: auto;
+  margin-bottom: auto;
   position: relative;
   color: #ebebeb;
   top: 0px;

@@ -37,8 +37,8 @@
   </head>
   <body>
     <div id='main'>
-      <div id='table-top'>
-        <a id='logout' name='logout' href='/login'></a>
+      <div id='table-top'>     
+        <a id='logout-link' href="{{ url }}">{{ url_linktext }}</a>
         <img onclick='location.href = "/" 'style="cursor:pointer"' id='logo' src='/images/logo.png'>
         <ul id='classes' class='ui-helper-reset'>
           <li class='ui-selected'>Your classes...</li>
@@ -99,6 +99,5 @@
     <script type='text/javascript' src='/lib/main.js'>
     <script type="text/javascript">
     </script>
-    <a href="{{ url }}">{{ url_linktext }}</a>
   </body>
 </html>
