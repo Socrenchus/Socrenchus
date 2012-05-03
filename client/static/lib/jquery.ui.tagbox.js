@@ -54,7 +54,6 @@
           this.tagtext.focusout(function() {
             if (_this.alltags.length === 0 && _this.currenttag.text() === '') {
               _this.message.show();
-              _this.submit.hide();
             }
             _this.state = _this._states.none;
             return $(_this.element).trigger('unfocusingTagBox', _this.state);
@@ -69,7 +68,6 @@
             if (!_this.editingoldtag) {
               _this.message.hide();
               _this.currenttag.focus();
-              _this.submit.show();
               _this.state = _this._states.typing;
               return $(_this.element).trigger('typingTag', _this.state);
             }
