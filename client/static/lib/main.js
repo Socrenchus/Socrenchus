@@ -285,12 +285,14 @@
       function StreamView() {
         this.render = __bind(this.render, this);
         this.showTopicCreator = __bind(this.showTopicCreator, this);
+        this.setTopicCreatorVisibility = __bind(this.setTopicCreatorVisibility, this);
         this.addOne = __bind(this.addOne, this);
         StreamView.__super__.constructor.apply(this, arguments);
       }
 
       StreamView.prototype.initialize = function() {
         this.streamviewRendered = false;
+        this.topic_creator_showing = false;
         this.selectedStory = '#story-part1';
         postCollection.bind('add', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
@@ -360,12 +362,17 @@
         return tagCollection.each(this.addTag);
       };
 
-      StreamView.prototype.showTopicCreator = function(showing) {
-        if (showing) {
+      StreamView.prototype.setTopicCreatorVisibility = function() {
+        if (this.topic_creator_showing) {
           return $('#post-question').show();
         } else {
           return $('#post-question').hide();
         }
+      };
+
+      StreamView.prototype.showTopicCreator = function(showing) {
+        this.topic_creator_showing = showing;
+        return this.setTopicCreatorVisibility();
       };
 
       StreamView.prototype.render = function() {
@@ -376,6 +383,7 @@
             callback: this.makePost,
             message: 'Post a topic...'
           });
+          this.setTopicCreatorVisibility();
           this.scrollingDiv = $('#story');
           $('#collapsible-profile').hide();
           profileshowing = false;

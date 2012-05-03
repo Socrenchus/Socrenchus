@@ -210,16 +210,20 @@ $ ->
     addAllTags: ->
       tagCollection.each(@addTag)
     
+    setTopicCreatorVisibility: =>
+      if @topic_creator_showing
+        $('#post-question').show() 
+      else
+        $('#post-question').hide()
+
     showTopicCreator: (showing) =>
       @topic_creator_showing = showing
+      @setTopicCreatorVisibility()
         
     render: =>
       if !@streamviewRendered
         $('#post-question').omnipost({callback: @makePost, message: 'Post a topic...'})
-        if @topic_creator_showing
-          $('#post-question').show() 
-        else
-          $('#post-question').hide()
+        @setTopicCreatorVisibility()
         @scrollingDiv = $('#story')
         $('#collapsible-profile').hide()
         profileshowing = false
