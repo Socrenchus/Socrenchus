@@ -347,17 +347,10 @@
       };
 
       StreamView.prototype.addTag = function(item) {
-        var placeholder, tag;
-        tag = new TagView({
+        var tag;
+        return tag = new TagView({
           model: item
         });
-        if (item.get('title') === ',correct') {
-          return placeholder = 1;
-        } else if (item.get('title') === ',incorrect') {
-          return placeholder = 2;
-        } else if (document.getElementById('tags' + item.get('parent')) && item.get('title') !== ',assignment') {
-          return $('#tags' + item.get('parent')).append(tag.render());
-        }
       };
 
       StreamView.prototype.addAllTags = function() {

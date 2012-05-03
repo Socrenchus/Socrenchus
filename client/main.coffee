@@ -204,13 +204,6 @@ $ ->
 
     addTag: (item) ->
       tag = new TagView(model: item)
-      #TODO add something when the post has been marked correct or incorrect
-      if item.get('title') == ',correct'
-        placeholder = 1        
-      else if item.get('title') == ',incorrect'
-        placeholder = 2
-      else if document.getElementById('tags' + item.get('parent')) and item.get('title') != ',assignment'
-        $('#tags' + item.get('parent')).append(tag.render())
     
     addAllTags: ->
       tagCollection.each(@addTag)
