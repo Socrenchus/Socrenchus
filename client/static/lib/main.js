@@ -169,32 +169,24 @@
       };
 
       PostView.prototype.renderProgressBar = function() {
-        var indicatortext, lockedpostsdiv, percent, progressbardiv, progressindicatordiv, textinline;
+        var lockedpostsdiv, percent, progressbardiv, progressindicatordiv;
         if (postCollection.where({
           parent: this.id
         }).length > 0) {
-          lockedpostsdiv = $("<div class='locked-posts'></div>");
-          progressbardiv = $("<div class='progressbar'></div>");
-          percent = this.model.get('progress') * 100;
-          textinline = true;
-          indicatortext = $('<p id="indicator-text">Unlock More Posts</p>');
-          if (percent < 100.0 / 350.0 * 100) textinline = false;
-          if (textinline) {
-            progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
-            progressindicatordiv.append(indicatortext);
-            progressbardiv.append(progressindicatordiv);
-          } else {
+          if ($('#' + this.model.get('id')).find('.locked-posts').length === 0) {
+            lockedpostsdiv = $("<div class='locked-posts'></div>");
+            progressbardiv = $("<div class='progressbar'></div>");
+            percent = this.model.get('progress') * 100;
             progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
             progressbardiv.append(progressindicatordiv);
-            progressbardiv.append(indicatortext);
+            lockedpostsdiv.append(progressbardiv);
+            return $('#' + this.model.get('id') + ' .progress-bar').append(lockedpostsdiv);
           }
-          lockedpostsdiv.append(progressbardiv);
-          return $(this.el).find('.inner-question').append(lockedpostsdiv);
         }
       };
 
       PostView.prototype.renderInnerContents = function() {
-        var overflowedresponsediv, responsediv;
+        var overflowedresponsediv, progressdiv, responsediv;
         overflowedresponsediv = $("<div id = 'overflowedresponses" + (this.model.get('id')) + "'></div>");
         overflowedresponsediv.attr('class', 'overflowed-posts');
         $(this.el).find('.inner-question').append(overflowedresponsediv);
@@ -206,7 +198,6 @@
         $(this.el).find('.inner-question').tagbox({
           callback: this.model.maketag
         });
-        this.renderProgressBar();
         if (!(postCollection.where({
           parent: this.id
         }).length > 0)) {
@@ -215,6 +206,8 @@
             callback: this.model.respond
           });
         }
+        progressdiv = $("<div class = 'progress-bar'></div>");
+        $(this.el).find('.inner-question').append(progressdiv);
         responsediv = $("<div id = 'response" + (this.model.get('id')) + "'></div>");
         responsediv.css('border-left', 'dotted 1px black');
         return $(this.el).find('.inner-question').append(responsediv);
@@ -222,18 +215,20 @@
 
       PostView.prototype.renderLineToParent = function() {
         var linediv, x1, x2, y1, y2;
-        x1 = $(this.el).find('.inner-question').offset().left;
-        y1 = $(this.el).find('.inner-question').offset().top + 50;
-        x2 = $('#' + this.model.get('parent')).offset().left + $('#' + this.model.get('parent')).width();
-        y2 = $('#' + this.model.get('parent')).offset().top + $('#' + this.model.get('parent')).height() + 50;
-        linediv = $("<img src='/images/diagonalLine.png'></img>");
-        linediv.css("position", "absolute");
-        linediv.css("left", x1);
-        linediv.css("top", y1);
-        linediv.css("width", x2 - x1);
-        linediv.css("height", y2 - y1);
-        linediv.css("z-index", 0);
-        return $('body').append(linediv);
+        if ($('#line' + this.model.get('id')).length === 0) {
+          x1 = $('#' + this.model.get('id')).offset().left;
+          y1 = $('#' + this.model.get('id')).offset().top;
+          x2 = $('#' + this.model.get('parent')).offset().left + $('#' + this.model.get('parent')).width();
+          y2 = $('#' + this.model.get('parent')).offset().top + $('#' + this.model.get('parent')).height();
+          linediv = $("<img id ='line" + (this.model.get("id")) + "' src='/images/diagonalLine.png'></img>");
+          linediv.css("position", "absolute");
+          linediv.css("left", x1);
+          linediv.css("top", y1);
+          linediv.css("width", x2 - x1);
+          linediv.css("height", y2 - y1);
+          linediv.css("z-index", 0);
+          return $('body').append(linediv);
+        }
       };
 
       PostView.prototype.render = function() {
@@ -323,15 +318,14 @@
         }
         if (!document.getElementById(item.get('id'))) {
           if (document.getElementById('response' + item.get('parent')) && !post.overflowing) {
-            return $('#response' + item.get('parent')).prepend(post.render());
+            $('#response' + item.get('parent')).prepend(post.render());
           } else if (post.overflowing) {
-            return $('#overflowedresponses' + item.get('parent')).prepend(post.render());
+            $('#overflowedresponses' + item.get('parent')).prepend(post.render());
           } else {
-            return $('#assignments').prepend(post.render());
+            $('#assignments').prepend(post.render());
           }
-        } else {
-          return post.renderProgressBar();
         }
+        return post.renderProgressBar();
       };
 
       StreamView.prototype.addLines = function(item) {

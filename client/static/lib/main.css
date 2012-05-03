@@ -330,7 +330,7 @@ background-image: linear-gradient(top,white,#ECECEC);
 .progressbar {
   margin-top: 10px;
   position: relative;
-  height: 35px;
+  height: 10px;
   padding-right: 2px;
   background-color: #abb2bc;
   border-radius: 35px;
@@ -361,7 +361,7 @@ background-image: linear-gradient(top,white,#ECECEC);
   position: relative;
   display: block;
   overflow: hidden;
-  height: 33px;
+  height: 8px;
   -moz-border-radius: 35px;
   -webkit-border-radius: 35px;
   border-radius: 35px;
