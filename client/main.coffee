@@ -37,7 +37,6 @@ $ ->
         xp: 0
       )
       tagCollection.create(t)
-      
     
   class Posts extends Backbone.Collection
     model: Post
@@ -85,23 +84,14 @@ $ ->
     
     renderProgressBar: => 
       if postCollection.where({parent: @id}).length > 0
-        lockedpostsdiv = $("<div class='locked-posts'></div>")
-        progressbardiv = $("<div class='progressbar'></div>")
-        percent = @model.get('progress') * 100
-        textinline = true
-        indicatortext = $('<p id="indicator-text">Unlock More Posts</p>')
-        if percent < 100.0/350.0 * 100
-          textinline = false
-        if textinline
-          progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")
-          progressindicatordiv.append(indicatortext)          
-          progressbardiv.append(progressindicatordiv)
-        else
+        if $('#' + @model.get('id')).find('.locked-posts').length == 0
+          lockedpostsdiv = $("<div class='locked-posts'></div>")
+          progressbardiv = $("<div class='progressbar'></div>")
+          percent = @model.get('progress') * 100
           progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")          
-          progressbardiv.append(progressindicatordiv)
-          progressbardiv.append(indicatortext)            
-        lockedpostsdiv.append(progressbardiv)
-        $(@el).find('.inner-question').append(lockedpostsdiv)
+          progressbardiv.append(progressindicatordiv)   
+          lockedpostsdiv.append(progressbardiv)
+          $('#' + @model.get('id') + ' .progress-bar').append(lockedpostsdiv)
 
     renderInnerContents: =>
       overflowedresponsediv = $("<div id = 'overflowedresponses#{@model.get('id')}'></div>")
@@ -110,29 +100,31 @@ $ ->
       $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()
       $(@el).find('.inner-question').tagbox({callback: @model.maketag})
-      @renderProgressBar()
       unless postCollection.where({parent: @id}).length > 0
         $(@el).find('.inner-question').omnipost({removeOnSubmit: true, callback: @model.respond})
+      progressdiv = $("<div class = 'progress-bar'></div>")
+      $(@el).find('.inner-question').append(progressdiv)
       responsediv = $("<div id = 'response#{@model.get('id')}'></div>")
       responsediv.css('border-left', 'dotted 1px black')
       $(@el).find('.inner-question').append(responsediv)
 
     renderLineToParent: =>
-      x1 = $(@el).find('.inner-question').offset().left
-      #FIXME: figure out why the top is not quite correct
-      y1 = $(@el).find('.inner-question').offset().top + 50
-      x2 = $('#' + @model.get('parent')).offset().left + $('#' + @model.get('parent')).width()
-      #FIXME: figure out why the top is not quite correct
-      y2 = $('#'+@model.get('parent')).offset().top + 
-      $('#'+@model.get('parent')).height() + 50
-      linediv = $("<img src='/images/diagonalLine.png'></img>")
-      linediv.css("position", "absolute")
-      linediv.css("left", x1)
-      linediv.css("top", y1)
-      linediv.css("width", x2 - x1)
-      linediv.css("height", y2 - y1)
-      linediv.css("z-index", 0)
-      $('body').append(linediv)
+      if $('#line' + @model.get('id')).length == 0
+        x1 = $('#'+@model.get('id')).offset().left
+        #FIXME: figure out why the top is not quite correct
+        y1 = $('#'+@model.get('id')).offset().top
+        x2 = $('#' + @model.get('parent')).offset().left + $('#' + @model.get('parent')).width()
+        #FIXME: figure out why the top is not quite correct
+        y2 = $('#'+@model.get('parent')).offset().top + 
+        $('#'+@model.get('parent')).height()
+        linediv = $("<img id ='line#{@model.get("id")}' src='/images/diagonalLine.png'></img>")
+        linediv.css("position", "absolute")
+        linediv.css("left", x1)
+        linediv.css("top", y1)
+        linediv.css("width", x2 - x1)
+        linediv.css("height", y2 - y1)
+        linediv.css("z-index", 0)
+        $('body').append(linediv)
 
     render: =>
       $(@el).html(@template)
@@ -181,7 +173,7 @@ $ ->
       if item.relativelevel == item.maxlevel
         post.overflowing = true
         item.relativelevel = 0
-        
+      
       if !document.getElementById(item.get('id'))
         if document.getElementById('response' + item.get('parent')) and !post.overflowing
           $('#response' + item.get('parent')).prepend(post.render())
@@ -189,9 +181,7 @@ $ ->
           $('#overflowedresponses' + item.get('parent')).prepend(post.render())
         else      
           $('#assignments').prepend(post.render())
-      else
-        post.renderProgressBar()
-
+      post.renderProgressBar()
     addLines: (item) ->
       if item.view.overflowing
         item.view.renderLineToParent()
