@@ -104,6 +104,9 @@ $ ->
         $(@el).find('.inner-question').append(lockedpostsdiv)
 
     renderInnerContents: =>
+      overflowedresponsediv = $("<div id = 'overflowedresponses#{@model.get('id')}'></div>")
+      overflowedresponsediv.attr('class', 'overflowed-posts')
+      $(@el).find('.inner-question').append(overflowedresponsediv)
       $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()
       $(@el).find('.inner-question').tagbox({callback: @model.maketag})
@@ -181,6 +184,8 @@ $ ->
       if !document.getElementById(item.get('id'))
         if document.getElementById('response' + item.get('parent')) and !post.overflowing
           $('#response' + item.get('parent')).prepend(post.render())
+        else if post.overflowing
+          $('#overflowedresponses' + item.get('parent')).prepend(post.render())
         else      
           $('#assignments').prepend(post.render())
       else

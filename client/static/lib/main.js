@@ -194,7 +194,10 @@
       };
 
       PostView.prototype.renderInnerContents = function() {
-        var responsediv;
+        var overflowedresponsediv, responsediv;
+        overflowedresponsediv = $("<div id = 'overflowedresponses" + (this.model.get('id')) + "'></div>");
+        overflowedresponsediv.attr('class', 'overflowed-posts');
+        $(this.el).find('.inner-question').append(overflowedresponsediv);
         $(this.el).find('.inner-question').votebox({
           votesnum: this.model.get('score'),
           callback: this.model.maketag
@@ -319,6 +322,8 @@
         if (!document.getElementById(item.get('id'))) {
           if (document.getElementById('response' + item.get('parent')) && !post.overflowing) {
             return $('#response' + item.get('parent')).prepend(post.render());
+          } else if (post.overflowing) {
+            return $('#overflowedresponses' + item.get('parent')).prepend(post.render());
           } else {
             return $('#assignments').prepend(post.render());
           }

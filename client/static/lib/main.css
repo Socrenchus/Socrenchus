@@ -269,6 +269,10 @@ background-image: linear-gradient(top,white,#ECECEC);
   float: right;
 }
 
+.overflowed-posts {
+  margin-left: -36px;
+}
+
 #question-text, #assignment-text {
   border: none;
   width: 100%;
