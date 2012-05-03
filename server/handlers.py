@@ -33,8 +33,7 @@ from google.appengine.ext.webapp import template
 #TODO: figure out why this doesn't get rid of the warning
 from google.appengine.dist import use_library
 use_library('django', '0.96')
-from database_test import DatabaseTests
-from boot_strap import BootStrap
+from bootstrap import BootStrap
 
 _DEBUG = 'localhost' in users.create_logout_url( "/" )
 class BootstrapHandler(webapp.RequestHandler):
