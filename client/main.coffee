@@ -159,6 +159,7 @@ $ ->
   class StreamView extends Backbone.View
     initialize: ->
       @streamviewRendered = false
+      @topic_creator_showing = false
       @selectedStory = '#story-part1'
       postCollection.bind('add', @addOne, this)
       postCollection.bind('reset', @addAll, this)
@@ -210,14 +211,15 @@ $ ->
       tagCollection.each(@addTag)
     
     showTopicCreator: (showing) =>
-      if showing
-        $('#post-question').show()
-      else
-        $('#post-question').hide()
+      @topic_creator_showing = showing
         
     render: =>
       if !@streamviewRendered
-        $('#post-question').omnipost({callback: @makePost, message: 'Post a topic...'})      
+        $('#post-question').omnipost({callback: @makePost, message: 'Post a topic...'})
+        if @topic_creator_showing
+          $('#post-question').show() 
+        else
+          $('#post-question').hide()
         @scrollingDiv = $('#story')
         $('#collapsible-profile').hide()
         profileshowing = false
