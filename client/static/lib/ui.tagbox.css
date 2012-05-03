@@ -14,12 +14,10 @@
 }
 
 .ui-tagtext {
+    border: none;
     width: 350px;
-    height: 50px;
-    background-color: white;
+    height: 30px;
     position: relative;
-    overflow: auto;
-    border: 1px solid black;
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
 }
