@@ -161,13 +161,15 @@
             progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
             progressbardiv.append(progressindicatordiv);
             lockedpostsdiv.append(progressbardiv);
-            return $('#' + this.model.get('id') + ' #progress-bar').append(lockedpostsdiv);
+            return $(this.el).find('#progress-bar:first').progressbar({
+              value: 37
+            });
           }
         }
       };
 
       PostView.prototype.renderInnerContents = function() {
-        var responsediv;
+        var progressdiv, responsediv;
         $(this.el).find('.inner-question').votebox({
           votesnum: this.model.get('score'),
           callback: this.model.maketag
@@ -184,6 +186,8 @@
             callback: this.model.respond
           });
         }
+        progressdiv = $("<div id = 'progress-bar'></div>");
+        $(this.el).find('.inner-question').append(progressdiv);
         responsediv = $("<div id = 'response'></div>");
         responsediv.css('border-left', 'dotted 1px black');
         return $(this.el).find('.inner-question').append(responsediv);
@@ -272,6 +276,7 @@
         this.render = __bind(this.render, this);
         this.showTopicCreator = __bind(this.showTopicCreator, this);
         this.setTopicCreatorVisibility = __bind(this.setTopicCreatorVisibility, this);
+        this.setview = __bind(this.setview, this);
         this.addOne = __bind(this.addOne, this);
         StreamView.__super__.constructor.apply(this, arguments);
       }
@@ -301,10 +306,15 @@
 
       StreamView.prototype.addOne = function(item) {
         var post;
-        if (!document.getElementById(item.get('id'))) {
+        post = null;
+        if (!item.view) {
           post = new PostView({
             model: item
           });
+        } else {
+          post = item.view;
+        }
+        if (!document.getElementById(item.get('id'))) {
           post.parent = postCollection.where({
             id: item.get('parent')
           });
@@ -318,7 +328,15 @@
         }
       };
 
+      StreamView.prototype.setview = function(item) {
+        var post;
+        return post = new PostView({
+          model: item
+        });
+      };
+
       StreamView.prototype.addAll = function() {
+        postCollection.each(this.setview);
         return postCollection.each(this.addOne);
       };
 

@@ -77,7 +77,7 @@ $ ->
           progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")          
           progressbardiv.append(progressindicatordiv)   
           lockedpostsdiv.append(progressbardiv)
-          $('#' + @model.get('id') + ' #progress-bar').append(lockedpostsdiv)
+          $(@el).find('#progress-bar:first').progressbar({@model.get('progress')*100})
 
     renderInnerContents: =>
       $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
@@ -85,6 +85,8 @@ $ ->
       $(@el).find('.inner-question').tagbox({callback: @model.maketag})
       unless postCollection.where({parent: @id}).length > 0
         $(@el).find('.inner-question').omnipost({removeOnSubmit: true, callback: @model.respond})
+      progressdiv = $("<div id = 'progress-bar'></div>")
+      $(@el).find('.inner-question').append(progressdiv)
       responsediv = $("<div id = 'response'></div>")
       responsediv.css('border-left', 'dotted 1px black')
       $(@el).find('.inner-question').append(responsediv)
@@ -164,8 +166,13 @@ $ ->
       postCollection.fetch()
 
     addOne: (item) =>
-      if !document.getElementById(item.get('id'))
+      post = null
+      if !item.view
         post = new PostView(model: item)
+      else
+        post = item.view
+
+      if !document.getElementById(item.get('id'))
         post.parent = postCollection.where({id: item.get('parent')})
         if post.parent.length > 0
           post.parent = post.parent[0].view
@@ -174,8 +181,13 @@ $ ->
           $('#assignments').prepend(post.render())
         post.renderProgressBar()
 
+    setview: (item) =>
+       post = new PostView(model: item)
+
     addAll: ->
+      postCollection.each(@setview)
       postCollection.each(@addOne)
+
     deleteOne: (item) ->
       item.destroy()
     deleteAll: ->

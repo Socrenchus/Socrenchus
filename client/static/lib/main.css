@@ -343,6 +343,14 @@ background-image: linear-gradient(top,white,#ECECEC);
   box-shadow: inset 0px 1px 2px 0px rgba(0, 0, 0, 0.5), 0px 1px 0px 0px #FFF;
 }
 
+#progress-bar {
+  width: 348px;
+  margin-left: 50px;
+  height: 10px;
+  border: 1px solid black;
+  padding: 1px;
+}
+
 .progress-indicator p {    
   
 }
