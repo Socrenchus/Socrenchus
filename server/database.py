@@ -327,7 +327,7 @@ class Stream(ndb.Model):
   """
   user        = ndb.UserProperty(auto_current_user_add=True)
   timestamp   = ndb.DateTimeProperty(auto_now=True)
-  
+
   @classmethod
   def get_or_create(cls, user):
     """
@@ -338,7 +338,19 @@ class Stream(ndb.Model):
       u = Stream(user=user)
       u.put()
     return u
-  
+
+  def to_dict(self):
+    result = {}
+    result['id'] = self.key.urlsafe()
+    def post_check(key):
+      return key.parent().get().to_dict()
+    self.assignments().map(post_check,keys_only=True)
+    def post_list(key):
+      return key.parent()
+    result['assignments'] = self.assignments().order(Stream.timestamp).map(post_list,keys_only=True)
+    result['tags'] = Tag.query(Tag.user == users.get_current_user())
+    return result
+
   def assignments(self):
     """
     Returns a list of post keys assigned to the user.
