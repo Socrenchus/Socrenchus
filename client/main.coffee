@@ -7,20 +7,8 @@ $ ->
     urlRoot: '/posts'
     initialize: =>
       @view = null
-      @level = 0
-      @maxlevel = 2
-      @relativelevel = 0
-      @currentlevel = 0
-      
-    calcDepth: =>
-      parentposts = postCollection.where({id:@get('parent')})
-      if parentposts.length > 0
-        @level = parentposts[0].level + 1
-        @relativelevel = parentposts[0].relativelevel + 1
-        parentposts = postCollection.where({id:parentposts[0].get('parent')})
-      else
-        @level = 0
-        @relativelevel = 0
+
+    depth: => @get('depth')-1
 
     respond: (content) =>
       p = new Post(
@@ -72,7 +60,6 @@ $ ->
       @id = @model.id
       @model.bind('change', @render)
       @model.view = @      
-      @overflowing = false
 
     renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))
@@ -94,9 +81,6 @@ $ ->
           $('#' + @model.get('id') + ' .progress-bar').append(lockedpostsdiv)
 
     renderInnerContents: =>
-      overflowedresponsediv = $("<div id = 'overflowedresponses#{@model.get('id')}'></div>")
-      overflowedresponsediv.attr('class', 'overflowed-posts')
-      $(@el).find('.inner-question').append(overflowedresponsediv)
       $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()
       $(@el).find('.inner-question').tagbox({callback: @model.maketag})
@@ -104,7 +88,7 @@ $ ->
         $(@el).find('.inner-question').omnipost({removeOnSubmit: true, callback: @model.respond})
       progressdiv = $("<div class = 'progress-bar'></div>")
       $(@el).find('.inner-question').append(progressdiv)
-      responsediv = $("<div id = 'response#{@model.get('id')}'></div>")
+      responsediv = $("<div id = 'response'></div>")
       responsediv.css('border-left', 'dotted 1px black')
       $(@el).find('.inner-question').append(responsediv)
 
@@ -131,6 +115,21 @@ $ ->
       $(@el).find('.inner-question').attr('id', @model.get('id'))
       @renderInnerContents()
       return $(@el)
+      
+    addChild:(child) =>
+      if (@model.depth() % App.maxlevel) == (App.maxlevel - 1)
+        root = @
+        while root.parent
+          root = root.parent
+        base = $(root.el)
+        base.prepend(child.render())
+        # TODO: add right angle line to top right of post
+        # TODO: change child's style to 'grand piano' down to the right corner
+        # TODO: remove render line to parent
+        child.renderLineToParent()
+      else
+        base = $(@el).find('#response')
+        base.prepend(child.render())
      
    class TagView extends Backbone.View
     tagName: 'p'
@@ -150,6 +149,7 @@ $ ->
    
   class StreamView extends Backbone.View
     initialize: ->
+      @maxlevel = 4
       @streamviewRendered = false
       @topic_creator_showing = false
       @selectedStory = '#story-part1'
@@ -169,26 +169,18 @@ $ ->
 
     addOne: (item) =>
       post = new PostView(model: item)
-      item.calcDepth()
-      if item.relativelevel == item.maxlevel
-        post.overflowing = true
-        item.relativelevel = 0
       
       if !document.getElementById(item.get('id'))
-        if document.getElementById('response' + item.get('parent')) and !post.overflowing
-          $('#response' + item.get('parent')).prepend(post.render())
-        else if post.overflowing
-          $('#overflowedresponses' + item.get('parent')).prepend(post.render())
-        else      
+        post.parent = postCollection.where({id: item.get('parent')})[0]
+        if post.parent
+          post.parent = post.parent.view
+          post.parent.addChild(post)
+        else
           $('#assignments').prepend(post.render())
       post.renderProgressBar()
-    addLines: (item) ->
-      if item.view.overflowing
-        item.view.renderLineToParent()
 
     addAll: ->
       postCollection.each(@addOne)
-      postCollection.each(@addLines)
     deleteOne: (item) ->
       item.destroy()
     deleteAll: ->

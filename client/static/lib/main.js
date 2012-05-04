@@ -15,7 +15,7 @@
       function Post() {
         this.maketag = __bind(this.maketag, this);
         this.respond = __bind(this.respond, this);
-        this.calcDepth = __bind(this.calcDepth, this);
+        this.depth = __bind(this.depth, this);
         this.initialize = __bind(this.initialize, this);
         Post.__super__.constructor.apply(this, arguments);
       }
@@ -23,28 +23,11 @@
       Post.prototype.urlRoot = '/posts';
 
       Post.prototype.initialize = function() {
-        this.view = null;
-        this.level = 0;
-        this.maxlevel = 2;
-        this.relativelevel = 0;
-        return this.currentlevel = 0;
+        return this.view = null;
       };
 
-      Post.prototype.calcDepth = function() {
-        var parentposts;
-        parentposts = postCollection.where({
-          id: this.get('parent')
-        });
-        if (parentposts.length > 0) {
-          this.level = parentposts[0].level + 1;
-          this.relativelevel = parentposts[0].relativelevel + 1;
-          return parentposts = postCollection.where({
-            id: parentposts[0].get('parent')
-          });
-        } else {
-          this.level = 0;
-          return this.relativelevel = 0;
-        }
+      Post.prototype.depth = function() {
+        return this.get('depth') - 1;
       };
 
       Post.prototype.respond = function(content) {
@@ -135,6 +118,7 @@
       __extends(PostView, _super);
 
       function PostView() {
+        this.addChild = __bind(this.addChild, this);
         this.render = __bind(this.render, this);
         this.renderLineToParent = __bind(this.renderLineToParent, this);
         this.renderInnerContents = __bind(this.renderInnerContents, this);
@@ -154,8 +138,7 @@
       PostView.prototype.initialize = function() {
         this.id = this.model.id;
         this.model.bind('change', this.render);
-        this.model.view = this;
-        return this.overflowing = false;
+        return this.model.view = this;
       };
 
       PostView.prototype.renderPostContent = function() {
@@ -186,10 +169,7 @@
       };
 
       PostView.prototype.renderInnerContents = function() {
-        var overflowedresponsediv, progressdiv, responsediv;
-        overflowedresponsediv = $("<div id = 'overflowedresponses" + (this.model.get('id')) + "'></div>");
-        overflowedresponsediv.attr('class', 'overflowed-posts');
-        $(this.el).find('.inner-question').append(overflowedresponsediv);
+        var progressdiv, responsediv;
         $(this.el).find('.inner-question').votebox({
           votesnum: this.model.get('score'),
           callback: this.model.maketag
@@ -208,7 +188,7 @@
         }
         progressdiv = $("<div class = 'progress-bar'></div>");
         $(this.el).find('.inner-question').append(progressdiv);
-        responsediv = $("<div id = 'response" + (this.model.get('id')) + "'></div>");
+        responsediv = $("<div id = 'response'></div>");
         responsediv.css('border-left', 'dotted 1px black');
         return $(this.el).find('.inner-question').append(responsediv);
       };
@@ -236,6 +216,22 @@
         $(this.el).find('.inner-question').attr('id', this.model.get('id'));
         this.renderInnerContents();
         return $(this.el);
+      };
+
+      PostView.prototype.addChild = function(child) {
+        var base, root;
+        if ((this.model.depth() % App.maxlevel) === (App.maxlevel - 1)) {
+          root = this;
+          while (root.parent) {
+            root = root.parent;
+          }
+          base = $(root.el);
+          base.prepend(child.render());
+          return child.renderLineToParent();
+        } else {
+          base = $(this.el).find('#response');
+          return base.prepend(child.render());
+        }
       };
 
       return PostView;
@@ -286,6 +282,7 @@
       }
 
       StreamView.prototype.initialize = function() {
+        this.maxlevel = 4;
         this.streamviewRendered = false;
         this.topic_creator_showing = false;
         this.selectedStory = '#story-part1';
@@ -311,16 +308,13 @@
         post = new PostView({
           model: item
         });
-        item.calcDepth();
-        if (item.relativelevel === item.maxlevel) {
-          post.overflowing = true;
-          item.relativelevel = 0;
-        }
         if (!document.getElementById(item.get('id'))) {
-          if (document.getElementById('response' + item.get('parent')) && !post.overflowing) {
-            $('#response' + item.get('parent')).prepend(post.render());
-          } else if (post.overflowing) {
-            $('#overflowedresponses' + item.get('parent')).prepend(post.render());
+          post.parent = postCollection.where({
+            id: item.get('parent')
+          })[0];
+          if (post.parent) {
+            post.parent = post.parent.view;
+            post.parent.addChild(post);
           } else {
             $('#assignments').prepend(post.render());
           }
@@ -328,13 +322,8 @@
         return post.renderProgressBar();
       };
 
-      StreamView.prototype.addLines = function(item) {
-        if (item.view.overflowing) return item.view.renderLineToParent();
-      };
-
       StreamView.prototype.addAll = function() {
-        postCollection.each(this.addOne);
-        return postCollection.each(this.addLines);
+        return postCollection.each(this.addOne);
       };
 
       StreamView.prototype.deleteOne = function(item) {
