@@ -6,7 +6,6 @@ $ ->
   class Post extends Backbone.Model
     urlRoot: '/posts'
     initialize: =>
-      @view = null
 
     depth: => @get('depth')-1
 
@@ -59,7 +58,7 @@ $ ->
     initialize: ->
       @id = @model.id
       @model.bind('change', @render)
-      @model.view = @      
+      @model.view = @
 
     renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))
@@ -78,7 +77,7 @@ $ ->
           progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")          
           progressbardiv.append(progressindicatordiv)   
           lockedpostsdiv.append(progressbardiv)
-          $('#' + @model.get('id') + ' .progress-bar').append(lockedpostsdiv)
+          $('#' + @model.get('id') + ' #progress-bar').append(lockedpostsdiv)
 
     renderInnerContents: =>
       $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
@@ -86,8 +85,6 @@ $ ->
       $(@el).find('.inner-question').tagbox({callback: @model.maketag})
       unless postCollection.where({parent: @id}).length > 0
         $(@el).find('.inner-question').omnipost({removeOnSubmit: true, callback: @model.respond})
-      progressdiv = $("<div class = 'progress-bar'></div>")
-      $(@el).find('.inner-question').append(progressdiv)
       responsediv = $("<div id = 'response'></div>")
       responsediv.css('border-left', 'dotted 1px black')
       $(@el).find('.inner-question').append(responsediv)
@@ -122,11 +119,11 @@ $ ->
         while (root.model.depth() % App.maxlevel) != 0
           root = root.parent
         base = $(root.el)
-        base.prepend(child.render())
+        base.before(child.render())
         # TODO: add right angle line to top right of post
         # TODO: change child's style to 'grand piano' down to the right corner
       else
-        base = $(@el).find('#response')
+        base = $(@el).find('#response:first')
         base.prepend(child.render())
      
    class TagView extends Backbone.View
@@ -164,18 +161,18 @@ $ ->
         content: content
       )
       postCollection.create(p)
+      postCollection.fetch()
 
     addOne: (item) =>
-      post = new PostView(model: item)
-      
       if !document.getElementById(item.get('id'))
-        post.parent = postCollection.where({id: item.get('parent')})[0]
-        if post.parent
-          post.parent = post.parent.view
+        post = new PostView(model: item)
+        post.parent = postCollection.where({id: item.get('parent')})
+        if post.parent.length > 0
+          post.parent = post.parent[0].view
           post.parent.addChild(post)
         else
           $('#assignments').prepend(post.render())
-      post.renderProgressBar()
+        post.renderProgressBar()
 
     addAll: ->
       postCollection.each(@addOne)

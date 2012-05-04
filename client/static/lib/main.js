@@ -22,9 +22,7 @@
 
       Post.prototype.urlRoot = '/posts';
 
-      Post.prototype.initialize = function() {
-        return this.view = null;
-      };
+      Post.prototype.initialize = function() {};
 
       Post.prototype.depth = function() {
         return this.get('depth') - 1;
@@ -163,13 +161,13 @@
             progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
             progressbardiv.append(progressindicatordiv);
             lockedpostsdiv.append(progressbardiv);
-            return $('#' + this.model.get('id') + ' .progress-bar').append(lockedpostsdiv);
+            return $('#' + this.model.get('id') + ' #progress-bar').append(lockedpostsdiv);
           }
         }
       };
 
       PostView.prototype.renderInnerContents = function() {
-        var progressdiv, responsediv;
+        var responsediv;
         $(this.el).find('.inner-question').votebox({
           votesnum: this.model.get('score'),
           callback: this.model.maketag
@@ -186,8 +184,6 @@
             callback: this.model.respond
           });
         }
-        progressdiv = $("<div class = 'progress-bar'></div>");
-        $(this.el).find('.inner-question').append(progressdiv);
         responsediv = $("<div id = 'response'></div>");
         responsediv.css('border-left', 'dotted 1px black');
         return $(this.el).find('.inner-question').append(responsediv);
@@ -226,9 +222,9 @@
             root = root.parent;
           }
           base = $(root.el);
-          return base.prepend(child.render());
+          return base.before(child.render());
         } else {
-          base = $(this.el).find('#response');
+          base = $(this.el).find('#response:first');
           return base.prepend(child.render());
         }
       };
@@ -299,26 +295,27 @@
         p = new Post({
           content: content
         });
-        return postCollection.create(p);
+        postCollection.create(p);
+        return postCollection.fetch();
       };
 
       StreamView.prototype.addOne = function(item) {
         var post;
-        post = new PostView({
-          model: item
-        });
         if (!document.getElementById(item.get('id'))) {
+          post = new PostView({
+            model: item
+          });
           post.parent = postCollection.where({
             id: item.get('parent')
-          })[0];
-          if (post.parent) {
-            post.parent = post.parent.view;
+          });
+          if (post.parent.length > 0) {
+            post.parent = post.parent[0].view;
             post.parent.addChild(post);
           } else {
             $('#assignments').prepend(post.render());
           }
+          return post.renderProgressBar();
         }
-        return post.renderProgressBar();
       };
 
       StreamView.prototype.addAll = function() {
