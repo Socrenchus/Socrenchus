@@ -514,15 +514,15 @@ background-image: linear-gradient(top,white,#ECECEC);
   float: left;
 }
 
-.ui-postcontent {
+#content {
   margin-left: 50px;
   margin-bottom: 30px;
 }
 
-.ui-omnipost {
+#omnipost {
   margin-left: 50px;
 }
 
-.ui-tagbox {
+#tagbox {
   margin-left: 50px;
 }
