@@ -140,57 +140,41 @@
       };
 
       PostView.prototype.renderPostContent = function() {
-        var jsondata, postcontentdiv;
+        var jsondata;
         jsondata = jQuery.parseJSON(this.model.get('content'));
-        postcontentdiv = $("<div class = 'ui-postcontent'></div>");
-        postcontentdiv.append($(jsondata.linkdata));
-        postcontentdiv.append('<br />');
-        postcontentdiv.append(jsondata.posttext);
-        return $(this.el).find('.inner-question').append(postcontentdiv);
+        $(this.el).find('.inner-question').find('#content').append($(jsondata.linkdata));
+        return $(this.el).find('.inner-question').find('#content').append(jsondata.posttext);
       };
 
       PostView.prototype.renderProgressBar = function() {
-        var lockedpostsdiv, percent, progressbardiv, progressindicatordiv;
         if (postCollection.where({
           parent: this.id
         }).length > 0) {
           if ($('#' + this.model.get('id')).find('.locked-posts').length === 0) {
-            lockedpostsdiv = $("<div class='locked-posts'></div>");
-            progressbardiv = $("<div class='progressbar'></div>");
-            percent = this.model.get('progress') * 100;
-            progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
-            progressbardiv.append(progressindicatordiv);
-            lockedpostsdiv.append(progressbardiv);
-            return $(this.el).find('#progress-bar:first').progressbar({
-              value: 37
+            return $(this.el).find('#progress-bar').progressbar({
+              value: this.model.get('progress')
             });
           }
         }
       };
 
       PostView.prototype.renderInnerContents = function() {
-        var progressdiv, responsediv;
-        $(this.el).find('.inner-question').votebox({
+        $(this.el).find('.inner-question').find('#votebox').votebox({
           votesnum: this.model.get('score'),
           callback: this.model.maketag
         });
         this.renderPostContent();
-        $(this.el).find('.inner-question').tagbox({
+        $(this.el).find('.inner-question').find('#tagbox').tagbox({
           callback: this.model.maketag
         });
         if (!(postCollection.where({
           parent: this.id
         }).length > 0)) {
-          $(this.el).find('.inner-question').omnipost({
+          return $(this.el).find('.inner-question').find('#omnipost').omnipost({
             removeOnSubmit: true,
             callback: this.model.respond
           });
         }
-        progressdiv = $("<div id = 'progress-bar'></div>");
-        $(this.el).find('.inner-question').append(progressdiv);
-        responsediv = $("<div id = 'response'></div>");
-        responsediv.css('border-left', 'dotted 1px black');
-        return $(this.el).find('.inner-question').append(responsediv);
       };
 
       PostView.prototype.renderLineToParent = function() {

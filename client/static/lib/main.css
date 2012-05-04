@@ -273,6 +273,10 @@ background-image: linear-gradient(top,white,#ECECEC);
   margin-left: -36px;
 }
 
+#response {
+  border-left: 1px dotted black;
+}
+
 #question-text, #assignment-text {
   border: none;
   width: 100%;
@@ -343,12 +347,15 @@ background-image: linear-gradient(top,white,#ECECEC);
   box-shadow: inset 0px 1px 2px 0px rgba(0, 0, 0, 0.5), 0px 1px 0px 0px #FFF;
 }
 
-#progress-bar {
-  width: 348px;
+.ui-progressbar {
+  width: 349px;
   margin-left: 50px;
-  height: 10px;
   border: 1px solid black;
   padding: 1px;
+}
+
+#progress-bar {
+  height: 10px;
 }
 
 .progress-indicator p {    
@@ -522,7 +529,7 @@ background-image: linear-gradient(top,white,#ECECEC);
   float: left;
 }
 
-.ui-postcontent {
+#content {
   margin-left: 50px;
   margin-bottom: 30px;
 }

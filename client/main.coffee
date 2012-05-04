@@ -62,34 +62,20 @@ $ ->
 
     renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))
-      postcontentdiv = $("<div class = 'ui-postcontent'></div>")
-      postcontentdiv.append($(jsondata.linkdata))
-      postcontentdiv.append('<br />')
-      postcontentdiv.append(jsondata.posttext)
-      $(@el).find('.inner-question').append(postcontentdiv)
+      $(@el).find('.inner-question').find('#content').append($(jsondata.linkdata))
+      $(@el).find('.inner-question').find('#content').append(jsondata.posttext)
     
     renderProgressBar: => 
       if postCollection.where({parent: @id}).length > 0
-        if $('#' + @model.get('id')).find('.locked-posts').length == 0
-          lockedpostsdiv = $("<div class='locked-posts'></div>")
-          progressbardiv = $("<div class='progressbar'></div>")
-          percent = @model.get('progress') * 100
-          progressindicatordiv = $("<div class='progress-indicator' style='width:#{percent}%'></div>")          
-          progressbardiv.append(progressindicatordiv)   
-          lockedpostsdiv.append(progressbardiv)
-          $(@el).find('#progress-bar:first').progressbar({@model.get('progress')*100})
+        if $('#' + @model.get('id')).find('.locked-posts').length == 0     
+          $(@el).find('#progress-bar').progressbar({value: @model.get('progress')})         
 
     renderInnerContents: =>
-      $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
+      $(@el).find('.inner-question').find('#votebox').votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()
-      $(@el).find('.inner-question').tagbox({callback: @model.maketag})
+      $(@el).find('.inner-question').find('#tagbox').tagbox({callback: @model.maketag})
       unless postCollection.where({parent: @id}).length > 0
-        $(@el).find('.inner-question').omnipost({removeOnSubmit: true, callback: @model.respond})
-      progressdiv = $("<div id = 'progress-bar'></div>")
-      $(@el).find('.inner-question').append(progressdiv)
-      responsediv = $("<div id = 'response'></div>")
-      responsediv.css('border-left', 'dotted 1px black')
-      $(@el).find('.inner-question').append(responsediv)
+        $(@el).find('.inner-question').find('#omnipost').omnipost({removeOnSubmit: true, callback: @model.respond})
 
     renderLineToParent: =>
       if $('#line' + @model.get('id')).length == 0
