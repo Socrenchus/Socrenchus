@@ -30,34 +30,31 @@
       }
 
       Plugin.prototype.init = function() {
-        var downpressed, originalvotesnum, uppressed, voteboxdiv, votetext,
+        var downpressed, originalvotesnum, uppressed, votetext,
           _this = this;
         this.state = this._states.none;
         uppressed = false;
         downpressed = false;
         originalvotesnum = this.options.votesnum;
-        voteboxdiv = $("<div class = 'ui-votebox'></div>");
         this.upArrow = $("<img alt='^' title='vote up' id='ui-upvote'>");
         this.upArrow.attr('onmouseover', 'src="/images/votearrowover.png"');
         this.upArrow.attr('onmousedown', 'src="/images/votearrowdown.png"');
-        votetext = $("<div id='ui-votetext'>" + originalvotesnum + "</div>");
+        votetext = $("<div id='ui-votetext'>" + (Math.round(originalvotesnum)) + "</div>");
         this.downArrow = $("<img alt='v' title='vote down' id='ui-downvote'>");
         this.downArrow.attr('onmouseover', 'src="/images/votearrowover.png"');
         this.downArrow.attr('onmousedown', 'src="/images/votearrowdown.png"');
-        voteboxdiv.append(this.upArrow);
-        voteboxdiv.append(votetext);
-        voteboxdiv.append(this.downArrow);
-        $(this.element).append(voteboxdiv);
+        $(this.element).append(this.upArrow);
+        $(this.element).append(votetext);
+        $(this.element).append(this.downArrow);
         this.setImages();
         this.upArrow.click(function() {
           if (_this.state !== _this._states.up) {
-            _this.voteCount(originalvotesnum + 1);
             _this.state = _this._states.up;
           } else {
             _this.voteCount(originalvotesnum);
             _this.state = _this._states.none;
           }
-          votetext.text(_this.voteCount());
+          votetext.text(Math.round(_this.voteCount()));
           $(_this.element).trigger('votetextChanged', [parseInt(votetext.text()), _this.voteCount()]);
           _this.setImages();
           if (_this.state === _this._states.up) {
@@ -68,13 +65,12 @@
         });
         return this.downArrow.click(function() {
           if (_this.state !== _this._states.down) {
-            _this.voteCount(originalvotesnum - 1);
             _this.state = _this._states.down;
           } else {
             _this.voteCount(originalvotesnum);
             _this.state = _this._states.none;
           }
-          votetext.text(_this.voteCount());
+          votetext.text(Math.round(_this.voteCount()));
           $(_this.element).trigger('votetextChanged', [parseInt(votetext.text()), _this.voteCount()]);
           _this.setImages();
           if (_this.state === _this._states.down) {

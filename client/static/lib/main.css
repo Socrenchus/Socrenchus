@@ -111,8 +111,7 @@ h2 {
 #post-question {
   margin-left: auto;
   margin-right: auto;
-  /*take this out when omnipost widths are fixed*/
-  margin-right: 200px;
+  width: 350px;
 }
 
 #story {
@@ -185,10 +184,10 @@ h2 {
   margin: 10px;
   background-color: #F8F8F8;
   background-image: -webkit-linear-gradient(top,white,#ECECEC);
-background-image: -moz-linear-gradient(top,white,#ECECEC);
-background-image: -ms-linear-gradient(top,white,#ECECEC);
-background-image: -o-linear-gradient(top,white,#ECECEC);
-background-image: linear-gradient(top,white,#ECECEC);
+  background-image: -moz-linear-gradient(top,white,#ECECEC);
+  background-image: -ms-linear-gradient(top,white,#ECECEC);
+  background-image: -o-linear-gradient(top,white,#ECECEC);
+  background-image: linear-gradient(top,white,#ECECEC);
   border-color: #C6C6C6;
   float: left;
   position: relative;
@@ -525,7 +524,15 @@ background-image: linear-gradient(top,white,#ECECEC);
   margin-bottom: 20px;
 }
 
-.ui-votebox {
+.parent {
+  border-bottom: 1px solid black;
+}
+
+.reply {
+  border-left: 1px solid black;
+}
+
+#votebox {
   float: left;
 }
 
@@ -534,10 +541,10 @@ background-image: linear-gradient(top,white,#ECECEC);
   margin-bottom: 30px;
 }
 
-.ui-omnipost {
+#omnipost {
   margin-left: 50px;
 }
 
-.ui-tagbox {
+#tagbox {
   margin-left: 50px;
 }

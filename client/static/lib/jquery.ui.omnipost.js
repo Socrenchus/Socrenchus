@@ -8,6 +8,7 @@
     pluginName = 'omnipost';
     defaults = {
       editing: true,
+      removeOnSubmit: false,
       callback: '',
       message: 'Post your reply here...'
     };
@@ -177,12 +178,11 @@
       }
 
       Plugin.prototype.init = function() {
-        var collapse, link, message, omnicontainer, omnipostdiv, paneldiv, panelselectors, post, selectedImageLink, text, videolink,
+        var collapse, link, message, omnicontainer, paneldiv, panelselectors, post, selectedImageLink, text, videolink,
           _this = this;
         this.state = this._states.none;
         this.panelList = [];
         message = this.options.message;
-        omnipostdiv = $("<div class = 'ui-omnipost'></div>");
         collapse = $("<img alt='x' title='x' id='ui-omniPostCollapse'>");
         collapse.attr('src', '/images/collapse.png');
         link = $("<img alt='a' title='attach a link' id='ui-omniPostAttach'>");
@@ -202,14 +202,13 @@
         omnicontainer.append(text);
         omnicontainer.append(collapse);
         omnicontainer.append(panelselectors);
-        omnipostdiv.append(omnicontainer);
+        $(this.element).append(omnicontainer);
         $(this.element).append(selectedImageLink);
         paneldiv = $("<div id='panels-container'></div>");
-        omnipostdiv.append(paneldiv);
+        $(this.element).append(paneldiv);
         $(this.element).append($('<br/>'));
         post = $("<button id='ui-omniPostSubmit'>Post</button>");
-        omnipostdiv.append(post);
-        $(this.element).append(omnipostdiv);
+        $(this.element).append(post);
         $(this.element).addClass('ui-omniPost');
         omnicontainer.click(function() {
           if (!text.attr('readonly')) {
@@ -271,6 +270,7 @@
           };
           data = JSON.stringify(data);
           collapse.click();
+          if (_this.options.removeOnSubmit) $(_this.element).remove();
           return _this.options.callback(data);
         });
       };

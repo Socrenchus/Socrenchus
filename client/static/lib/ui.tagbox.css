@@ -14,12 +14,12 @@
 }
 
 .ui-tagtext {
+    border: none;
     width: 350px;
-    height: 60px;
-    background-color: white;
+    height: 30px;
     position: relative;
-    overflow: auto;
-    border: 1px solid black;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
 }
 
 .ui-tagpic {
@@ -31,5 +31,4 @@
 .ui-tagmessage {
   color: #a1a1a1;
   font-style: italic;
-  margin: 3px;
 }

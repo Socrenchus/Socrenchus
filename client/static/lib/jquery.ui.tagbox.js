@@ -39,29 +39,19 @@
           _this = this;
         this.alltags = [];
         editingoldtag = false;
-        addtagstext = 'Tag the above post here...';
+        addtagstext = '+ Add Tags';
         if (this.options.editing) {
-          this.tagsdiv = $("<div class='ui-tagbox'></div>");
           this.tagtext = $("<div class='ui-tagtext' contentEditable='false'></div>");
-          this.tagsdiv.append(this.tagtext);
-          $(this.element).append(this.tagsdiv);
+          $(this.element).append(this.tagtext);
           tagIcon = $("<div contentEditable='false'><img src = '/images/tag.png' id = 'ui-tagicon'/></div>");
           this.currenttag = $("<div class='ui-individualtag' contentEditable='true'></div>");
           this.message = $("<div class='ui-tagmessage'>" + addtagstext + "</div>");
           this.tagtext.append(tagIcon);
           this.tagtext.append(this.message);
           this.tagtext.append(this.currenttag);
-          this.submit = $("<button id='ui-tagboxSubmit'>Submit Tags</button>");
-          this.tagsdiv.append(this.submit);
-          this.submit.hide();
-          this.submit.click(function() {
-            var tags;
-            return tags = _this.maketags();
-          });
           this.tagtext.focusout(function() {
             if (_this.alltags.length === 0 && _this.currenttag.text() === '') {
               _this.message.show();
-              _this.submit.hide();
             }
             _this.state = _this._states.none;
             return $(_this.element).trigger('unfocusingTagBox', _this.state);
@@ -76,7 +66,6 @@
             if (!_this.editingoldtag) {
               _this.message.hide();
               _this.currenttag.focus();
-              _this.submit.show();
               _this.state = _this._states.typing;
               return $(_this.element).trigger('typingTag', _this.state);
             }
@@ -101,6 +90,8 @@
           tagdiv.focusout(function() {
             return _this.formtag(tagdiv);
           });
+          this.options.callback(this.currenttag.text());
+          tagdiv.remove();
           newtag = $("<div class='ui-individualtag' contentEditable='true'></div>");
           this.tagtext.append(newtag);
           this.currenttag = newtag;
@@ -109,16 +100,9 @@
       };
 
       Plugin.prototype.formtag = function(tagdiv) {
-        var deletetagicon,
-          _this = this;
+        var _this = this;
         this.editingoldtag = false;
         tagdiv.text($.trim(tagdiv.text()));
-        deletetagicon = $("<img width = '16px' class='delete-imageicon' src = '/images/collapse.png'>");
-        tagdiv.append(deletetagicon);
-        deletetagicon.click(function() {
-          _this.removeFromArray(tagdiv);
-          return deletetagicon.parent().remove();
-        });
         tagdiv.click(function() {
           var state;
           _this.deformtag(tagdiv);

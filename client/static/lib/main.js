@@ -210,7 +210,9 @@
             root = root.parent;
           }
           base = $(root.el);
-          return base.before(child.render());
+          base.before(child.render());
+          $(parent.el).addClass('parent');
+          return $(child.el).addClass('reply');
         } else {
           base = $(this.el).find('#response:first');
           return base.prepend(child.render());

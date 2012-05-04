@@ -1,7 +1,3 @@
-.ui-omniPost {
-    width:340px;
-}
-    
 .ui-omniPostActive {
     color:#a1a1a1;
     font-style:italic;
@@ -10,7 +6,6 @@
 #ui-omniPostSubmit {
     margin-left:auto;
 }
-    
 
 #ui-omniContainer {
     cursor: text;

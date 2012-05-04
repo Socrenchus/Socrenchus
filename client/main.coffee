@@ -109,6 +109,8 @@ $ ->
         base = $(root.el)
         base.before(child.render())
         # TODO: add right angle line to top right of post
+        $(parent.el).addClass('parent')
+        $(child.el).addClass('reply')
         # TODO: change child's style to 'grand piano' down to the right corner
       else
         base = $(@el).find('#response:first')
