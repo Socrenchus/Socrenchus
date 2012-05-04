@@ -222,12 +222,11 @@
         var base, root;
         if ((this.model.depth() % App.maxlevel) === (App.maxlevel - 1)) {
           root = this;
-          while (root.parent) {
+          while ((root.model.depth() % App.maxlevel) !== 0) {
             root = root.parent;
           }
           base = $(root.el);
-          base.prepend(child.render());
-          return child.renderLineToParent();
+          return base.prepend(child.render());
         } else {
           base = $(this.el).find('#response');
           return base.prepend(child.render());

@@ -119,14 +119,12 @@ $ ->
     addChild:(child) =>
       if (@model.depth() % App.maxlevel) == (App.maxlevel - 1)
         root = @
-        while root.parent
+        while (root.model.depth() % App.maxlevel) != 0
           root = root.parent
         base = $(root.el)
         base.prepend(child.render())
         # TODO: add right angle line to top right of post
         # TODO: change child's style to 'grand piano' down to the right corner
-        # TODO: remove render line to parent
-        child.renderLineToParent()
       else
         base = $(@el).find('#response')
         base.prepend(child.render())
