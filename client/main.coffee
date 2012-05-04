@@ -62,12 +62,10 @@ $ ->
       @model.view = @      
 
     renderPostContent: =>
+      contentdiv = $(@el).find('.inner-question').find('#content')
       jsondata = jQuery.parseJSON(@model.get('content'))
-      postcontentdiv = $("<div class = 'ui-postcontent'></div>")
-      postcontentdiv.append($(jsondata.linkdata))
-      postcontentdiv.append('<br />')
-      postcontentdiv.append(jsondata.posttext)
-      $(@el).find('.inner-question').append(postcontentdiv)
+      contentdiv.append($(jsondata.linkdata))
+      contentdiv.append(jsondata.posttext)
     
     renderProgressBar: => 
       if postCollection.where({parent: @id}).length > 0
@@ -81,11 +79,11 @@ $ ->
           $('#' + @model.get('id') + ' .progress-bar').append(lockedpostsdiv)
 
     renderInnerContents: =>
-      $(@el).find('.inner-question').votebox({votesnum:@model.get('score'), callback: @model.maketag})
+      $(@el).find('.inner-question').find('#votebox').votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()
-      $(@el).find('.inner-question').tagbox({callback: @model.maketag})
+      $(@el).find('.inner-question').find('#tagbox').tagbox({callback: @model.maketag})
       unless postCollection.where({parent: @id}).length > 0
-        $(@el).find('.inner-question').omnipost({removeOnSubmit: true, callback: @model.respond})
+        $(@el).find('.inner-question').find('#omnipost').omnipost({removeOnSubmit: true, callback: @model.respond})
       progressdiv = $("<div class = 'progress-bar'></div>")
       $(@el).find('.inner-question').append(progressdiv)
       responsediv = $("<div id = 'response'></div>")
@@ -147,6 +145,7 @@ $ ->
    
   class StreamView extends Backbone.View
     initialize: ->
+      @id = 0
       @maxlevel = 4
       @streamviewRendered = false
       @topic_creator_showing = false
@@ -155,9 +154,15 @@ $ ->
       postCollection.bind('reset', @addAll, this)
       postCollection.bind('all', @render, this)
       tagCollection.bind('add', @addTag, this)
+      @reset()
       tagCollection.bind('reset', @addAllTags, this)
-      postCollection.fetch()
-      tagCollection.fetch()
+    
+    reset: =>
+      $.getJSON('/stream', ( (data) ->
+        @id = data['id']
+        postCollection.add(data['assignments'])
+        tagCollection.add(data['tags'])
+      ))
 
     makePost: (content) ->
       p = new Post(
