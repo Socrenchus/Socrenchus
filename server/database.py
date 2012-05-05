@@ -140,7 +140,7 @@ class Post(Model, ndb.Model):
     Assigns num children to the current user if num children exist.
     """
     # TODO: Improve selection of child posts
-    for child in Post.children(key).iter(keys_only=True):
+    for child in Post.children(key).order(-Post.score).iter(keys_only=True):
       if Post.assign_or_die(child, user):
         num -= 1
       if num <= 0:
