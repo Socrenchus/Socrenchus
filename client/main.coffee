@@ -24,7 +24,6 @@ $ ->
         xp: 0
       )
       tagCollection.create(t)
-      @view.addtag(content)
       @view.updateProgress()
     
   class Posts extends Backbone.Collection
@@ -32,12 +31,6 @@ $ ->
     url: '/posts'
 
   class Tag extends Backbone.Model
-    respond: (content) =>
-      t = new Tag(
-        title: content
-        xp: 0
-      )
-      tagCollection.create(t)
       
     
   class Tags extends Backbone.Collection
@@ -83,7 +76,7 @@ $ ->
     renderInnerContents: =>
       @renderPostContent()
       unless postCollection.where({parent: @id}).length > 0
-        $(@el).find('#omnipost').omnipost({removeOnSubmit: true, callback: @model.respond})
+        $(@el).find('#omnipost:first').omnipost({removeOnSubmit: true, callback: @model.respond})
 
     renderLineToParent: =>
       if $('#line' + @model.get('id')).length == 0
@@ -108,10 +101,18 @@ $ ->
       $(@el).find('.inner-question').attr('id', @model.get('id'))
       @renderInnerContents()
       tags = tagCollection.where({parent: @model.get('id')})
+      taglist = []
+      vote = null
       for tag in tags
-        @addTag(tag)
-      $(@el).find('#votebox').votebox(vote: @vote, votesnum:@model.get('score'), callback: @model.maketag)
-      $(@el).find('#tagbox').tagbox(callback: @model.maketag, tags: @tags)
+        t = tag.get('title')
+        if t[0] != ','
+          taglist.push(t)
+        if t == ',correct'
+          vote = true
+        else if t == ',incorrect'
+          vote = false
+      $(@el).find('#votebox:first').votebox(vote: vote, votesnum:@model.get('score'), callback: @model.maketag)
+      $(@el).find('#tagbox:first').tagbox(callback: @model.maketag, tags: taglist)
       return $(@el)
       
     addChild:(child) =>
@@ -132,7 +133,7 @@ $ ->
     addTag:(tag) =>
       t = tag.get('title')
       if t[0] != ','
-        @tags += t
+        @tags.push(t)
       if t == ',correct'
         @vote = true
       else if t == ',incorrect'
@@ -155,8 +156,8 @@ $ ->
     reset: =>
       $.getJSON('/stream', ( (data) ->
         @id = data['id']
-        postCollection.add(data['assignments'])
         tagCollection.add(data['tags'])
+        postCollection.add(data['assignments'])
       ))
 
     makePost: (content) ->

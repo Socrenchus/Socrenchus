@@ -46,7 +46,6 @@
           xp: 0
         });
         tagCollection.create(t);
-        this.view.addtag(content);
         return this.view.updateProgress();
       };
 
@@ -73,18 +72,8 @@
       __extends(Tag, _super);
 
       function Tag() {
-        this.respond = __bind(this.respond, this);
         Tag.__super__.constructor.apply(this, arguments);
       }
-
-      Tag.prototype.respond = function(content) {
-        var t;
-        t = new Tag({
-          title: content,
-          xp: 0
-        });
-        return tagCollection.create(t);
-      };
 
       return Tag;
 
@@ -176,7 +165,7 @@
         if (!(postCollection.where({
           parent: this.id
         }).length > 0)) {
-          return $(this.el).find('#omnipost').omnipost({
+          return $(this.el).find('#omnipost:first').omnipost({
             removeOnSubmit: true,
             callback: this.model.respond
           });
@@ -202,25 +191,33 @@
       };
 
       PostView.prototype.render = function() {
-        var tag, tags, _j, _len2;
+        var t, tag, taglist, tags, vote, _j, _len2;
         $(this.el).html(this.template);
         $(this.el).find('.inner-question').attr('id', this.model.get('id'));
         this.renderInnerContents();
         tags = tagCollection.where({
           parent: this.model.get('id')
         });
+        taglist = [];
+        vote = null;
         for (_j = 0, _len2 = tags.length; _j < _len2; _j++) {
           tag = tags[_j];
-          this.addTag(tag);
+          t = tag.get('title');
+          if (t[0] !== ',') taglist.push(t);
+          if (t === ',correct') {
+            vote = true;
+          } else if (t === ',incorrect') {
+            vote = false;
+          }
         }
-        $(this.el).find('#votebox').votebox({
-          vote: this.vote,
+        $(this.el).find('#votebox:first').votebox({
+          vote: vote,
           votesnum: this.model.get('score'),
           callback: this.model.maketag
         });
-        $(this.el).find('#tagbox').tagbox({
+        $(this.el).find('#tagbox:first').tagbox({
           callback: this.model.maketag,
-          tags: this.tags
+          tags: taglist
         });
         return $(this.el);
       };
@@ -245,7 +242,7 @@
       PostView.prototype.addTag = function(tag) {
         var t;
         t = tag.get('title');
-        if (t[0] !== ',') this.tags += t;
+        if (t[0] !== ',') this.tags.push(t);
         if (t === ',correct') {
           return this.vote = true;
         } else if (t === ',incorrect') {
@@ -264,7 +261,6 @@
         this.render = __bind(this.render, this);
         this.showTopicCreator = __bind(this.showTopicCreator, this);
         this.setTopicCreatorVisibility = __bind(this.setTopicCreatorVisibility, this);
-        this.setview = __bind(this.setview, this);
         this.addOne = __bind(this.addOne, this);
         this.reset = __bind(this.reset, this);
         StreamView.__super__.constructor.apply(this, arguments);
@@ -285,8 +281,8 @@
       StreamView.prototype.reset = function() {
         return $.getJSON('/stream', (function(data) {
           this.id = data['id'];
-          postCollection.add(data['assignments']);
-          return tagCollection.add(data['tags']);
+          tagCollection.add(data['tags']);
+          return postCollection.add(data['assignments']);
         }));
       };
 
@@ -301,38 +297,29 @@
 
       StreamView.prototype.addOne = function(item) {
         var post;
-        post = null;
-        if (!item.view) {
-          post = new PostView({
-            model: item
-          });
-        } else {
-          post = item.view;
-        }
-        if (!document.getElementById(item.get('id'))) {
-          post.parent = postCollection.where({
-            id: item.get('parent')
-          });
-          if (post.parent.length > 0) {
-            post.parent = post.parent[0].view;
-            post.parent.addChild(post);
-          } else {
-            $('#assignments').prepend(post.render());
-          }
-          return post.postDOMrender();
-        }
-      };
-
-      StreamView.prototype.setview = function(item) {
-        var post;
-        return post = new PostView({
+        post = new PostView({
           model: item
         });
+        post.parent = postCollection.where({
+          id: item.get('parent')
+        });
+        if (post.parent.length > 0) {
+          post.parent = post.parent[0].view;
+          post.parent.addChild(post);
+        } else {
+          $('#assignments').prepend(post.render());
+        }
+        return post.postDOMrender();
       };
 
       StreamView.prototype.addAll = function() {
-        postCollection.each(this.setview);
-        return postCollection.each(this.addOne);
+        var a, b;
+        b = $('#assignments');
+        a = b.clone();
+        a.empty();
+        b.before(a);
+        postCollection.each(this.addOne);
+        return b.remove();
       };
 
       StreamView.prototype.deleteOne = function(item) {

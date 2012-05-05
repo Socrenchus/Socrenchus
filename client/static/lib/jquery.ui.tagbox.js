@@ -26,6 +26,8 @@
         this.formtag = __bind(this.formtag, this);
         this.makenewtag = __bind(this.makenewtag, this);
         this.removeFromArray = __bind(this.removeFromArray, this);
+        this.showTags = __bind(this.showTags, this);
+        this.addTag = __bind(this.addTag, this);
         this.options = $.extend({}, defaults, options);
         this._defaults = defaults;
         this._states = states;
@@ -35,18 +37,17 @@
       }
 
       Plugin.prototype.init = function() {
-        var addtagstext, editingoldtag, tagIcon,
+        var addtagstext, editingoldtag,
           _this = this;
         this.alltags = [];
         editingoldtag = false;
         addtagstext = '+ Add Tags';
         if (this.options.editing) {
+          if (this.options.tags) this.showTags();
           this.tagtext = $("<div class='ui-tagtext' contentEditable='false'></div>");
           $(this.element).append(this.tagtext);
-          tagIcon = $("<div contentEditable='false'><img src = '/images/tag.png' id = 'ui-tagicon'/></div>");
           this.currenttag = $("<div class='ui-individualtag' contentEditable='true'></div>");
           this.message = $("<div class='ui-tagmessage'>" + addtagstext + "</div>");
-          this.tagtext.append(tagIcon);
           this.tagtext.append(this.message);
           this.tagtext.append(this.currenttag);
           this.tagtext.focusout(function() {
@@ -73,6 +74,26 @@
         } else {
           return this.createcompletetags(this.options.tags);
         }
+      };
+
+      Plugin.prototype.addTag = function(tag) {
+        var currenttag;
+        currenttag = $("<div class='ui-individualtag'>" + tag + "</div>");
+        currenttag.css('background-image', 'url("/images/tagOutline.png")');
+        currenttag.css('background-repeat', 'no-repeat');
+        currenttag.css('background-size', '100% 100%');
+        return $(this.element).append(currenttag);
+      };
+
+      Plugin.prototype.showTags = function(taglist) {
+        var tag, _i, _len, _ref, _results;
+        _ref = this.options.tags;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          tag = _ref[_i];
+          _results.push(this.addTag(tag));
+        }
+        return _results;
       };
 
       Plugin.prototype.removeFromArray = function(toremove) {
