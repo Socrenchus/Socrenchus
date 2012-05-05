@@ -103,7 +103,7 @@ $ ->
       else if tag == ',incorrect'
         vote = false
       else
-        $(@el).find('#tagbox').trigger('addtag', tag)
+        $(@el).find('#tagbox:first').trigger('addtag', tag)
 
     render: =>
       $(@el).html(@template)

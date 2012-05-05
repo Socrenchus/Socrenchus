@@ -199,7 +199,7 @@
         } else if (tag === ',incorrect') {
           return vote = false;
         } else {
-          return $(this.el).find('#tagbox').trigger('addtag', tag);
+          return $(this.el).find('#tagbox:first').trigger('addtag', tag);
         }
       };
 
