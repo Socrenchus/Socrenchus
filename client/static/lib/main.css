@@ -59,6 +59,7 @@ textarea[readonly] {
 }
 
 #learn {
+  padding-right: 38px;
 }
 
 h2 {
@@ -433,7 +434,6 @@ h2 {
 
 .inner-question {
   margin-left: 36px;
-  margin-right: 44px;
   position: relative;
   z-index: 2;
 }
@@ -537,7 +537,7 @@ h2 {
 }
 
 #content {
-  width: 75%;
+  width: 85%;
   border: none;
   background: none;
   resize:none;
