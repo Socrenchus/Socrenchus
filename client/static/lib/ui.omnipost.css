@@ -13,7 +13,7 @@
     background-color: white;
     position: relative;
     min-height: 50px;
-    width: 350px;
+    width: 100%;
 }
 #ui-omniPostText {
     position: relative;
@@ -56,13 +56,13 @@
 }
 
 #frame {
-    width: 300px;
+    width: 100%;
     height: 200px;
     border: none;
 }
 
 .ui-linkbox {
-    width: 350px;
+    width: 100%;
     background-color: white;
     position: relative;
     border: 1px solid black;
@@ -70,7 +70,7 @@
 }
 
 .ui-videobox {
-    width: 350px;
+    width: 100%;
     background-color: white;
     position: relative;
     border: 1px solid black;
@@ -78,7 +78,7 @@
 }
 
 .ui-omniPostLink {
-    width: 200px;
+    width: 66%;
     height: 20px;
     margin: 10px;
     resize: none;
