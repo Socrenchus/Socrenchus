@@ -35,7 +35,7 @@ from google.appengine.dist import use_library
 use_library('django', '0.96')
 from bootstrap import BootStrap
 
-_DEBUG = 'localhost' in users.create_logout_url( "/" )
+_DEBUG = True
 class BootstrapHandler(webapp.RequestHandler):
   def get(self, id):
     if _DEBUG:
