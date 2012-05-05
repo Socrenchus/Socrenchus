@@ -16,6 +16,8 @@
 }
 #ui-omniPostText {
     position: relative;
+    /*FIXME: figure out the real reason that the margin is off*/
+    margin-left: -36px;
     width: 280px;
     minHeight: 100px;
     margin-bottom: 10px;
