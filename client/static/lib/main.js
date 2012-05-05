@@ -265,10 +265,12 @@
         this.setTopicCreatorVisibility = __bind(this.setTopicCreatorVisibility, this);
         this.setview = __bind(this.setview, this);
         this.addOne = __bind(this.addOne, this);
+        this.reset = __bind(this.reset, this);
         StreamView.__super__.constructor.apply(this, arguments);
       }
 
       StreamView.prototype.initialize = function() {
+        this.id = 0;
         this.maxlevel = 4;
         this.streamviewRendered = false;
         this.topic_creator_showing = false;
@@ -277,9 +279,16 @@
         postCollection.bind('reset', this.addAll, this);
         postCollection.bind('all', this.render, this);
         tagCollection.bind('add', this.addTag, this);
-        tagCollection.bind('reset', this.addAllTags, this);
-        postCollection.fetch();
-        return tagCollection.fetch();
+        this.reset();
+        return tagCollection.bind('reset', this.addAllTags, this);
+      };
+
+      StreamView.prototype.reset = function() {
+        return $.getJSON('/stream', (function(data) {
+          this.id = data['id'];
+          postCollection.add(data['assignments']);
+          return tagCollection.add(data['tags']);
+        }));
       };
 
       StreamView.prototype.makePost = function(content) {

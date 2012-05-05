@@ -137,6 +137,7 @@ $ ->
    
   class StreamView extends Backbone.View
     initialize: ->
+      @id = 0
       @maxlevel = 4
       @streamviewRendered = false
       @topic_creator_showing = false
@@ -145,9 +146,15 @@ $ ->
       postCollection.bind('reset', @addAll, this)
       postCollection.bind('all', @render, this)
       tagCollection.bind('add', @addTag, this)
+      @reset()
       tagCollection.bind('reset', @addAllTags, this)
-      postCollection.fetch()
-      tagCollection.fetch()
+    
+    reset: =>
+      $.getJSON('/stream', ( (data) ->
+        @id = data['id']
+        postCollection.add(data['assignments'])
+        tagCollection.add(data['tags'])
+      ))
 
     makePost: (content) ->
       p = new Post(

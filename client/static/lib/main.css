@@ -23,11 +23,13 @@ h2 {
 .mediumText {
   text-align: left;
   font-size: 30px;
+  line-height: 45px;
   color: #000;
 }
 
 .largeText {
   font-size: 40px;
+  line-height: 60px;
   color: #444444;
 }
 
