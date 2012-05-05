@@ -54,6 +54,8 @@ $ ->
     tagName: 'li'
     className: 'post'
     template: Templates.post
+    tags: []
+    vote: null
     events: ->
       
     initialize: ->
@@ -78,9 +80,7 @@ $ ->
       $(@el).find('#content').autosize()
 
     renderInnerContents: =>
-      $(@el).find('#votebox').votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()
-      $(@el).find('#tagbox').tagbox({callback: @model.maketag})
       unless postCollection.where({parent: @id}).length > 0
         $(@el).find('#omnipost').omnipost({removeOnSubmit: true, callback: @model.respond})
 
@@ -106,6 +106,11 @@ $ ->
       $(@el).html(@template)
       $(@el).find('.inner-question').attr('id', @model.get('id'))
       @renderInnerContents()
+      tags = tagCollection.where({parent: @model.get('id')})
+      for tag in tags
+        @addTag(tag)
+      $(@el).find('#votebox').votebox(vote: @vote, votesnum:@model.get('score'), callback: @model.maketag)
+      $(@el).find('#tagbox').tagbox(callback: @model.maketag, tags: @tags)
       return $(@el)
       
     addChild:(child) =>
@@ -122,22 +127,16 @@ $ ->
       else
         base = $(@el).find('#response:first')
         base.prepend(child.render())
-     
-   class TagView extends Backbone.View
-    tagName: 'p'
-    className: 'tag'
-    template: Templates.post
-    events: ->
+        
+    addTag:(tag) =>
+      t = tag.get('title')
+      if t[0] != ','
+        @tags += t
+      if t == ',correct'
+        @vote = true
+      else if t == ',incorrect'
+        @vote = false
       
-    initialize: ->
-      @id = @model.get('parent')
-
-    render: ->
-      tagdiv = $("<div class = 'ui-tag'>#{@model.get('title')}</div>")
-      tagdiv.css('background-image', 'url("/images/tagOutline.png")')
-      tagdiv.css('background-repeat', 'no-repeat')
-      tagdiv.css('background-size', '100% 100%')
-      $(@el).append(tagdiv)
    
   class StreamView extends Backbone.View
     initialize: ->
@@ -149,9 +148,7 @@ $ ->
       postCollection.bind('add', @addOne, this)
       postCollection.bind('reset', @addAll, this)
       postCollection.bind('all', @render, this)
-      tagCollection.bind('add', @addTag, this)
       @reset()
-      tagCollection.bind('reset', @addAllTags, this)
     
     reset: =>
       $.getJSON('/stream', ( (data) ->
@@ -194,12 +191,6 @@ $ ->
       item.destroy()
     deleteAll: ->
       postCollection.each(@deleteOne)
-
-    addTag: (item) ->
-      tag = new TagView(model: item)
-    
-    addAllTags: ->
-      tagCollection.each(@addTag)
     
     setTopicCreatorVisibility: =>
       if @topic_creator_showing
