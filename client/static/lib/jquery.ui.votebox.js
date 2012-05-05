@@ -22,6 +22,8 @@
         this.voteCount = __bind(this.voteCount, this);
         this.disable = __bind(this.disable, this);
         this.setImages = __bind(this.setImages, this);
+        this.pressDown = __bind(this.pressDown, this);
+        this.pressUp = __bind(this.pressUp, this);
         this.options = $.extend({}, defaults, options);
         this._defaults = defaults;
         this._name = 'votebox';
@@ -30,7 +32,7 @@
       }
 
       Plugin.prototype.init = function() {
-        var downpressed, originalvotesnum, uppressed, votetext,
+        var downpressed, originalvotesnum, uppressed,
           _this = this;
         this.state = this._states.none;
         uppressed = false;
@@ -39,51 +41,62 @@
         this.upArrow = $("<img alt='^' title='vote up' id='ui-upvote'>");
         this.upArrow.attr('onmouseover', 'src="/images/votearrowover.png"');
         this.upArrow.attr('onmousedown', 'src="/images/votearrowdown.png"');
-        votetext = $("<div id='ui-votetext'>" + (Math.round(originalvotesnum)) + "</div>");
+        this.votetext = $("<div id='ui-votetext'>" + (Math.round(originalvotesnum)) + "</div>");
         this.downArrow = $("<img alt='v' title='vote down' id='ui-downvote'>");
         this.downArrow.attr('onmouseover', 'src="/images/votearrowover.png"');
         this.downArrow.attr('onmousedown', 'src="/images/votearrowdown.png"');
         $(this.element).append(this.upArrow);
-        $(this.element).append(votetext);
+        $(this.element).append(this.votetext);
         $(this.element).append(this.downArrow);
-        if (this.options.vote === true) {
-          this.upArrow.click();
-        } else if (this.options.vote === false) {
-          this.downArrow.click();
-        }
         this.setImages();
-        this.upArrow.click(function() {
-          if (_this.state !== _this._states.up) {
-            _this.state = _this._states.up;
-          } else {
-            _this.voteCount(originalvotesnum);
-            _this.state = _this._states.none;
-          }
-          votetext.text(Math.round(_this.voteCount()));
-          $(_this.element).trigger('votetextChanged', [parseInt(votetext.text()), _this.voteCount()]);
-          _this.setImages();
-          if (_this.state === _this._states.up) {
-            _this.disable();
-            _this.options.callback(",correct");
-          }
-          return $(_this.element).trigger('upArrowPressed', _this.state);
-        });
-        return this.downArrow.click(function() {
-          if (_this.state !== _this._states.down) {
-            _this.state = _this._states.down;
-          } else {
-            _this.voteCount(originalvotesnum);
-            _this.state = _this._states.none;
-          }
-          votetext.text(Math.round(_this.voteCount()));
-          $(_this.element).trigger('votetextChanged', [parseInt(votetext.text()), _this.voteCount()]);
-          _this.setImages();
-          if (_this.state === _this._states.down) {
-            _this.disable();
-            _this.options.callback(",incorrect");
-          }
-          return $(_this.element).trigger('downArrowPressed', _this.state);
-        });
+        if (this.options.vote === true) {
+          this.pressUp();
+          return this.disable();
+        } else if (this.options.vote === false) {
+          this.pressDown();
+          return this.disable();
+        } else {
+          this.upArrow.click(function() {
+            return _this.pressUp();
+          });
+          return this.downArrow.click(function() {
+            return _this.pressDown();
+          });
+        }
+      };
+
+      Plugin.prototype.pressUp = function() {
+        if (this.state !== this._states.up) {
+          this.state = this._states.up;
+        } else {
+          this.voteCount(originalvotesnum);
+          this.state = this._states.none;
+        }
+        this.votetext.text(Math.round(this.voteCount()));
+        $(this.element).trigger('votetextChanged', [parseInt(this.votetext.text()), this.voteCount()]);
+        this.setImages();
+        if (this.state === this._states.up) {
+          this.disable();
+          this.options.callback(",correct");
+        }
+        return $(this.element).trigger('upArrowPressed', this.state);
+      };
+
+      Plugin.prototype.pressDown = function() {
+        if (this.state !== this._states.down) {
+          this.state = this._states.down;
+        } else {
+          this.voteCount(originalvotesnum);
+          this.state = this._states.none;
+        }
+        this.votetext.text(Math.round(this.voteCount()));
+        $(this.element).trigger('votetextChanged', [parseInt(this.votetext.text()), this.voteCount()]);
+        this.setImages();
+        if (this.state === this._states.down) {
+          this.disable();
+          this.options.callback(",incorrect");
+        }
+        return $(this.element).trigger('downArrowPressed', this.state);
       };
 
       Plugin.prototype.setImages = function() {
@@ -112,6 +125,8 @@
       };
 
       Plugin.prototype.disable = function() {
+        this.upArrow.attr('disabled', 'disabled');
+        this.downArrow.attr('disabled', 'disabled');
         this.upArrow.unbind('click');
         this.downArrow.unbind('click');
         this.upArrow.removeAttr('onmouseout');
