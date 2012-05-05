@@ -179,7 +179,7 @@ $ ->
     addAll: ->
       b = $('#assignments')
       a = b.clone()
-      a.empth()
+      a.empty()
       b.before(a)
       postCollection.each(@addOne)
       b.remove()
