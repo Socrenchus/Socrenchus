@@ -31,4 +31,6 @@
 .ui-tagmessage {
   color: #a1a1a1;
   font-style: italic;
+  width: 100px;
+  float: left;
 }
