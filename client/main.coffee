@@ -67,18 +67,17 @@ $ ->
       #contentdiv.append($(jsondata.linkdata))
       contentdiv.val(jsondata.posttext)
 
-    postDOMrender: => 
-      if postCollection.where({parent: @id}).length > 0
-        if $('#' + @model.get('id')).find('.locked-posts').length == 0     
-          $(@el).find('#progress-bar').progressbar({value: @model.get('progress')})
+    postDOMrender: =>
+      if postCollection.where({parent: @id}).length > 0  
+        $(@el).find('#progress-bar').progressbar({value: @model.get('progress')})
       $(@el).find('#content').autosize()
 
     renderInnerContents: =>
-      $(@el).find('.inner-question').find('#votebox').votebox({votesnum:@model.get('score'), callback: @model.maketag})
+      $(@el).find('#votebox').votebox({votesnum:@model.get('score'), callback: @model.maketag})
       @renderPostContent()
-      $(@el).find('.inner-question').find('#tagbox').tagbox({callback: @model.maketag})
+      $(@el).find('#tagbox').tagbox({callback: @model.maketag})
       unless postCollection.where({parent: @id}).length > 0
-        $(@el).find('.inner-question').find('#omnipost').omnipost({removeOnSubmit: true, callback: @model.respond})
+        $(@el).find('#omnipost').omnipost({removeOnSubmit: true, callback: @model.respond})
 
     renderLineToParent: =>
       if $('#line' + @model.get('id')).length == 0

@@ -150,28 +150,26 @@
         if (postCollection.where({
           parent: this.id
         }).length > 0) {
-          if ($('#' + this.model.get('id')).find('.locked-posts').length === 0) {
-            $(this.el).find('#progress-bar').progressbar({
-              value: this.model.get('progress')
-            });
-          }
+          $(this.el).find('#progress-bar').progressbar({
+            value: this.model.get('progress')
+          });
         }
         return $(this.el).find('#content').autosize();
       };
 
       PostView.prototype.renderInnerContents = function() {
-        $(this.el).find('.inner-question').find('#votebox').votebox({
+        $(this.el).find('#votebox').votebox({
           votesnum: this.model.get('score'),
           callback: this.model.maketag
         });
         this.renderPostContent();
-        $(this.el).find('.inner-question').find('#tagbox').tagbox({
+        $(this.el).find('#tagbox').tagbox({
           callback: this.model.maketag
         });
         if (!(postCollection.where({
           parent: this.id
         }).length > 0)) {
-          return $(this.el).find('.inner-question').find('#omnipost').omnipost({
+          return $(this.el).find('#omnipost').omnipost({
             removeOnSubmit: true,
             callback: this.model.respond
           });
