@@ -24,6 +24,7 @@ $ ->
         xp: 0
       )
       tagCollection.create(t)
+      @view.updateProgress()
     
   class Posts extends Backbone.Collection
     model: Post
@@ -67,9 +68,13 @@ $ ->
       #contentdiv.append($(jsondata.linkdata))
       contentdiv.val(jsondata.posttext)
 
+    updateProgress: =>
+      $(@el).find('#progress-bar:first').progressbar("value", @model.get('score') * 100)
+
     postDOMrender: =>
-      if postCollection.where({parent: @id}).length > 0  
-        $(@el).find('#progress-bar').progressbar({value: @model.get('progress')})
+      if postCollection.where({parent: @id}).length > 0
+        if @model.get('progress') != 1
+          $(@el).find('#progress-bar:first').progressbar({value: @model.get('progress') * 100})
       $(@el).find('#content').autosize()
 
     renderInnerContents: =>

@@ -45,7 +45,8 @@
           title: content,
           xp: 0
         });
-        return tagCollection.create(t);
+        tagCollection.create(t);
+        return this.view.updateProgress();
       };
 
       return Post;
@@ -121,6 +122,7 @@
         this.renderLineToParent = __bind(this.renderLineToParent, this);
         this.renderInnerContents = __bind(this.renderInnerContents, this);
         this.postDOMrender = __bind(this.postDOMrender, this);
+        this.updateProgress = __bind(this.updateProgress, this);
         this.renderPostContent = __bind(this.renderPostContent, this);
         PostView.__super__.constructor.apply(this, arguments);
       }
@@ -146,13 +148,19 @@
         return contentdiv.val(jsondata.posttext);
       };
 
+      PostView.prototype.updateProgress = function() {
+        return $(this.el).find('#progress-bar:first').progressbar("value", this.model.get('score') * 100);
+      };
+
       PostView.prototype.postDOMrender = function() {
         if (postCollection.where({
           parent: this.id
         }).length > 0) {
-          $(this.el).find('#progress-bar').progressbar({
-            value: this.model.get('progress')
-          });
+          if (this.model.get('progress') !== 1) {
+            $(this.el).find('#progress-bar:first').progressbar({
+              value: this.model.get('progress') * 100
+            });
+          }
         }
         return $(this.el).find('#content').autosize();
       };
