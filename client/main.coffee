@@ -165,27 +165,22 @@ $ ->
       postCollection.fetch()
 
     addOne: (item) =>
-      post = null
-      if !item.view
-        post = new PostView(model: item)
+      post = new PostView(model: item)
+      post.parent = postCollection.where({id: item.get('parent')})
+      if post.parent.length > 0
+        post.parent = post.parent[0].view
+        post.parent.addChild(post)
       else
-        post = item.view
-
-      if !document.getElementById(item.get('id'))
-        post.parent = postCollection.where({id: item.get('parent')})
-        if post.parent.length > 0
-          post.parent = post.parent[0].view
-          post.parent.addChild(post)
-        else
-          $('#assignments').prepend(post.render())
-        post.postDOMrender()
-
-    setview: (item) =>
-       post = new PostView(model: item)
+        $('#assignments').prepend(post.render())
+      post.postDOMrender()
 
     addAll: ->
-      postCollection.each(@setview)
+      b = $('#assignments')
+      a = b.clone()
+      a.empth()
+      b.before(a)
       postCollection.each(@addOne)
+      b.remove()
 
     deleteOne: (item) ->
       item.destroy()
