@@ -61,14 +61,17 @@ $ ->
       @model.view = @
 
     renderPostContent: =>
-      jsondata = jQuery.parseJSON(@model.get('content'))
-      $(@el).find('.inner-question').find('#content').append($(jsondata.linkdata))
-      $(@el).find('.inner-question').find('#content').append(jsondata.posttext)
-    
-    renderProgressBar: => 
+      jsondata = jQuery.parseJSON(@model.get('content'))  
+      contentdiv = $(@el).find('#content')
+
+      #contentdiv.append($(jsondata.linkdata))
+      contentdiv.val(jsondata.posttext)
+
+    postDOMrender: => 
       if postCollection.where({parent: @id}).length > 0
         if $('#' + @model.get('id')).find('.locked-posts').length == 0     
-          $(@el).find('#progress-bar').progressbar({value: @model.get('progress')})         
+          $(@el).find('#progress-bar').progressbar({value: @model.get('progress')})
+      $(@el).find('#content').autosize()
 
     renderInnerContents: =>
       $(@el).find('.inner-question').find('#votebox').votebox({votesnum:@model.get('score'), callback: @model.maketag})
@@ -167,7 +170,7 @@ $ ->
           post.parent.addChild(post)
         else
           $('#assignments').prepend(post.render())
-        post.renderProgressBar()
+        post.postDOMrender()
 
     setview: (item) =>
        post = new PostView(model: item)

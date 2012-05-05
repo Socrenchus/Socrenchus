@@ -6,7 +6,9 @@
 </script>
     <script src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js' type='text/javascript'>
 </script>
-    <script type='text/javascript' src='/lib/autoresize.jquery.min.js'>
+    <script type='text/javascript' src='/lib/jquery.autosize.js'>
+</script>
+    <script type='text/javascript' src='/lib/jquery.autoResizable.min.js'>
 </script>
 <!--[if IE 8]><script language='javascript' type='text/javascript' src='excanvas.min.js'></script><![endif]-->
 <script type='text/javascript' src='http://s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4eff18ed1735c2b6'></script>
@@ -69,7 +71,7 @@
           <script type='text/template' id='post' class='question'>
             <div class='inner-question'>
               <div id='votebox'></div>
-              <div id='content'></div>
+              <textarea disabled="disabled" readonly="readonly" id='content'></textarea>
               <div id='tagbox'></div>
               <div id='omnipost'></div>
               <div id='progress-bar'></div>

@@ -120,7 +120,7 @@
         this.render = __bind(this.render, this);
         this.renderLineToParent = __bind(this.renderLineToParent, this);
         this.renderInnerContents = __bind(this.renderInnerContents, this);
-        this.renderProgressBar = __bind(this.renderProgressBar, this);
+        this.postDOMrender = __bind(this.postDOMrender, this);
         this.renderPostContent = __bind(this.renderPostContent, this);
         PostView.__super__.constructor.apply(this, arguments);
       }
@@ -140,22 +140,23 @@
       };
 
       PostView.prototype.renderPostContent = function() {
-        var jsondata;
+        var contentdiv, jsondata;
         jsondata = jQuery.parseJSON(this.model.get('content'));
-        $(this.el).find('.inner-question').find('#content').append($(jsondata.linkdata));
-        return $(this.el).find('.inner-question').find('#content').append(jsondata.posttext);
+        contentdiv = $(this.el).find('#content');
+        return contentdiv.val(jsondata.posttext);
       };
 
-      PostView.prototype.renderProgressBar = function() {
+      PostView.prototype.postDOMrender = function() {
         if (postCollection.where({
           parent: this.id
         }).length > 0) {
           if ($('#' + this.model.get('id')).find('.locked-posts').length === 0) {
-            return $(this.el).find('#progress-bar').progressbar({
+            $(this.el).find('#progress-bar').progressbar({
               value: this.model.get('progress')
             });
           }
         }
+        return $(this.el).find('#content').autosize();
       };
 
       PostView.prototype.renderInnerContents = function() {
@@ -310,7 +311,7 @@
           } else {
             $('#assignments').prepend(post.render());
           }
-          return post.renderProgressBar();
+          return post.postDOMrender();
         }
       };
 

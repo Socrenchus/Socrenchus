@@ -2,7 +2,7 @@
     color:#a1a1a1;
     font-style:italic;
 }
-    
+ 
 #ui-omniPostSubmit {
     margin-left:auto;
 }
@@ -17,6 +17,8 @@
 #ui-omniPostText {
     position: relative;
     width: 280px;
+    minHeight: 100px;
+    margin-bottom: 10px;
     outline: none;
     resize: none;
     border: none;

@@ -194,9 +194,7 @@
         panelselectors.append(link);
         omnicontainer = $("<div id='ui-omniContainer'></div>");
         text = $("<textarea id='ui-omniPostText'></textarea>");
-        text.autoResize({
-          extraSpace: 50
-        }).addClass('ui-omniPost');
+        text.autosize().addClass('ui-omniPost');
         selectedImageLink = $("<img alt='x' title='your linked image' id='ui-omniPostImage'>");
         selectedImageLink.hide();
         omnicontainer.append(text);
