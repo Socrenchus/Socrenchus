@@ -46,6 +46,11 @@
         $(this.element).append(this.upArrow);
         $(this.element).append(votetext);
         $(this.element).append(this.downArrow);
+        if (this.options.vote === true) {
+          this.upArrow.click();
+        } else if (this.options.vote === false) {
+          this.downArrow.click();
+        }
         this.setImages();
         this.upArrow.click(function() {
           if (_this.state !== _this._states.up) {
@@ -109,14 +114,14 @@
       Plugin.prototype.disable = function() {
         this.upArrow.unbind('click');
         this.downArrow.unbind('click');
-        this.upArrow.attr('onmouseout', "src={#@upArrow.attr('src')}");
-        this.upArrow.attr('onmouseup', "src={#@upArrow.attr('src')}");
-        this.upArrow.attr('onmouseover', "src={#@upArrow.attr('src')}");
-        this.upArrow.attr('onmousedown', "src={#@upArrow.attr('src')}");
-        this.downArrow.attr('onmouseout', "src={#@downArrow.attr('src')}");
-        this.downArrow.attr('onmouseup', "src={#@downArrow.attr('src')}");
-        this.downArrow.attr('onmouseover', "src={#@downArrow.attr('src')}");
-        return this.downArrow.attr('onmousedown', "src={#@downArrow.attr('src')}");
+        this.upArrow.removeAttr('onmouseout');
+        this.upArrow.removeAttr('onmouseup');
+        this.upArrow.removeAttr('onmouseover');
+        this.upArrow.removeAttr('onmousedown');
+        this.downArrow.removeAttr('onmouseout');
+        this.downArrow.removeAttr('onmouseup');
+        this.downArrow.removeAttr('onmouseover');
+        return this.downArrow.removeAttr('onmousedown');
       };
 
       Plugin.prototype.voteCount = function(newVotesNum) {

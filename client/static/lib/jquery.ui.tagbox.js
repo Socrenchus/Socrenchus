@@ -28,6 +28,7 @@
         this.removeFromArray = __bind(this.removeFromArray, this);
         this.showTags = __bind(this.showTags, this);
         this.addTag = __bind(this.addTag, this);
+        this.addtagevent = __bind(this.addtagevent, this);
         this.options = $.extend({}, defaults, options);
         this._defaults = defaults;
         this._states = states;
@@ -42,6 +43,7 @@
         this.alltags = [];
         editingoldtag = false;
         addtagstext = '+ Add Tags';
+        $(this.element).bind('addtag', this.addtagevent);
         if (this.options.editing) {
           if (this.options.tags) this.showTags();
           this.tagtext = $("<div class='ui-tagtext' contentEditable='false'></div>");
@@ -74,6 +76,15 @@
         } else {
           return this.createcompletetags(this.options.tags);
         }
+      };
+
+      Plugin.prototype.addtagevent = function(event, tag) {
+        var currenttag;
+        currenttag = $("<div class='ui-individualtag'>" + tag + "</div>");
+        currenttag.css('background-image', 'url("/images/tagOutline.png")');
+        currenttag.css('background-repeat', 'no-repeat');
+        currenttag.css('background-size', '100% 100%');
+        return this.message.before(currenttag);
       };
 
       Plugin.prototype.addTag = function(tag) {

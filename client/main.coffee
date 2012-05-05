@@ -24,6 +24,7 @@ $ ->
         xp: 0
       )
       tagCollection.create(t)
+      @view.createTag(content)
       @view.updateProgress()
     
   class Posts extends Backbone.Collection
@@ -96,6 +97,14 @@ $ ->
         linediv.css("z-index", 0)
         $('body').append(linediv)
 
+    createTag: (tag) =>
+      if tag == ',correct'
+        vote = true
+      else if tag == ',incorrect'
+        vote = false
+      else
+        $(@el).find('#tagbox').trigger('addtag', tag)
+
     render: =>
       $(@el).html(@template)
       $(@el).find('.inner-question').attr('id', @model.get('id'))
@@ -123,8 +132,6 @@ $ ->
         base = $(root.el)
         base.before(child.render())
         # TODO: add right angle line to top right of post
-        $(parent.el).addClass('parent')
-        $(child.el).addClass('reply')
         # TODO: change child's style to 'grand piano' down to the right corner
       else
         base = $(@el).find('#response:first')

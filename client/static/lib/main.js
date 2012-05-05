@@ -46,6 +46,7 @@
           xp: 0
         });
         tagCollection.create(t);
+        this.view.createTag(content);
         return this.view.updateProgress();
       };
 
@@ -110,6 +111,7 @@
         this.addTag = __bind(this.addTag, this);
         this.addChild = __bind(this.addChild, this);
         this.render = __bind(this.render, this);
+        this.createTag = __bind(this.createTag, this);
         this.renderLineToParent = __bind(this.renderLineToParent, this);
         this.renderInnerContents = __bind(this.renderInnerContents, this);
         this.postDOMrender = __bind(this.postDOMrender, this);
@@ -190,6 +192,17 @@
         }
       };
 
+      PostView.prototype.createTag = function(tag) {
+        var vote;
+        if (tag === ',correct') {
+          return vote = true;
+        } else if (tag === ',incorrect') {
+          return vote = false;
+        } else {
+          return $(this.el).find('#tagbox').trigger('addtag', tag);
+        }
+      };
+
       PostView.prototype.render = function() {
         var t, tag, taglist, tags, vote, _j, _len2;
         $(this.el).html(this.template);
@@ -230,9 +243,7 @@
             root = root.parent;
           }
           base = $(root.el);
-          base.before(child.render());
-          $(parent.el).addClass('parent');
-          return $(child.el).addClass('reply');
+          return base.before(child.render());
         } else {
           base = $(this.el).find('#response:first');
           return base.prepend(child.render());
