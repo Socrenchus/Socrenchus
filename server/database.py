@@ -159,6 +159,10 @@ class Post(Model, ndb.Model):
         depth = len(key.pairs())
         # count the current replies visible to the user
         current = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==user,  Tag.depth==depth+2, ancestor=key).count()
+        # return if all the replies are visible
+        more = Post.query(Post.depth==depth+1, ancestor=key).count(current+1)
+        if more == current:
+          return 1
         # get our experience in the context of our reply
         old_xp = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==user,  Tag.depth==depth+2, ancestor=my_reply).get()
         new_xp = Post.dereference_experience(my_reply)
