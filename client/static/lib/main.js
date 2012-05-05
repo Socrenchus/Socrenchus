@@ -46,6 +46,7 @@
           xp: 0
         });
         tagCollection.create(t);
+        this.view.addtag(content);
         return this.view.updateProgress();
       };
 
@@ -213,7 +214,7 @@
         var base, root;
         if ((this.model.depth() % App.maxlevel) === (App.maxlevel - 1)) {
           root = this;
-          while ((root.model.depth() % App.maxlevel) !== 0) {
+          while (root.parent && (root.model.depth() % App.maxlevel) !== 0) {
             root = root.parent;
           }
           base = $(root.el);
@@ -255,7 +256,7 @@
         tagdiv.css('background-image', 'url("/images/tagOutline.png")');
         tagdiv.css('background-repeat', 'no-repeat');
         tagdiv.css('background-size', '100% 100%');
-        return $(this.el).append(tagdiv);
+        return $(this.el).find('#taglist').append(tagdiv);
       };
 
       return TagView;

@@ -24,6 +24,7 @@ $ ->
         xp: 0
       )
       tagCollection.create(t)
+      @view.addtag(content)
       @view.updateProgress()
     
   class Posts extends Backbone.Collection
@@ -111,7 +112,7 @@ $ ->
     addChild:(child) =>
       if (@model.depth() % App.maxlevel) == (App.maxlevel - 1)
         root = @
-        while (root.model.depth() % App.maxlevel) != 0
+        while root.parent and (root.model.depth() % App.maxlevel) != 0
           root = root.parent
         base = $(root.el)
         base.before(child.render())
@@ -137,7 +138,7 @@ $ ->
       tagdiv.css('background-image', 'url("/images/tagOutline.png")')
       tagdiv.css('background-repeat', 'no-repeat')
       tagdiv.css('background-size', '100% 100%')
-      $(@el).append(tagdiv)
+      $(@el).find('#taglist').append(tagdiv)
    
   class StreamView extends Backbone.View
     initialize: ->
