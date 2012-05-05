@@ -20,7 +20,7 @@
     },
     { "content" : "{\"posttext\":\"Mariachis\",\"linkdata\":\"\"}",
       "id" : "post4",
-      "parent" : "post9",
+      "parent" : "post3",
       "user" : "100"
     },
     { "content" : "{\"posttext\":\"What do you think of online education?\",\"linkdata\":\"\"}",
