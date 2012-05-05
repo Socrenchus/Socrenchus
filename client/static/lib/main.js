@@ -7,7 +7,7 @@
     /*
       # Core Models and Logic
     */
-    var App, Post, PostView, Posts, StreamView, Tag, TagView, Tags, Templates, Workspace, app_router, e, postCollection, tagCollection, _i, _len, _ref;
+    var App, Post, PostView, Posts, StreamView, Tag, Tags, Templates, Workspace, app_router, e, postCollection, tagCollection, _i, _len, _ref;
     Post = (function(_super) {
 
       __extends(Post, _super);
@@ -118,6 +118,7 @@
       __extends(PostView, _super);
 
       function PostView() {
+        this.addTag = __bind(this.addTag, this);
         this.addChild = __bind(this.addChild, this);
         this.render = __bind(this.render, this);
         this.renderLineToParent = __bind(this.renderLineToParent, this);
@@ -133,6 +134,10 @@
       PostView.prototype.className = 'post';
 
       PostView.prototype.template = Templates.post;
+
+      PostView.prototype.tags = [];
+
+      PostView.prototype.vote = null;
 
       PostView.prototype.events = function() {};
 
@@ -167,14 +172,7 @@
       };
 
       PostView.prototype.renderInnerContents = function() {
-        $(this.el).find('#votebox').votebox({
-          votesnum: this.model.get('score'),
-          callback: this.model.maketag
-        });
         this.renderPostContent();
-        $(this.el).find('#tagbox').tagbox({
-          callback: this.model.maketag
-        });
         if (!(postCollection.where({
           parent: this.id
         }).length > 0)) {
@@ -204,9 +202,26 @@
       };
 
       PostView.prototype.render = function() {
+        var tag, tags, _j, _len2;
         $(this.el).html(this.template);
         $(this.el).find('.inner-question').attr('id', this.model.get('id'));
         this.renderInnerContents();
+        tags = tagCollection.where({
+          parent: this.model.get('id')
+        });
+        for (_j = 0, _len2 = tags.length; _j < _len2; _j++) {
+          tag = tags[_j];
+          this.addTag(tag);
+        }
+        $(this.el).find('#votebox').votebox({
+          vote: this.vote,
+          votesnum: this.model.get('score'),
+          callback: this.model.maketag
+        });
+        $(this.el).find('#tagbox').tagbox({
+          callback: this.model.maketag,
+          tags: this.tags
+        });
         return $(this.el);
       };
 
@@ -227,39 +242,18 @@
         }
       };
 
+      PostView.prototype.addTag = function(tag) {
+        var t;
+        t = tag.get('title');
+        if (t[0] !== ',') this.tags += t;
+        if (t === ',correct') {
+          return this.vote = true;
+        } else if (t === ',incorrect') {
+          return this.vote = false;
+        }
+      };
+
       return PostView;
-
-    })(Backbone.View);
-    TagView = (function(_super) {
-
-      __extends(TagView, _super);
-
-      function TagView() {
-        TagView.__super__.constructor.apply(this, arguments);
-      }
-
-      TagView.prototype.tagName = 'p';
-
-      TagView.prototype.className = 'tag';
-
-      TagView.prototype.template = Templates.post;
-
-      TagView.prototype.events = function() {};
-
-      TagView.prototype.initialize = function() {
-        return this.id = this.model.get('parent');
-      };
-
-      TagView.prototype.render = function() {
-        var tagdiv;
-        tagdiv = $("<div class = 'ui-tag'>" + (this.model.get('title')) + "</div>");
-        tagdiv.css('background-image', 'url("/images/tagOutline.png")');
-        tagdiv.css('background-repeat', 'no-repeat');
-        tagdiv.css('background-size', '100% 100%');
-        return $(this.el).find('#taglist').append(tagdiv);
-      };
-
-      return TagView;
 
     })(Backbone.View);
     StreamView = (function(_super) {
@@ -285,9 +279,7 @@
         postCollection.bind('add', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
         postCollection.bind('all', this.render, this);
-        tagCollection.bind('add', this.addTag, this);
-        this.reset();
-        return tagCollection.bind('reset', this.addAllTags, this);
+        return this.reset();
       };
 
       StreamView.prototype.reset = function() {
@@ -349,17 +341,6 @@
 
       StreamView.prototype.deleteAll = function() {
         return postCollection.each(this.deleteOne);
-      };
-
-      StreamView.prototype.addTag = function(item) {
-        var tag;
-        return tag = new TagView({
-          model: item
-        });
-      };
-
-      StreamView.prototype.addAllTags = function() {
-        return tagCollection.each(this.addTag);
       };
 
       StreamView.prototype.setTopicCreatorVisibility = function() {
