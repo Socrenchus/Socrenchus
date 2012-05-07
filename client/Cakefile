@@ -44,6 +44,15 @@ prodCoffeeFiles = [
     'jquery.ui.notifybox'
 ]
   
+clientTest = (callback) ->
+  jasminetest = spawn 'jasmine-node', ['--coffee', '--verbose', 'spec']
+  jasminetest.stderr.on 'data', (data) ->
+    process.stderr.write data.toString()
+  jasminetest.stdout.on 'data', (data) ->
+    util.log data.toString()
+  jasminetest.on 'exit', (code) ->
+    callback?() if code is 0
+
 build = (callback) ->
   for folder in srcFolders
     coffee = spawn 'coffee', ['-c', '-o', outputJSFolder, folder]
@@ -126,3 +135,7 @@ task 'buildAndCpAll', 'build all coffee files and copy all images', ->
   invoke 'build'
   invoke 'cpimgs'
   invoke 'cpcss'
+
+task 'test', 'run the client and server tests', ->
+  clientTest()
+  
