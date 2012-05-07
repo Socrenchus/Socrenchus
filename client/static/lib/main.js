@@ -153,11 +153,7 @@
         if (postCollection.where({
           parent: this.id
         }).length > 0) {
-          if (this.model.get('progress') !== 1) {
-            $(this.el).find('#progress-bar:first').progressbar({
-              value: this.model.get('progress') * 100
-            });
-          }
+          if (this.model.get('progress') !== 1) updateProgress();
         }
         return $(this.el).find('#content').autosize();
       };

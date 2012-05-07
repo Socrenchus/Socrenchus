@@ -61,8 +61,6 @@ $ ->
     renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))  
       contentdiv = $(@el).find('#content')
-
-      #contentdiv.append($(jsondata.linkdata))
       contentdiv.val(jsondata.posttext)
 
     updateProgress: =>
@@ -71,7 +69,7 @@ $ ->
     postDOMrender: =>
       if postCollection.where({parent: @id}).length > 0
         if @model.get('progress') != 1
-          $(@el).find('#progress-bar:first').progressbar({value: @model.get('progress') * 100})
+          updateProgress()
       $(@el).find('#content').autosize()
 
     renderInnerContents: =>
