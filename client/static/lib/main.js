@@ -112,7 +112,6 @@
         this.addChild = __bind(this.addChild, this);
         this.render = __bind(this.render, this);
         this.createTag = __bind(this.createTag, this);
-        this.renderLineToParent = __bind(this.renderLineToParent, this);
         this.renderInnerContents = __bind(this.renderInnerContents, this);
         this.postDOMrender = __bind(this.postDOMrender, this);
         this.updateProgress = __bind(this.updateProgress, this);
@@ -167,24 +166,6 @@
             removeOnSubmit: true,
             callback: this.model.respond
           });
-        }
-      };
-
-      PostView.prototype.renderLineToParent = function() {
-        var linediv, x1, x2, y1, y2;
-        if ($('#line' + this.model.get('id')).length === 0) {
-          x1 = $('#' + this.model.get('id')).offset().left;
-          y1 = $('#' + this.model.get('id')).offset().top;
-          x2 = $('#' + this.model.get('parent')).offset().left + $('#' + this.model.get('parent')).width();
-          y2 = $('#' + this.model.get('parent')).offset().top + $('#' + this.model.get('parent')).height();
-          linediv = $("<img id ='line" + (this.model.get("id")) + "' src='/images/diagonalLine.png'></img>");
-          linediv.css("position", "absolute");
-          linediv.css("left", x1);
-          linediv.css("top", y1);
-          linediv.css("width", x2 - x1);
-          linediv.css("height", y2 - y1);
-          linediv.css("z-index", 0);
-          return $('body').append(linediv);
         }
       };
 

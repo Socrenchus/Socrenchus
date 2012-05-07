@@ -77,24 +77,6 @@ $ ->
       unless postCollection.where({parent: @id}).length > 0
         $(@el).find('#omnipost:first').omnipost({removeOnSubmit: true, callback: @model.respond})
 
-    renderLineToParent: =>
-      if $('#line' + @model.get('id')).length == 0
-        x1 = $('#'+@model.get('id')).offset().left
-        #FIXME: figure out why the top is not quite correct
-        y1 = $('#'+@model.get('id')).offset().top
-        x2 = $('#' + @model.get('parent')).offset().left + $('#' + @model.get('parent')).width()
-        #FIXME: figure out why the top is not quite correct
-        y2 = $('#'+@model.get('parent')).offset().top + 
-        $('#'+@model.get('parent')).height()
-        linediv = $("<img id ='line#{@model.get("id")}' src='/images/diagonalLine.png'></img>")
-        linediv.css("position", "absolute")
-        linediv.css("left", x1)
-        linediv.css("top", y1)
-        linediv.css("width", x2 - x1)
-        linediv.css("height", y2 - y1)
-        linediv.css("z-index", 0)
-        $('body').append(linediv)
-
     createTag: (tag) =>
       if tag == ',correct'
         vote = true
