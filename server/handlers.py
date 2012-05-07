@@ -95,6 +95,11 @@ class TagHandler(webapp.RequestHandler):
       self.error(403)
   """
 
+class StreamHandler(webapp.RequestHandler):
+  def get(self, id):
+    stream = Stream.get_or_create(users.get_current_user())
+    self.response.out.write(json.encode(stream))
+
 class AccountHandler(webapp.RequestHandler):
   def get(self):
     if users.get_current_user():
@@ -116,7 +121,8 @@ options = [
   ('/load/?(.*)', BootstrapHandler),
   ('/', AccountHandler),
   (r'/posts/?(.*)', PostHandler),
-  (r'/tags/?(.*)', TagHandler)
+  (r'/tags/?(.*)', TagHandler),
+  (r'/stream/?(.*)', StreamHandler)
 ]
 application = webapp.WSGIApplication(options, debug=_DEBUG)
 application = ndb.toplevel(application.__call__)

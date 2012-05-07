@@ -6,8 +6,9 @@
 </script>
     <script src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/jquery-ui.min.js' type='text/javascript'>
 </script>
-    <script type='text/javascript' src='/lib/autoresize.jquery.min.js'>
+    <script type='text/javascript' src='/lib/jquery.autosize.js'>
 </script>
+   
 <!--[if IE 8]><script language='javascript' type='text/javascript' src='excanvas.min.js'></script><![endif]-->
 <script type='text/javascript' src='http://s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4eff18ed1735c2b6'></script>
     <script type='text/javascript'>var addthis_config={data_track_clickback: false}</script>
@@ -40,60 +41,27 @@
       <div id='table-top'>     
         <a id='logout-link' href="{{ url }}">{{ url_linktext }}</a>
         <img onclick='location.href = "/" 'style="cursor:pointer"' id='logo' src='/images/logo.png'>
-        <ul id='classes' class='ui-helper-reset'>
-          <li class='ui-selected'>Your classes...</li>
-          <li id='create'>Teach a class</li>
-        </ul>
-      </div>
-      <div id='profile-view'>
-        <img id='collapsible-profile' src='/images/map.png'>
-        </img>
-        <img id='dropdown-panel' src='/images/scroll-bottom.png'>
-        <h3 id='notification-counter' title='Notifications'>2</h3>
-        <img id='notification-box' src='/images/notifications.png'>
-        </img>
       </div>
       <div id='header'>
       </div>
-      <div id='teach'>
-        <div id='post-question'></div>
-      </div>
-      <div id='learn'>
-        <div id='welcome'>
-        <h1 class='mediumText'><i>WHAT IF</i> YOU HAD A <span class='largeText'>PERSONAL TUTOR</span> THAT REGULARLY MET WITH ALL YOUR PROFESSORS TO ADVOCATE FOR YOU AND TEACH YOU EVERYTHING YOU DON'T UNDERSTAND?<br/><hr/></h1><h1 class='mediumText'><i>WHAT IF</i> YOU HAD A <span class='largeText'>GRADER</span> FOR ALL YOUR CLASSES THAT WORKED WITH YOUR STUDENTS TO HELP YOU UNDERSTAND THEIR NEEDS?<br/><hr/></h1><h2 class='smallText mediumText'>GOODBYE <i>WHAT IF</i>, HELLO&nbsp;&nbsp;<span class='mediumText'>SOCRENCHUS</span></h2>
-          </div>
-          <div id='newquestion'></div>
+      <div id='stream'>
+        <div id='new-assignment'></div>
         <ul id='assignments' class='sortable ui-helper-reset'>
         </ul>
         <div id='templates'>
           <script type='text/template' id='post' class='question'>
             <div class='inner-question'>
-              <ul id='replies' class='ui-helper-reset'></ul>
+              <div id='votebox'></div>
+              <textarea disabled="disabled" readonly="readonly" id='content'></textarea>
+              <div id='taglist'></div>
+              <div id='tagbox'></div>
+              <div id='omnipost'></div>
+              <div id='progress-bar'></div>
+              <ul id='response' class='ui-helper-reset'></ul>
             </div>
           </script>
-          <script type='text/template' id='assignment'>
-            <textarea id='assignment-text' class='autoResizable' readonly>    
-            </textarea>
-            <textarea id='answer' class='defaultText autoResizable no-selection' title='Your response here...'></textarea>
-            
-            <div id='grader'>
-              <br/>
-              <div id='slider'></div>
-              <br/>
-              <span id='grade'>&#8593; Move slider to grade</span>
-            </div>
-
-            </br>
-            <button id='submit' class='submitArea' value='submit'>Submit</button>
-
-            <a id='score'></a>
-          </script>
+         
         </div>
-      </div>
-      <span id='nextPage'>
-        <a>More</a>
-      </span>
-      <div id='footer'>
       </div>
     </div>
     <script type='text/javascript' src='/lib/main.js'>

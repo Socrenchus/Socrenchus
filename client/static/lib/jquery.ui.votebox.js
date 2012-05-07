@@ -18,10 +18,13 @@
 
       function Plugin(element, options) {
         this.element = element;
+        this.updateScore = __bind(this.updateScore, this);
         this.getState = __bind(this.getState, this);
         this.voteCount = __bind(this.voteCount, this);
         this.disable = __bind(this.disable, this);
         this.setImages = __bind(this.setImages, this);
+        this.pressDown = __bind(this.pressDown, this);
+        this.pressUp = __bind(this.pressUp, this);
         this.options = $.extend({}, defaults, options);
         this._defaults = defaults;
         this._name = 'votebox';
@@ -30,59 +33,72 @@
       }
 
       Plugin.prototype.init = function() {
-        var downpressed, originalvotesnum, uppressed, voteboxdiv, votetext,
+        var downpressed, originalvotesnum, uppressed,
           _this = this;
         this.state = this._states.none;
         uppressed = false;
         downpressed = false;
         originalvotesnum = this.options.votesnum;
-        voteboxdiv = $("<div class = 'ui-votebox'></div>");
+        $(this.element).bind('updateScore', this.updateScore);
         this.upArrow = $("<img alt='^' title='vote up' id='ui-upvote'>");
         this.upArrow.attr('onmouseover', 'src="/images/votearrowover.png"');
         this.upArrow.attr('onmousedown', 'src="/images/votearrowdown.png"');
-        votetext = $("<div id='ui-votetext'>" + originalvotesnum + "</div>");
+        this.votetext = $("<div id='ui-votetext'>" + (Math.round(originalvotesnum)) + "</div>");
         this.downArrow = $("<img alt='v' title='vote down' id='ui-downvote'>");
         this.downArrow.attr('onmouseover', 'src="/images/votearrowover.png"');
         this.downArrow.attr('onmousedown', 'src="/images/votearrowdown.png"');
-        voteboxdiv.append(this.upArrow);
-        voteboxdiv.append(votetext);
-        voteboxdiv.append(this.downArrow);
-        $(this.element).append(voteboxdiv);
+        $(this.element).append(this.upArrow);
+        $(this.element).append(this.votetext);
+        $(this.element).append(this.downArrow);
         this.setImages();
-        this.upArrow.click(function() {
-          if (_this.state !== _this._states.up) {
-            _this.voteCount(originalvotesnum + 1);
-            _this.state = _this._states.up;
-          } else {
-            _this.voteCount(originalvotesnum);
-            _this.state = _this._states.none;
-          }
-          votetext.text(_this.voteCount());
-          $(_this.element).trigger('votetextChanged', [parseInt(votetext.text()), _this.voteCount()]);
-          _this.setImages();
-          if (_this.state === _this._states.up) {
-            _this.disable();
-            _this.options.callback(",correct");
-          }
-          return $(_this.element).trigger('upArrowPressed', _this.state);
-        });
-        return this.downArrow.click(function() {
-          if (_this.state !== _this._states.down) {
-            _this.voteCount(originalvotesnum - 1);
-            _this.state = _this._states.down;
-          } else {
-            _this.voteCount(originalvotesnum);
-            _this.state = _this._states.none;
-          }
-          votetext.text(_this.voteCount());
-          $(_this.element).trigger('votetextChanged', [parseInt(votetext.text()), _this.voteCount()]);
-          _this.setImages();
-          if (_this.state === _this._states.down) {
-            _this.disable();
-            _this.options.callback(",incorrect");
-          }
-          return $(_this.element).trigger('downArrowPressed', _this.state);
-        });
+        if (this.options.vote === true) {
+          this.pressUp();
+          return this.disable();
+        } else if (this.options.vote === false) {
+          this.pressDown();
+          return this.disable();
+        } else {
+          this.upArrow.click(function() {
+            return _this.pressUp();
+          });
+          return this.downArrow.click(function() {
+            return _this.pressDown();
+          });
+        }
+      };
+
+      Plugin.prototype.pressUp = function() {
+        if (this.state !== this._states.up) {
+          this.state = this._states.up;
+        } else {
+          this.voteCount(originalvotesnum);
+          this.state = this._states.none;
+        }
+        this.votetext.text(Math.round(this.voteCount()));
+        $(this.element).trigger('votetextChanged', [parseInt(this.votetext.text()), this.voteCount()]);
+        this.setImages();
+        if (this.state === this._states.up) {
+          this.disable();
+          this.options.callback(",correct");
+        }
+        return $(this.element).trigger('upArrowPressed', this.state);
+      };
+
+      Plugin.prototype.pressDown = function() {
+        if (this.state !== this._states.down) {
+          this.state = this._states.down;
+        } else {
+          this.voteCount(originalvotesnum);
+          this.state = this._states.none;
+        }
+        this.votetext.text(Math.round(this.voteCount()));
+        $(this.element).trigger('votetextChanged', [parseInt(this.votetext.text()), this.voteCount()]);
+        this.setImages();
+        if (this.state === this._states.down) {
+          this.disable();
+          this.options.callback(",incorrect");
+        }
+        return $(this.element).trigger('downArrowPressed', this.state);
       };
 
       Plugin.prototype.setImages = function() {
@@ -111,16 +127,18 @@
       };
 
       Plugin.prototype.disable = function() {
+        this.upArrow.attr('disabled', 'disabled');
+        this.downArrow.attr('disabled', 'disabled');
         this.upArrow.unbind('click');
         this.downArrow.unbind('click');
-        this.upArrow.attr('onmouseout', "src={#@upArrow.attr('src')}");
-        this.upArrow.attr('onmouseup', "src={#@upArrow.attr('src')}");
-        this.upArrow.attr('onmouseover', "src={#@upArrow.attr('src')}");
-        this.upArrow.attr('onmousedown', "src={#@upArrow.attr('src')}");
-        this.downArrow.attr('onmouseout', "src={#@downArrow.attr('src')}");
-        this.downArrow.attr('onmouseup', "src={#@downArrow.attr('src')}");
-        this.downArrow.attr('onmouseover', "src={#@downArrow.attr('src')}");
-        return this.downArrow.attr('onmousedown', "src={#@downArrow.attr('src')}");
+        this.upArrow.removeAttr('onmouseout');
+        this.upArrow.removeAttr('onmouseup');
+        this.upArrow.removeAttr('onmouseover');
+        this.upArrow.removeAttr('onmousedown');
+        this.downArrow.removeAttr('onmouseout');
+        this.downArrow.removeAttr('onmouseup');
+        this.downArrow.removeAttr('onmouseover');
+        return this.downArrow.removeAttr('onmousedown');
       };
 
       Plugin.prototype.voteCount = function(newVotesNum) {
@@ -134,6 +152,11 @@
 
       Plugin.prototype.getState = function() {
         return this.options.pressState;
+      };
+
+      Plugin.prototype.updateScore = function(event, newscore) {
+        this.voteCount(newscore);
+        return this.votetext.text(Math.round(this.voteCount()));
       };
 
       return Plugin;

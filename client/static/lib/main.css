@@ -58,7 +58,8 @@ textarea[readonly] {
   float: left;
 }
 
-#learn {
+#stream {
+  padding-right: 38px;
 }
 
 h2 {
@@ -108,11 +109,10 @@ h2 {
   right: 5px;
 }
 
-#post-question {
+#new-assignment {
   margin-left: auto;
   margin-right: auto;
-  /*take this out when omnipost widths are fixed*/
-  margin-right: 200px;
+  width: 350px;
 }
 
 #story {
@@ -185,10 +185,10 @@ h2 {
   margin: 10px;
   background-color: #F8F8F8;
   background-image: -webkit-linear-gradient(top,white,#ECECEC);
-background-image: -moz-linear-gradient(top,white,#ECECEC);
-background-image: -ms-linear-gradient(top,white,#ECECEC);
-background-image: -o-linear-gradient(top,white,#ECECEC);
-background-image: linear-gradient(top,white,#ECECEC);
+  background-image: -moz-linear-gradient(top,white,#ECECEC);
+  background-image: -ms-linear-gradient(top,white,#ECECEC);
+  background-image: -o-linear-gradient(top,white,#ECECEC);
+  background-image: linear-gradient(top,white,#ECECEC);
   border-color: #C6C6C6;
   float: left;
   position: relative;
@@ -273,6 +273,10 @@ background-image: linear-gradient(top,white,#ECECEC);
   margin-left: -36px;
 }
 
+#response {
+  border-left: 1px dotted black;
+}
+
 #question-text, #assignment-text {
   border: none;
   width: 100%;
@@ -330,7 +334,7 @@ background-image: linear-gradient(top,white,#ECECEC);
 .progressbar {
   margin-top: 10px;
   position: relative;
-  height: 35px;
+  height: 10px;
   padding-right: 2px;
   background-color: #abb2bc;
   border-radius: 35px;
@@ -341,6 +345,17 @@ background-image: linear-gradient(top,white,#ECECEC);
   -webkit-box-shadow: inset 0px 1px 2px 0px rgba(0, 0, 0, 0.5), 0px 1px 0px 0px #FFF;
   -moz-box-shadow: inset 0px 1px 2px 0px rgba(0, 0, 0, 0.5), 0px 1px 0px 0px #FFF;
   box-shadow: inset 0px 1px 2px 0px rgba(0, 0, 0, 0.5), 0px 1px 0px 0px #FFF;
+}
+
+.ui-progressbar {
+  width: 85%;
+  margin-left: 50px;
+  border: 1px solid black;
+  padding: 1px;
+}
+
+#progress-bar {
+  height: 10px;
 }
 
 .progress-indicator p {    
@@ -361,7 +376,7 @@ background-image: linear-gradient(top,white,#ECECEC);
   position: relative;
   display: block;
   overflow: hidden;
-  height: 33px;
+  height: 8px;
   -moz-border-radius: 35px;
   -webkit-border-radius: 35px;
   border-radius: 35px;
@@ -419,7 +434,6 @@ background-image: linear-gradient(top,white,#ECECEC);
 
 .inner-question {
   margin-left: 36px;
-  margin-right: 44px;
   position: relative;
   z-index: 2;
 }
@@ -510,19 +524,30 @@ background-image: linear-gradient(top,white,#ECECEC);
   margin-bottom: 20px;
 }
 
-.ui-votebox {
+.parent {
+  border-bottom: 1px solid black;
+}
+
+.reply {
+  border-left: 1px solid black;
+}
+
+#votebox {
   float: left;
 }
 
-.ui-postcontent {
-  margin-left: 50px;
-  margin-bottom: 30px;
+#content {
+  width: 85%;
+  border: none;
+  background: none;
+  resize:none;
 }
 
-.ui-omnipost {
+#omnipost {
+  width: 85%;
   margin-left: 50px;
 }
 
-.ui-tagbox {
+#tagbox {
   margin-left: 50px;
 }
