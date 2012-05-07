@@ -24,7 +24,7 @@ $ ->
         xp: 0
       )
       tagCollection.create(t)
-      @view.createTag(content)
+      @view.triggerTagCall(content)
       @view.updateProgress()
     
   class Posts extends Backbone.Collection
@@ -77,11 +77,13 @@ $ ->
       unless postCollection.where({parent: @id}).length > 0
         $(@el).find('#omnipost:first').omnipost({removeOnSubmit: true, callback: @model.respond})
 
-    createTag: (tag) =>
+    triggerTagCall: (tag) =>
       if tag == ',correct'
         vote = true
+        $(@el).find('#votebox:first').trigger('updateScore', @model.get('score'))
       else if tag == ',incorrect'
         vote = false
+        $(@el).find('#votebox:first').trigger('updateScore', @model.get('score'))
       else
         $(@el).find('#tagbox:first').trigger('addtag', tag)
 
@@ -116,17 +118,6 @@ $ ->
       else
         base = $(@el).find('#response:first')
         base.prepend(child.render())
-        
-    addTag:(tag) =>
-      t = tag.get('title')
-      if t[0] != ','
-        @tags.push(t)
-      if t == ',correct'
-        @vote = true
-      else if t == ',incorrect'
-        @vote = false
-      
-
    
   class StreamView extends Backbone.View
     initialize: ->

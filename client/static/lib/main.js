@@ -46,7 +46,7 @@
           xp: 0
         });
         tagCollection.create(t);
-        this.view.createTag(content);
+        this.view.triggerTagCall(content);
         return this.view.updateProgress();
       };
 
@@ -108,10 +108,9 @@
       __extends(PostView, _super);
 
       function PostView() {
-        this.addTag = __bind(this.addTag, this);
         this.addChild = __bind(this.addChild, this);
         this.render = __bind(this.render, this);
-        this.createTag = __bind(this.createTag, this);
+        this.triggerTagCall = __bind(this.triggerTagCall, this);
         this.renderInnerContents = __bind(this.renderInnerContents, this);
         this.postDOMrender = __bind(this.postDOMrender, this);
         this.updateProgress = __bind(this.updateProgress, this);
@@ -169,12 +168,14 @@
         }
       };
 
-      PostView.prototype.createTag = function(tag) {
+      PostView.prototype.triggerTagCall = function(tag) {
         var vote;
         if (tag === ',correct') {
-          return vote = true;
+          vote = true;
+          return $(this.el).find('#votebox:first').trigger('updateScore', this.model.get('score'));
         } else if (tag === ',incorrect') {
-          return vote = false;
+          vote = false;
+          return $(this.el).find('#votebox:first').trigger('updateScore', this.model.get('score'));
         } else {
           return $(this.el).find('#tagbox:first').trigger('addtag', tag);
         }
@@ -224,17 +225,6 @@
         } else {
           base = $(this.el).find('#response:first');
           return base.prepend(child.render());
-        }
-      };
-
-      PostView.prototype.addTag = function(tag) {
-        var t;
-        t = tag.get('title');
-        if (t[0] !== ',') this.tags.push(t);
-        if (t === ',correct') {
-          return this.vote = true;
-        } else if (t === ',incorrect') {
-          return this.vote = false;
         }
       };
 
