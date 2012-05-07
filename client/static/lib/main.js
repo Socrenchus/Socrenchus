@@ -152,7 +152,7 @@
         if (postCollection.where({
           parent: this.id
         }).length > 0) {
-          if (this.model.get('progress') !== 1) updateProgress();
+          if (this.model.get('progress') !== 1) this.updateProgress();
         }
         return $(this.el).find('#content').autosize();
       };
@@ -320,9 +320,9 @@
 
       StreamView.prototype.setTopicCreatorVisibility = function() {
         if (this.topic_creator_showing) {
-          return $('#post-question').show();
+          return $('#new-assignment').show();
         } else {
-          return $('#post-question').hide();
+          return $('#new-assignment').hide();
         }
       };
 
@@ -335,7 +335,7 @@
         var profileshowing,
           _this = this;
         if (!this.streamviewRendered) {
-          $('#post-question').omnipost({
+          $('#new-assignment').omnipost({
             callback: this.makePost,
             message: 'Post a topic...'
           });
@@ -439,7 +439,7 @@
     postCollection = new Posts();
     tagCollection = new Tags();
     App = new StreamView({
-      el: $('#learn')
+      el: $('#stream')
     });
     app_router = new Workspace();
     return Backbone.history.start();

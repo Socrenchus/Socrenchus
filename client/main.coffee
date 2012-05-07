@@ -69,7 +69,7 @@ $ ->
     postDOMrender: =>
       if postCollection.where({parent: @id}).length > 0
         if @model.get('progress') != 1
-          updateProgress()
+          @updateProgress()
       $(@el).find('#content').autosize()
 
     renderInnerContents: =>
@@ -179,9 +179,9 @@ $ ->
     
     setTopicCreatorVisibility: =>
       if @topic_creator_showing
-        $('#post-question').show() 
+        $('#new-assignment').show() 
       else
-        $('#post-question').hide()
+        $('#new-assignment').hide()
 
     showTopicCreator: (showing) =>
       @topic_creator_showing = showing
@@ -189,7 +189,7 @@ $ ->
         
     render: =>
       if !@streamviewRendered
-        $('#post-question').omnipost({callback: @makePost, message: 'Post a topic...'})
+        $('#new-assignment').omnipost({callback: @makePost, message: 'Post a topic...'})
         @setTopicCreatorVisibility()
         @scrollingDiv = $('#story')
         $('#collapsible-profile').hide()
@@ -274,6 +274,6 @@ $ ->
 
   postCollection = new Posts()
   tagCollection = new Tags()
-  App = new StreamView(el: $('#learn'))        
+  App = new StreamView(el: $('#stream'))        
   app_router = new Workspace()  
   Backbone.history.start()

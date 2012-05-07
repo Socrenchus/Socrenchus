@@ -41,26 +41,11 @@
       <div id='table-top'>     
         <a id='logout-link' href="{{ url }}">{{ url_linktext }}</a>
         <img onclick='location.href = "/" 'style="cursor:pointer"' id='logo' src='/images/logo.png'>
-        <ul id='classes' class='ui-helper-reset'>
-          <li class='ui-selected'>Your classes...</li>
-          <li id='create'>Teach a class</li>
-        </ul>
-      </div>
-      <div id='profile-view'>
-        <img id='collapsible-profile' src='/images/map.png'>
-        </img>
-        <img id='dropdown-panel' src='/images/scroll-bottom.png'>
-        <h3 id='notification-counter' title='Notifications'>2</h3>
-        <img id='notification-box' src='/images/notifications.png'>
-        </img>
       </div>
       <div id='header'>
       </div>
-      <div id='teach'>
-        <div id='post-question'></div>
-      </div>
-      <div id='learn'>
-          <div id='newquestion'></div>
+      <div id='stream'>
+        <div id='new-assignment'></div>
         <ul id='assignments' class='sortable ui-helper-reset'>
         </ul>
         <div id='templates'>
@@ -77,11 +62,6 @@
           </script>
          
         </div>
-      </div>
-      <span id='nextPage'>
-        <a>More</a>
-      </span>
-      <div id='footer'>
       </div>
     </div>
     <script type='text/javascript' src='/lib/main.js'>
