@@ -7,7 +7,7 @@
     /*
       # Core Models and Logic
     */
-    var App, Post, PostView, Posts, StreamView, Tag, TagView, Tags, Templates, Workspace, app_router, e, postCollection, tagCollection, _i, _len, _ref;
+    var App, Post, PostView, Posts, StreamView, Tag, Tags, Templates, Workspace, app_router, e, postCollection, tagCollection, _i, _len, _ref;
     Post = (function(_super) {
 
       __extends(Post, _super);
@@ -15,36 +15,17 @@
       function Post() {
         this.maketag = __bind(this.maketag, this);
         this.respond = __bind(this.respond, this);
-        this.calcDepth = __bind(this.calcDepth, this);
+        this.depth = __bind(this.depth, this);
         this.initialize = __bind(this.initialize, this);
         Post.__super__.constructor.apply(this, arguments);
       }
 
       Post.prototype.urlRoot = '/posts';
 
-      Post.prototype.initialize = function() {
-        this.view = null;
-        this.level = 0;
-        this.maxlevel = 2;
-        this.relativelevel = 0;
-        return this.currentlevel = 0;
-      };
+      Post.prototype.initialize = function() {};
 
-      Post.prototype.calcDepth = function() {
-        var parentposts;
-        parentposts = postCollection.where({
-          id: this.get('parent')
-        });
-        if (parentposts.length > 0) {
-          this.level = parentposts[0].level + 1;
-          this.relativelevel = parentposts[0].relativelevel + 1;
-          return parentposts = postCollection.where({
-            id: parentposts[0].get('parent')
-          });
-        } else {
-          this.level = 0;
-          return this.relativelevel = 0;
-        }
+      Post.prototype.depth = function() {
+        return this.get('depth') - 1;
       };
 
       Post.prototype.respond = function(content) {
@@ -64,7 +45,9 @@
           title: content,
           xp: 0
         });
-        return tagCollection.create(t);
+        tagCollection.create(t);
+        this.view.triggerTagCall(content);
+        return this.view.updateProgress();
       };
 
       return Post;
@@ -90,18 +73,8 @@
       __extends(Tag, _super);
 
       function Tag() {
-        this.respond = __bind(this.respond, this);
         Tag.__super__.constructor.apply(this, arguments);
       }
-
-      Tag.prototype.respond = function(content) {
-        var t;
-        t = new Tag({
-          title: content,
-          xp: 0
-        });
-        return tagCollection.create(t);
-      };
 
       return Tag;
 
@@ -135,10 +108,12 @@
       __extends(PostView, _super);
 
       function PostView() {
+        this.addChild = __bind(this.addChild, this);
         this.render = __bind(this.render, this);
-        this.renderLineToParent = __bind(this.renderLineToParent, this);
+        this.triggerTagCall = __bind(this.triggerTagCall, this);
         this.renderInnerContents = __bind(this.renderInnerContents, this);
-        this.renderProgressBar = __bind(this.renderProgressBar, this);
+        this.postDOMrender = __bind(this.postDOMrender, this);
+        this.updateProgress = __bind(this.updateProgress, this);
         this.renderPostContent = __bind(this.renderPostContent, this);
         PostView.__super__.constructor.apply(this, arguments);
       }
@@ -149,133 +124,111 @@
 
       PostView.prototype.template = Templates.post;
 
+      PostView.prototype.tags = [];
+
+      PostView.prototype.vote = null;
+
       PostView.prototype.events = function() {};
 
       PostView.prototype.initialize = function() {
         this.id = this.model.id;
         this.model.bind('change', this.render);
-        this.model.view = this;
-        return this.overflowing = false;
+        return this.model.view = this;
       };
 
       PostView.prototype.renderPostContent = function() {
-        var jsondata, postcontentdiv;
+        var contentdiv, jsondata;
         jsondata = jQuery.parseJSON(this.model.get('content'));
-        postcontentdiv = $("<div class = 'ui-postcontent'></div>");
-        postcontentdiv.append($(jsondata.linkdata));
-        postcontentdiv.append('<br />');
-        postcontentdiv.append(jsondata.posttext);
-        return $(this.el).find('.inner-question').append(postcontentdiv);
+        contentdiv = $(this.el).find('#content');
+        return contentdiv.val(jsondata.posttext);
       };
 
-      PostView.prototype.renderProgressBar = function() {
-        var indicatortext, lockedpostsdiv, percent, progressbardiv, progressindicatordiv, textinline;
+      PostView.prototype.updateProgress = function() {
+        return $(this.el).find('#progress-bar:first').progressbar("value", this.model.get('score') * 100);
+      };
+
+      PostView.prototype.postDOMrender = function() {
         if (postCollection.where({
           parent: this.id
         }).length > 0) {
-          lockedpostsdiv = $("<div class='locked-posts'></div>");
-          progressbardiv = $("<div class='progressbar'></div>");
-          percent = this.model.get('progress') * 100;
-          textinline = true;
-          indicatortext = $('<p id="indicator-text">Unlock More Posts</p>');
-          if (percent < 100.0 / 350.0 * 100) textinline = false;
-          if (textinline) {
-            progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
-            progressindicatordiv.append(indicatortext);
-            progressbardiv.append(progressindicatordiv);
-          } else {
-            progressindicatordiv = $("<div class='progress-indicator' style='width:" + percent + "%'></div>");
-            progressbardiv.append(progressindicatordiv);
-            progressbardiv.append(indicatortext);
-          }
-          lockedpostsdiv.append(progressbardiv);
-          return $(this.el).find('.inner-question').append(lockedpostsdiv);
+          if (this.model.get('progress') !== 1) this.updateProgress();
         }
+        return $(this.el).find('#content').autosize();
       };
 
       PostView.prototype.renderInnerContents = function() {
-        var overflowedresponsediv, responsediv;
-        overflowedresponsediv = $("<div id = 'overflowedresponses" + (this.model.get('id')) + "'></div>");
-        overflowedresponsediv.attr('class', 'overflowed-posts');
-        $(this.el).find('.inner-question').append(overflowedresponsediv);
-        $(this.el).find('.inner-question').votebox({
-          votesnum: this.model.get('score'),
-          callback: this.model.maketag
-        });
         this.renderPostContent();
-        $(this.el).find('.inner-question').tagbox({
-          callback: this.model.maketag
-        });
-        this.renderProgressBar();
         if (!(postCollection.where({
           parent: this.id
         }).length > 0)) {
-          $(this.el).find('.inner-question').omnipost({
+          return $(this.el).find('#omnipost:first').omnipost({
             removeOnSubmit: true,
             callback: this.model.respond
           });
         }
-        responsediv = $("<div id = 'response" + (this.model.get('id')) + "'></div>");
-        responsediv.css('border-left', 'dotted 1px black');
-        return $(this.el).find('.inner-question').append(responsediv);
       };
 
-      PostView.prototype.renderLineToParent = function() {
-        var linediv, x1, x2, y1, y2;
-        x1 = $(this.el).find('.inner-question').offset().left;
-        y1 = $(this.el).find('.inner-question').offset().top + 50;
-        x2 = $('#' + this.model.get('parent')).offset().left + $('#' + this.model.get('parent')).width();
-        y2 = $('#' + this.model.get('parent')).offset().top + $('#' + this.model.get('parent')).height() + 50;
-        linediv = $("<img src='/images/diagonalLine.png'></img>");
-        linediv.css("position", "absolute");
-        linediv.css("left", x1);
-        linediv.css("top", y1);
-        linediv.css("width", x2 - x1);
-        linediv.css("height", y2 - y1);
-        linediv.css("z-index", 0);
-        return $('body').append(linediv);
+      PostView.prototype.triggerTagCall = function(tag) {
+        var vote;
+        if (tag === ',correct') {
+          vote = true;
+          return $(this.el).find('#votebox:first').trigger('updateScore', this.model.get('score'));
+        } else if (tag === ',incorrect') {
+          vote = false;
+          return $(this.el).find('#votebox:first').trigger('updateScore', this.model.get('score'));
+        } else {
+          return $(this.el).find('#tagbox:first').trigger('addtag', tag);
+        }
       };
 
       PostView.prototype.render = function() {
+        var t, tag, taglist, tags, vote, _j, _len2;
         $(this.el).html(this.template);
         $(this.el).find('.inner-question').attr('id', this.model.get('id'));
         this.renderInnerContents();
+        tags = tagCollection.where({
+          parent: this.model.get('id')
+        });
+        taglist = [];
+        vote = null;
+        for (_j = 0, _len2 = tags.length; _j < _len2; _j++) {
+          tag = tags[_j];
+          t = tag.get('title');
+          if (t[0] !== ',') taglist.push(t);
+          if (t === ',correct') {
+            vote = true;
+          } else if (t === ',incorrect') {
+            vote = false;
+          }
+        }
+        $(this.el).find('#votebox:first').votebox({
+          vote: vote,
+          votesnum: this.model.get('score'),
+          callback: this.model.maketag
+        });
+        $(this.el).find('#tagbox:first').tagbox({
+          callback: this.model.maketag,
+          tags: taglist
+        });
         return $(this.el);
       };
 
+      PostView.prototype.addChild = function(child) {
+        var base, root;
+        if ((this.model.depth() % App.maxlevel) === (App.maxlevel - 1)) {
+          root = this;
+          while (root.parent && (root.model.depth() % App.maxlevel) !== 0) {
+            root = root.parent;
+          }
+          base = $(root.el);
+          return base.before(child.render());
+        } else {
+          base = $(this.el).find('#response:first');
+          return base.prepend(child.render());
+        }
+      };
+
       return PostView;
-
-    })(Backbone.View);
-    TagView = (function(_super) {
-
-      __extends(TagView, _super);
-
-      function TagView() {
-        TagView.__super__.constructor.apply(this, arguments);
-      }
-
-      TagView.prototype.tagName = 'p';
-
-      TagView.prototype.className = 'tag';
-
-      TagView.prototype.template = Templates.post;
-
-      TagView.prototype.events = function() {};
-
-      TagView.prototype.initialize = function() {
-        return this.id = this.model.get('parent');
-      };
-
-      TagView.prototype.render = function() {
-        var tagdiv;
-        tagdiv = $("<div class = 'ui-tag'>" + (this.model.get('title')) + "</div>");
-        tagdiv.css('background-image', 'url("/images/tagOutline.png")');
-        tagdiv.css('background-repeat', 'no-repeat');
-        tagdiv.css('background-size', '100% 100%');
-        return $(this.el).append(tagdiv);
-      };
-
-      return TagView;
 
     })(Backbone.View);
     StreamView = (function(_super) {
@@ -287,20 +240,28 @@
         this.showTopicCreator = __bind(this.showTopicCreator, this);
         this.setTopicCreatorVisibility = __bind(this.setTopicCreatorVisibility, this);
         this.addOne = __bind(this.addOne, this);
+        this.reset = __bind(this.reset, this);
         StreamView.__super__.constructor.apply(this, arguments);
       }
 
       StreamView.prototype.initialize = function() {
+        this.id = 0;
+        this.maxlevel = 4;
         this.streamviewRendered = false;
         this.topic_creator_showing = false;
         this.selectedStory = '#story-part1';
         postCollection.bind('add', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
         postCollection.bind('all', this.render, this);
-        tagCollection.bind('add', this.addTag, this);
-        tagCollection.bind('reset', this.addAllTags, this);
-        postCollection.fetch();
-        return tagCollection.fetch();
+        return this.reset();
+      };
+
+      StreamView.prototype.reset = function() {
+        return $.getJSON('/stream', (function(data) {
+          this.id = data['id'];
+          tagCollection.add(data['tags']);
+          return postCollection.add(data['assignments']);
+        }));
       };
 
       StreamView.prototype.makePost = function(content) {
@@ -308,7 +269,8 @@
         p = new Post({
           content: content
         });
-        return postCollection.create(p);
+        postCollection.create(p);
+        return postCollection.fetch();
       };
 
       StreamView.prototype.addOne = function(item) {
@@ -316,31 +278,26 @@
         post = new PostView({
           model: item
         });
-        item.calcDepth();
-        if (item.relativelevel === item.maxlevel) {
-          post.overflowing = true;
-          item.relativelevel = 0;
-        }
-        if (!document.getElementById(item.get('id'))) {
-          if (document.getElementById('response' + item.get('parent')) && !post.overflowing) {
-            return $('#response' + item.get('parent')).prepend(post.render());
-          } else if (post.overflowing) {
-            return $('#overflowedresponses' + item.get('parent')).prepend(post.render());
-          } else {
-            return $('#assignments').prepend(post.render());
-          }
+        post.parent = postCollection.where({
+          id: item.get('parent')
+        });
+        if (post.parent.length > 0) {
+          post.parent = post.parent[0].view;
+          post.parent.addChild(post);
         } else {
-          return post.renderProgressBar();
+          $('#assignments').prepend(post.render());
         }
-      };
-
-      StreamView.prototype.addLines = function(item) {
-        if (item.view.overflowing) return item.view.renderLineToParent();
+        return post.postDOMrender();
       };
 
       StreamView.prototype.addAll = function() {
+        var a, b;
+        b = $('#assignments');
+        a = b.clone();
+        a.empty();
+        b.before(a);
         postCollection.each(this.addOne);
-        return postCollection.each(this.addLines);
+        return b.remove();
       };
 
       StreamView.prototype.deleteOne = function(item) {
@@ -351,22 +308,11 @@
         return postCollection.each(this.deleteOne);
       };
 
-      StreamView.prototype.addTag = function(item) {
-        var tag;
-        return tag = new TagView({
-          model: item
-        });
-      };
-
-      StreamView.prototype.addAllTags = function() {
-        return tagCollection.each(this.addTag);
-      };
-
       StreamView.prototype.setTopicCreatorVisibility = function() {
         if (this.topic_creator_showing) {
-          return $('#post-question').show();
+          return $('#new-assignment').show();
         } else {
-          return $('#post-question').hide();
+          return $('#new-assignment').hide();
         }
       };
 
@@ -379,7 +325,7 @@
         var profileshowing,
           _this = this;
         if (!this.streamviewRendered) {
-          $('#post-question').omnipost({
+          $('#new-assignment').omnipost({
             callback: this.makePost,
             message: 'Post a topic...'
           });
@@ -483,7 +429,7 @@
     postCollection = new Posts();
     tagCollection = new Tags();
     App = new StreamView({
-      el: $('#learn')
+      el: $('#stream')
     });
     app_router = new Workspace();
     return Backbone.history.start();

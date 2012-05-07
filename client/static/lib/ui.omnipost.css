@@ -1,27 +1,25 @@
-.ui-omniPost {
-    width:340px;
-}
-    
 .ui-omniPostActive {
     color:#a1a1a1;
     font-style:italic;
 }
-    
+ 
 #ui-omniPostSubmit {
     margin-left:auto;
 }
-    
 
 #ui-omniContainer {
     cursor: text;
     border: 1px solid black;
     background-color: white;
     position: relative;
-    width: 350px;
+    min-height: 50px;
+    width: 100%;
 }
 #ui-omniPostText {
     position: relative;
     width: 280px;
+    minHeight: 100px;
+    margin-bottom: 10px;
     outline: none;
     resize: none;
     border: none;
@@ -58,13 +56,13 @@
 }
 
 #frame {
-    width: 300px;
+    width: 100%;
     height: 200px;
     border: none;
 }
 
 .ui-linkbox {
-    width: 350px;
+    width: 100%;
     background-color: white;
     position: relative;
     border: 1px solid black;
@@ -72,7 +70,7 @@
 }
 
 .ui-videobox {
-    width: 350px;
+    width: 100%;
     background-color: white;
     position: relative;
     border: 1px solid black;
@@ -80,7 +78,7 @@
 }
 
 .ui-omniPostLink {
-    width: 200px;
+    width: 66%;
     height: 20px;
     margin: 10px;
     resize: none;
