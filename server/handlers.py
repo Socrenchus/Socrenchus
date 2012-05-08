@@ -35,7 +35,7 @@ from google.appengine.dist import use_library
 use_library('django', '0.96')
 from bootstrap import BootStrap
 
-_DEBUG = 'localhost' in users.create_logout_url( "/" )
+_DEBUG = True
 class BootstrapHandler(webapp.RequestHandler):
   def get(self, id):
     if _DEBUG:
@@ -53,8 +53,7 @@ class PostHandler(webapp.RequestHandler):
     else:
       def post_list(key):
         return key.parent()
-      json.encode(stream.assignments().map(post_list,keys_only=True))
-      result = stream.assignments().order(Stream.timestamp).map(post_list,keys_only=True)
+      result = stream.get_assignments()
     self.response.out.write(json.encode(result))
 
  
