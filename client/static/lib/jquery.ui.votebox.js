@@ -18,7 +18,6 @@
 
       function Plugin(element, options) {
         this.element = element;
-        this.updateScore = __bind(this.updateScore, this);
         this.getState = __bind(this.getState, this);
         this.voteCount = __bind(this.voteCount, this);
         this.disable = __bind(this.disable, this);
@@ -39,7 +38,6 @@
         uppressed = false;
         downpressed = false;
         originalvotesnum = this.options.votesnum;
-        $(this.element).bind('updateScore', this.updateScore);
         this.upArrow = $("<img alt='^' title='vote up' id='ui-upvote'>");
         this.upArrow.attr('onmouseover', 'src="/images/votearrowover.png"');
         this.upArrow.attr('onmousedown', 'src="/images/votearrowdown.png"');
@@ -58,7 +56,6 @@
           this.pressDown();
           return this.disable();
         } else {
-          this.votetext.text('*');
           this.upArrow.click(function() {
             return _this.pressUp();
           });
@@ -153,11 +150,6 @@
 
       Plugin.prototype.getState = function() {
         return this.options.pressState;
-      };
-
-      Plugin.prototype.updateScore = function(event, newscore) {
-        this.voteCount(newscore);
-        return this.votetext.text(Math.round(this.voteCount()));
       };
 
       return Plugin;

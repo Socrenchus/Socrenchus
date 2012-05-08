@@ -185,8 +185,11 @@ class DatabaseTests(unittest.TestCase):
     stream = self.switchToUser(str(1))
     for i in range(3):
       # check assignments
-      post.get_progress(stream.user)
-      self.assertEqual(stream.assignments().count(), (5*(i+1))+1)
+      a = stream.get_assignments()
+      m = "Stream contains unexpected duplicates."
+      self.assertEqual(len(a), len(set([x.key for x in a])), msg=m)
+      m = "New assignments did not follow expected behavior."
+      self.assertEqual(len(a), (5*(i+1))+1, msg=m)
       # acquire points
       stream.adjust_experience('a',25)
 
