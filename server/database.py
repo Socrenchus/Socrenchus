@@ -46,6 +46,14 @@ class Post(Model, ndb.Model):
   score       = ndb.FloatProperty(default=0.0)
   timestamp   = ndb.DateTimeProperty(auto_now_add=True)
 
+  def to_dict(self):
+    result = Model.to_dict(self)
+    # scrub post's score if the user hasn't voted yet
+    voted = Tag.query(ndb.OR(Tag.title==Tag.base('correct'),Tag.title==Tag.base('incorrect')), Tag.user==users.get_current_user(), ancestor=self.key).count(1)
+    if not voted:
+      del result['score']
+    return result
+
   @classmethod
   def children(cls, key):
     """
@@ -188,8 +196,8 @@ class Post(Model, ndb.Model):
     """
     # TODO: Improve step function
     # show 5 posts for every 25 xp
-    point_step = 25
-    post_step = 5
+    point_step = 15
+    post_step = 3
     return (((int(delta_xp)/point_step)+1)*post_step, float(delta_xp%point_step)/float(point_step))
 
 class Tag(Model, ndb.Model):
