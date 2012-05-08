@@ -53,8 +53,7 @@ class PostHandler(webapp.RequestHandler):
     else:
       def post_list(key):
         return key.parent()
-      json.encode(stream.assignments().map(post_list,keys_only=True))
-      result = stream.assignments().order(Stream.timestamp).map(post_list,keys_only=True)
+      result = stream.get_assignments()
     self.response.out.write(json.encode(result))
 
  

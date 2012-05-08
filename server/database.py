@@ -17,6 +17,7 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 
 import random
+import datetime
 
 class Model:
   @ndb.ComputedProperty
@@ -44,11 +45,6 @@ class Post(Model, ndb.Model):
   content     = ndb.TextProperty()
   score       = ndb.FloatProperty(default=0.0)
   timestamp   = ndb.DateTimeProperty(auto_now=True)
-  
-  def to_dict(self):
-    result = Model.to_dict(self)
-    result['progress'] = self.get_progress(users.get_current_user())
-    return result
 
   @classmethod
   def children(cls, key):
@@ -346,14 +342,24 @@ class Stream(ndb.Model):
   def to_dict(self):
     result = {}
     result['id'] = self.key.urlsafe()
-    def post_check(key):
-      return key.parent().get().to_dict()
-    self.assignments().map(post_check,keys_only=True)
-    def post_list(key):
-      return key.parent()
-    result['assignments'] = self.assignments().order(Stream.timestamp).map(post_list,keys_only=True)
+    result['assignments'] = self.get_assignments()
     result['tags'] = Tag.query(Tag.user == users.get_current_user())
     return result
+    
+  def get_assignments(self):
+    """
+    Gets current assignments, adds new ones, returns all.
+    """
+    def post_check(key):
+      p = key.parent().get()
+      p.progress = p.get_progress(self.user)
+      return p
+    qtime = datetime.datetime.now()
+    a = self.assignments().order(Stream.timestamp).map(post_check,keys_only=True)
+    def post_list(key):
+      return key.parent()
+    a += self.assignments().filter(Stream.timestamp > qtime).order(Stream.timestamp).map(post_list,keys_only=True)
+    return a
 
   def assignments(self):
     """
