@@ -58,6 +58,7 @@
           this.pressDown();
           return this.disable();
         } else {
+          this.votetext.text('*');
           this.upArrow.click(function() {
             return _this.pressUp();
           });
