@@ -43,7 +43,7 @@ prodCoffeeFiles = [
     'jquery.ui.omnipost'
     'jquery.ui.notifybox'
 ]
-  
+
 build = (callback) ->
   for folder in srcFolders
     coffee = spawn 'coffee', ['-c', '-o', outputJSFolder, folder]
@@ -126,3 +126,5 @@ task 'buildAndCpAll', 'build all coffee files and copy all images', ->
   invoke 'build'
   invoke 'cpimgs'
   invoke 'cpcss'
+
+  

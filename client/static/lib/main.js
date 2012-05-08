@@ -46,7 +46,7 @@
           xp: 0
         });
         tagCollection.create(t);
-        this.view.createTag(content);
+        this.view.triggerTagCall(content);
         return this.view.updateProgress();
       };
 
@@ -108,11 +108,9 @@
       __extends(PostView, _super);
 
       function PostView() {
-        this.addTag = __bind(this.addTag, this);
         this.addChild = __bind(this.addChild, this);
         this.render = __bind(this.render, this);
-        this.createTag = __bind(this.createTag, this);
-        this.renderLineToParent = __bind(this.renderLineToParent, this);
+        this.triggerTagCall = __bind(this.triggerTagCall, this);
         this.renderInnerContents = __bind(this.renderInnerContents, this);
         this.postDOMrender = __bind(this.postDOMrender, this);
         this.updateProgress = __bind(this.updateProgress, this);
@@ -153,11 +151,7 @@
         if (postCollection.where({
           parent: this.id
         }).length > 0) {
-          if (this.model.get('progress') !== 1) {
-            $(this.el).find('#progress-bar:first').progressbar({
-              value: this.model.get('progress') * 100
-            });
-          }
+          if (this.model.get('progress') !== 1) this.updateProgress();
         }
         return $(this.el).find('#content').autosize();
       };
@@ -174,30 +168,14 @@
         }
       };
 
-      PostView.prototype.renderLineToParent = function() {
-        var linediv, x1, x2, y1, y2;
-        if ($('#line' + this.model.get('id')).length === 0) {
-          x1 = $('#' + this.model.get('id')).offset().left;
-          y1 = $('#' + this.model.get('id')).offset().top;
-          x2 = $('#' + this.model.get('parent')).offset().left + $('#' + this.model.get('parent')).width();
-          y2 = $('#' + this.model.get('parent')).offset().top + $('#' + this.model.get('parent')).height();
-          linediv = $("<img id ='line" + (this.model.get("id")) + "' src='/images/diagonalLine.png'></img>");
-          linediv.css("position", "absolute");
-          linediv.css("left", x1);
-          linediv.css("top", y1);
-          linediv.css("width", x2 - x1);
-          linediv.css("height", y2 - y1);
-          linediv.css("z-index", 0);
-          return $('body').append(linediv);
-        }
-      };
-
-      PostView.prototype.createTag = function(tag) {
+      PostView.prototype.triggerTagCall = function(tag) {
         var vote;
         if (tag === ',correct') {
-          return vote = true;
+          vote = true;
+          return $(this.el).find('#votebox:first').trigger('updateScore', this.model.get('score'));
         } else if (tag === ',incorrect') {
-          return vote = false;
+          vote = false;
+          return $(this.el).find('#votebox:first').trigger('updateScore', this.model.get('score'));
         } else {
           return $(this.el).find('#tagbox:first').trigger('addtag', tag);
         }
@@ -247,17 +225,6 @@
         } else {
           base = $(this.el).find('#response:first');
           return base.prepend(child.render());
-        }
-      };
-
-      PostView.prototype.addTag = function(tag) {
-        var t;
-        t = tag.get('title');
-        if (t[0] !== ',') this.tags.push(t);
-        if (t === ',correct') {
-          return this.vote = true;
-        } else if (t === ',incorrect') {
-          return this.vote = false;
         }
       };
 
@@ -343,9 +310,9 @@
 
       StreamView.prototype.setTopicCreatorVisibility = function() {
         if (this.topic_creator_showing) {
-          return $('#post-question').show();
+          return $('#new-assignment').show();
         } else {
-          return $('#post-question').hide();
+          return $('#new-assignment').hide();
         }
       };
 
@@ -358,7 +325,7 @@
         var profileshowing,
           _this = this;
         if (!this.streamviewRendered) {
-          $('#post-question').omnipost({
+          $('#new-assignment').omnipost({
             callback: this.makePost,
             message: 'Post a topic...'
           });
@@ -462,7 +429,7 @@
     postCollection = new Posts();
     tagCollection = new Tags();
     App = new StreamView({
-      el: $('#learn')
+      el: $('#stream')
     });
     app_router = new Workspace();
     return Backbone.history.start();

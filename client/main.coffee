@@ -24,7 +24,7 @@ $ ->
         xp: 0
       )
       tagCollection.create(t)
-      @view.createTag(content)
+      @view.triggerTagCall(content)
       @view.updateProgress()
     
   class Posts extends Backbone.Collection
@@ -61,8 +61,6 @@ $ ->
     renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))  
       contentdiv = $(@el).find('#content')
-
-      #contentdiv.append($(jsondata.linkdata))
       contentdiv.val(jsondata.posttext)
 
     updateProgress: =>
@@ -71,7 +69,7 @@ $ ->
     postDOMrender: =>
       if postCollection.where({parent: @id}).length > 0
         if @model.get('progress') != 1
-          $(@el).find('#progress-bar:first').progressbar({value: @model.get('progress') * 100})
+          @updateProgress()
       $(@el).find('#content').autosize()
 
     renderInnerContents: =>
@@ -79,29 +77,13 @@ $ ->
       unless postCollection.where({parent: @id}).length > 0
         $(@el).find('#omnipost:first').omnipost({removeOnSubmit: true, callback: @model.respond})
 
-    renderLineToParent: =>
-      if $('#line' + @model.get('id')).length == 0
-        x1 = $('#'+@model.get('id')).offset().left
-        #FIXME: figure out why the top is not quite correct
-        y1 = $('#'+@model.get('id')).offset().top
-        x2 = $('#' + @model.get('parent')).offset().left + $('#' + @model.get('parent')).width()
-        #FIXME: figure out why the top is not quite correct
-        y2 = $('#'+@model.get('parent')).offset().top + 
-        $('#'+@model.get('parent')).height()
-        linediv = $("<img id ='line#{@model.get("id")}' src='/images/diagonalLine.png'></img>")
-        linediv.css("position", "absolute")
-        linediv.css("left", x1)
-        linediv.css("top", y1)
-        linediv.css("width", x2 - x1)
-        linediv.css("height", y2 - y1)
-        linediv.css("z-index", 0)
-        $('body').append(linediv)
-
-    createTag: (tag) =>
+    triggerTagCall: (tag) =>
       if tag == ',correct'
         vote = true
+        $(@el).find('#votebox:first').trigger('updateScore', @model.get('score'))
       else if tag == ',incorrect'
         vote = false
+        $(@el).find('#votebox:first').trigger('updateScore', @model.get('score'))
       else
         $(@el).find('#tagbox:first').trigger('addtag', tag)
 
@@ -136,17 +118,6 @@ $ ->
       else
         base = $(@el).find('#response:first')
         base.prepend(child.render())
-        
-    addTag:(tag) =>
-      t = tag.get('title')
-      if t[0] != ','
-        @tags.push(t)
-      if t == ',correct'
-        @vote = true
-      else if t == ',incorrect'
-        @vote = false
-      
-
    
   class StreamView extends Backbone.View
     initialize: ->
@@ -199,9 +170,9 @@ $ ->
     
     setTopicCreatorVisibility: =>
       if @topic_creator_showing
-        $('#post-question').show() 
+        $('#new-assignment').show() 
       else
-        $('#post-question').hide()
+        $('#new-assignment').hide()
 
     showTopicCreator: (showing) =>
       @topic_creator_showing = showing
@@ -209,7 +180,7 @@ $ ->
         
     render: =>
       if !@streamviewRendered
-        $('#post-question').omnipost({callback: @makePost, message: 'Post a topic...'})
+        $('#new-assignment').omnipost({callback: @makePost, message: 'Post a topic...'})
         @setTopicCreatorVisibility()
         @scrollingDiv = $('#story')
         $('#collapsible-profile').hide()
@@ -294,6 +265,6 @@ $ ->
 
   postCollection = new Posts()
   tagCollection = new Tags()
-  App = new StreamView(el: $('#learn'))        
+  App = new StreamView(el: $('#stream'))        
   app_router = new Workspace()  
   Backbone.history.start()
