@@ -237,15 +237,17 @@ class Tag(Model, ndb.Model):
     return (self._local_xp*self._global_xp_norm) / (self._local_xp_norm*self._global_xp+self._local_user_count)
     
   @classmethod
-  def get_or_create(cls, title, item_key, user=None):
+  def get_or_create(cls, title, item_key, user=None, xp=None):
     """
     Create a tag for an item.
     """
+    if xp == None:
+      xp = 1
     if not user:
       user = users.get_current_user()
     result = Tag.query(cls.title == title, cls.user == user, ancestor=item_key).get()
     if not result:
-      result = Tag(title=title,user=user,parent=item_key)
+      result = Tag(title=title,user=user,xp=xp,parent=item_key)
       result.put()
       if result.user != user:
         result.user = user
@@ -410,6 +412,14 @@ class Stream(ndb.Model):
     Assigns a post to a user.
     """
     Tag.get_or_create(Tag.base('assignment'),key,self.user)
+    # give all tags a chance to be shown to the user
+    w = Tag.weights(Tag.query(ancestor=key))
+    if w:
+      # TODO: Tweak this offset
+      m = max(w.values()) + 15
+      for k,v in w.iteritems():
+        if random.random() * m < v:
+          Tag.get_or_create(k,key,self.user,0)
     return key
   
   def create_post(self, content, parent=None):
