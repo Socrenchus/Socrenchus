@@ -44,7 +44,7 @@ class Post(Model, ndb.Model):
   author      = ndb.UserProperty(auto_current_user_add=True)
   content     = ndb.TextProperty()
   score       = ndb.FloatProperty(default=0.0)
-  timestamp   = ndb.DateTimeProperty(auto_now=True)
+  timestamp   = ndb.DateTimeProperty(auto_now_add=True)
 
   @classmethod
   def children(cls, key):
@@ -201,7 +201,7 @@ class Tag(Model, ndb.Model):
   user        = ndb.UserProperty(auto_current_user_add=True)
   title       = ndb.StringProperty()
   xp          = ndb.FloatProperty(default=1.0)
-  timestamp   = ndb.DateTimeProperty(auto_now=True)
+  timestamp   = ndb.DateTimeProperty(auto_now_add=True)
   
   @property
   def weight(self):
@@ -326,7 +326,7 @@ class Stream(ndb.Model):
   Stores data associated with the user's stream.
   """
   user        = ndb.UserProperty(auto_current_user_add=True)
-  timestamp   = ndb.DateTimeProperty(auto_now=True)
+  timestamp   = ndb.DateTimeProperty(auto_now_add=True)
 
   @classmethod
   def get_or_create(cls, user):
@@ -357,7 +357,7 @@ class Stream(ndb.Model):
     qtime = datetime.datetime.now()
     a = self.assignments().order(Stream.timestamp).map(post_check,keys_only=True)
     def post_list(key):
-      return key.parent()
+      return key.parent().get()
     a += self.assignments().filter(Stream.timestamp > qtime).order(Stream.timestamp).map(post_list,keys_only=True)
     return a
 
