@@ -1,0 +1,50 @@
+<head>
+  <title>Socrenchus</title>
+</head>
+
+<body>
+  <div id='main'>
+    <div id='table-top'>     
+      <a id='logout-link' href="">logout</a>
+      <img onclick='location.href = "/" 'style="cursor:pointer" id='logo' src='/images/logo.png'>
+    </div>
+    <div id='header'>
+    </div>
+    {{> posts}}
+  </div>
+</body>
+
+<template name="posts">
+  <div id='stream'>
+    {{#if new}}
+    <div id='new-assignment'></div>
+    {{/if}}
+    <ul id='assignments' class='sortable ui-helper-reset'>
+      {{#each posts}}
+        {{> post}}
+      {{/each}}
+      </ul>
+    </div>
+    <div id='footer'>
+    </div>
+  </div>
+</template>
+
+<template name="post">
+  <div class="post">
+    <div id='inner-question'>
+      <div id='votebox'></div>
+      <textarea disabled="disabled" readonly="readonly" id='content'>{{content}}</textarea>
+      <div id='taglist'></div>
+      <div id='tagbox'></div>
+      <div id='omnipost' title='reply to this post...'></div>
+      <div id='progress-bar'></div>
+      <ul id='response' class='ui-helper-reset'>
+        {{#each children}}
+          {{> post}}
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+</template>
+
