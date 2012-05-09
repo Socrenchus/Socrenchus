@@ -4,19 +4,25 @@ Posts = new Meteor.Collection("posts")
 Tags = new Meteor.Collection("tags")
 
 # Session Variables
-Session.set "user_id", null
+Session.set "user_id", "9124fcdb-52fb-4a72-a31c-feec607d0847"
 
 # Subscriptions
 Meteor.subscribe( "my_posts" )
+Meteor.subscribe( "my_tags" )
+Meteor.autosubscribe ->
+  Meteor.subscribe( "my_user", Session.get( 'user_id' ) )
 
 _.extend( Template.posts,
   posts: ->
-    q = Posts.find().fetch()
-    ids = (r._id for r in q)
-    result = []
-    for x in q
-      result.unshift x unless (x.parent_id in ids)
-    return result
+    user_id = Session.get( 'user_id' )
+    if user_id
+      tags = Tags.find( user_id: user_id, name: ',assignment' ).fetch()
+      q = Posts.find( _id: {'$in':( t.post_id for t in tags )} ).fetch()
+      ids = ( r._id for r in q )
+      result = []
+      for x in q
+        result.unshift x unless (x.parent_id in ids)
+      return result
   new: true
 )
 
@@ -42,4 +48,3 @@ class Router extends Backbone.Router
 Router = new Router()
 Meteor.startup ->
   Backbone.history.start( pushState: true )
-  $('#omnipost').omnipost()

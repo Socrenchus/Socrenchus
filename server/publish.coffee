@@ -6,6 +6,12 @@ Meteor.publish("my_user", (user_id) ->
   return Users.find( _id: user_id )
 )
 
+Meteor.publish("my_tags", ->
+  user_id = Session.get('user_id')
+  if user_id
+    return Tags.find( user_id: user_id )
+)
+
 Meteor.publish("my_posts", ->
   user_id = Session.get('user_id')
   if user_id

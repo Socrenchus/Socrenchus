@@ -551,39 +551,3 @@ h2 {
 #tagbox {
   margin-left: 50px;
 }
-
-.ui-omniPostActive {
-    color:#a1a1a1;
-    font-style:italic;
-}
- 
-#ui-omniPostSubmit {
-    margin-left:auto;
-}
-
-#ui-omniContainer {
-    cursor: text;
-    border: 1px solid black;
-    background-color: white;
-    position: relative;
-    min-height: 50px;
-    width: 100%;
-}
-#ui-omniPostText {
-    position: relative;
-    width: 280px;
-    minHeight: 100px;
-    margin-bottom: 10px;
-    outline: none;
-    resize: none;
-    border: none;
-}
-
-#ui-omniPostCollapse {    
-    cursor: pointer;
-    height:16px;
-    position:absolute;    
-    top: 0px;    
-    right: 0px;    
-    margin: 5px;
-}
