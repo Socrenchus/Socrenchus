@@ -73,7 +73,7 @@ class TagHandler(webapp.RequestHandler):
  
   def post(self, id):
     tmp = json.simplejson.loads(self.request.body)
-    t = Tag.get_or_create(tmp['title'],ndb.Key(urlsafe=tmp['parent']))
+    t = ndb.Key(urlsafe=tmp['parent']).get().add_tag(tmp['title'])
     self.response.out.write(json.encode(t))
 
   def put(self, id):

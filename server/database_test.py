@@ -13,7 +13,7 @@ import os
 import random
 import json
 from google.appengine.ext import ndb
-from google.appengine.api import users
+from google.appengine.api import users, memcache
 from google.appengine.ext import testbed
 from google.appengine.datastore import datastore_stub_util
 from database import *
@@ -111,15 +111,15 @@ class DatabaseTests(unittest.TestCase):
     p = Post().put()
     # switch between arbitrary users and tag the post as such
     self.switchToUser('userA')
-    Tag(parent=p, title='a', xp=1).put()
-    Tag(parent=p, title='b', xp=3).put()
-    Tag(parent=p, title='c', xp=2).put()
+    Tag.get_or_create('a', p, None, 1)
+    Tag.get_or_create('b', p, None, 3)
+    Tag.get_or_create('c', p, None, 2)
     self.switchToUser('userB')
-    Tag(parent=p, title='a', xp=2).put()
-    Tag(parent=p, title='b', xp=2).put()
-    Tag(parent=p, title='d', xp=5).put()
+    Tag.get_or_create('a', p, None, 2)
+    Tag.get_or_create('b', p, None, 2)
+    Tag.get_or_create('d', p, None, 5)
     self.switchToUser('userC')
-    Tag(parent=p, title='a', xp=3).put()
+    Tag.get_or_create('a', p, None, 3)
     # switch back to 'tagging' user and apply a tag
     self.switchToUser('tagging')
     t = Tag(parent=p, title='blah')
@@ -129,33 +129,34 @@ class DatabaseTests(unittest.TestCase):
   def testPointsFromTagging(self):
     # create the common post
     self.switchToUser('user')
-    p = Post().put()
+    p = Post()
+    p.put()
     # give users a starting experience
     self.switchToUser('A')
     a = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
-    aa = Tag(parent=a, title='a', xp=500).put()
-    ab = Tag(parent=a, title='b', xp=50).put()
-    ac = Tag(parent=a, title='c', xp=5).put()
+    aa = Tag.get_or_create('a', a, None, 500).key
+    ab = Tag.get_or_create('b', a, None, 50).key
+    ac = Tag.get_or_create('c', a, None, 5).key
     self.switchToUser('B')
     b = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
-    ba = Tag(parent=b, title='a', xp=50).put()
-    bb = Tag(parent=b, title='b', xp=500).put()
-    bc = Tag(parent=b, title='c', xp=50).put()
+    ba = Tag.get_or_create('a', b, None, 50).key
+    bb = Tag.get_or_create('b', b, None, 500).key
+    bc = Tag.get_or_create('c', b, None, 50).key
     self.switchToUser('C')
     c = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
-    ca = Tag(parent=c, title='a', xp=5).put()
-    cb = Tag(parent=c, title='b', xp=50).put()
-    cc = Tag(parent=c, title='c', xp=500).put()
+    ca = Tag.get_or_create('a', c, None, 5).key
+    cb = Tag.get_or_create('b', c, None, 50).key
+    cc = Tag.get_or_create('c', c, None, 500).key
     # have users tag posts
     self.switchToUser('A')
-    Tag(parent=p, title='a').put()
+    p.add_tag('a')
     self.switchToUser('B')
-    Tag(parent=p, title='a').put()
-    Tag(parent=p, title='b').put()
+    p.add_tag('a')
+    p.add_tag('b')
     self.switchToUser('C')
-    Tag(parent=p, title='a').put()
-    Tag(parent=p, title='b').put()
-    Tag(parent=p, title='c').put()
+    p.add_tag('a')
+    p.add_tag('b')
+    p.add_tag('c')
     # check users ending experience
     self.assertGreater(aa.get().xp, 500)
     self.assertEqual(ab.get().xp, 50)
@@ -169,80 +170,64 @@ class DatabaseTests(unittest.TestCase):
     # figure out why the post sometimes gets 100 points
     self.assertEqual(p.get().score, 0)
 
-  def testIncrementalAssignment(self):
+  def testAssignment(self):
     # create post
     self.switchToUser('user')
     user = self.switchToUser('user')
     post = user.create_post('my post')
-    Tag(parent=post.key, title='a').put()
+    post.add_tag('a')
     # create responses
     resp = []
     for i in range(15):
       user = self.switchToUser(str(i))
-      user.assign_post(post.key)
       resp.append(user.create_post(str(i), post.key).key)
     # check assignments
     stream = self.switchToUser(str(1))
-    for i in range(3):
-      # check assignments
-      a = stream.get_assignments()
-      m = "Stream contains unexpected duplicates."
-      self.assertEqual(len(a), len(set([x.key for x in a])), msg=m)
-      self.assertEqual(len(a), Post.step_reveal(i*15)[0]+1)
-      # acquire points
-      stream.adjust_experience('a',15)
+    a = stream.get_assignments()
+    m = "Stream contains unexpected duplicates."
+    self.assertEqual(len(a), len(set([x for x in a])), msg=m)
 
     # check that grandchildren don't get assigned
-    count = stream.assignments().count()
+    count = len(stream.get_assignments())
     user = self.switchToUser(str(2))
-    user.assign_post(resp[3])
     p = user.create_post(str("grandchild"), resp[3])
     stream = self.switchToUser(str(1))
     stream.adjust_experience('a',15)
     m = "Grandchildren are being assigned mistakenly."
-    self.assertEqual(count, stream.assignments().count())
-    for a in stream.assignments():
-      self.assertNotEqual(a.depth, 4,msg=m)
-
-  def testProbabilisticTagAssignment(self):
-    # create the common post
+    self.assertEqual(count, len(stream.get_assignments()))
+    for a in stream.get_assignments():
+      self.assertNotEqual(a.get().depth, 4,msg=m)
+    
+  def testTagCounter(self):
+    # create the common posts
     stream = self.switchToUser('user')
-    p = Post().put()
-    # give users a starting experience
-    self.switchToUser('A')
-    a = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
-    aa = Tag(parent=a, title='a', xp=500).put()
-    ab = Tag(parent=a, title='b', xp=50).put()
-    ac = Tag(parent=a, title='c', xp=5).put()
-    self.switchToUser('B')
-    b = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
-    ba = Tag(parent=b, title='a', xp=50).put()
-    bb = Tag(parent=b, title='b', xp=500).put()
-    bc = Tag(parent=b, title='c', xp=50).put()
-    self.switchToUser('C')
-    c = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
-    ca = Tag(parent=c, title='a', xp=5).put()
-    cb = Tag(parent=c, title='b', xp=50).put()
-    cc = Tag(parent=c, title='c', xp=500).put()
-    # have users tag posts
-    self.switchToUser('A')
-    Tag(parent=p, title='a').put()
-    self.switchToUser('B')
-    Tag(parent=p, title='a').put()
-    Tag(parent=p, title='b').put()
-    self.switchToUser('C')
-    Tag(parent=p, title='a').put()
-    Tag(parent=p, title='b').put()
-    Tag(parent=p, title='c').put()
-    # assign to post to 100 new people
-    for j in range(10):
-      for i in range(10):
-        stream = self.switchToUser(i)
-        stream.assign_post(p)      
-      # count how many zero score tags were added
-      a_zero = Tag.query(Tag.title=='a', Tag.xp==0).count()
-      b_zero = Tag.query(Tag.title=='b', Tag.xp==0).count()
-      c_zero = Tag.query(Tag.title=='c', Tag.xp==0).count()
-      if a_zero > b_zero and b_zero > c_zero:
-        return True
-    self.assertTrue(False, "Failed to show tags based on popularity.")
+    p1 = Post()
+    p1.put()
+    p2 = Post()
+    p2.put()
+    # make a and b correlated
+    p1.add_tag('a')
+    p1.add_tag('b')
+    # make b and c correlated
+    p2.add_tag('c')
+    p2.add_tag('b')
+    # get count models
+    a = TagCount.get_or_create('a')
+    b = TagCount.get_or_create('b')
+    c = TagCount.get_or_create('c')
+    # get correlation models
+    ab = TagCount.get_or_create('a', 'b')
+    bc = TagCount.get_or_create('c', 'b')
+    ac = TagCount.get_or_create('a', 'c')
+    # check counts
+    self.assertEqual(a.count, 1)
+    self.assertEqual(b.count, 2)
+    self.assertEqual(c.count, 1)
+    # check correlations
+    self.assertEqual(ab.count, 1)
+    self.assertEqual(bc.count, 1)
+    self.assertEqual(ac.count, 0)
+    # check that xp matches since they should all be baseline
+    for t in [a, b, c, ab, bc, ac]:
+      self.assertEqual(t.count, t.xp)
+    
