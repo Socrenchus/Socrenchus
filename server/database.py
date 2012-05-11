@@ -35,6 +35,20 @@ class Model:
       result['parent'] = ''
     result['id'] = self.key.urlsafe()
     return result
+    
+  @classmethod
+  def children(cls, key):
+    """
+    Return a query of children of this model.
+    """
+    return cls.query(cls.depth == len(key.pairs())+1, ancestor=key)
+    
+  @classmethod
+  def siblings(cls, key):
+    """
+    Return a query for siblings of this model.
+    """
+    return cls.children(key.parent()).filter()
 
 
 class Post(Model, ndb.Model):
@@ -43,29 +57,17 @@ class Post(Model, ndb.Model):
   """
   author      = ndb.UserProperty(auto_current_user_add=True)
   content     = ndb.TextProperty()
+  tags        = ndb.TextProperty(repeated=True)
   score       = ndb.FloatProperty(default=0.0)
   timestamp   = ndb.DateTimeProperty(auto_now_add=True)
 
-  @classmethod
-  def children(cls, key):
-    """
-    Return a query of children of this post.
-    """
-    return Post.query(cls.depth == len(key.pairs())+1, ancestor=key)
-  
-  @classmethod
-  def sibling(cls, key):
-    """
-    Return a query for a sibling of this post.
-    """
-    return Post.query(cls.depth == len(key.pairs()), ancestor=key.parent())
-  
-  #@ndb.ComputedProperty
-  def popularity(self):
-    """
-    Count the number of children a post has.
-    """
-    return ndb.Query(ancestor=self.key).count()
+  def to_dict(self):
+    result = Model.to_dict(self)
+    # scrub post's score if the user hasn't voted yet
+    user = Stream.get_or_create()
+    if not user.voted(self.key):
+      del result['score']
+    return result
   
   @classmethod
   def dereference_experience(cls, key):
@@ -115,82 +117,54 @@ class Post(Model, ndb.Model):
         
     return self.put_async()
   
-  @classmethod
-  def assign_or_die(cls, key, user=None):
-    """
-    Assign the current post to the current user or die if already assigned.
-    """
-    if not user:
-      user = users.get_current_user()
-    assigned = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==user, ancestor=key).count(1)
-    if assigned:
+  def add_tag(self, title):
+    # check that tag isn't already permanent
+    if title in self.tags:
       return False
-    else:
-      t = Tag(parent=key, user=user, title=Tag.base('assignment'))
-      t.put()
-      return True
-  
-  @classmethod
-  def assign_children(cls, key, user, num):
-    """
-    Assigns num children to the current user if num children exist.
-    """
-    # TODO: Improve selection of child posts
-    for child in Post.children(key).order(-Post.score).iter(keys_only=True):
-      if Post.assign_or_die(child, user):
-        num -= 1
-      if num <= 0:
-        return True
-    return False
-  
-  def get_progress(self, user):
-    """
-    Checks if new assignments are due, assigns them if they are.
-    """
-    key = self.key
-    try:
-      my_reply = Post.children(key).filter(Post.author==user).iter(keys_only=True).next()
-      if my_reply:
-        # current post depth
-        depth = len(key.pairs())
-        # count the current replies visible to the user
-        current = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==user,  Tag.depth==depth+2, ancestor=key).count()
-        # return if all the replies are visible
-        more = Post.query(Post.depth==depth+1, ancestor=key).count(current+1)
-        if more == current:
-          return 1
-        # get our experience in the context of our reply
-        old_xp = Tag.query(Tag.title==Tag.base('assignment'), Tag.user==user,  Tag.depth==depth+2, ancestor=my_reply).get()
-        new_xp = Post.dereference_experience(my_reply)
-        if old_xp.xp == 1:
-          if new_xp == 1:
-            old_xp.xp = 0.9
-          else:
-            old_xp.xp = new_xp
-          old_xp.put()
-        old_xp = old_xp.xp
-        # run our experience points through the magic step function
-        summary = Post.step_reveal(new_xp-old_xp)
-        expected = summary[0]
-        # assign the newly earned posts
-        if expected > current:
-          Post.assign_children(key, user, expected-current)
-        return summary[1]
-    except StopIteration:
-      return 0
-    except:
-      raise
+    # add the tag
+    t = Tag.get_or_create(title, self.key)
+    if t.public:
+      self.tags += title
+      self.put()
+    return t
 
+class TagCount(ndb.Model):
+  """
+  TagCount is used to keep track of tag numbers and experience. It is also
+  used to keep correlational data for tags.
+  """
+  # keyname is (first alphabetical) tag name (',' second tag)
+  count = ndb.IntegerProperty(default=0)
+  xp    = ndb.FloatProperty(default=0.0)
+  
   @classmethod
-  def step_reveal(cls, delta_xp):
+  def get_or_create(cls, first_tag_name, second_tag_name=None):
     """
-    Converts change in experience to expected reponse assignments.
+    Fetch or create our tag count model.
     """
-    # TODO: Improve step function
-    # show 5 posts for every 25 xp
-    point_step = 25
-    post_step = 5
-    return (((int(delta_xp)/point_step)+1)*post_step, float(delta_xp%point_step)/float(point_step))
+    keyname = first_tag_name
+    if second_tag_name:
+      keyname += ','.join(sorted([first_tag_name, second_tag_name]))
+    return cls.get_or_insert(keyname)
+  
+  @classmethod
+  def update_counts(cls, tag):
+    """
+    Update the count for the above tag along with the relevant correlational counts.
+    """
+    # update the tag itself
+    tc = cls.get_or_create(tag.title)
+    tc.count += 1
+    tc.xp += tag.xp
+    tc.put()
+    # update the other tags in the post
+    tags = set([c.title for c in Tag.children(tag.key.parent())])
+    for t in tags:
+      tc = cls.get_or_create(tag.title, t)
+      tc.count += 1
+      tc.xp += tag.xp
+      tc.put()
+    
 
 class Tag(Model, ndb.Model):
   """
@@ -207,37 +181,44 @@ class Tag(Model, ndb.Model):
   def weight(self):
     """
     Get the normalized weight of a tag.
-    
-    TODO: Layered caching to speed this up.
     """
-    self._global_xp = 0.0
-    self._global_xp_norm = 1.0
     self._local_xp = 0.0
     self._local_xp_norm = 1.0
-    self._local_user_count = 1.0
     def tally_up(tag):
-      self._global_xp_norm += tag.xp
       if tag.key.parent() == self.key.parent():
         self._local_xp_norm += tag.xp
-        if tag.user == self.user:
-          self._local_user_count += 1
       if tag.title == self.title:
-        self._global_xp += tag.xp
-        if tag.key.parent() == self.key.parent():
+        if tag.depth == self.depth:
           self._local_xp += tag.xp
-    Tag.query().map(tally_up)
-    return (self._local_xp*self._global_xp_norm) / (self._local_xp_norm*self._global_xp+self._local_user_count)
+    Tag.query(ancestor=self.key.parent()).map(tally_up)
+    return self._local_xp / self._local_xp_norm
+  
+  @property
+  def public(self):
+    if random.random() < self.weight:
+      return True
+    else:
+      return False
     
   @classmethod
-  def get_or_create(cls, title, item_key, user=None):
+  def get_or_create(cls, title, item_key, user=None, xp=None):
     """
     Create a tag for an item.
     """
+    no_xp = (xp == None)
+    if not xp:
+      xp = 1
     if not user:
       user = users.get_current_user()
     result = Tag.query(cls.title == title, cls.user == user, ancestor=item_key).get()
     if not result:
-      result = Tag(title=title,user=user,parent=item_key)
+      result = Tag(title=title,user=user,xp=xp,parent=item_key)
+      if item_key.kind() == 'Post':
+        if no_xp:
+          result.update_experience()
+          result.eval_score_change()
+        if not result.is_base():
+          TagCount.update_counts(result)
       result.put()
       if result.user != user:
         result.user = user
@@ -246,7 +227,7 @@ class Tag(Model, ndb.Model):
       
   @classmethod
   def base(cls, name):
-    names = ['correct','incorrect','assignment']
+    names = ['correct','incorrect']
     if not name in names:
       raise Exception('Base name not found.')
     return ',' + name
@@ -314,12 +295,6 @@ class Tag(Model, ndb.Model):
         user = Stream.query(Stream.user==tag.user).get()
         user.adjust_experience(tag.title, (tag.weight/tag._local_xp)*self.xp)
       Tag.query(Tag.title == self.title, ancestor=self.key.parent()).map(reward_tagger)
-          
-  def _pre_put_hook(self):
-    # call eval_score_changes when tag is created
-    if self.xp == 1 and self.key.parent().kind() == 'Post':
-      self.update_experience()
-      self.eval_score_change()
 
 class Stream(ndb.Model):
   """
@@ -329,10 +304,12 @@ class Stream(ndb.Model):
   timestamp   = ndb.DateTimeProperty(auto_now_add=True)
 
   @classmethod
-  def get_or_create(cls, user):
+  def get_or_create(cls, user=None):
     """
     Creates a new stream or finds the user's stream.
     """
+    if not user:
+      user = users.get_current_user()
     u = Stream.query(Stream.user==user).get()
     if not u:
       u = Stream(user=user)
@@ -348,30 +325,24 @@ class Stream(ndb.Model):
     
   def get_assignments(self):
     """
-    Gets current assignments, adds new ones, returns all.
+    Returns a list of all the assignment keys.
     """
-    def post_check(key):
-      p = key.parent().get()
-      p.progress = p.get_progress(self.user)
-      return p
-    qtime = datetime.datetime.now()
-    a = self.assignments().order(Stream.timestamp).map(post_check,keys_only=True)
-    def post_list(key):
-      return key.parent().get()
-    a += self.assignments().filter(Stream.timestamp > qtime).order(Stream.timestamp).map(post_list,keys_only=True)
-    return a
+    def parent(key):
+      if key.parent():
+        return key.parent()
+    return self.my_posts().order(Stream.timestamp).map(parent,keys_only=True)
 
-  def assignments(self):
+  def my_posts(self):
     """
-    Returns a list of post keys assigned to the user.
+    Return a query for all of my posts.
     """
-    return Tag.query(Tag.title == Tag.base('assignment'), Tag.user == self.user)
+    return Post.query(Post.author == self.user)
   
-  def assigned_children(self, post_key):
+  def get_children(self, post_key):
     """
-    Returns a list of post keys assigned to the user under the given post key.
+    Returns a query for a post's children.
     """
-    return Tag.query(Tag.title == Tag.base('assignment'), Tag.user == self.user, ancestor=post_key)
+    return Post.children(post_key)
   
   def get_tag(self, tag_title):
     """
@@ -381,6 +352,13 @@ class Stream(ndb.Model):
     if not ref_tag:
       ref_tag = Tag(title=tag_title, parent=self.key)
     return ref_tag
+    
+  def voted(self, key):
+    """
+    Check if the user voted on a post.
+    """
+    vote_tag = ndb.OR(Tag.title==Tag.base('correct'),Tag.title==Tag.base('incorrect'))
+    Tag.query(vote_tag, Tag.user==self.user, ancestor=key).count(1)
     
   def adjust_experience(self, tag_title, delta):
     """
@@ -397,22 +375,10 @@ class Stream(ndb.Model):
     """
     return self.get_tag(tag_title).xp
   
-  def assign_post(self, key):
-    """
-    Assigns a post to a user.
-    """
-    Tag.get_or_create(Tag.base('assignment'),key,self.user)
-    return key
-  
   def create_post(self, content, parent=None):
     """
     Creates a post from given content with optional parent.
     """
     p = Post(parent=parent,content=content)
     p.put()
-    self.assign_post(p.key)
-    if parent:
-      parent = parent.get()
-      Tag.get_or_create(Tag.base('assignment'),p.key,parent.author)
-    
     return p

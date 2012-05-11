@@ -48,11 +48,8 @@ class PostHandler(webapp.RequestHandler):
     stream = Stream.get_or_create(users.get_current_user())
     if id:
       key = ndb.Key(urlsafe=id)
-      stream.assign_post(key)
-      result = key.get()
+      result = stream.get_children(key)
     else:
-      def post_list(key):
-        return key.parent()
       result = stream.get_assignments()
     self.response.out.write(json.encode(result))
 
@@ -76,7 +73,7 @@ class TagHandler(webapp.RequestHandler):
  
   def post(self, id):
     tmp = json.simplejson.loads(self.request.body)
-    t = Tag.get_or_create(tmp['title'],ndb.Key(urlsafe=tmp['parent']))
+    t = ndb.Key(urlsafe=tmp['parent']).get().add_tag(tmp['title'])
     self.response.out.write(json.encode(t))
 
   def put(self, id):
