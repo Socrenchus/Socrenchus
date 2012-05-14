@@ -13,7 +13,7 @@
     defaults = {
       editing: true,
       tags: [],
-      callback: ''
+      callback: null
     };
     Plugin = (function() {
 
@@ -49,6 +49,7 @@
           this.tagtext = $("<div class='ui-tagtext' contentEditable='false'></div>");
           $(this.element).append(this.tagtext);
           this.currenttag = $("<div class='ui-individualtag' contentEditable='true'></div>");
+          $(this.element).trigger('tagSync', this.currenttag.text());
           this.message = $("<div class='ui-tagmessage'>" + addtagstext + "</div>");
           this.tagtext.append(this.message);
           this.tagtext.append(this.currenttag);
@@ -89,11 +90,11 @@
 
       Plugin.prototype.addTag = function(tag) {
         var currenttag;
-        currenttag = $("<div class='ui-individualtag'>" + tag + "</div>");
+        currenttag = $("<div class='ui-completetag'>" + tag + "</div>");
         currenttag.css('background-image', 'url("/images/tagOutline.png")');
         currenttag.css('background-repeat', 'no-repeat');
         currenttag.css('background-size', '100% 100%');
-        return $(this.element).append(currenttag);
+        return this.message.before(currenttag);
       };
 
       Plugin.prototype.showTags = function(taglist) {
@@ -110,24 +111,22 @@
       Plugin.prototype.removeFromArray = function(toremove) {
         var index;
         index = this.alltags.indexOf(toremove);
-        if (index > -1) this.alltags.splice(index, 1);
-        return $(this.element).trigger('tagRemoved', this.alltags.length);
+        if (index > -1) return this.alltags.splice(index, 1);
       };
 
       Plugin.prototype.makenewtag = function(tagdiv) {
-        var newtag,
-          _this = this;
+        var _this = this;
         this.currenttag.text($.trim(this.currenttag.text()));
         if (this.currenttag.text() !== '') {
           tagdiv.focusout(function() {
             return _this.formtag(tagdiv);
           });
-          this.options.callback(this.currenttag.text());
-          tagdiv.remove();
-          newtag = $("<div class='ui-individualtag' contentEditable='true'></div>");
-          this.tagtext.append(newtag);
-          this.currenttag = newtag;
-          return newtag.focus();
+          $(this.element).trigger('tagSync', this.currenttag.text());
+          if (this.options.callback !== null) {
+            this.options.callback(this.currenttag.text());
+          }
+          this.addTag(this.currenttag.text());
+          return tagdiv.text('');
         }
       };
 
@@ -143,9 +142,7 @@
         tagdiv.attr('contentEditable', 'false');
         tagdiv.css('background-image', 'url("/images/tagOutline.png")');
         tagdiv.css('background-repeat', 'no-repeat');
-        tagdiv.css('background-size', '100% 100%');
-        this.alltags.push(tagdiv);
-        return $(this.element).trigger('tagAdded', this.alltags.length);
+        return tagdiv.css('background-size', '100% 100%');
       };
 
       Plugin.prototype.deformtag = function(tagdiv) {

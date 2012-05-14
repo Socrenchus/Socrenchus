@@ -7,7 +7,7 @@
     pluginName = 'votebox';
     defaults = {
       votesnum: 0,
-      callback: ''
+      callback: null
     };
     states = {
       none: 0,
@@ -58,7 +58,7 @@
           this.pressDown();
           return this.disable();
         } else {
-          this.votetext.text('*');
+          this.votetext.text('');
           this.upArrow.click(function() {
             return _this.pressUp();
           });
@@ -69,35 +69,35 @@
       };
 
       Plugin.prototype.pressUp = function() {
-        if (this.state !== this._states.up) {
-          this.state = this._states.up;
-        } else {
-          this.voteCount(originalvotesnum);
-          this.state = this._states.none;
-        }
+        var voteParams;
+        this.state = this._states.up;
         this.votetext.text(Math.round(this.voteCount()));
-        $(this.element).trigger('votetextChanged', [parseInt(this.votetext.text()), this.voteCount()]);
+        voteParams = {
+          'votetext': this.votetext.text(),
+          'votecount': Math.round(this.voteCount()).toString()
+        };
+        $(this.element).trigger('votetextChanged', voteParams);
         this.setImages();
         if (this.state === this._states.up) {
           this.disable();
-          this.options.callback(",correct");
+          if (this.options.callback !== null) this.options.callback(",correct");
         }
         return $(this.element).trigger('upArrowPressed', this.state);
       };
 
       Plugin.prototype.pressDown = function() {
-        if (this.state !== this._states.down) {
-          this.state = this._states.down;
-        } else {
-          this.voteCount(originalvotesnum);
-          this.state = this._states.none;
-        }
+        var voteParams;
+        this.state = this._states.down;
         this.votetext.text(Math.round(this.voteCount()));
-        $(this.element).trigger('votetextChanged', [parseInt(this.votetext.text()), this.voteCount()]);
+        voteParams = {
+          'votetext': this.votetext.text(),
+          'votecount': Math.round(this.voteCount()).toString()
+        };
+        $(this.element).trigger('votetextChanged', voteParams);
         this.setImages();
         if (this.state === this._states.down) {
           this.disable();
-          this.options.callback(",incorrect");
+          if (this.options.callback !== null) this.options.callback(",incorrect");
         }
         return $(this.element).trigger('downArrowPressed', this.state);
       };
@@ -158,6 +158,10 @@
       Plugin.prototype.updateScore = function(event, newscore) {
         this.voteCount(newscore);
         return this.votetext.text(Math.round(this.voteCount()));
+      };
+
+      Plugin.prototype.destroy = function() {
+        return $(this.element).remove();
       };
 
       return Plugin;
