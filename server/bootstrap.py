@@ -34,9 +34,9 @@ class BootStrap:
           parentkey = postkeymap[filename + posts[i]['parent']]
           ndbpost = Post.get_or_insert(fullid, parent=parentkey, content=posts[i]['content'])
         else:
+          logging.debug(posts[i]['content'])
           ndbpost = Post.get_or_insert(fullid, content=posts[i]['content'])
-        postkeymap[fullid] = ndbpost.key        
-        stream.assign_post(ndb.Key(urlsafe=ndbpost.key.urlsafe()))
+        postkeymap[fullid] = ndbpost.key
 
       tags = fullcontents[1]
       
