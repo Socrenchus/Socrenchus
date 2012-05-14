@@ -52,14 +52,14 @@ $ ->
     tags: []
     vote: null
     events: ->
-      
+
     initialize: ->
       @id = @model.id
       @model.bind('change', @render)
       @model.view = @
 
     renderPostContent: =>
-      jsondata = jQuery.parseJSON(@model.get('content'))  
+      jsondata = jQuery.parseJSON(@model.get('content'))
       contentdiv = $(@el).find('#content')
       contentdiv.val(jsondata.posttext)
 
@@ -75,35 +75,42 @@ $ ->
     renderInnerContents: =>
       @renderPostContent()
       unless postCollection.where({parent: @id}).length > 0
-        $(@el).find('#omnipost:first').omnipost({removeOnSubmit: true, callback: @model.respond})
+        $(@el).find('#replyButton:first').click( =>
+          $(@el).find('#replyButton:first').remove()
+          $(@el).find('#omnipost:first').omnipost({removeOnSubmit: true, callback: @model.respond})
+        )
 
     triggerTagCall: (tag) =>
-      if tag == ',correct'
+      if tag == ",correct"
         vote = true
         $(@el).find('#votebox:first').trigger('updateScore', @model.get('score'))
-      else if tag == ',incorrect'
+      else if tag == ",incorrect"
         vote = false
         $(@el).find('#votebox:first').trigger('updateScore', @model.get('score'))
       else
         $(@el).find('#tagbox:first').trigger('addtag', tag)
 
     render: =>
-      $(@el).html(@template)
-      $(@el).find('.inner-question').attr('id', @model.get('id'))
-      @renderInnerContents()
-      tags = tagCollection.where({parent: @model.get('id')})
-      taglist = []
-      vote = null
-      for tag in tags
-        t = tag.get('title')
-        if t[0] != ','
-          taglist.push(t)
-        if t == ',correct'
-          vote = true
-        else if t == ',incorrect'
-          vote = false
-      $(@el).find('#votebox:first').votebox(vote: vote, votesnum:@model.get('score'), callback: @model.maketag)
-      $(@el).find('#tagbox:first').tagbox(callback: @model.maketag, tags: taglist)
+      # HACK
+      postcontent = jQuery.parseJSON(@model.get('content'))
+      if postcontent != null and postcontent.posttext != ''  
+        $(@el).html(@template)
+        $(@el).find('.inner-question').attr('id', @model.get('id'))
+        @renderInnerContents()
+        tags = tagCollection.where({parent: @model.get('id')})
+        taglist = []
+        vote = null
+        for tag in tags
+          t = tag.get('title')
+          if t[0] != ','
+            taglist.push(t)
+          if t == ',correct'
+            vote = true
+          else if t == ',incorrect'
+            vote = false
+        
+        $(@el).find('#votebox:first').votebox(vote: vote, votesnum:@model.get('score') ? '', callback: @model.maketag)
+        $(@el).find('#tagbox:first').tagbox(callback: @model.maketag, tags: taglist)
       return $(@el)
       
     addChild:(child) =>
@@ -143,7 +150,6 @@ $ ->
         content: content
       )
       postCollection.create(p)
-      postCollection.fetch()
 
     addOne: (item) =>
       post = new PostView(model: item)

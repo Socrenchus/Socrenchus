@@ -157,23 +157,27 @@
       };
 
       PostView.prototype.renderInnerContents = function() {
+        var _this = this;
         this.renderPostContent();
         if (!(postCollection.where({
           parent: this.id
         }).length > 0)) {
-          return $(this.el).find('#omnipost:first').omnipost({
-            removeOnSubmit: true,
-            callback: this.model.respond
+          return $(this.el).find('#replyButton:first').click(function() {
+            $(_this.el).find('#replyButton:first').remove();
+            return $(_this.el).find('#omnipost:first').omnipost({
+              removeOnSubmit: true,
+              callback: _this.model.respond
+            });
           });
         }
       };
 
       PostView.prototype.triggerTagCall = function(tag) {
         var vote;
-        if (tag === ',correct') {
+        if (tag === ",correct") {
           vote = true;
           return $(this.el).find('#votebox:first').trigger('updateScore', this.model.get('score'));
-        } else if (tag === ',incorrect') {
+        } else if (tag === ",incorrect") {
           vote = false;
           return $(this.el).find('#votebox:first').trigger('updateScore', this.model.get('score'));
         } else {
@@ -182,34 +186,37 @@
       };
 
       PostView.prototype.render = function() {
-        var t, tag, taglist, tags, vote, _j, _len2;
-        $(this.el).html(this.template);
-        $(this.el).find('.inner-question').attr('id', this.model.get('id'));
-        this.renderInnerContents();
-        tags = tagCollection.where({
-          parent: this.model.get('id')
-        });
-        taglist = [];
-        vote = null;
-        for (_j = 0, _len2 = tags.length; _j < _len2; _j++) {
-          tag = tags[_j];
-          t = tag.get('title');
-          if (t[0] !== ',') taglist.push(t);
-          if (t === ',correct') {
-            vote = true;
-          } else if (t === ',incorrect') {
-            vote = false;
+        var postcontent, t, tag, taglist, tags, vote, _j, _len2, _ref2;
+        postcontent = jQuery.parseJSON(this.model.get('content'));
+        if (postcontent !== null && postcontent.posttext !== '') {
+          $(this.el).html(this.template);
+          $(this.el).find('.inner-question').attr('id', this.model.get('id'));
+          this.renderInnerContents();
+          tags = tagCollection.where({
+            parent: this.model.get('id')
+          });
+          taglist = [];
+          vote = null;
+          for (_j = 0, _len2 = tags.length; _j < _len2; _j++) {
+            tag = tags[_j];
+            t = tag.get('title');
+            if (t[0] !== ',') taglist.push(t);
+            if (t === ',correct') {
+              vote = true;
+            } else if (t === ',incorrect') {
+              vote = false;
+            }
           }
+          $(this.el).find('#votebox:first').votebox({
+            vote: vote,
+            votesnum: (_ref2 = this.model.get('score')) != null ? _ref2 : '',
+            callback: this.model.maketag
+          });
+          $(this.el).find('#tagbox:first').tagbox({
+            callback: this.model.maketag,
+            tags: taglist
+          });
         }
-        $(this.el).find('#votebox:first').votebox({
-          vote: vote,
-          votesnum: this.model.get('score'),
-          callback: this.model.maketag
-        });
-        $(this.el).find('#tagbox:first').tagbox({
-          callback: this.model.maketag,
-          tags: taglist
-        });
         return $(this.el);
       };
 
@@ -269,8 +276,7 @@
         p = new Post({
           content: content
         });
-        postCollection.create(p);
-        return postCollection.fetch();
+        return postCollection.create(p);
       };
 
       StreamView.prototype.addOne = function(item) {
