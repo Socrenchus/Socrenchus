@@ -51,7 +51,7 @@ class Model:
     if key.parent():
       return cls.children(key.parent()).filter()
     else:
-      return None
+      return cls.query(cls.depth == len(key.pairs()))
 
 
 class Post(Model, ndb.Model):
