@@ -286,6 +286,10 @@ h2 {
   color: black;
 }
 
+#reply {
+  margin-left: 50px;
+}
+
 #tagscontainer {
   width: 350px;
   min-height: 100%;

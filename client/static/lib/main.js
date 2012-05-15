@@ -173,22 +173,15 @@
       };
 
       PostView.prototype.triggerTagCall = function(tag) {
-        var vote;
-        if (tag === ",correct") {
-          vote = true;
+        if (tag === ",correct" || tag === ",incorrect") {
           return $(this.el).find('#votebox:first').trigger('updateScore', this.model.get('score'));
-        } else if (tag === ",incorrect") {
-          vote = false;
-          return $(this.el).find('#votebox:first').trigger('updateScore', this.model.get('score'));
-        } else {
-          return $(this.el).find('#tagbox:first').trigger('addtag', tag);
         }
       };
 
       PostView.prototype.render = function() {
         var postcontent, t, tag, taglist, tags, vote, _j, _len2, _ref2;
         postcontent = jQuery.parseJSON(this.model.get('content'));
-        if (postcontent !== null && postcontent.posttext !== '') {
+        if (postcontent.posttext !== '') {
           $(this.el).html(this.template);
           $(this.el).find('.inner-question').attr('id', this.model.get('id'));
           this.renderInnerContents();
@@ -276,7 +269,9 @@
         p = new Post({
           content: content
         });
-        return postCollection.create(p);
+        postCollection.create(p);
+        postCollection.fetch();
+        return $('#new-assignment').dialog('close');
       };
 
       StreamView.prototype.addOne = function(item) {
@@ -315,8 +310,23 @@
       };
 
       StreamView.prototype.setTopicCreatorVisibility = function() {
+        var new_assignment;
         if (this.topic_creator_showing) {
-          return $('#new-assignment').show();
+          new_assignment = $('#new-assignment').dialog({
+            title: 'Create a new topic.',
+            modal: true,
+            draggable: false,
+            resizable: false,
+            minWidth: 320
+          });
+          new_assignment.find('#new-post').omnipost({
+            removeOnSubmit: true,
+            callback: this.makePost,
+            message: 'Post a topic...'
+          });
+          return new_assignment.bind("dialogresize", function() {
+            return new_assignment.find('#ui-omnipost').css("height", new_assignment.dialog('option', 'height'));
+          });
         } else {
           return $('#new-assignment').hide();
         }
@@ -331,10 +341,6 @@
         var profileshowing,
           _this = this;
         if (!this.streamviewRendered) {
-          $('#new-assignment').omnipost({
-            callback: this.makePost,
-            message: 'Post a topic...'
-          });
           this.setTopicCreatorVisibility();
           this.scrollingDiv = $('#story');
           $('#collapsible-profile').hide();

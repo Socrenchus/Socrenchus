@@ -81,19 +81,12 @@ $ ->
         )
 
     triggerTagCall: (tag) =>
-      if tag == ",correct"
-        vote = true
+      if tag is ",correct" or tag is ",incorrect"
         $(@el).find('#votebox:first').trigger('updateScore', @model.get('score'))
-      else if tag == ",incorrect"
-        vote = false
-        $(@el).find('#votebox:first').trigger('updateScore', @model.get('score'))
-      else
-        $(@el).find('#tagbox:first').trigger('addtag', tag)
 
     render: =>
-      # HACK
       postcontent = jQuery.parseJSON(@model.get('content'))
-      if postcontent != null and postcontent.posttext != ''  
+      if postcontent.posttext != ''  
         $(@el).html(@template)
         $(@el).find('.inner-question').attr('id', @model.get('id'))
         @renderInnerContents()
@@ -150,6 +143,8 @@ $ ->
         content: content
       )
       postCollection.create(p)
+      postCollection.fetch()
+      $('#new-assignment').dialog('close')
 
     addOne: (item) =>
       post = new PostView(model: item)
@@ -176,7 +171,9 @@ $ ->
     
     setTopicCreatorVisibility: =>
       if @topic_creator_showing
-        $('#new-assignment').show() 
+        new_assignment = $('#new-assignment').dialog({title: 'Create a new topic.', modal:true, draggable: false, resizable:false, minWidth: 320})
+        new_assignment.find('#new-post').omnipost({removeOnSubmit: true, callback: @makePost, message: 'Post a topic...'})
+        new_assignment.bind("dialogresize", -> new_assignment.find('#ui-omnipost').css("height", new_assignment.dialog('option', 'height')))
       else
         $('#new-assignment').hide()
 
@@ -186,7 +183,7 @@ $ ->
         
     render: =>
       if !@streamviewRendered
-        $('#new-assignment').omnipost({callback: @makePost, message: 'Post a topic...'})
+        #$('#new-assignment').omnipost({callback: @makePost, message: 'Post a topic...'})
         @setTopicCreatorVisibility()
         @scrollingDiv = $('#story')
         $('#collapsible-profile').hide()
