@@ -334,6 +334,8 @@ class Stream(ndb.Model):
     def parent(key):
       if key.parent():
         return key.parent()
+      elif key:
+        return key
     parents = self.my_posts().order(Stream.timestamp).map(parent,keys_only=True)
     # add siblings that share a common tag
     siblings = []
