@@ -127,7 +127,7 @@ class Post(Model, ndb.Model):
     # add the tag
     t = Tag.get_or_create(title, self.key)
     if t.public:
-      self.tags += title
+      self.tags.append(title)
       self.put()
     return t
 
