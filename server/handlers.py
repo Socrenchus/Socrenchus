@@ -48,7 +48,7 @@ class PostHandler(webapp.RequestHandler):
     stream = Stream.get_or_create(users.get_current_user())
     if id:
       key = ndb.Key(urlsafe=id)
-      result = stream.get_children(key)
+      result = key
     else:
       result = stream.get_assignments()
     self.response.out.write(json.encode(result))

@@ -16,6 +16,7 @@ $ ->
       )
       postCollection.create(p)
       postCollection.fetch()
+      $('#new-assignment').dialog('close')
 
     maketag: (content) =>
       t = new Tag(
@@ -169,11 +170,13 @@ $ ->
     deleteAll: ->
       postCollection.each(@deleteOne)
     
+    createModalReply: (titlemessage, omnimessage, callback) =>
+      new_assignment = $('#new-assignment').dialog({title: titlemessage, modal:true, draggable: false, resizable:false, minWidth: 320})
+      new_assignment.find('#new-post').omnipost({removeOnSubmit: true, callback: callback, message: omnimessage})
+
     setTopicCreatorVisibility: =>
       if @topic_creator_showing
-        new_assignment = $('#new-assignment').dialog({title: 'Create a new topic.', modal:true, draggable: false, resizable:false, minWidth: 320})
-        new_assignment.find('#new-post').omnipost({removeOnSubmit: true, callback: @makePost, message: 'Post a topic...'})
-        new_assignment.bind("dialogresize", -> new_assignment.find('#ui-omnipost').css("height", new_assignment.dialog('option', 'height')))
+        @createModalReply("New Topic", "Post a reply...", @makePost)
       else
         $('#new-assignment').hide()
 
@@ -260,7 +263,8 @@ $ ->
       if id?
         p = new Post({'id':id})
         p.fetch(success:->
-          postCollection.add(p)
+          postcontent = jQuery.parseJSON(p.get('content'))['posttext']
+          App.createModalReply(postcontent, "Post a reply...", p.respond)
         )
 
     new: ->

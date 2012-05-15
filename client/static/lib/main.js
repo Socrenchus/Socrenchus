@@ -35,7 +35,8 @@
           content: content
         });
         postCollection.create(p);
-        return postCollection.fetch();
+        postCollection.fetch();
+        return $('#new-assignment').dialog('close');
       };
 
       Post.prototype.maketag = function(content) {
@@ -239,6 +240,7 @@
         this.render = __bind(this.render, this);
         this.showTopicCreator = __bind(this.showTopicCreator, this);
         this.setTopicCreatorVisibility = __bind(this.setTopicCreatorVisibility, this);
+        this.createModalReply = __bind(this.createModalReply, this);
         this.addOne = __bind(this.addOne, this);
         this.reset = __bind(this.reset, this);
         StreamView.__super__.constructor.apply(this, arguments);
@@ -309,24 +311,25 @@
         return postCollection.each(this.deleteOne);
       };
 
-      StreamView.prototype.setTopicCreatorVisibility = function() {
+      StreamView.prototype.createModalReply = function(titlemessage, omnimessage, callback) {
         var new_assignment;
+        new_assignment = $('#new-assignment').dialog({
+          title: titlemessage,
+          modal: true,
+          draggable: false,
+          resizable: false,
+          minWidth: 320
+        });
+        return new_assignment.find('#new-post').omnipost({
+          removeOnSubmit: true,
+          callback: callback,
+          message: omnimessage
+        });
+      };
+
+      StreamView.prototype.setTopicCreatorVisibility = function() {
         if (this.topic_creator_showing) {
-          new_assignment = $('#new-assignment').dialog({
-            title: 'Create a new topic.',
-            modal: true,
-            draggable: false,
-            resizable: false,
-            minWidth: 320
-          });
-          new_assignment.find('#new-post').omnipost({
-            removeOnSubmit: true,
-            callback: this.makePost,
-            message: 'Post a topic...'
-          });
-          return new_assignment.bind("dialogresize", function() {
-            return new_assignment.find('#ui-omnipost').css("height", new_assignment.dialog('option', 'height'));
-          });
+          return this.createModalReply("New Topic", "Post a reply...", this.makePost);
         } else {
           return $('#new-assignment').hide();
         }
@@ -425,7 +428,9 @@
           });
           return p.fetch({
             success: function() {
-              return postCollection.add(p);
+              var postcontent;
+              postcontent = jQuery.parseJSON(p.get('content'))['posttext'];
+              return App.createModalReply(postcontent, "Post a reply...", p.respond);
             }
           });
         }
