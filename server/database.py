@@ -335,7 +335,7 @@ class Stream(ndb.Model):
     for p in parents:
       if p:
         result.append(p)
-        result.extend(p.children.fetch())
+        result.extend(Post.children(p).fetch(keys_only=True))
     return result
 
   def my_posts(self):
