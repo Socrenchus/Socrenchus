@@ -5,7 +5,7 @@ $ ->
   ###
   class Post extends Backbone.Model
     urlRoot: '/posts'
-    initialize: =>
+    initialize: =>     
 
     depth: => @get('depth')-1
 
@@ -58,7 +58,17 @@ $ ->
       @id = @model.id
       @model.bind('change', @render)
       @model.view = @
+      @siblingtags = []
+      @setSiblingTags() 
 
+    setSiblingTags: =>
+      siblings = postCollection.where({parent: @model.get('parent')})
+      for sibling in siblings
+        if sibling.get('id') != @model.get('id')
+          taglist = tagCollection.where({parent:sibling.get('id')})
+          for tag in taglist
+            @siblingtags.push(tag.get('title'))
+      
     renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))
       contentdiv = $(@el).find('#content')
@@ -80,6 +90,8 @@ $ ->
           $(@el).find('#replyButton:first').remove()
           $(@el).find('#omnipost:first').omnipost({removeOnSubmit: true, callback: @model.respond})
         )
+      else
+        $(@el).find('#replyButton:first').hide()
 
     triggerTagCall: (tag) =>
       if tag is ",correct" or tag is ",incorrect"
@@ -104,7 +116,7 @@ $ ->
             vote = false
         
         $(@el).find('#votebox:first').votebox(vote: vote, votesnum:@model.get('score') ? '', callback: @model.maketag)
-        $(@el).find('#tagbox:first').tagbox(callback: @model.maketag, tags: taglist)
+        $(@el).find('#tagbox:first').tagbox(callback: @model.maketag, tags: taglist, similarTagsStringList: @siblingtags)
       return $(@el)
       
     addChild:(child) =>

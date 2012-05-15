@@ -116,6 +116,7 @@
         this.postDOMrender = __bind(this.postDOMrender, this);
         this.updateProgress = __bind(this.updateProgress, this);
         this.renderPostContent = __bind(this.renderPostContent, this);
+        this.setSiblingTags = __bind(this.setSiblingTags, this);
         PostView.__super__.constructor.apply(this, arguments);
       }
 
@@ -134,7 +135,37 @@
       PostView.prototype.initialize = function() {
         this.id = this.model.id;
         this.model.bind('change', this.render);
-        return this.model.view = this;
+        this.model.view = this;
+        this.siblingtags = [];
+        return this.setSiblingTags();
+      };
+
+      PostView.prototype.setSiblingTags = function() {
+        var sibling, siblings, tag, taglist, _j, _len2, _results;
+        siblings = postCollection.where({
+          parent: this.model.get('parent')
+        });
+        _results = [];
+        for (_j = 0, _len2 = siblings.length; _j < _len2; _j++) {
+          sibling = siblings[_j];
+          if (sibling.get('id') !== this.model.get('id')) {
+            taglist = tagCollection.where({
+              parent: sibling.get('id')
+            });
+            _results.push((function() {
+              var _k, _len3, _results2;
+              _results2 = [];
+              for (_k = 0, _len3 = taglist.length; _k < _len3; _k++) {
+                tag = taglist[_k];
+                _results2.push(this.siblingtags.push(tag.get('title')));
+              }
+              return _results2;
+            }).call(this));
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
       };
 
       PostView.prototype.renderPostContent = function() {
@@ -170,6 +201,8 @@
               callback: _this.model.respond
             });
           });
+        } else {
+          return $(this.el).find('#replyButton:first').hide();
         }
       };
 
@@ -208,7 +241,8 @@
           });
           $(this.el).find('#tagbox:first').tagbox({
             callback: this.model.maketag,
-            tags: taglist
+            tags: taglist,
+            similarTagsStringList: this.siblingtags
           });
         }
         return $(this.el);
