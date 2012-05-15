@@ -48,7 +48,10 @@ class Model:
     """
     Return a query for siblings of this model.
     """
-    return cls.children(key.parent()).filter()
+    if key.parent():
+      return cls.children(key.parent()).filter()
+    else:
+      return None
 
 
 class Post(Model, ndb.Model):
@@ -327,15 +330,26 @@ class Stream(ndb.Model):
     """
     Returns a list of all the assignment keys.
     """
+    # get parent posts of user's replies
     def parent(key):
       if key.parent():
         return key.parent()
+      elif key:
+        return key
     parents = self.my_posts().order(Stream.timestamp).map(parent,keys_only=True)
-    result = []
+    # add siblings that share a common tag
+    siblings = []
     for p in parents:
       if p:
-        result.append(p)
-        result.extend(Post.children(p).fetch(keys_only=True))
+        siblings.append(p)
+        tags = p.get().tags
+        if tags:
+          siblings.extend(Post.siblings(p).filter(Post.tags.IN(tags)).fetch(keys_only=True))
+    # show children of all above
+    result = []
+    for p in siblings:
+      result.append(p)
+      result.extend(Post.children(p).fetch(keys_only=True))
     return result
 
   def my_posts(self):
