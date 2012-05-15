@@ -330,7 +330,13 @@ class Stream(ndb.Model):
     def parent(key):
       if key.parent():
         return key.parent()
-    return self.my_posts().order(Stream.timestamp).map(parent,keys_only=True)
+    parents = self.my_posts().order(Stream.timestamp).map(parent,keys_only=True)
+    result = []
+    for p in parents:
+      if p:
+        result.append(p)
+        result.extend(p.children.fetch())
+    return result
 
   def my_posts(self):
     """
