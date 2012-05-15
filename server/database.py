@@ -60,7 +60,7 @@ class Post(Model, ndb.Model):
   """
   author      = ndb.UserProperty(auto_current_user_add=True)
   content     = ndb.TextProperty()
-  tags        = ndb.TextProperty(repeated=True)
+  tags        = ndb.StringProperty(repeated=True)
   score       = ndb.FloatProperty(default=0.0)
   timestamp   = ndb.DateTimeProperty(auto_now_add=True)
 
@@ -201,7 +201,7 @@ class Tag(Model, ndb.Model):
     if random.random() < self.weight:
       return True
     else:
-      return False
+      return True
     
   @classmethod
   def get_or_create(cls, title, item_key, user=None, xp=None):

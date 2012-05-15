@@ -44,5 +44,5 @@ class BootStrap:
         user = tags[i]['user']
         stream = BootStrap.switchToUser(user)
         parentkey = postkeymap[filename + tags[i]['parent']]
-        Tag.get_or_create(tags[i]['title'],parentkey)
+        parentkey.get().add_tag(tags[i]['title'])
 
