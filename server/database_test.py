@@ -12,8 +12,6 @@ import unittest
 import os
 import random
 import json
-from google.appengine.ext import ndb
-from google.appengine.api import users, memcache
 from google.appengine.ext import testbed
 from database import *
 
@@ -35,9 +33,11 @@ class DatabaseTests(unittest.TestCase):
     self.testbed.deactivate()
     
   def switchToUser(self, id):
-    os.environ['USER_EMAIL'] = 'test'+str(id)+'@example.com'
-    os.environ['USER_ID'] = str(id)
-    return Stream.get_or_create(users.get_current_user())
+    os.environ['OAUTH_EMAIL'] = 'test'+str(id)+'@example.com'
+    os.environ['OAUTH_ID'] = str(id)
+    os.environ['USER_EMAIL'] = os.environ['OAUTH_EMAIL']
+    os.environ['USER_ID'] = os.environ['OAUTH_ID']
+    return Stream.get_or_create(oauth.get_current_user())
     
   def testPostScoring(self):
     # create post
@@ -88,7 +88,7 @@ class DatabaseTests(unittest.TestCase):
     # adjust the score
     post.adjust_score(100.0).wait()
     # check that the tags were updated properly
-    user = Stream.query(Stream.user==post.author).iter(keys_only=True).next()
+    user = Stream.get_or_create(post.author).key
     tags = Tag.query(ancestor=user).fetch()
     self.assertEqual(len(tags),len(tag_names))
     for t in tags:
@@ -96,8 +96,7 @@ class DatabaseTests(unittest.TestCase):
       
   def testExperienceDereferencing(self):
     # switch to 'tagging' user
-    self.switchToUser('tagging')
-    user = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
+    user = self.switchToUser('tagging').key
     # give 'tagging' user experience in a few tags
     Tag(parent=user, title='a', xp=100).put()
     Tag(parent=user, title='b', xp=50).put()

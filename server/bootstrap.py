@@ -2,15 +2,17 @@ import fileinput
 import os
 import logging
 import json
-from google.appengine.api import users
+from google.appengine.api import oauth
 from database import *
 from google.appengine.ext import ndb
 class BootStrap:
   @classmethod
   def switchToUser(self, id):
-    os.environ['USER_EMAIL'] = 'test'+str(id)+'@example.com'
-    os.environ['USER_ID'] = str(id)
-    return Stream.get_or_create(users.get_current_user())
+    os.environ['OAUTH_EMAIL'] = 'test'+str(id)+'@example.com'
+    os.environ['OAUTH_ID'] = str(id)
+    os.environ['USER_EMAIL'] = os.environ['OAUTH_EMAIL']
+    os.environ['USER_ID'] = os.environ['OAUTH_ID']
+    return Stream.get_or_create(oauth.get_current_user())
   
   @classmethod
   def loadconfiguration(self,filename): 

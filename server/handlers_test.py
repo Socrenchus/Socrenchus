@@ -14,7 +14,7 @@ import json
 from StringIO import StringIO
 from google.appengine.ext import ndb
 from google.appengine.ext import db
-from google.appengine.api import users
+from google.appengine.api import oauth
 from google.appengine.ext import testbed
 from google.appengine.ext import webapp
 from google.appengine.datastore import datastore_stub_util
@@ -37,18 +37,18 @@ class HandlerTests(unittest.TestCase):
     self.testbed.deactivate()
 
   def switchToUser(self, id):
-    os.environ['USER_EMAIL'] = 'test'+str(id)+'@example.com'
-    os.environ['USER_ID'] = str(id)
-    stream = Stream.query(Stream.user==users.User()).get()
-    if not stream:
-      Stream().put()
+    os.environ['OAUTH_EMAIL'] = 'test'+str(id)+'@example.com'
+    os.environ['OAUTH_ID'] = str(id)
+    os.environ['USER_EMAIL'] = os.environ['OAUTH_EMAIL']
+    os.environ['USER_ID'] = os.environ['OAUTH_ID']
+    return Stream.get_or_create(oauth.get_current_user())
 
   def testGet(self):
     # get post list
     self.switchToUser(100)
     tmp = {}
     tmp['content'] = "{posttext: 'sample', linkdata: 'reddit.com'}"
-    stream = Stream.get_or_create(users.get_current_user())
+    stream = Stream.get_or_create(oauth.get_current_user())
     if 'parent' in tmp:
       post = stream.create_post(tmp['content'], ndb.Key(urlsafe=tmp['parent']))
     else:

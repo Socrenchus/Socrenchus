@@ -13,7 +13,8 @@ need work.
 This is the database model and core logic.
 """
 
-from google.appengine.api import users
+#from google.appengine.api import oauth
+import google.appengine.api.users as oauth
 from google.appengine.ext import ndb
 
 import random
@@ -79,7 +80,7 @@ class Post(Model, ndb.Model):
     """
     Dereference a user's experience on a post.
     """
-    user = Stream.query(Stream.user==users.get_current_user()).get()
+    user = Stream.get_or_create()
     result = 0 # clear the current
     tags_d = Tag.weights(Tag.query(ancestor=key))
     # check if parent post exists
@@ -106,7 +107,7 @@ class Post(Model, ndb.Model):
     # adjust the score by delta
     self.score += delta
     # reference the experience points earned
-    user = Stream.query(Stream.user==self.author).get()
+    user = Stream.get_or_create(self.author)
     tags_d = Tag.weights(Tag.query(ancestor=self.key))
     # check if parent post exists
     parent = self.key.parent()
@@ -212,7 +213,7 @@ class Tag(Model, ndb.Model):
     if not xp:
       xp = 1
     if not user:
-      user = users.get_current_user()
+      user = oauth.get_current_user()
     result = Tag.query(cls.title == title, cls.user == user, ancestor=item_key).get()
     if not result:
       result = Tag(title=title,user=user,xp=xp,parent=item_key)
@@ -312,7 +313,7 @@ class Stream(ndb.Model):
     Creates a new stream or finds the user's stream.
     """
     if not user:
-      user = users.get_current_user()
+      user = oauth.get_current_user()
     u = Stream.query(Stream.user==user).get()
     if not u:
       u = Stream(user=user)
@@ -323,14 +324,13 @@ class Stream(ndb.Model):
     result = {}
     result['id'] = self.key.urlsafe()
     result['assignments'] = self.get_assignments()
-    result['tags'] = Tag.query(Tag.user == users.get_current_user())
+    result['tags'] = Tag.query(Tag.user == self.user)
     return result
     
   def get_assignments(self):
     """
     Returns a list of all the assignment keys.
     """
-    user = users.get_current_user()
     # get user's replies
     posts = self.my_posts().order(Stream.timestamp).fetch(keys_only=True)
     # add parents of user's posts and siblings that share a common tag
@@ -348,7 +348,7 @@ class Stream(ndb.Model):
     result = []
     for p in rest:
       result.append(p)
-      result.extend(Post.children(p).filter(Post.author != user).fetch(keys_only=True))
+      result.extend(Post.children(p).filter(Post.author != self.user).fetch(keys_only=True))
     return result
 
   def my_posts(self):
@@ -398,7 +398,7 @@ class Stream(ndb.Model):
     """
     Creates a post from given content with optional parent.
     """
-    if parent and parent.get().author == users.get_current_user():
+    if parent and parent.get().author == self.user:
       return False
     p = Post(parent=parent,content=content)
     p.put()
