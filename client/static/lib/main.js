@@ -191,22 +191,26 @@
         }).length > 0) {
           if (this.model.get('progress') !== 1) this.updateProgress();
         }
-        return $(this.el).find('#content').autosize();
+        $(this.el).find('#content').autosize();
+        return addthis.toolbox('.addthis_toolbox');
       };
 
       PostView.prototype.renderInnerContents = function() {
-        var _this = this;
+        var questionURL,
+          _this = this;
         this.renderPostContent();
         if (!(postCollection.where({
           parent: this.id
         }).length > 0)) {
-          return $(this.el).find('#replyButton:first').click(function() {
+          $(this.el).find('#replyButton:first').click(function() {
             $(_this.el).find('#replyButton:first').remove();
             return $(_this.el).find('#omnipost:first').omnipost({
               removeOnSubmit: true,
               callback: _this.model.respond
             });
           });
+          questionURL = "http://" + window.location.host + "/#" + this.model.get('id');
+          return $(this.el).find('#addThis').attr('addthis:url', questionURL);
         } else {
           return $(this.el).find('#replyButton:first').hide();
         }

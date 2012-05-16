@@ -83,6 +83,7 @@ $ ->
         if @model.get('progress') != 1
           @updateProgress()
       $(@el).find('#content').autosize()
+      addthis.toolbox('.addthis_toolbox')
 
     renderInnerContents: =>
       @renderPostContent()
@@ -91,6 +92,8 @@ $ ->
           $(@el).find('#replyButton:first').remove()
           $(@el).find('#omnipost:first').omnipost({removeOnSubmit: true, callback: @model.respond})
         )
+        questionURL = "http://" + window.location.host + "/#" + @model.get('id')
+        $(@el).find('#addThis').attr('addthis:url', questionURL)
       else
         $(@el).find('#replyButton:first').hide()
 
