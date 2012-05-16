@@ -25,6 +25,7 @@ $ ->
         xp: 0
       )
       tagCollection.create(t)
+      @fetch()
       @view.triggerTagCall(content)
     
   class Posts extends Backbone.Collection
@@ -138,7 +139,8 @@ $ ->
       @selectedStory = '#story-part1'
       postCollection.bind('add', @addOne, this)
       postCollection.bind('reset', @addAll, this)
-      postCollection.bind('all', @render, this)
+      postCollection.bind('all', @render, this)      
+      tagCollection.fetch()
       postCollection.fetch()
       @reset()
     

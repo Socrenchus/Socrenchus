@@ -49,6 +49,7 @@
           xp: 0
         });
         tagCollection.create(t);
+        this.fetch();
         return this.view.triggerTagCall(content);
       };
 
@@ -289,6 +290,7 @@
         postCollection.bind('add', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
         postCollection.bind('all', this.render, this);
+        tagCollection.fetch();
         postCollection.fetch();
         return this.reset();
       };
