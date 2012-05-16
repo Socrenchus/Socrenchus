@@ -49,8 +49,7 @@
           xp: 0
         });
         tagCollection.create(t);
-        this.view.triggerTagCall(content);
-        return this.view.updateProgress();
+        return this.view.triggerTagCall(content);
       };
 
       return Post;
@@ -116,7 +115,6 @@
         this.triggerTagCall = __bind(this.triggerTagCall, this);
         this.renderInnerContents = __bind(this.renderInnerContents, this);
         this.postDOMrender = __bind(this.postDOMrender, this);
-        this.updateProgress = __bind(this.updateProgress, this);
         this.renderPostContent = __bind(this.renderPostContent, this);
         this.setSiblingTags = __bind(this.setSiblingTags, this);
         PostView.__super__.constructor.apply(this, arguments);
@@ -181,16 +179,7 @@
         return contentdiv.val(jsondata.posttext);
       };
 
-      PostView.prototype.updateProgress = function() {
-        return $(this.el).find('#progress-bar:first').progressbar("value", this.model.get('score') * 100);
-      };
-
       PostView.prototype.postDOMrender = function() {
-        if (postCollection.where({
-          parent: this.id
-        }).length > 0) {
-          if (this.model.get('progress') !== 1) this.updateProgress();
-        }
         $(this.el).find('#content').autosize();
         return addthis.toolbox('.addthis_toolbox');
       };
@@ -347,8 +336,8 @@
         children = postCollection.where({
           parent: item.get('id')
         });
+        if (item.depth() === 0) $('#assignments').prepend(post.render());
         if (children.length > 0) {
-          $('#assignments').prepend(post.render());
           clusters = item.clusters;
           if (clusters.length === 0) {
             for (_j = 0, _len2 = children.length; _j < _len2; _j++) {

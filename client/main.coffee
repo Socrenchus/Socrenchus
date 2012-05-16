@@ -26,7 +26,6 @@ $ ->
       )
       tagCollection.create(t)
       @view.triggerTagCall(content)
-      @view.updateProgress()
     
   class Posts extends Backbone.Collection
     model: Post
@@ -75,13 +74,7 @@ $ ->
       contentdiv = $(@el).find('#content')
       contentdiv.val(jsondata.posttext)
 
-    updateProgress: =>
-      $(@el).find('#progress-bar:first').progressbar("value", @model.get('score') * 100)
-
     postDOMrender: =>
-      if postCollection.where({parent: @id}).length > 0
-        if @model.get('progress') != 1
-          @updateProgress()
       $(@el).find('#content').autosize()
       addthis.toolbox('.addthis_toolbox')
 
@@ -175,10 +168,11 @@ $ ->
       post = item.view
       post ? post : post = @makeView(item)
       children = postCollection.where({parent: item.get('id')})
+      # render root posts
+      if item.depth() is 0
+        $('#assignments').prepend(post.render())      
+      # render the children posts
       if children.length > 0
-        # render the parent
-        $('#assignments').prepend(post.render())
-        # render the children
         clusters = item.clusters
         if clusters.length == 0
           for child in children
