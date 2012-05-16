@@ -161,12 +161,12 @@ class TagCount(ndb.Model):
     tc.xp += tag.xp
     tc.put()
     # update the other tags in the post
-    tags = set([c.title for c in Tag.children(tag.key.parent())])
+    tags = set(c.title for c in Tag.siblings(tag.key))
     for t in tags:
-      tc = cls.get_or_create(tag.title, t)
-      tc.count += 1
-      tc.xp += tag.xp
-      tc.put()
+      stc = cls.get_or_create(tag.title, t)
+      stc.count += 1
+      stc.xp += tag.xp
+      stc.put()
     
 
 class Tag(Model, ndb.Model):
