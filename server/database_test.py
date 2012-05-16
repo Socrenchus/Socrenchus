@@ -68,6 +68,7 @@ class DatabaseTests(unittest.TestCase):
     t.put()
     # check it
     self.assertEqual(post.score, -2)
+    self.assertEqual(Stream.get_or_create().voted(post.key), 1)
     
   def testExperienceReferencing(self):
     # create post

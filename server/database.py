@@ -376,7 +376,7 @@ class Stream(ndb.Model):
     Check if the user voted on a post.
     """
     vote_tag = ndb.OR(Tag.title==Tag.base('correct'),Tag.title==Tag.base('incorrect'))
-    Tag.query(vote_tag, Tag.user==self.user, ancestor=key).count(1)
+    return Tag.query(vote_tag, Tag.user==self.user, ancestor=key).count(1)
     
   def adjust_experience(self, tag_title, delta):
     """
