@@ -48,10 +48,12 @@ class Model:
     """
     Return a query for siblings of this model.
     """
+    result = None
     if key.parent():
-      return cls.children(key.parent()).filter()
+      result = cls.children(key.parent())
     else:
-      return cls.query(cls.depth == len(key.pairs()))
+      result = cls.query(cls.depth == len(key.pairs()))
+    return result
 
 
 class Post(Model, ndb.Model):
@@ -341,7 +343,6 @@ class Stream(ndb.Model):
     siblings = []
     for p in parents:
       if p:
-        siblings.append(p)
         tags = p.get().tags
         if tags:
           siblings.extend(Post.siblings(p).filter(Post.tags.IN(tags)).fetch(keys_only=True))
