@@ -36,6 +36,7 @@ use_library('django', '0.96')
 from bootstrap import BootStrap
 
 _DEBUG = True
+
 class BootstrapHandler(webapp.RequestHandler):
   def get(self, id):
     if _DEBUG:
