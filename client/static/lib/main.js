@@ -148,22 +148,16 @@
         _results = [];
         for (_j = 0, _len2 = siblings.length; _j < _len2; _j++) {
           sibling = siblings[_j];
-          if (sibling.get('id') !== this.model.get('id')) {
-            taglist = tagCollection.where({
-              parent: sibling.get('id')
-            });
-            _results.push((function() {
-              var _k, _len3, _results2;
-              _results2 = [];
-              for (_k = 0, _len3 = taglist.length; _k < _len3; _k++) {
-                tag = taglist[_k];
-                _results2.push(this.siblingtags.push(tag.get('title')));
-              }
-              return _results2;
-            }).call(this));
-          } else {
-            _results.push(void 0);
-          }
+          taglist = sibling.get('tags');
+          _results.push((function() {
+            var _k, _len3, _results2;
+            _results2 = [];
+            for (_k = 0, _len3 = taglist.length; _k < _len3; _k++) {
+              tag = taglist[_k];
+              _results2.push(this.siblingtags.push(tag));
+            }
+            return _results2;
+          }).call(this));
         }
         return _results;
       };

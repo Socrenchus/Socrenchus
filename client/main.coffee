@@ -64,10 +64,9 @@ $ ->
     setSiblingTags: =>
       siblings = postCollection.where({parent: @model.get('parent')})
       for sibling in siblings
-        if sibling.get('id') != @model.get('id')
-          taglist = tagCollection.where({parent:sibling.get('id')})
-          for tag in taglist
-            @siblingtags.push(tag.get('title'))
+        taglist = sibling.get('tags')
+        for tag in taglist
+          @siblingtags.push(tag)
       
     renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))

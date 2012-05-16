@@ -39,11 +39,7 @@
       "user" : "100"
     }
   ],
-  [ 
-    { "parent" : "post0",
-      "title" : "Martial Arts",
-      "user" : "100"
-    },
+  [
     { "parent" : "post0",
       "title" : "Martial Arts",
       "user" : "101"
