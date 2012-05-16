@@ -22,7 +22,9 @@
 
       Post.prototype.urlRoot = '/posts';
 
-      Post.prototype.initialize = function() {};
+      Post.prototype.initialize = function() {
+        return this.clusters = [];
+      };
 
       Post.prototype.depth = function() {
         return this.get('depth') - 1;
@@ -149,15 +151,25 @@
         for (_j = 0, _len2 = siblings.length; _j < _len2; _j++) {
           sibling = siblings[_j];
           taglist = sibling.get('tags');
-          _results.push((function() {
-            var _k, _len3, _results2;
-            _results2 = [];
-            for (_k = 0, _len3 = taglist.length; _k < _len3; _k++) {
-              tag = taglist[_k];
-              _results2.push(this.siblingtags.push(tag));
-            }
-            return _results2;
-          }).call(this));
+          if (taglist) {
+            _results.push((function() {
+              var _k, _len3, _results2;
+              _results2 = [];
+              for (_k = 0, _len3 = taglist.length; _k < _len3; _k++) {
+                tag = taglist[_k];
+                if (this.siblingtags.indexOf(tag) < 0 && tagCollection.where({
+                  title: tag
+                }).length === 0) {
+                  _results2.push(this.siblingtags.push(tag));
+                } else {
+                  _results2.push(void 0);
+                }
+              }
+              return _results2;
+            }).call(this));
+          } else {
+            _results.push(void 0);
+          }
         }
         return _results;
       };
@@ -270,6 +282,7 @@
         this.setTopicCreatorVisibility = __bind(this.setTopicCreatorVisibility, this);
         this.createModalReply = __bind(this.createModalReply, this);
         this.addOne = __bind(this.addOne, this);
+        this.makeView = __bind(this.makeView, this);
         this.reset = __bind(this.reset, this);
         StreamView.__super__.constructor.apply(this, arguments);
       }
@@ -283,6 +296,7 @@
         postCollection.bind('add', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
         postCollection.bind('all', this.render, this);
+        postCollection.fetch();
         return this.reset();
       };
 
@@ -304,7 +318,7 @@
         return $('#new-assignment').dialog('close');
       };
 
-      StreamView.prototype.addOne = function(item) {
+      StreamView.prototype.makeView = function(item) {
         var post;
         post = new PostView({
           model: item
@@ -312,11 +326,41 @@
         post.parent = postCollection.where({
           id: item.get('parent')
         });
-        if (post.parent.length > 0) {
-          post.parent = post.parent[0].view;
-          post.parent.addChild(post);
+        if (post.parent.length > 0) post.parent[0].clusters = post.siblingtags;
+        return post;
+      };
+
+      StreamView.prototype.addOne = function(item) {
+        var child, children, cluster, clusters, post, _j, _k, _l, _len2, _len3, _len4;
+        post = item.view;
+                if (post != null) {
+          post;
         } else {
+          ({
+            post: post = this.makeView(item)
+          });
+        };
+        children = postCollection.where({
+          parent: item.get('id')
+        });
+        if (children.length > 0) {
           $('#assignments').prepend(post.render());
+          clusters = item.clusters;
+          if (clusters.length === 0) {
+            for (_j = 0, _len2 = children.length; _j < _len2; _j++) {
+              child = children[_j];
+              post.addChild(child.view);
+            }
+          }
+          for (_k = 0, _len3 = clusters.length; _k < _len3; _k++) {
+            cluster = clusters[_k];
+            for (_l = 0, _len4 = children.length; _l < _len4; _l++) {
+              child = children[_l];
+              if (child.get('tags').indexOf(cluster) > -1 || child.get('tags').length === 0) {
+                post.addChild(child.view);
+              }
+            }
+          }
         }
         return post.postDOMrender();
       };
@@ -327,6 +371,7 @@
         a = b.clone();
         a.empty();
         b.before(a);
+        postCollection.each(this.makeView);
         postCollection.each(this.addOne);
         return b.remove();
       };

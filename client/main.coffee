@@ -6,7 +6,7 @@ $ ->
   class Post extends Backbone.Model
     urlRoot: '/posts'
     initialize: =>     
-
+      @clusters = []
     depth: => @get('depth')-1
 
     respond: (content) =>
@@ -65,8 +65,10 @@ $ ->
       siblings = postCollection.where({parent: @model.get('parent')})
       for sibling in siblings
         taglist = sibling.get('tags')
-        for tag in taglist
-          @siblingtags.push(tag)
+        if taglist
+          for tag in taglist
+            if @siblingtags.indexOf(tag) < 0 and tagCollection.where({title:tag}).length == 0
+              @siblingtags.push(tag)
       
     renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))
@@ -141,6 +143,7 @@ $ ->
       postCollection.bind('add', @addOne, this)
       postCollection.bind('reset', @addAll, this)
       postCollection.bind('all', @render, this)
+      postCollection.fetch()
       @reset()
     
     reset: =>
@@ -158,14 +161,31 @@ $ ->
       postCollection.fetch()
       $('#new-assignment').dialog('close')
 
-    addOne: (item) =>
+    makeView: (item) =>
       post = new PostView(model: item)
       post.parent = postCollection.where({id: item.get('parent')})
-      if post.parent.length > 0
-        post.parent = post.parent[0].view
-        post.parent.addChild(post)
-      else
+      if post.parent.length > 0 
+        post.parent[0].clusters = post.siblingtags
+      return post
+
+    addOne: (item) =>
+      post = item.view
+      post ? post : post = @makeView(item)
+      children = postCollection.where({parent: item.get('id')})
+      if children.length > 0
+        # render the parent
         $('#assignments').prepend(post.render())
+        # render the children
+        clusters = item.clusters
+        if clusters.length == 0
+          for child in children
+            post.addChild(child.view)
+        
+        for cluster in clusters
+          for child in children
+            if child.get('tags').indexOf(cluster) > -1 or child.get('tags').length == 0
+              post.addChild(child.view)
+        
       post.postDOMrender()
 
     addAll: ->
@@ -173,6 +193,7 @@ $ ->
       a = b.clone()
       a.empty()
       b.before(a)
+      postCollection.each(@makeView)
       postCollection.each(@addOne)
       b.remove()
 
