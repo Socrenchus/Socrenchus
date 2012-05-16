@@ -330,25 +330,25 @@ class Stream(ndb.Model):
     """
     Returns a list of all the assignment keys.
     """
-    # get parent posts of user's replies
-    def parent(key):
-      if key.parent():
-        return key.parent()
-      elif key:
-        return key
-    parents = self.my_posts().order(Stream.timestamp).map(parent,keys_only=True)
-    # add siblings that share a common tag
-    siblings = []
-    for p in parents:
-      if p:
-        tags = p.get().tags
+    user = users.get_current_user()
+    # get user's replies
+    posts = self.my_posts().order(Stream.timestamp).fetch(keys_only=True)
+    # add parents of user's posts and siblings that share a common tag
+    rest = []
+    for p in posts:
+      rest.append(p)
+      parent = p.parent()
+      if parent:
+        rest.append(parent)
+        tags = parent.get().tags
         if tags:
-          siblings.extend(Post.siblings(p).filter(Post.tags.IN(tags)).fetch(keys_only=True))
+          rest.extend(Post.siblings(parent).filter(Post.tags.IN(tags)).fetch(keys_only=True))
+
     # show children of all above
     result = []
-    for p in siblings:
+    for p in rest:
       result.append(p)
-      result.extend(Post.children(p).fetch(keys_only=True))
+      result.extend(Post.children(p).filter(Post.author != user).fetch(keys_only=True))
     return result
 
   def my_posts(self):

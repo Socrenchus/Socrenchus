@@ -175,12 +175,18 @@ class DatabaseTests(unittest.TestCase):
     for i in range(15):
       user = self.switchToUser(str(i))
       resp.append(user.create_post(str(i), post.key).key)
+    user.create_post("reply_to_user", resp[1])
     # check assignments
     stream = self.switchToUser(str(1))
     a = stream.get_assignments()
     m = "Stream contains unexpected duplicates."
     self.assertEqual(len(a), len(set([x for x in a])), msg=m)
-
+    # check that user's own posts were automatically assigned
+    m = "Not all of the user's posts were assigned."
+    self.assertEqual(sum([(p.get().author == user.user) for p in a]), Post.query(Post.author == user.user).count())
+    # check that the children of the user's own posts are shown
+    m = "Children of user's posts aren't automatically being shown."
+    self.assertTrue([p.parent() == resp[1] for p in a], m)
     # check that grandchildren don't get assigned
     count = len(stream.get_assignments())
     user = self.switchToUser(str(2))
