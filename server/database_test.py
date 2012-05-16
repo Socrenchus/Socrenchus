@@ -33,11 +33,9 @@ class DatabaseTests(unittest.TestCase):
     self.testbed.deactivate()
     
   def switchToUser(self, id):
-    os.environ['OAUTH_EMAIL'] = 'test'+str(id)+'@example.com'
-    os.environ['OAUTH_ID'] = str(id)
-    os.environ['USER_EMAIL'] = os.environ['OAUTH_EMAIL']
-    os.environ['USER_ID'] = os.environ['OAUTH_ID']
-    return Stream.get_or_create(oauth.get_current_user())
+    os.environ['USER_EMAIL'] = 'test'+str(id)+'@example.com'
+    os.environ['USER_ID'] = str(id)
+    return Stream.get_or_create(users.get_current_user())
     
   def testPostScoring(self):
     # create post

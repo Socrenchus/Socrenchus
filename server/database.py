@@ -13,8 +13,7 @@ need work.
 This is the database model and core logic.
 """
 
-#from google.appengine.api import oauth
-import google.appengine.api.users as oauth
+from google.appengine.api import users
 from google.appengine.ext import ndb
 
 import random
@@ -213,7 +212,7 @@ class Tag(Model, ndb.Model):
     if not xp:
       xp = 1
     if not user:
-      user = oauth.get_current_user()
+      user = users.get_current_user()
     result = Tag.query(cls.title == title, cls.user == user, ancestor=item_key).get()
     if not result:
       result = Tag(title=title,user=user,xp=xp,parent=item_key)
@@ -313,7 +312,7 @@ class Stream(ndb.Model):
     Creates a new stream or finds the user's stream.
     """
     if not user:
-      user = oauth.get_current_user()
+      user = users.get_current_user()
     u = Stream.query(Stream.user==user).get()
     if not u:
       u = Stream(user=user)

@@ -23,7 +23,7 @@ if cmd_folder not in sys.path:
   sys.path.insert(0, cmd_folder)
 import json
 from google.appengine.ext import webapp
-from google.appengine.api import oauth
+from google.appengine.api import users
 from google.appengine.ext.ndb import context
 from google.appengine.ext import ndb
 import logging
@@ -45,7 +45,7 @@ class BootstrapHandler(webapp.RequestHandler):
 class PostHandler(webapp.RequestHandler):
   def get(self, id):
     result = None
-    stream = Stream.get_or_create(oauth.get_current_user())
+    stream = Stream.get_or_create(users.get_current_user())
     if id:
       key = ndb.Key(urlsafe=id)
       result = key
@@ -55,7 +55,7 @@ class PostHandler(webapp.RequestHandler):
 
  
   def post(self, id):
-    stream = Stream.get_or_create(oauth.get_current_user())
+    stream = Stream.get_or_create(users.get_current_user())
     tmp = json.simplejson.loads(self.request.body)
     if 'parent' in tmp:
       post = stream.create_post(tmp['content'], ndb.Key(urlsafe=tmp['parent']))
@@ -68,7 +68,7 @@ class PostHandler(webapp.RequestHandler):
 
 class TagHandler(webapp.RequestHandler):
   def get(self, id):
-    q = Tag.query(Tag.user == oauth.get_current_user()).fetch()
+    q = Tag.query(Tag.user == users.get_current_user()).fetch()
     self.response.out.write(json.encode(q))
  
   def post(self, id):
@@ -93,16 +93,16 @@ class TagHandler(webapp.RequestHandler):
 
 class StreamHandler(webapp.RequestHandler):
   def get(self, id):
-    stream = Stream.get_or_create(oauth.get_current_user())
+    stream = Stream.get_or_create(users.get_current_user())
     self.response.out.write(json.encode(stream))
 
 class AccountHandler(webapp.RequestHandler):
   def get(self):
-    if oauth.get_current_user():
-      url = oauth.create_logout_url(self.request.uri)
+    if users.get_current_user():
+      url = users.create_logout_url(self.request.uri)
       url_linktext = 'Logout'
     else:
-      url = oauth.create_login_url(self.request.uri)
+      url = users.create_login_url(self.request.uri)
       self.redirect(url)
       url_linktext = 'Login'
     template_values = {
