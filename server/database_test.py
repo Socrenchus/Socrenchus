@@ -119,7 +119,7 @@ class DatabaseTests(unittest.TestCase):
     Tag.get_or_create('a', p, None, 3)
     # switch back to 'tagging' user and apply a tag
     self.switchToUser('tagging')
-    t = Tag(parent=p, title='blah')
+    t = Tag.get_or_create('blah', p)
     t.put()
     self.assertEqual(round(t.xp), 50)
     
@@ -129,18 +129,15 @@ class DatabaseTests(unittest.TestCase):
     p = Post()
     p.put()
     # give users a starting experience
-    self.switchToUser('A')
-    a = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
+    a = self.switchToUser('A').key
     aa = Tag.get_or_create('a', a, None, 500).key
     ab = Tag.get_or_create('b', a, None, 50).key
     ac = Tag.get_or_create('c', a, None, 5).key
-    self.switchToUser('B')
-    b = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
+    b = self.switchToUser('B').key
     ba = Tag.get_or_create('a', b, None, 50).key
     bb = Tag.get_or_create('b', b, None, 500).key
     bc = Tag.get_or_create('c', b, None, 50).key
-    self.switchToUser('C')
-    c = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
+    c = self.switchToUser('C').key
     ca = Tag.get_or_create('a', c, None, 5).key
     cb = Tag.get_or_create('b', c, None, 50).key
     cc = Tag.get_or_create('c', c, None, 500).key
@@ -165,7 +162,7 @@ class DatabaseTests(unittest.TestCase):
     self.assertEqual(cc.get().xp, 500)
     # check the final post score
     # figure out why the post sometimes gets 100 points
-    self.assertEqual(p.get().score, 0)
+    self.assertEqual(p.score, 0)
     
   def testAssignment(self):
     # create post

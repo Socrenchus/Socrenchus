@@ -123,12 +123,10 @@ class Post(Model, ndb.Model):
     return self.put_async()
   
   def add_tag(self, title):
-    # check that tag isn't already permanent
-    if title in self.tags:
-      return False
     # add the tag
     t = Tag.get_or_create(title, self.key)
-    if t.public:
+    # check that tag isn't already permanent
+    if t.public and not title in self.tags:
       self.tags.append(title)
       self.put()
     return t
@@ -200,10 +198,10 @@ class Tag(Model, ndb.Model):
   
   @property
   def public(self):
-    if random.random() < self.weight:
+    if self.weight > 0.75:
       return True
     else:
-      return True
+      return False
     
   @classmethod
   def get_or_create(cls, title, item_key, user=None, xp=None):
@@ -221,7 +219,7 @@ class Tag(Model, ndb.Model):
       if item_key.kind() == 'Post':
         if no_xp:
           result.update_experience()
-          result.eval_score_change()
+        result.eval_score_change()
         if not result.is_base():
           TagCount.update_counts(result)
       result.put()
@@ -294,12 +292,12 @@ class Tag(Model, ndb.Model):
       post.adjust_score(delta).wait()
     else:
       # adjust the experience for the taggers
-      user = Stream.query(Stream.user==users.get_current_user()).get()
+      user = Stream.get_or_create()
       user.adjust_experience(self.title, self.weight)
       def reward_tagger(tag):
-        user = Stream.query(Stream.user==tag.user).get()
+        user = Stream.get_or_create(tag.user)
         user.adjust_experience(tag.title, (tag.weight/tag._local_xp)*self.xp)
-      Tag.query(Tag.title == self.title, ancestor=self.key.parent()).map(reward_tagger)
+      Tag.siblings(self.key).filter(Tag.title == self.title).map(reward_tagger)
 
 class Stream(ndb.Model):
   """
