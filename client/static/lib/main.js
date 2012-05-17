@@ -186,12 +186,13 @@
       };
 
       PostView.prototype.renderInnerContents = function() {
-        var questionURL,
+        var children, questionURL,
           _this = this;
         this.renderPostContent();
-        if (!(postCollection.where({
+        children = postCollection.where({
           parent: this.id
-        }).length > 0)) {
+        });
+        if (!(children.length > 0)) {
           $(this.el).find('#replyButton:first').click(function() {
             $(_this.el).find('#replyButton:first').remove();
             return $(_this.el).find('#omnipost:first').omnipost({
@@ -200,9 +201,10 @@
             });
           });
           questionURL = "http://" + window.location.host + "/#" + this.model.get('id');
-          return $(this.el).find('#addThis').attr('addthis:url', questionURL);
-        } else {
-          return $(this.el).find('#replyButton:first').hide();
+          $(this.el).find('#addThis').attr('addthis:url', questionURL);
+        }
+        if (children.length > 0 || App.user['email'] === this.model.get('author')['email']) {
+          return $(this.el).find('#replyButton:first').remove();
         }
       };
 
@@ -278,26 +280,30 @@
         this.addOne = __bind(this.addOne, this);
         this.makeView = __bind(this.makeView, this);
         this.reset = __bind(this.reset, this);
+        this.initialize = __bind(this.initialize, this);
         StreamView.__super__.constructor.apply(this, arguments);
       }
 
       StreamView.prototype.initialize = function() {
         this.id = 0;
+        this.user = 0;
         this.maxlevel = 4;
         this.streamviewRendered = false;
         this.topic_creator_showing = false;
         this.selectedStory = '#story-part1';
+        this.reset();
         postCollection.bind('add', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
         postCollection.bind('all', this.render, this);
         tagCollection.fetch();
-        postCollection.fetch();
-        return this.reset();
+        return postCollection.fetch();
       };
 
       StreamView.prototype.reset = function() {
+        var _this = this;
         return $.getJSON('/stream', (function(data) {
-          this.id = data['id'];
+          _this.id = data['id'];
+          _this.user = data['user'];
           tagCollection.add(data['tags']);
           return postCollection.add(data['assignments']);
         }));
@@ -344,6 +350,7 @@
           if (clusters.length === 0) {
             for (_j = 0, _len2 = children.length; _j < _len2; _j++) {
               child = children[_j];
+              if (child.view === void 0) child.view = this.makeView(child);
               post.addChild(child.view);
             }
           }
