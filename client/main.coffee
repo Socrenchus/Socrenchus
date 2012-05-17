@@ -25,8 +25,8 @@ $ ->
         xp: 0
       )
       tagCollection.create(t)
+      tagCollection.fetch()
       @fetch()
-      @view.triggerTagCall(content)
     
   class Posts extends Backbone.Collection
     model: Post
@@ -59,7 +59,7 @@ $ ->
       @model.bind('change', @render)
       @model.view = @
       @siblingtags = []
-      @setSiblingTags() 
+      @setSiblingTags()
 
     setSiblingTags: =>
       siblings = postCollection.where({parent: @model.get('parent')})
@@ -67,7 +67,7 @@ $ ->
         taglist = sibling.get('tags')
         if taglist
           for tag in taglist
-            if @siblingtags.indexOf(tag) < 0 and tagCollection.where({title:tag}).length == 0
+            if @siblingtags.indexOf(tag) < 0
               @siblingtags.push(tag)
       
     renderPostContent: =>
@@ -176,15 +176,26 @@ $ ->
       # render root posts
       if item.depth() is 0
         $('#assignments').prepend(post.render())      
+      mychild = null
+      for child in children
+        if App.user['email'] == child.get('author')['email']
+          mychild = child
+      clusters = []
+      if mychild != null
+        clusters = mychild.get('tags')
+      for cluster in item.clusters
+        if clusters.indexOf(cluster) < 0
+          clusters.push(cluster)
+     
       # render the children posts
       if children.length > 0
-        clusters = item.clusters
+        # if no clusters exist yet, just add all the children unordered
         if clusters.length == 0
           for child in children
             if child.view is undefined
               child.view = @makeView(child)
             post.addChild(child.view)
-        
+ 
         for cluster in clusters
           for child in children
             if child.get('tags').indexOf(cluster) > -1 or child.get('tags').length == 0
