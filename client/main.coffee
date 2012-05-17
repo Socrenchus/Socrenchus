@@ -81,15 +81,16 @@ $ ->
 
     renderInnerContents: =>
       @renderPostContent()
-      unless postCollection.where({parent: @id}).length > 0
+      children =  postCollection.where({parent: @id})
+      unless children.length > 0
         $(@el).find('#replyButton:first').click( =>
           $(@el).find('#replyButton:first').remove()
           $(@el).find('#omnipost:first').omnipost({removeOnSubmit: true, callback: @model.respond})
         )
         questionURL = "http://" + window.location.host + "/#" + @model.get('id')
         $(@el).find('#addThis').attr('addthis:url', questionURL)
-      else
-        $(@el).find('#replyButton:first').hide()
+      if children.length > 0 or App.user['email'] == @model.get('author')['email']
+        $(@el).find('#replyButton:first').remove()
 
     triggerTagCall: (tag) =>
       if tag is ",correct" or tag is ",incorrect"
@@ -131,22 +132,24 @@ $ ->
         base.prepend(child.render())
    
   class StreamView extends Backbone.View
-    initialize: ->
+    initialize: =>
       @id = 0
-      @maxlevel = 4
+      @user = 0
+      @maxlevel = 4      
       @streamviewRendered = false
       @topic_creator_showing = false
-      @selectedStory = '#story-part1'
+      @selectedStory = '#story-part1'      
+      @reset() 
       postCollection.bind('add', @addOne, this)
       postCollection.bind('reset', @addAll, this)
-      postCollection.bind('all', @render, this)      
+      postCollection.bind('all', @render, this)     
       tagCollection.fetch()
       postCollection.fetch()
-      @reset()
     
     reset: =>
-      $.getJSON('/stream', ( (data) ->
+      $.getJSON('/stream', ( (data) =>
         @id = data['id']
+        @user = data['user']
         tagCollection.add(data['tags'])
         postCollection.add(data['assignments'])
       ))
