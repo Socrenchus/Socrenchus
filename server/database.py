@@ -126,7 +126,9 @@ class Post(Model, ndb.Model):
     # add the tag
     t = Tag.get_or_create(title, self.key)
     # check that tag isn't already permanent
-    if t.public and not title in self.tags:
+    if not title in self.tags \
+       and len(self.tags) \
+       and t.weight >= 1.0/float(len(self.tags)):
       self.tags.append(title)
       self.put()
     return t
@@ -196,13 +198,6 @@ class Tag(Model, ndb.Model):
     Tag.query(ancestor=self.key.parent()).map(tally_up)
     return self._local_xp / self._local_xp_norm
   
-  @property
-  def public(self):
-    if self.weight > 0.75:
-      return True
-    else:
-      return False
-    
   @classmethod
   def get_or_create(cls, title, item_key, user=None, xp=None):
     """
