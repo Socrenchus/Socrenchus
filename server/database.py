@@ -335,13 +335,13 @@ class Stream(ndb.Model):
     # add parents of user's posts and siblings that share a common tag
     rest = []
     for p in posts:
-      rest.append(p)
       parent = p.parent()
       if parent:
         rest.append(parent)
         tags = parent.get().tags
         if tags:
           rest.extend(Post.siblings(parent).filter(Post.tags.IN(tags)).fetch(keys_only=True))
+      rest.append(p)
 
     # show children of all above
     result = []
