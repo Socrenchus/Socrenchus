@@ -127,8 +127,8 @@ class Post(Model, ndb.Model):
     t = Tag.get_or_create(title, self.key)
     # check that tag isn't already permanent
     if not title in self.tags \
-       and len(self.tags) \
-       and t.weight >= 1.0/float(len(self.tags)):
+       and (not len(self.tags) \
+       or t.weight >= 1.0/float(len(self.tags))):
       self.tags.append(title)
       self.put()
     return t
@@ -188,7 +188,7 @@ class Tag(Model, ndb.Model):
     Get the normalized weight of a tag.
     """
     self._local_xp = 0.0
-    self._local_xp_norm = 1.0
+    self._local_xp_norm = 0.0
     def tally_up(tag):
       if tag.key.parent() == self.key.parent():
         self._local_xp_norm += tag.xp
@@ -196,7 +196,10 @@ class Tag(Model, ndb.Model):
         if tag.depth == self.depth:
           self._local_xp += tag.xp
     Tag.query(ancestor=self.key.parent()).map(tally_up)
-    return self._local_xp / self._local_xp_norm
+    if self._local_xp_norm == 0.0:
+      return 0
+    else:
+      return self._local_xp / self._local_xp_norm
   
   @classmethod
   def get_or_create(cls, title, item_key, user=None, xp=None):
