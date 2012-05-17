@@ -181,6 +181,8 @@ $ ->
         clusters = item.clusters
         if clusters.length == 0
           for child in children
+            if child.view is undefined
+              child.view = @makeView(child)
             post.addChild(child.view)
         
         for cluster in clusters

@@ -350,6 +350,7 @@
           if (clusters.length === 0) {
             for (_j = 0, _len2 = children.length; _j < _len2; _j++) {
               child = children[_j];
+              if (child.view === void 0) child.view = this.makeView(child);
               post.addChild(child.view);
             }
           }
