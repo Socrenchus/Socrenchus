@@ -285,7 +285,7 @@ class Tag(Model, ndb.Model):
         return False
       post = self.key.parent().get()
       post.adjust_score(delta).wait()
-      user.notify(2, self.key, int(delta))
+      Stream.get_or_create(post.author).notify(2, self.key, int(delta))
     else:
       # adjust the experience for the taggers
       user = Stream.get_or_create()
