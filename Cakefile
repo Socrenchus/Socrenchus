@@ -4,12 +4,19 @@ util = require 'util'
 {spawn} = require 'child_process'
 
 clientTest = (callback) ->
-  jasminetest = spawn 'jasmine-node', ['--coffee', 'client/spec']
-  jasminetest.stderr.on 'data', (data) ->
+  d = spawn 'cd', ['client/']
+  d.stderr.on 'data', (data) ->
     process.stderr.write data.toString()
-  jasminetest.stdout.on 'data', (data) ->
+  d.stdout.on 'data', (data) ->
     util.log data.toString()
-  jasminetest.on 'exit', (code) ->
+    t = spawn 'cake', ['test']
+    t.stderr.on 'data', (data) ->
+      process.stderr.write data.toString()
+    t.stdout.on 'data', (data) ->
+      util.log data.toString()
+    t.on 'exit', (code) ->
+      callback?() if code is 0
+  d.on 'exit', (code) ->
     callback?() if code is 0
 
 serverTest = (callback) ->
