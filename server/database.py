@@ -320,7 +320,7 @@ class Stream(ndb.Model):
     return u
 
   def to_dict(self):
-    result = {}
+    result = ndb.Model.to_dict(self)
     result['id'] = self.key.urlsafe()
     result['assignments'] = self.get_assignments()
     result['tags'] = Tag.query(Tag.user == self.user)
