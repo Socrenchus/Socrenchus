@@ -118,7 +118,7 @@ $ ->
         $(@el).find('#tagbox:first').tagbox(callback: @model.maketag, tags: taglist, similarTagsStringList: @siblingtags)
       return $(@el)
       
-    addChild:(child) =>
+    addChild:(child, tagsToOrderBy=[]) =>
       if (@model.depth() % App.maxlevel) == (App.maxlevel - 1)
         root = @
         while root.parent and (root.model.depth() % App.maxlevel) != 0
@@ -129,7 +129,21 @@ $ ->
         # TODO: change child's style to 'grand piano' down to the right corner
       else
         base = $(@el).find('#response:first')
-        base.prepend(child.render())
+        childtags =  child.model.get('tags')
+        for tag in childtags
+          if $("#"+tag).length == 0
+            newtagdiv = $("<div></div>")
+            newtagdiv.attr('id', tag)
+            indexOfTag = tagsToOrderBy.indexOf(tag)
+            if indexOfTag == 0
+              base.prepend(newtagdiv)
+            else if indexOfTag > 0
+              base.prepend(newtagdiv)
+            else
+              base.append(newtagdiv)
+          base.find('#' + tag + ':first').prepend(child.render())
+        if childtags.length is 0
+          base.append(child.render())
    
   class StreamView extends Backbone.View
     initialize: =>
@@ -175,31 +189,20 @@ $ ->
       children = postCollection.where({parent: item.get('id')})
       # render root posts
       if item.depth() is 0
-        $('#assignments').prepend(post.render())      
+        $('#assignments').prepend(post.render())
       mychild = null
       for child in children
         if App.user['email'] == child.get('author')['email']
           mychild = child
-      clusters = []
-      if mychild != null
-        clusters = mychild.get('tags')
-      for cluster in item.clusters
-        if clusters.indexOf(cluster) < 0
-          clusters.push(cluster)
-     
+      
       # render the children posts
-      if children.length > 0
-        # if no clusters exist yet, just add all the children unordered
-        if clusters.length == 0
-          for child in children
-            if child.view is undefined
-              child.view = @makeView(child)
-            post.addChild(child.view)
- 
-        for cluster in clusters
-          for child in children
-            if child.get('tags').indexOf(cluster) > -1 or child.get('tags').length == 0
-              post.addChild(child.view)
+      for child in children
+        if child.view == undefined 
+          child.view = @makeView(child)
+        if mychild == undefined
+          post.addChild(child.view)
+        else
+          post.addChild(child.view, mychild.tags)
         
       post.postDOMrender()
 
