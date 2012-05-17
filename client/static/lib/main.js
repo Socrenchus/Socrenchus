@@ -49,8 +49,8 @@
           xp: 0
         });
         tagCollection.create(t);
-        this.fetch();
-        return this.view.triggerTagCall(content);
+        tagCollection.fetch();
+        return this.fetch();
       };
 
       return Post;
@@ -156,9 +156,7 @@
               _results2 = [];
               for (_k = 0, _len3 = taglist.length; _k < _len3; _k++) {
                 tag = taglist[_k];
-                if (this.siblingtags.indexOf(tag) < 0 && tagCollection.where({
-                  title: tag
-                }).length === 0) {
+                if (this.siblingtags.indexOf(tag) < 0) {
                   _results2.push(this.siblingtags.push(tag));
                 } else {
                   _results2.push(void 0);
@@ -332,7 +330,7 @@
       };
 
       StreamView.prototype.addOne = function(item) {
-        var child, children, cluster, clusters, post, _j, _k, _l, _len2, _len3, _len4;
+        var child, children, cluster, clusters, mychild, post, _j, _k, _l, _len2, _len3, _len4, _len5, _len6, _m, _n, _ref2;
         post = item.view;
                 if (post != null) {
           post;
@@ -345,19 +343,30 @@
           parent: item.get('id')
         });
         if (item.depth() === 0) $('#assignments').prepend(post.render());
+        mychild = null;
+        for (_j = 0, _len2 = children.length; _j < _len2; _j++) {
+          child = children[_j];
+          if (App.user['email'] === child.get('author')['email']) mychild = child;
+        }
+        clusters = [];
+        if (mychild !== null) clusters = mychild.get('tags');
+        _ref2 = item.clusters;
+        for (_k = 0, _len3 = _ref2.length; _k < _len3; _k++) {
+          cluster = _ref2[_k];
+          if (clusters.indexOf(cluster) < 0) clusters.push(cluster);
+        }
         if (children.length > 0) {
-          clusters = item.clusters;
           if (clusters.length === 0) {
-            for (_j = 0, _len2 = children.length; _j < _len2; _j++) {
-              child = children[_j];
+            for (_l = 0, _len4 = children.length; _l < _len4; _l++) {
+              child = children[_l];
               if (child.view === void 0) child.view = this.makeView(child);
               post.addChild(child.view);
             }
           }
-          for (_k = 0, _len3 = clusters.length; _k < _len3; _k++) {
-            cluster = clusters[_k];
-            for (_l = 0, _len4 = children.length; _l < _len4; _l++) {
-              child = children[_l];
+          for (_m = 0, _len5 = clusters.length; _m < _len5; _m++) {
+            cluster = clusters[_m];
+            for (_n = 0, _len6 = children.length; _n < _len6; _n++) {
+              child = children[_n];
               if (child.get('tags').indexOf(cluster) > -1 || child.get('tags').length === 0) {
                 post.addChild(child.view);
               }
