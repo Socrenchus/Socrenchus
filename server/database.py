@@ -290,21 +290,40 @@ class Tag(Model, ndb.Model):
         return False
       post = self.key.parent().get()
       post.adjust_score(delta).wait()
+      #user.notify(2, self.key, delta)
     else:
       # adjust the experience for the taggers
       user = Stream.get_or_create()
       user.adjust_experience(self.title, self.weight)
+      #user.notify(0, self.key, self.weight)
       def reward_tagger(tag):
         user = Stream.get_or_create(tag.user)
-        user.adjust_experience(tag.title, (tag.weight/tag._local_xp)*self.xp)
+        points = (tag.weight/tag._local_xp)*self.xp
+        user.adjust_experience(tag.title, points)
+        user.notify(1, tag.key, int(points))
       Tag.siblings(self.key).filter(Tag.title == self.title).map(reward_tagger)
+      
+class Notification(ndb.Model):
+  """
+  Stores data associated with a notification.
+  
+  0 - points from adding a tag (item: tag, points: integer)
+  1 - points from someone adding one of your tags (item: tag, points: integer)
+  2 - points from post being upvoted (item: base tag, points: integer)
+  3 - post has been replied to (item: reply, points: 0)
+  """
+  kind      = ndb.IntegerProperty()
+  timestamp = ndb.DateTimeProperty(auto_now_add=True)
+  item      = ndb.KeyProperty()
+  points    = ndb.IntegerProperty(default=0)
 
 class Stream(ndb.Model):
   """
   Stores data associated with the user's stream.
   """
-  user        = ndb.UserProperty(auto_current_user_add=True)
-  timestamp   = ndb.DateTimeProperty(auto_now_add=True)
+  user          = ndb.UserProperty(auto_current_user_add=True)
+  timestamp     = ndb.DateTimeProperty(auto_now_add=True)
+  notifications = ndb.LocalStructuredProperty(Notification, repeated=True)
 
   @classmethod
   def get_or_create(cls, user=None):
@@ -397,8 +416,20 @@ class Stream(ndb.Model):
     """
     Creates a post from given content with optional parent.
     """
-    if parent and parent.get().author == self.user:
-      return False
+    parent_author = None
+    if parent:
+      parent_author = parent.get().author
+      if parent_author == self.user:
+        return False
     p = Post(parent=parent,content=content)
     p.put()
+    if parent_author:
+      Stream.get_or_create(parent_author).notify(3, p.key)
     return p
+  
+  def notify(self, kind, item, points=0):
+    """
+    Create a notification object and store it.
+    """
+    self.notifications.append(Notification(kind=kind,item=item,points=points))
+    self.put()

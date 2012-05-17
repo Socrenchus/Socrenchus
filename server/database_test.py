@@ -195,6 +195,10 @@ class DatabaseTests(unittest.TestCase):
     self.assertEqual(count, len(stream.get_assignments()))
     for a in stream.get_assignments():
       self.assertNotEqual(a.get().depth, 4,msg=m)
+    # check notification count
+    u = self.switchToUser('user')
+    self.assertEqual(sum([n.kind == 3 for n in u.notifications]), 15)
+      
   
   def testTagCounter(self):
     ctx = ndb.get_context()
