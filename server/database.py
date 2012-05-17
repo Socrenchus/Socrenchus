@@ -290,12 +290,12 @@ class Tag(Model, ndb.Model):
         return False
       post = self.key.parent().get()
       post.adjust_score(delta).wait()
-      #user.notify(2, self.key, delta)
+      user.notify(2, self.key, int(delta))
     else:
       # adjust the experience for the taggers
       user = Stream.get_or_create()
       user.adjust_experience(self.title, self.weight)
-      #user.notify(0, self.key, self.weight)
+      user.notify(0, self.key, int(self.weight))
       def reward_tagger(tag):
         user = Stream.get_or_create(tag.user)
         points = (tag.weight/tag._local_xp)*self.xp
@@ -314,7 +314,7 @@ class Notification(ndb.Model):
   """
   kind      = ndb.IntegerProperty()
   timestamp = ndb.DateTimeProperty(auto_now_add=True)
-  item      = ndb.KeyProperty()
+  item      = ndb.TextProperty()
   points    = ndb.IntegerProperty(default=0)
 
 class Stream(ndb.Model):
@@ -431,5 +431,5 @@ class Stream(ndb.Model):
     """
     Create a notification object and store it.
     """
-    self.notifications.append(Notification(kind=kind,item=item,points=points))
+    self.notifications.append(Notification(kind=kind,item=item.urlsafe(),points=points))
     self.put()

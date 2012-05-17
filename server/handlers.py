@@ -80,17 +80,10 @@ class TagHandler(webapp.RequestHandler):
   def put(self, id):
     self.post(id)
 
-  """
-  def delete(self, id):
-    key = self.request.cookies['posts']
-    postlist = db.get(key)
-    post = Posts.get_by_id(int(id))
-    if post.postlist.key() == postlist.key():
-      tmp = post.toDict()
-      post.delete()
-    else:
-      self.error(403)
-  """
+class NotificationHandler(webapp.RequestHandler):
+  def get(self, id):
+    stream = Stream.get_or_create(users.get_current_user())
+    self.response.out.write(json.encode(stream.notifications))
 
 class StreamHandler(webapp.RequestHandler):
   def get(self, id):
@@ -119,6 +112,7 @@ options = [
   ('/', AccountHandler),
   (r'/posts/?(.*)', PostHandler),
   (r'/tags/?(.*)', TagHandler),
+  (r'/notifications/?(.*)', NotificationHandler),
   (r'/stream/?(.*)', StreamHandler)
 ]
 application = webapp.WSGIApplication(options, debug=_DEBUG)
