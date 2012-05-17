@@ -359,6 +359,7 @@ class Stream(ndb.Model):
         if tags:
           rest.extend(Post.siblings(parent).filter(Post.tags.IN(tags)).fetch(keys_only=True))
       rest.append(p)
+    rest = list(set(rest))
 
     # show children of all above
     result = []
