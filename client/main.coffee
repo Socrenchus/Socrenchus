@@ -6,7 +6,7 @@ $ ->
   class Post extends Backbone.Model
     urlRoot: '/posts'
     initialize: =>     
-
+      @clusters = []
     depth: => @get('depth')-1
 
     respond: (content) =>
@@ -25,8 +25,8 @@ $ ->
         xp: 0
       )
       tagCollection.create(t)
+      @fetch()
       @view.triggerTagCall(content)
-      @view.updateProgress()
     
   class Posts extends Backbone.Collection
     model: Post
@@ -64,24 +64,20 @@ $ ->
     setSiblingTags: =>
       siblings = postCollection.where({parent: @model.get('parent')})
       for sibling in siblings
-        if sibling.get('id') != @model.get('id')
-          taglist = tagCollection.where({parent:sibling.get('id')})
+        taglist = sibling.get('tags')
+        if taglist
           for tag in taglist
-            @siblingtags.push(tag.get('title'))
+            if @siblingtags.indexOf(tag) < 0 and tagCollection.where({title:tag}).length == 0
+              @siblingtags.push(tag)
       
     renderPostContent: =>
       jsondata = jQuery.parseJSON(@model.get('content'))
       contentdiv = $(@el).find('#content')
       contentdiv.val(jsondata.posttext)
 
-    updateProgress: =>
-      $(@el).find('#progress-bar:first').progressbar("value", @model.get('score') * 100)
-
     postDOMrender: =>
-      if postCollection.where({parent: @id}).length > 0
-        if @model.get('progress') != 1
-          @updateProgress()
       $(@el).find('#content').autosize()
+      addthis.toolbox('.addthis_toolbox')
 
     renderInnerContents: =>
       @renderPostContent()
@@ -90,6 +86,8 @@ $ ->
           $(@el).find('#replyButton:first').remove()
           $(@el).find('#omnipost:first').omnipost({removeOnSubmit: true, callback: @model.respond})
         )
+        questionURL = "http://" + window.location.host + "/#" + @model.get('id')
+        $(@el).find('#addThis').attr('addthis:url', questionURL)
       else
         $(@el).find('#replyButton:first').hide()
 
@@ -141,7 +139,9 @@ $ ->
       @selectedStory = '#story-part1'
       postCollection.bind('add', @addOne, this)
       postCollection.bind('reset', @addAll, this)
-      postCollection.bind('all', @render, this)
+      postCollection.bind('all', @render, this)      
+      tagCollection.fetch()
+      postCollection.fetch()
       @reset()
     
     reset: =>
@@ -159,14 +159,32 @@ $ ->
       postCollection.fetch()
       $('#new-assignment').dialog('close')
 
-    addOne: (item) =>
+    makeView: (item) =>
       post = new PostView(model: item)
       post.parent = postCollection.where({id: item.get('parent')})
-      if post.parent.length > 0
-        post.parent = post.parent[0].view
-        post.parent.addChild(post)
-      else
-        $('#assignments').prepend(post.render())
+      if post.parent.length > 0 
+        post.parent[0].clusters = post.siblingtags
+      return post
+
+    addOne: (item) =>
+      post = item.view
+      post ? post : post = @makeView(item)
+      children = postCollection.where({parent: item.get('id')})
+      # render root posts
+      if item.depth() is 0
+        $('#assignments').prepend(post.render())      
+      # render the children posts
+      if children.length > 0
+        clusters = item.clusters
+        if clusters.length == 0
+          for child in children
+            post.addChild(child.view)
+        
+        for cluster in clusters
+          for child in children
+            if child.get('tags').indexOf(cluster) > -1 or child.get('tags').length == 0
+              post.addChild(child.view)
+        
       post.postDOMrender()
 
     addAll: ->
@@ -174,6 +192,7 @@ $ ->
       a = b.clone()
       a.empty()
       b.before(a)
+      postCollection.each(@makeView)
       postCollection.each(@addOne)
       b.remove()
 
