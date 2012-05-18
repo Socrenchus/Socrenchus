@@ -263,7 +263,7 @@
           childtags = child.model.get('tags');
           for (_j = 0, _len2 = childtags.length; _j < _len2; _j++) {
             tag = childtags[_j];
-            tagdiv = base.find("#" + tag.replace(" ", "") + ":first");
+            tagdiv = base.children("#" + tag.replace(" ", ""));
             if (tagdiv.length === 0) {
               newtagdiv = $("<div></div>");
               newtagdiv.attr('id', tag.replace(" ", ""));
@@ -271,7 +271,7 @@
               if (indexOfTag === 0) {
                 base.prepend(newtagdiv);
               } else if (indexOfTag > 0) {
-                base.find("#" + tagsToOrderBy[indexOfTag - 1].replace(" ", "") + ":first").after(newtagdiv);
+                base.children("#" + tagsToOrderBy[indexOfTag - 1].replace(" ", "")).after(newtagdiv);
               } else {
                 base.append(newtagdiv);
               }
@@ -433,6 +433,10 @@
           _this = this;
         if (!this.streamviewRendered) {
           this.setTopicCreatorVisibility();
+          this.notifications = null;
+          $.getJSON('/notifications', (function(data) {
+            return _this.notifications = data;
+          }));
           this.scrollingDiv = $('#story');
           $('#collapsible-profile').hide();
           profileshowing = false;
