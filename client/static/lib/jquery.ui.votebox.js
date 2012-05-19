@@ -33,23 +33,26 @@
       }
 
       Plugin.prototype.init = function() {
-        var downpressed, originalvotesnum, uppressed,
+        var downpressed, html, originalvotesnum, template, templatedata, uppressed,
           _this = this;
+        template = "<img alt='^' title='vote up' id='ui-upvote' />                  <div id='ui-votetext'>{{votes}}</div>                  <img alt='v' title='vote up' id='ui-downvote'>";
         this.state = this._states.none;
         uppressed = false;
         downpressed = false;
         originalvotesnum = this.options.votesnum;
         $(this.element).bind('updateScore', this.updateScore);
-        this.upArrow = $("<img alt='^' title='vote up' id='ui-upvote'>");
+        templatedata = {
+          votes: Math.round(originalvotesnum)
+        };
+        html = Mustache.to_html(template, templatedata);
+        $(this.element).html(html);
+        this.upArrow = $(this.element).find('#ui-upvote');
         this.upArrow.attr('onmouseover', 'src="/images/votearrowover.png"');
         this.upArrow.attr('onmousedown', 'src="/images/votearrowdown.png"');
-        this.votetext = $("<div id='ui-votetext'>" + (Math.round(originalvotesnum)) + "</div>");
-        this.downArrow = $("<img alt='v' title='vote down' id='ui-downvote'>");
+        this.votetext = $(this.element).find('#ui-votetext');
+        this.downArrow = $(this.element).find('#ui-downvote');
         this.downArrow.attr('onmouseover', 'src="/images/votearrowover.png"');
         this.downArrow.attr('onmousedown', 'src="/images/votearrowdown.png"');
-        $(this.element).append(this.upArrow);
-        $(this.element).append(this.votetext);
-        $(this.element).append(this.downArrow);
         this.setImages();
         if (this.options.vote === true) {
           this.pressUp();

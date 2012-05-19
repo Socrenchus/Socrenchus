@@ -131,17 +131,19 @@ $ ->
         base = $(@el).find('#response:first')
         childtags =  child.model.get('tags')
         for tag in childtags
-          if $("#"+tag).length == 0
+          tagdiv = base.children("#"+tag.replace(" ", ""))
+          if tagdiv.length == 0
             newtagdiv = $("<div></div>")
-            newtagdiv.attr('id', tag)
+            newtagdiv.attr('id', tag.replace(" ", ""))
             indexOfTag = tagsToOrderBy.indexOf(tag)
             if indexOfTag == 0
               base.prepend(newtagdiv)
             else if indexOfTag > 0
-              base.prepend(newtagdiv)
+              base.children("#"+tagsToOrderBy[indexOfTag-1].replace(" ", "")).after(newtagdiv)
             else
               base.append(newtagdiv)
-          base.find('#' + tag + ':first').prepend(child.render())
+            tagdiv = base.find("#"+tag.replace(" ", ""))
+          tagdiv.prepend(child.render())
         if childtags.length is 0
           base.append(child.render())
    
@@ -199,10 +201,10 @@ $ ->
       for child in children
         if child.view == undefined 
           child.view = @makeView(child)
-        if mychild == undefined
+        if mychild == undefined or mychild == null
           post.addChild(child.view)
         else
-          post.addChild(child.view, mychild.tags)
+          post.addChild(child.view, mychild.get('tags'))
         
       post.postDOMrender()
 
@@ -238,6 +240,11 @@ $ ->
       if !@streamviewRendered
         #$('#new-assignment').omnipost({callback: @makePost, message: 'Post a topic...'})
         @setTopicCreatorVisibility()
+        @notifications = null
+        $.getJSON('/notifications', ( (data) =>
+          @notifications = data          
+          #$('#notifications').notify()
+        ))
         @scrollingDiv = $('#story')
         $('#collapsible-profile').hide()
         profileshowing = false

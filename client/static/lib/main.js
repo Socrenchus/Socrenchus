@@ -249,7 +249,7 @@
       };
 
       PostView.prototype.addChild = function(child, tagsToOrderBy) {
-        var base, childtags, indexOfTag, newtagdiv, root, tag, _j, _len2;
+        var base, childtags, indexOfTag, newtagdiv, root, tag, tagdiv, _j, _len2;
         if (tagsToOrderBy == null) tagsToOrderBy = [];
         if ((this.model.depth() % App.maxlevel) === (App.maxlevel - 1)) {
           root = this;
@@ -263,19 +263,21 @@
           childtags = child.model.get('tags');
           for (_j = 0, _len2 = childtags.length; _j < _len2; _j++) {
             tag = childtags[_j];
-            if ($("#" + tag).length === 0) {
+            tagdiv = base.children("#" + tag.replace(" ", ""));
+            if (tagdiv.length === 0) {
               newtagdiv = $("<div></div>");
-              newtagdiv.attr('id', tag);
+              newtagdiv.attr('id', tag.replace(" ", ""));
               indexOfTag = tagsToOrderBy.indexOf(tag);
               if (indexOfTag === 0) {
                 base.prepend(newtagdiv);
               } else if (indexOfTag > 0) {
-                base.prepend(newtagdiv);
+                base.children("#" + tagsToOrderBy[indexOfTag - 1].replace(" ", "")).after(newtagdiv);
               } else {
                 base.append(newtagdiv);
               }
+              tagdiv = base.find("#" + tag.replace(" ", ""));
             }
-            base.find('#' + tag + ':first').prepend(child.render());
+            tagdiv.prepend(child.render());
           }
           if (childtags.length === 0) return base.append(child.render());
         }
@@ -369,10 +371,10 @@
         for (_k = 0, _len3 = children.length; _k < _len3; _k++) {
           child = children[_k];
           if (child.view === void 0) child.view = this.makeView(child);
-          if (mychild === void 0) {
+          if (mychild === void 0 || mychild === null) {
             post.addChild(child.view);
           } else {
-            post.addChild(child.view, mychild.tags);
+            post.addChild(child.view, mychild.get('tags'));
           }
         }
         return post.postDOMrender();
@@ -431,6 +433,10 @@
           _this = this;
         if (!this.streamviewRendered) {
           this.setTopicCreatorVisibility();
+          this.notifications = null;
+          $.getJSON('/notifications', (function(data) {
+            return _this.notifications = data;
+          }));
           this.scrollingDiv = $('#story');
           $('#collapsible-profile').hide();
           profileshowing = false;

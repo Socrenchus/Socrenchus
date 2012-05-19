@@ -11,7 +11,6 @@
       altering: 2
     };
     defaults = {
-      editing: true,
       tags: [],
       callback: null,
       similarTagsStringList: ['my', 'name', 'is', 'prash', 'mah', 'naem', 'iss', 'prashu']
@@ -40,54 +39,52 @@
       }
 
       Plugin.prototype.init = function() {
-        var editingoldtag,
+        var editingoldtag, html, template, templatedata,
           _this = this;
+        template = "<div class='ui-tagmessage'>{{tagmessage}}</div>                  <div class='ui-individualtag' contentEditable='true'></div>                  <div id='ui-simtags'></div>                  ";
         this.alltags = [];
         this.similartags = [];
         editingoldtag = false;
-        this.addtagstext = '+ Add Tags';
-        if (this.options.editing) {
-          this.similartagdiv = $("<div id='ui-simtags'></div>");
-          this.currenttag = $("<div class='ui-individualtag' contentEditable='true'></div>");
-          $(this.element).trigger('tagSync', this.currenttag.text());
-          this.message = $("<div class='ui-tagmessage'>" + this.addtagstext + "</div>");
-          $(this.element).append(this.message);
-          this.message.after(this.currenttag);
-          this.currenttag.after(this.similartagdiv);
-          this.similartagdiv.hide();
-          this.createSimilarTags();
-          if (this.options.tags) this.showTags();
-          this.currenttag.focusout(function() {
-            _this.similartagdiv.hide();
-            _this.message.show();
-            _this.currenttag.text("");
-            _this.showSimilarTags();
-            _this.currenttag.hide();
-            _this.state = _this._states.none;
-            return $(_this.element).trigger('unfocusingTagBox', _this.state);
-          });
-          this.currenttag.keydown(function(event) {
-            if (event.keyCode === 13 || event.keyCode === 188) {
-              event.preventDefault();
-              return _this.makenewtag();
-            }
-          });
-          this.currenttag.keyup(function(event) {
-            return _this.showSimilarTags();
-          });
-          return this.message.click(function() {
-            if (!_this.editingoldtag) {
-              _this.similartagdiv.show();
-              _this.message.hide();
-              _this.currenttag.show();
-              _this.currenttag.focus();
-              _this.state = _this._states.typing;
-              return $(_this.element).trigger('typingTag', _this.state);
-            }
-          });
-        } else {
-          return this.createcompletetags(this.options.tags);
-        }
+        templatedata = {
+          tagmessage: '+ Add Tags'
+        };
+        html = Mustache.to_html(template, templatedata);
+        $(this.element).html(html);
+        this.similartagdiv = $(this.element).find('#ui-simtags');
+        this.currenttag = $(this.element).find('.ui-individualtag');
+        this.message = $(this.element).find('.ui-tagmessage');
+        $(this.element).trigger('tagSync', this.currenttag.text());
+        this.similartagdiv.hide();
+        this.createSimilarTags();
+        if (this.options.tags) this.showTags();
+        this.currenttag.focusout(function() {
+          _this.similartagdiv.hide();
+          _this.message.show();
+          _this.currenttag.text("");
+          _this.showSimilarTags();
+          _this.currenttag.hide();
+          _this.state = _this._states.none;
+          return $(_this.element).trigger('unfocusingTagBox', _this.state);
+        });
+        this.currenttag.keydown(function(event) {
+          if (event.keyCode === 13 || event.keyCode === 188) {
+            event.preventDefault();
+            return _this.makenewtag();
+          }
+        });
+        this.currenttag.keyup(function(event) {
+          return _this.showSimilarTags();
+        });
+        return this.message.click(function() {
+          if (!_this.editingoldtag) {
+            _this.similartagdiv.show();
+            _this.message.hide();
+            _this.currenttag.show();
+            _this.currenttag.focus();
+            _this.state = _this._states.typing;
+            return $(_this.element).trigger('typingTag', _this.state);
+          }
+        });
       };
 
       Plugin.prototype.createSimilarTags = function() {

@@ -178,26 +178,20 @@
       }
 
       Plugin.prototype.init = function() {
-        var collapse, message, omnicontainer, post, selectedImageLink, text,
+        var collapse, html, message, omnicontainer, post, template, templatedata, text,
           _this = this;
+        template = "<div id='ui-omniContainer'>                    <textarea id='ui-omniPostText'></textarea>                    <img src='/images/collapse.png' alt='x' title='x' id='ui-omniPostCollapse'>                  </div>                  <button id='ui-omniPostSubmit'>Post</button>                 ";
         this.state = this._states.none;
         this.panelList = [];
         message = this.options.message;
-        collapse = $("<img alt='x' title='x' id='ui-omniPostCollapse'>");
-        collapse.attr('src', '/images/collapse.png');
-        omnicontainer = $("<div id='ui-omniContainer'></div>");
-        text = $("<textarea id='ui-omniPostText'></textarea>");
-        text.autosize().addClass('ui-omniPost');
-        selectedImageLink = $("<img alt='x' title='your linked image' id='ui-omniPostImage'>");
-        selectedImageLink.hide();
-        omnicontainer.append(text);
-        omnicontainer.append(collapse);
-        $(this.element).append(omnicontainer);
-        $(this.element).append(selectedImageLink);
-        $(this.element).append($('<br/>'));
-        post = $("<button id='ui-omniPostSubmit'>Post</button>");
-        $(this.element).append(post);
         $(this.element).addClass('ui-omniPost');
+        templatedata = {};
+        html = Mustache.to_html(template, templatedata);
+        $(this.element).html(html);
+        omnicontainer = $(this.element).find('#ui-omniContainer');
+        text = $(this.element).find('#ui-omniPostText');
+        collapse = $(this.element).find('#ui-omniPostCollapse');
+        post = $(this.element).find('#ui-omniPostSubmit');
         omnicontainer.click(function() {
           if (!text.attr('readonly')) {
             post.show();
@@ -224,7 +218,7 @@
         });
         collapse.click();
         return post.click(function() {
-          var allPanelContent, data, panel, warning, _i, _len, _ref;
+          var allPanelContent, data, linkdata, panel, warning, _i, _len, _ref;
           if (!($.trim(text.val()) === '')) {
             allPanelContent = $("<div id='rich-content'></div>");
             _ref = _this.panelList;
@@ -232,16 +226,10 @@
               panel = _ref[_i];
               allPanelContent.append(panel.content());
             }
-            if (allPanelContent[0].innerHTML === '') {
-              data = {
-                posttext: $.trim(text.val())
-              };
-            } else {
-              data = {
-                posttext: $.trim(text.val()),
-                linkdata: allPanelContent[0].outerHTML
-              };
-            }
+            linkdata = allPanelContent[0].innerHTML;
+            data = {};
+            data['posttext'] = $.trim(text.val());
+            if (linkdata) data['linkdata'] = linkdata;
             data = JSON.stringify(data);
             collapse.click();
             if (_this.options.removeOnSubmit) $(_this.element).remove();
