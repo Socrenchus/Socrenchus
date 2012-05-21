@@ -434,7 +434,32 @@
           this.setTopicCreatorVisibility();
           this.notifications = null;
           $.getJSON('/notifications', (function(data) {
-            return _this.notifications = data;
+            var message, messages, notification, _j, _len2, _ref2;
+            _this.notifications = data;
+            messages = [];
+            _ref2 = _this.notifications;
+            for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+              notification = _ref2[_j];
+              message = '';
+              switch (notification['kind']) {
+                case 0:
+                  message = "You gained " + notification['points'] + " points for tagging";
+                  break;
+                case 1:
+                  message = "You gained " + notification['points'] + " points for your post being tagged";
+                  break;
+                case 2:
+                  message = "You gained " + notification['points'] + " points for getting upvoted";
+                  break;
+                case 3:
+                  message = "Your post has been replied to";
+              }
+              messages.push(message);
+            }
+            return $('#notifications').notify({
+              notificationCount: messages.length,
+              messages: messages
+            });
           }));
           this.scrollingDiv = $('#story');
           $('#collapsible-profile').hide();

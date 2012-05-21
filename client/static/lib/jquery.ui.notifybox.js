@@ -8,7 +8,7 @@
     defaults = {
       notificationCount: 0,
       position: 'topleft',
-      messages: ['fake message']
+      messages: ['fake message', 'and another']
     };
     states = {
       none: 0,
