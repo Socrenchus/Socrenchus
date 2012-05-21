@@ -49,7 +49,6 @@
           xp: 0
         });
         tagCollection.create(t);
-        tagCollection.fetch();
         return this.fetch();
       };
 
@@ -310,7 +309,7 @@
         this.topic_creator_showing = false;
         this.selectedStory = '#story-part1';
         this.reset();
-        postCollection.bind('add', this.addOne, this);
+        postCollection.bind('sync', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
         postCollection.bind('all', this.render, this);
         tagCollection.fetch();
@@ -366,7 +365,7 @@
         mychild = null;
         for (_j = 0, _len2 = children.length; _j < _len2; _j++) {
           child = children[_j];
-          if (App.user['email'] === child.get('author')['email']) mychild = child;
+          if (this.user['email'] === child.get('author')['email']) mychild = child;
         }
         for (_k = 0, _len3 = children.length; _k < _len3; _k++) {
           child = children[_k];

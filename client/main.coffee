@@ -25,7 +25,6 @@ $ ->
         xp: 0
       )
       tagCollection.create(t)
-      tagCollection.fetch()
       @fetch()
     
   class Posts extends Backbone.Collection
@@ -156,7 +155,7 @@ $ ->
       @topic_creator_showing = false
       @selectedStory = '#story-part1'      
       @reset() 
-      postCollection.bind('add', @addOne, this)
+      postCollection.bind('sync', @addOne, this)
       postCollection.bind('reset', @addAll, this)
       postCollection.bind('all', @render, this)     
       tagCollection.fetch()
@@ -194,12 +193,12 @@ $ ->
         $('#assignments').prepend(post.render())
       mychild = null
       for child in children
-        if App.user['email'] == child.get('author')['email']
+        if @user['email'] == child.get('author')['email']
           mychild = child
       
       # render the children posts
       for child in children
-        if child.view == undefined 
+        if child.view == undefined
           child.view = @makeView(child)
         if mychild == undefined or mychild == null
           post.addChild(child.view)
