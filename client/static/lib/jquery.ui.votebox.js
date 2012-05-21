@@ -7,7 +7,8 @@
     pluginName = 'votebox';
     defaults = {
       votesnum: 0,
-      callback: null
+      callback: null,
+      vote: null
     };
     states = {
       none: 0,
@@ -35,7 +36,7 @@
       Plugin.prototype.init = function() {
         var downpressed, html, originalvotesnum, template, templatedata, uppressed,
           _this = this;
-        template = "<img alt='^' title='vote up' id='ui-upvote' />                  <div id='ui-votetext'>{{votes}}</div>                  <img alt='v' title='vote up' id='ui-downvote'>";
+        template = "<img alt='^' title='vote up' id='ui-upvote' />                  <div id='ui-votetext'>{{votes}}</div>                  <img alt='v' title='vote down' id='ui-downvote'>";
         this.state = this._states.none;
         uppressed = false;
         downpressed = false;
@@ -83,7 +84,9 @@
         this.setImages();
         if (this.state === this._states.up) {
           this.disable();
-          if (this.options.callback !== null) this.options.callback(",correct");
+          if (this.options.callback !== null) {
+            if (this.options.vote === null) this.options.callback(",correct");
+          }
         }
         return $(this.element).trigger('upArrowPressed', this.state);
       };
@@ -100,7 +103,9 @@
         this.setImages();
         if (this.state === this._states.down) {
           this.disable();
-          if (this.options.callback !== null) this.options.callback(",incorrect");
+          if (this.options.callback !== null) {
+            if (this.options.vote === null) this.options.callback(",incorrect");
+          }
         }
         return $(this.element).trigger('downArrowPressed', this.state);
       };

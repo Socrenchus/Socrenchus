@@ -25,7 +25,7 @@ $ ->
         xp: 0
       )
       tagCollection.create(t)
-      @fetch()
+      postCollection.fetch()
     
   class Posts extends Backbone.Collection
     model: Post

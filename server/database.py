@@ -126,7 +126,8 @@ class Post(Model, ndb.Model):
     # add the tag
     t = Tag.get_or_create(title, self.key)
     # check that tag isn't already permanent
-    if not title in self.tags \
+    if not t.is_base() \
+       and not title in self.tags \
        and (not len(self.tags) \
        or t.weight >= 1.0/float(len(self.tags))):
       self.tags.append(title)

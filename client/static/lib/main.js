@@ -49,7 +49,7 @@
           xp: 0
         });
         tagCollection.create(t);
-        return this.fetch();
+        return postCollection.fetch();
       };
 
       return Post;
