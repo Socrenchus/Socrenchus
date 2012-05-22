@@ -32,7 +32,6 @@
         this.state = this._states.none;
         notifycounter = $("<h3 id='notification-counter' title='Notifications'>" + this.options.notificationCount + "</h3>");
         this.notifypanel = $("<div id='notification-box'></div>");
-        this.notifypanel.append($("<h3 id='notify-text'>Notifications</h3>"));
         this.addMessages();
         this.notifypanel.hide();
         $(this.element).append(notifycounter);

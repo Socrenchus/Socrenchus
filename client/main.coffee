@@ -246,10 +246,10 @@ $ ->
           for notification in @notifications
             message = ''
             switch notification['kind']
-              when 0 then message = "You gained " + notification['points'] + " points for tagging"
-              when 1 then message = "You gained " + notification['points'] + " points for your post being tagged"
-              when 2 then message = "You gained " + notification['points'] + " points for getting upvoted"
-              when 3 then message = "Your post has been replied to"
+              when 0 then message = "You gained " + notification['points'] + " point(s) for tagging <a href='#post/#{notification['item']}'>this post</a>"
+              when 1 then message = "You gained " + notification['points'] + " point(s) for your <a href='#post/#{notification['item']}'>post</a> being tagged"
+              when 2 then message = "You gained " + notification['points'] + " point(s) for your <a href='#post/#{notification['item']}'>post</a> getting upvoted"
+              when 3 then message = "Your <a href='#post/#{notification['item']}'>post</a> has been replied to"
             messages.push(message)
           $('#notifications').notify({notificationCount: messages.length, messages: messages})
         ))
@@ -323,6 +323,14 @@ $ ->
     routes:      
       'new' : 'new'
       ':id' : 'assign'
+      'post/:id': 'post'
+
+    post: (id) ->
+       if id?
+        p = postCollection.where(id: id)
+        $('#assignments li').remove()
+        unless p.length is 0
+         App.addOne(p[0])
 
     assign: (id) ->
       if id?

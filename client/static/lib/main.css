@@ -109,6 +109,12 @@ h2 {
   right: 5px;
 }
 
+#notifications {
+  position: relative;
+  top: -13px;
+  left: 10px;
+}
+
 #new-assignment {
   margin-left: auto;
   margin-right: auto;

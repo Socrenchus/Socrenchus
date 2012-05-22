@@ -443,16 +443,16 @@
               message = '';
               switch (notification['kind']) {
                 case 0:
-                  message = "You gained " + notification['points'] + " points for tagging";
+                  message = "You gained " + notification['points'] + (" point(s) for tagging <a href='#post/" + notification['item'] + "'>this post</a>");
                   break;
                 case 1:
-                  message = "You gained " + notification['points'] + " points for your post being tagged";
+                  message = "You gained " + notification['points'] + (" point(s) for your <a href='#post/" + notification['item'] + "'>post</a> being tagged");
                   break;
                 case 2:
-                  message = "You gained " + notification['points'] + " points for getting upvoted";
+                  message = "You gained " + notification['points'] + (" point(s) for your <a href='#post/" + notification['item'] + "'>post</a> getting upvoted");
                   break;
                 case 3:
-                  message = "Your post has been replied to";
+                  message = "Your <a href='#post/" + notification['item'] + "'>post</a> has been replied to";
               }
               messages.push(message);
             }
@@ -533,7 +533,19 @@
 
       Workspace.prototype.routes = {
         'new': 'new',
-        ':id': 'assign'
+        ':id': 'assign',
+        'post/:id': 'post'
+      };
+
+      Workspace.prototype.post = function(id) {
+        var p;
+        if (id != null) {
+          p = postCollection.where({
+            id: id
+          });
+          $('#assignments li').remove();
+          if (p.length !== 0) return App.addOne(p[0]);
+        }
       };
 
       Workspace.prototype.assign = function(id) {
