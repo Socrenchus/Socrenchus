@@ -8,7 +8,7 @@
     defaults = {
       notificationCount: 0,
       position: 'topleft',
-      messages: ['fake message', 'and another']
+      messages: []
     };
     states = {
       none: 0,
@@ -27,15 +27,19 @@
       }
 
       Plugin.prototype.init = function() {
-        var notifycounter,
+        var html, notifycounter, template, templatedata,
           _this = this;
         this.state = this._states.none;
-        notifycounter = $("<h3 id='notification-counter' title='Notifications'>" + this.options.notificationCount + "</h3>");
-        this.notifypanel = $("<div id='notification-box'></div>");
-        this.addMessages();
+        template = "<h3 id='notification-counter' title='Notifications'>                    {{notificationCount}}                   </h3>                   <div id='notification-box'></div>                  ";
+        templatedata = {
+          notificationCount: this.options.notificationCount
+        };
+        html = Mustache.to_html(template, templatedata);
+        $(this.element).html(html);
+        notifycounter = $(this.element).find("#notification-counter");
+        this.notifypanel = $(this.element).find("#notification-box");
         this.notifypanel.hide();
-        $(this.element).append(notifycounter);
-        $(this.element).append(this.notifypanel);
+        this.addMessages();
         notifycounter.click(function(event) {
           _this.notifypanel.fadeToggle("slow");
           if (_this.state === _this._states.none) {
@@ -77,15 +81,18 @@
       };
 
       Plugin.prototype.addMessages = function() {
-        var message, messagediv, _i, _len, _ref, _results;
+        var message, messagediv, params, _i, _len, _ref;
         _ref = this.options.messages;
-        _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           message = _ref[_i];
-          messagediv = $("<h4 class='notify-message'>" + message + "</h4>");
-          _results.push(this.notifypanel.append(messagediv));
+          messagediv = $("<li class='notify-message'>" + message + "</li>");
+          this.notifypanel.append(messagediv);
         }
-        return _results;
+        params = {
+          messages: this.options.messages,
+          messagecount: this.options.notificationCount
+        };
+        return $(this.element).trigger('messagesadded', params);
       };
 
       return Plugin;
