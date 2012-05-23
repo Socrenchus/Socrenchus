@@ -39,6 +39,7 @@ testFolders = [
     'tagbox'
     'votebox'
     'omnipost'
+    'notify'
 ]
 
 prodCoffeeFiles = [
