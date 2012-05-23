@@ -26,5 +26,4 @@ serverTest = (callback) ->
     callback?() if code is 0
 
 task 'test', 'run the client and server tests', ->
-  clientTest()
-  serverTest()
+  clientTest(serverTest)
