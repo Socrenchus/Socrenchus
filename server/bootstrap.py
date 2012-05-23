@@ -34,9 +34,9 @@ class BootStrap:
           parentkey = postkeymap[filename + posts[i]['parent']]
           ndbpost = Post.get_or_insert(fullid, parent=parentkey, content=posts[i]['content'])
         else:
+          logging.debug(posts[i]['content'])
           ndbpost = Post.get_or_insert(fullid, content=posts[i]['content'])
-        postkeymap[fullid] = ndbpost.key        
-        stream.assign_post(ndb.Key(urlsafe=ndbpost.key.urlsafe()))
+        postkeymap[fullid] = ndbpost.key
 
       tags = fullcontents[1]
       
@@ -44,5 +44,5 @@ class BootStrap:
         user = tags[i]['user']
         stream = BootStrap.switchToUser(user)
         parentkey = postkeymap[filename + tags[i]['parent']]
-        Tag.get_or_create(tags[i]['title'],parentkey)
+        parentkey.get().add_tag(tags[i]['title'])
 

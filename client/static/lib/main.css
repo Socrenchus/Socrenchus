@@ -109,6 +109,12 @@ h2 {
   right: 5px;
 }
 
+#notifications {
+  position: relative;
+  top: -13px;
+  left: 10px;
+}
+
 #new-assignment {
   margin-left: auto;
   margin-right: auto;
@@ -169,33 +175,6 @@ h2 {
   position:relative;
   top: 5px;
   display: none;
-}
-
-#notification-box {
-  position:absolute;
-  left: 10px;
-  bottom: -180px;
-  z-index: 100;
-}
-
-#notification-counter {
-  color: #666;
-  font-family: Arial,sans-serif;
-  cursor: pointer;
-  margin: 10px;
-  background-color: #F8F8F8;
-  background-image: -webkit-linear-gradient(top,white,#ECECEC);
-  background-image: -moz-linear-gradient(top,white,#ECECEC);
-  background-image: -ms-linear-gradient(top,white,#ECECEC);
-  background-image: -o-linear-gradient(top,white,#ECECEC);
-  background-image: linear-gradient(top,white,#ECECEC);
-  border-color: #C6C6C6;
-  float: left;
-  position: relative;
-  top: -40px;
-  text-align: center;
-  width: 20px;
-  height:20px;
 }
 
 .profile-element-header {
@@ -284,6 +263,10 @@ h2 {
   resize: none;
   outline: 0px none transparent;
   color: black;
+}
+
+#reply {
+  margin-left: 50px;
 }
 
 #tagscontainer {

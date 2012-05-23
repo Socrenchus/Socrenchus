@@ -11,9 +11,9 @@
       altering: 2
     };
     defaults = {
-      editing: true,
       tags: [],
-      callback: ''
+      callback: null,
+      similarTagsStringList: ['my', 'name', 'is', 'prash', 'mah', 'naem', 'iss', 'prashu']
     };
     Plugin = (function() {
 
@@ -28,7 +28,8 @@
         this.removeFromArray = __bind(this.removeFromArray, this);
         this.showTags = __bind(this.showTags, this);
         this.addTag = __bind(this.addTag, this);
-        this.addtagevent = __bind(this.addtagevent, this);
+        this.showSimilarTags = __bind(this.showSimilarTags, this);
+        this.createSimilarTags = __bind(this.createSimilarTags, this);
         this.options = $.extend({}, defaults, options);
         this._defaults = defaults;
         this._states = states;
@@ -38,62 +39,93 @@
       }
 
       Plugin.prototype.init = function() {
-        var addtagstext, editingoldtag,
+        var editingoldtag, html, template, templatedata,
           _this = this;
+        template = "<div class='ui-tagmessage'>{{tagmessage}}</div>                  <div class='ui-individualtag' contentEditable='true'></div>                  <div id='ui-simtags'></div>                  ";
         this.alltags = [];
+        this.similartags = [];
         editingoldtag = false;
-        addtagstext = '+ Add Tags';
-        $(this.element).bind('addtag', this.addtagevent);
-        if (this.options.editing) {
-          if (this.options.tags) this.showTags();
-          this.tagtext = $("<div class='ui-tagtext' contentEditable='false'></div>");
-          $(this.element).append(this.tagtext);
-          this.currenttag = $("<div class='ui-individualtag' contentEditable='true'></div>");
-          this.message = $("<div class='ui-tagmessage'>" + addtagstext + "</div>");
-          this.tagtext.append(this.message);
-          this.tagtext.append(this.currenttag);
-          this.tagtext.focusout(function() {
-            if (_this.alltags.length === 0 && _this.currenttag.text() === '') {
-              _this.message.show();
-            }
-            _this.state = _this._states.none;
-            return $(_this.element).trigger('unfocusingTagBox', _this.state);
-          });
-          this.tagtext.keydown(function(event) {
-            if (event.keyCode === 13 || event.keyCode === 188) {
-              event.preventDefault();
-              return _this.makenewtag(_this.currenttag);
-            }
-          });
-          return this.tagtext.click(function() {
-            if (!_this.editingoldtag) {
-              _this.message.hide();
-              _this.currenttag.focus();
-              _this.state = _this._states.typing;
-              return $(_this.element).trigger('typingTag', _this.state);
-            }
-          });
-        } else {
-          return this.createcompletetags(this.options.tags);
-        }
+        templatedata = {
+          tagmessage: '+ Add Tags'
+        };
+        html = Mustache.to_html(template, templatedata);
+        $(this.element).html(html);
+        this.similartagdiv = $(this.element).find('#ui-simtags');
+        this.currenttag = $(this.element).find('.ui-individualtag');
+        this.message = $(this.element).find('.ui-tagmessage');
+        $(this.element).trigger('tagSync', this.currenttag.text());
+        this.similartagdiv.hide();
+        this.createSimilarTags();
+        if (this.options.tags) this.showTags();
+        this.currenttag.focusout(function() {
+          _this.similartagdiv.hide();
+          _this.message.show();
+          _this.currenttag.text("");
+          _this.showSimilarTags();
+          _this.currenttag.hide();
+          _this.state = _this._states.none;
+          return $(_this.element).trigger('unfocusingTagBox', _this.state);
+        });
+        this.currenttag.keydown(function(event) {
+          if (event.keyCode === 13 || event.keyCode === 188) {
+            event.preventDefault();
+            return _this.makenewtag();
+          }
+        });
+        this.currenttag.keyup(function(event) {
+          return _this.showSimilarTags();
+        });
+        return this.message.click(function() {
+          if (!_this.editingoldtag) {
+            _this.similartagdiv.show();
+            _this.message.hide();
+            _this.currenttag.show();
+            _this.currenttag.focus();
+            _this.state = _this._states.typing;
+            return $(_this.element).trigger('typingTag', _this.state);
+          }
+        });
       };
 
-      Plugin.prototype.addtagevent = function(event, tag) {
-        var currenttag;
-        currenttag = $("<div class='ui-individualtag'>" + tag + "</div>");
-        currenttag.css('background-image', 'url("/images/tagOutline.png")');
-        currenttag.css('background-repeat', 'no-repeat');
-        currenttag.css('background-size', '100% 100%');
-        return this.message.before(currenttag);
+      Plugin.prototype.createSimilarTags = function() {
+        var currenttag, tag, _i, _len, _ref, _results;
+        _ref = this.options.similarTagsStringList;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          tag = _ref[_i];
+          currenttag = $("<div class='ui-completetag'>" + tag + "</div>");
+          currenttag.css('background-image', 'url("/images/tagOutline.png")');
+          currenttag.css('background-repeat', 'no-repeat');
+          currenttag.css('background-size', '100% 100%');
+          this.similartagdiv.append(currenttag);
+          _results.push(this.similartags.push(currenttag));
+        }
+        return _results;
+      };
+
+      Plugin.prototype.showSimilarTags = function() {
+        var currenttagtext, tag, _i, _len, _ref, _results;
+        currenttagtext = $.trim(this.currenttag.text());
+        _ref = this.similartags;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          tag = _ref[_i];
+          if (tag.text().indexOf(currenttagtext) === 0) {
+            _results.push(tag.show());
+          } else {
+            _results.push(tag.hide());
+          }
+        }
+        return _results;
       };
 
       Plugin.prototype.addTag = function(tag) {
         var currenttag;
-        currenttag = $("<div class='ui-individualtag'>" + tag + "</div>");
+        currenttag = $("<div class='ui-completetag'>" + tag + "</div>");
         currenttag.css('background-image', 'url("/images/tagOutline.png")');
         currenttag.css('background-repeat', 'no-repeat');
         currenttag.css('background-size', '100% 100%');
-        return $(this.element).append(currenttag);
+        return this.message.before(currenttag);
       };
 
       Plugin.prototype.showTags = function(taglist) {
@@ -110,24 +142,18 @@
       Plugin.prototype.removeFromArray = function(toremove) {
         var index;
         index = this.alltags.indexOf(toremove);
-        if (index > -1) this.alltags.splice(index, 1);
-        return $(this.element).trigger('tagRemoved', this.alltags.length);
+        if (index > -1) return this.alltags.splice(index, 1);
       };
 
-      Plugin.prototype.makenewtag = function(tagdiv) {
-        var newtag,
-          _this = this;
+      Plugin.prototype.makenewtag = function() {
         this.currenttag.text($.trim(this.currenttag.text()));
         if (this.currenttag.text() !== '') {
-          tagdiv.focusout(function() {
-            return _this.formtag(tagdiv);
-          });
-          this.options.callback(this.currenttag.text());
-          tagdiv.remove();
-          newtag = $("<div class='ui-individualtag' contentEditable='true'></div>");
-          this.tagtext.append(newtag);
-          this.currenttag = newtag;
-          return newtag.focus();
+          $(this.element).trigger('tagSync', this.currenttag.text());
+          if (this.options.callback !== null) {
+            this.options.callback(this.currenttag.text());
+          }
+          this.addTag(this.currenttag.text());
+          return this.currenttag.text('');
         }
       };
 
@@ -143,9 +169,7 @@
         tagdiv.attr('contentEditable', 'false');
         tagdiv.css('background-image', 'url("/images/tagOutline.png")');
         tagdiv.css('background-repeat', 'no-repeat');
-        tagdiv.css('background-size', '100% 100%');
-        this.alltags.push(tagdiv);
-        return $(this.element).trigger('tagAdded', this.alltags.length);
+        return tagdiv.css('background-size', '100% 100%');
       };
 
       Plugin.prototype.deformtag = function(tagdiv) {

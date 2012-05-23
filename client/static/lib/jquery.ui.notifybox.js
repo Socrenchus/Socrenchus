@@ -1,11 +1,14 @@
 (function() {
   ;
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
   (function($, window, document) {
     var Plugin, defaults, pluginName, states;
     pluginName = 'notify';
     defaults = {
       notificationCount: 0,
-      position: 'topleft'
+      position: 'topleft',
+      messages: []
     };
     states = {
       none: 0,
@@ -15,6 +18,7 @@
 
       function Plugin(element, options) {
         this.element = element;
+        this.addMessages = __bind(this.addMessages, this);
         this.options = $.extend({}, defaults, options);
         this._defaults = defaults;
         this._name = 'notify';
@@ -23,18 +27,21 @@
       }
 
       Plugin.prototype.init = function() {
-        var imagepanel, notifycounter, notifydiv,
+        var html, notifycounter, template, templatedata,
           _this = this;
         this.state = this._states.none;
-        notifydiv = $("<div class = 'ui-notifybox'></div>");
-        notifycounter = $("<h3 id='notification-counter' title='Notifications'>" + this.options.notificationCount + "</h3>");
-        imagepanel = $("<img id='notification-box' src='/images/notifications.png'>");
-        imagepanel.hide();
-        notifydiv.append(notifycounter);
-        notifydiv.append(imagepanel);
-        $(this.element).append(notifydiv);
+        template = "<h3 id='notification-counter' title='Notifications'>                    {{notificationCount}}                   </h3>                   <div id='notification-box'></div>                  ";
+        templatedata = {
+          notificationCount: this.options.notificationCount
+        };
+        html = Mustache.to_html(template, templatedata);
+        $(this.element).html(html);
+        notifycounter = $(this.element).find("#notification-counter");
+        this.notifypanel = $(this.element).find("#notification-box");
+        this.notifypanel.hide();
+        this.addMessages();
         notifycounter.click(function(event) {
-          imagepanel.fadeToggle("slow");
+          _this.notifypanel.fadeToggle("slow");
           if (_this.state === _this._states.none) {
             _this.state = _this._states.open;
           } else if (_this.state === _this._states.open) {
@@ -44,33 +51,48 @@
           return event.stopPropagation();
         });
         $(document).click(function() {
-          imagepanel.hide();
+          _this.notifypanel.hide();
           _this.state = _this._states.none;
           return $(_this.element).trigger('documentClicked', _this.state);
         });
-        return imagepanel.load(function() {
+        return this.notifypanel.load(function() {
           if (_this.options.position === 'lefttop') {
-            imagepanel.css("left", notifycounter.outerWidth());
-            return imagepanel.css("top", -notifycounter.outerHeight());
+            _this.notifypanel.css("left", notifycounter.outerWidth());
+            return _this.notifypanel.css("top", -notifycounter.outerHeight());
           } else if (_this.options.position === 'topright') {
-            return imagepanel.css("left", -imagepanel.width() + notifycounter.outerWidth());
+            return _this.notifypanel.css("left", -_this.notifypanel.width() + notifycounter.outerWidth());
           } else if (_this.options.position === 'righttop') {
-            imagepanel.css("left", -imagepanel.width());
-            return imagepanel.css("top", -notifycounter.outerHeight());
+            _this.notifypanel.css("left", -_this.notifypanel.width());
+            return _this.notifypanel.css("top", -notifycounter.outerHeight());
           } else if (_this.options.position === 'bottomright') {
-            imagepanel.css("left", -imagepanel.width() + notifycounter.outerWidth());
-            return imagepanel.css("top", -imagepanel.height() - notifycounter.outerHeight());
+            _this.notifypanel.css("left", -_this.notifypanel.width() + notifycounter.outerWidth());
+            return _this.notifypanel.css("top", -_this.notifypanel.height() - notifycounter.outerHeight());
           } else if (_this.options.position === 'rightbottom') {
-            imagepanel.css("left", -imagepanel.width());
-            return imagepanel.css("top", -imagepanel.height());
+            _this.notifypanel.css("left", -_this.notifypanel.width());
+            return _this.notifypanel.css("top", -_this.notifypanel.height());
           } else if (_this.options.position === 'bottomleft') {
-            imagepanel.css("left", 0);
-            return imagepanel.css("top", -imagepanel.height() - notifycounter.outerHeight());
+            _this.notifypanel.css("left", 0);
+            return _this.notifypanel.css("top", -_this.notifypanel.height() - notifycounter.outerHeight());
           } else if (_this.options.position === 'leftbottom') {
-            imagepanel.css("left", notifycounter.outerWidth());
-            return imagepanel.css("top", -imagepanel.height());
+            _this.notifypanel.css("left", notifycounter.outerWidth());
+            return _this.notifypanel.css("top", -_this.notifypanel.height());
           }
         });
+      };
+
+      Plugin.prototype.addMessages = function() {
+        var message, messagediv, params, _i, _len, _ref;
+        _ref = this.options.messages;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          message = _ref[_i];
+          messagediv = $("<li class='notify-message'>" + message + "</li>");
+          this.notifypanel.append(messagediv);
+        }
+        params = {
+          messages: this.options.messages,
+          messagecount: this.options.notificationCount
+        };
+        return $(this.element).trigger('messagesadded', params);
       };
 
       return Plugin;

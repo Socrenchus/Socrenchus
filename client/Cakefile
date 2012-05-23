@@ -29,7 +29,13 @@ srcWatchFolders = [
 
 srcFolders = [
     'main'
-    'main_test'
+    'tagbox'
+    'votebox'
+    'omnipost'
+    'notify'
+]
+
+testFolders = [
     'tagbox'
     'votebox'
     'omnipost'
@@ -43,7 +49,7 @@ prodCoffeeFiles = [
     'jquery.ui.omnipost'
     'jquery.ui.notifybox'
 ]
-  
+
 build = (callback) ->
   for folder in srcFolders
     coffee = spawn 'coffee', ['-c', '-o', outputJSFolder, folder]
@@ -126,3 +132,18 @@ task 'buildAndCpAll', 'build all coffee files and copy all images', ->
   invoke 'build'
   invoke 'cpimgs'
   invoke 'cpcss'
+
+task 'test', 'run the client tests', ->
+  for folder in testFolders
+    process.chdir(folder + '/spec')
+    t = spawn 'phantomjs', ['run-jasmine.js']
+    t.stderr.on 'data', (data) ->
+      process.stderr.write data.toString()
+    t.stdout.on 'data', (data) ->
+      util.log data.toString()
+    t.on 'exit', (code) ->
+      callback?() if code is 0
+    t.on 'exit', (code) ->
+      callback?() if code is 0
+    process.chdir('../..')   
+

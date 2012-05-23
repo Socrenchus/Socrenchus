@@ -7,7 +7,9 @@
     pluginName = 'votebox';
     defaults = {
       votesnum: 0,
-      callback: ''
+      callback: null,
+      vote: null,
+      local: false
     };
     states = {
       none: 0,
@@ -33,23 +35,28 @@
       }
 
       Plugin.prototype.init = function() {
-        var downpressed, originalvotesnum, uppressed,
+        var downpressed, html, originalvotesnum, template, templatedata, uppressed,
           _this = this;
+        this.dirprefix = '/';
+        if (this.options.local) this.dirprefix = '';
+        template = "<img alt='^' title='vote up' id='ui-upvote' />                  <div id='ui-votetext'>{{votes}}</div>                  <img alt='v' title='vote down' id='ui-downvote'>";
         this.state = this._states.none;
         uppressed = false;
         downpressed = false;
         originalvotesnum = this.options.votesnum;
         $(this.element).bind('updateScore', this.updateScore);
-        this.upArrow = $("<img alt='^' title='vote up' id='ui-upvote'>");
-        this.upArrow.attr('onmouseover', 'src="/images/votearrowover.png"');
-        this.upArrow.attr('onmousedown', 'src="/images/votearrowdown.png"');
-        this.votetext = $("<div id='ui-votetext'>" + (Math.round(originalvotesnum)) + "</div>");
-        this.downArrow = $("<img alt='v' title='vote down' id='ui-downvote'>");
-        this.downArrow.attr('onmouseover', 'src="/images/votearrowover.png"');
-        this.downArrow.attr('onmousedown', 'src="/images/votearrowdown.png"');
-        $(this.element).append(this.upArrow);
-        $(this.element).append(this.votetext);
-        $(this.element).append(this.downArrow);
+        templatedata = {
+          votes: Math.round(originalvotesnum)
+        };
+        html = Mustache.to_html(template, templatedata);
+        $(this.element).html(html);
+        this.upArrow = $(this.element).find('#ui-upvote');
+        this.upArrow.attr('onmouseover', 'src="' + this.dirprefix + 'images/votearrowover.png"');
+        this.upArrow.attr('onmousedown', 'src="' + this.dirprefix + 'images/votearrowdown.png"');
+        this.votetext = $(this.element).find('#ui-votetext');
+        this.downArrow = $(this.element).find('#ui-downvote');
+        this.downArrow.attr('onmouseover', 'src="' + this.dirprefix + 'images/votearrowover.png"');
+        this.downArrow.attr('onmousedown', 'src="' + this.dirprefix + 'images/votearrowdown.png"');
         this.setImages();
         if (this.options.vote === true) {
           this.pressUp();
@@ -58,6 +65,7 @@
           this.pressDown();
           return this.disable();
         } else {
+          this.votetext.text('');
           this.upArrow.click(function() {
             return _this.pressUp();
           });
@@ -68,61 +76,65 @@
       };
 
       Plugin.prototype.pressUp = function() {
-        if (this.state !== this._states.up) {
-          this.state = this._states.up;
-        } else {
-          this.voteCount(originalvotesnum);
-          this.state = this._states.none;
-        }
+        var voteParams;
+        this.state = this._states.up;
         this.votetext.text(Math.round(this.voteCount()));
-        $(this.element).trigger('votetextChanged', [parseInt(this.votetext.text()), this.voteCount()]);
+        voteParams = {
+          'votetext': this.votetext.text(),
+          'votecount': Math.round(this.voteCount()).toString()
+        };
+        $(this.element).trigger('votetextChanged', voteParams);
         this.setImages();
         if (this.state === this._states.up) {
           this.disable();
-          this.options.callback(",correct");
+          if (this.options.callback !== null) {
+            if (this.options.vote === null) this.options.callback(",correct");
+          }
         }
         return $(this.element).trigger('upArrowPressed', this.state);
       };
 
       Plugin.prototype.pressDown = function() {
-        if (this.state !== this._states.down) {
-          this.state = this._states.down;
-        } else {
-          this.voteCount(originalvotesnum);
-          this.state = this._states.none;
-        }
+        var voteParams;
+        this.state = this._states.down;
         this.votetext.text(Math.round(this.voteCount()));
-        $(this.element).trigger('votetextChanged', [parseInt(this.votetext.text()), this.voteCount()]);
+        voteParams = {
+          'votetext': this.votetext.text(),
+          'votecount': Math.round(this.voteCount()).toString()
+        };
+        $(this.element).trigger('votetextChanged', voteParams);
         this.setImages();
         if (this.state === this._states.down) {
           this.disable();
-          this.options.callback(",incorrect");
+          if (this.options.callback !== null) {
+            if (this.options.vote === null) this.options.callback(",incorrect");
+          }
         }
         return $(this.element).trigger('downArrowPressed', this.state);
       };
 
       Plugin.prototype.setImages = function() {
         if (this.state === this._states.down) {
-          this.downArrow.attr('src', '/images/votearrowcomplete.png');
-          this.downArrow.attr('onmouseout', 'src="/images/votearrowcomplete.png"');
-          this.downArrow.attr('onmouseup', 'src="/images/votearrowcomplete.png"');
-          this.upArrow.attr('src', '/images/votearrow.png');
-          this.upArrow.attr('onmouseout', 'src="/images/votearrow.png"');
-          return this.upArrow.attr('onmouseup', 'src="/images/votearrow.png"');
+          this.downArrow.attr('src', this.dirprefix + 'images/votearrowcomplete.png');
+          this.downArrow.attr('onmouseout', 'src="' + this.dirprefix + 'images/votearrowcomplete.png"');
+          this.downArrow.attr('onmouseup', 'src="' + this.dirprefix + 'images/votearrowcomplete.png"');
+          this.upArrow.attr('src', this.dirprefix + 'images/votearrow.png');
+          this.upArrow.attr('onmouseout', 'src="' + this.dirprefix + 'images/votearrow.png"');
+          return this.upArrow.attr('onmouseup', 'src="' + this.dirprefix + 'images/votearrow.png"');
         } else if (this.state === this._states.up) {
-          this.upArrow.attr('src', '/images/votearrowcomplete.png');
-          this.upArrow.attr('onmouseout', 'src="/images/votearrowcomplete.png"');
-          this.upArrow.attr('onmouseup', 'src="/images/votearrowcomplete.png"');
-          this.downArrow.attr('src', '/images/votearrow.png');
-          this.downArrow.attr('onmouseout', 'src="/images/votearrow.png"');
-          return this.downArrow.attr('onmouseup', 'src="/images/votearrow.png"');
+          this.upArrow.attr('src', this.dirprefix + 'images/votearrowcomplete.png');
+          this.upArrow.attr('onmouseout', 'src="' + this.dirprefix + 'images/votearrowcomplete.png"');
+          this.upArrow.attr('onmouseup', 'src="' + this.dirprefix + 'images/votearrowcomplete.png"');
+          this.downArrow.attr('src', this.dirprefix + 'images/votearrow.png');
+          this.downArrow.attr('onmouseout', 'src="' + this.dirprefix + 'images/votearrow.png"');
+          return this.downArrow.attr('onmouseup', 'src="' + this.dirprefix + 'images/votearrow.png"');
         } else if (this.state === this._states.none) {
-          this.upArrow.attr('src', '/images/votearrow.png');
-          this.upArrow.attr('onmouseout', 'src="/images/votearrow.png"');
-          this.upArrow.attr('onmouseup', 'src="/images/votearrow.png"');
-          this.downArrow.attr('src', '/images/votearrow.png');
-          this.downArrow.attr('onmouseout', 'src="/images/votearrow.png"');
-          return this.downArrow.attr('onmouseup', 'src="/images/votearrow.png"');
+          this.upArrow.attr('src', this.dirprefix + 'images/votearrow.png');
+          this.upArrow.attr('onmouseout', 'src="' + this.dirprefix + 'images/votearrow.png"');
+          this.upArrow.attr('onmouseup', 'src="' + this.dirprefix + 'images/votearrow.png"');
+          this.downArrow.attr('src', this.dirprefix + 'images/votearrow.png');
+          this.downArrow.attr('onmouseout', 'src="' + this.dirprefix + 'images/votearrow.png"');
+          return this.downArrow.attr('onmouseup', 'src="' + this.dirprefix + 'images/votearrow.png"');
         }
       };
 
@@ -157,6 +169,10 @@
       Plugin.prototype.updateScore = function(event, newscore) {
         this.voteCount(newscore);
         return this.votetext.text(Math.round(this.voteCount()));
+      };
+
+      Plugin.prototype.destroy = function() {
+        return $(this.element).remove();
       };
 
       return Plugin;

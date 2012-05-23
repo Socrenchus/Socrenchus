@@ -35,7 +35,8 @@ from google.appengine.dist import use_library
 use_library('django', '0.96')
 from bootstrap import BootStrap
 
-_DEBUG = 'localhost' in users.create_logout_url( "/" )
+_DEBUG = True
+
 class BootstrapHandler(webapp.RequestHandler):
   def get(self, id):
     if _DEBUG:
@@ -48,13 +49,9 @@ class PostHandler(webapp.RequestHandler):
     stream = Stream.get_or_create(users.get_current_user())
     if id:
       key = ndb.Key(urlsafe=id)
-      stream.assign_post(key)
-      result = key.get()
+      result = key
     else:
-      def post_list(key):
-        return key.parent()
-      json.encode(stream.assignments().map(post_list,keys_only=True))
-      result = stream.assignments().order(Stream.timestamp).map(post_list,keys_only=True)
+      result = stream.get_assignments()
     self.response.out.write(json.encode(result))
 
  
@@ -77,23 +74,16 @@ class TagHandler(webapp.RequestHandler):
  
   def post(self, id):
     tmp = json.simplejson.loads(self.request.body)
-    t = Tag.get_or_create(tmp['title'],ndb.Key(urlsafe=tmp['parent']))
+    t = ndb.Key(urlsafe=tmp['parent']).get().add_tag(tmp['title'])
     self.response.out.write(json.encode(t))
 
   def put(self, id):
     self.post(id)
 
-  """
-  def delete(self, id):
-    key = self.request.cookies['posts']
-    postlist = db.get(key)
-    post = Posts.get_by_id(int(id))
-    if post.postlist.key() == postlist.key():
-      tmp = post.toDict()
-      post.delete()
-    else:
-      self.error(403)
-  """
+class NotificationHandler(webapp.RequestHandler):
+  def get(self, id):
+    stream = Stream.get_or_create(users.get_current_user())
+    self.response.out.write(json.encode(stream.notifications))
 
 class StreamHandler(webapp.RequestHandler):
   def get(self, id):
@@ -122,6 +112,7 @@ options = [
   ('/', AccountHandler),
   (r'/posts/?(.*)', PostHandler),
   (r'/tags/?(.*)', TagHandler),
+  (r'/notifications/?(.*)', NotificationHandler),
   (r'/stream/?(.*)', StreamHandler)
 ]
 application = webapp.WSGIApplication(options, debug=_DEBUG)

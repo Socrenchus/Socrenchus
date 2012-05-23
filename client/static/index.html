@@ -16,6 +16,7 @@
 </script>
 <script type='text/javascript' src='http://documentcloud.github.com/underscore/underscore-min.js'></script>
 <script type='text/javascript' src='http://documentcloud.github.com/backbone/backbone-min.js'></script>
+<script type='text/javascript' src='/lib/mustache.js'></script>
 <script type='text/javascript' src='/lib/jquery.text-effects.js'></script>
 <script type='text/javascript' src='/lib/jquery.qtip-1.0.0-rc3.min.js'>
 </script>
@@ -28,7 +29,9 @@
 <script type='text/javascript' src='/lib/jquery.ui.tagbox.js'>
 </script>
 <link href='/lib/ui.tagbox.css' type='text/css' rel='stylesheet'>
+<script type='text/javascript' src='/lib/jquery.ui.notifybox.js'>
 </script>
+<link href='/lib/ui.notifybox.css' type='text/css' rel='stylesheet'>
     
     <link href='/lib/main.css' type='text/css' rel='stylesheet'>
     <link href='http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/flick/jquery-ui.css' type='text/css' rel='stylesheet'>
@@ -42,10 +45,11 @@
         <a id='logout-link' href="{{ url }}">{{ url_linktext }}</a>
         <img onclick='location.href = "/" 'style="cursor:pointer"' id='logo' src='/images/logo.png'>
       </div>
-      <div id='header'>
+      <div id='header'>        
       </div>
+      <div id='notifications'></div>
       <div id='stream'>
-        <div id='new-assignment'></div>
+        <div id='new-assignment'><div id='new-post'></div></div>
         <ul id='assignments' class='sortable ui-helper-reset'>
         </ul>
         <div id='templates'>
@@ -53,16 +57,24 @@
             <div class='inner-question'>
               <div id='votebox'></div>
               <textarea disabled="disabled" readonly="readonly" id='content'></textarea>
+              <span id="addThis" class="addthis_toolbox addthis_default_style">
+                <a class="addthis_button_preferred_1"></a>
+                <a class="addthis_button_preferred_2"></a>
+                <a class="addthis_button_preferred_3"></a>
+                <a class="addthis_button_preferred_4"></a>
+                <a class="addthis_button_compact"></a>
+              </span>
               <div id='taglist'></div>
               <div id='tagbox'></div>
+              <div id='reply'><button id='replyButton' type='button'>Reply</button></div> 
               <div id='omnipost'></div>
-              <div id='progress-bar'></div>
               <ul id='response' class='ui-helper-reset'></ul>
             </div>
           </script>
-         
+        </div>    
         </div>
-      </div>
+        <div id='footer'>
+      </div>      
     </div>
     <script type='text/javascript' src='/lib/main.js'>
     <script type="text/javascript">
