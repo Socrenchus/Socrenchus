@@ -8,7 +8,8 @@
     defaults = {
       votesnum: 0,
       callback: null,
-      vote: null
+      vote: null,
+      local: false
     };
     states = {
       none: 0,
@@ -36,6 +37,8 @@
       Plugin.prototype.init = function() {
         var downpressed, html, originalvotesnum, template, templatedata, uppressed,
           _this = this;
+        this.dirprefix = '/';
+        if (this.options.local) this.dirprefix = '';
         template = "<img alt='^' title='vote up' id='ui-upvote' />                  <div id='ui-votetext'>{{votes}}</div>                  <img alt='v' title='vote down' id='ui-downvote'>";
         this.state = this._states.none;
         uppressed = false;
@@ -48,12 +51,12 @@
         html = Mustache.to_html(template, templatedata);
         $(this.element).html(html);
         this.upArrow = $(this.element).find('#ui-upvote');
-        this.upArrow.attr('onmouseover', 'src="/images/votearrowover.png"');
-        this.upArrow.attr('onmousedown', 'src="/images/votearrowdown.png"');
+        this.upArrow.attr('onmouseover', 'src="' + this.dirprefix + 'images/votearrowover.png"');
+        this.upArrow.attr('onmousedown', 'src="' + this.dirprefix + 'images/votearrowdown.png"');
         this.votetext = $(this.element).find('#ui-votetext');
         this.downArrow = $(this.element).find('#ui-downvote');
-        this.downArrow.attr('onmouseover', 'src="/images/votearrowover.png"');
-        this.downArrow.attr('onmousedown', 'src="/images/votearrowdown.png"');
+        this.downArrow.attr('onmouseover', 'src="' + this.dirprefix + 'images/votearrowover.png"');
+        this.downArrow.attr('onmousedown', 'src="' + this.dirprefix + 'images/votearrowdown.png"');
         this.setImages();
         if (this.options.vote === true) {
           this.pressUp();
@@ -112,26 +115,26 @@
 
       Plugin.prototype.setImages = function() {
         if (this.state === this._states.down) {
-          this.downArrow.attr('src', '/images/votearrowcomplete.png');
-          this.downArrow.attr('onmouseout', 'src="/images/votearrowcomplete.png"');
-          this.downArrow.attr('onmouseup', 'src="/images/votearrowcomplete.png"');
-          this.upArrow.attr('src', '/images/votearrow.png');
-          this.upArrow.attr('onmouseout', 'src="/images/votearrow.png"');
-          return this.upArrow.attr('onmouseup', 'src="/images/votearrow.png"');
+          this.downArrow.attr('src', this.dirprefix + 'images/votearrowcomplete.png');
+          this.downArrow.attr('onmouseout', 'src="' + this.dirprefix + 'images/votearrowcomplete.png"');
+          this.downArrow.attr('onmouseup', 'src="' + this.dirprefix + 'images/votearrowcomplete.png"');
+          this.upArrow.attr('src', this.dirprefix + 'images/votearrow.png');
+          this.upArrow.attr('onmouseout', 'src="' + this.dirprefix + 'images/votearrow.png"');
+          return this.upArrow.attr('onmouseup', 'src="' + this.dirprefix + 'images/votearrow.png"');
         } else if (this.state === this._states.up) {
-          this.upArrow.attr('src', '/images/votearrowcomplete.png');
-          this.upArrow.attr('onmouseout', 'src="/images/votearrowcomplete.png"');
-          this.upArrow.attr('onmouseup', 'src="/images/votearrowcomplete.png"');
-          this.downArrow.attr('src', '/images/votearrow.png');
-          this.downArrow.attr('onmouseout', 'src="/images/votearrow.png"');
-          return this.downArrow.attr('onmouseup', 'src="/images/votearrow.png"');
+          this.upArrow.attr('src', this.dirprefix + 'images/votearrowcomplete.png');
+          this.upArrow.attr('onmouseout', 'src="' + this.dirprefix + 'images/votearrowcomplete.png"');
+          this.upArrow.attr('onmouseup', 'src="' + this.dirprefix + 'images/votearrowcomplete.png"');
+          this.downArrow.attr('src', this.dirprefix + 'images/votearrow.png');
+          this.downArrow.attr('onmouseout', 'src="' + this.dirprefix + 'images/votearrow.png"');
+          return this.downArrow.attr('onmouseup', 'src="' + this.dirprefix + 'images/votearrow.png"');
         } else if (this.state === this._states.none) {
-          this.upArrow.attr('src', '/images/votearrow.png');
-          this.upArrow.attr('onmouseout', 'src="/images/votearrow.png"');
-          this.upArrow.attr('onmouseup', 'src="/images/votearrow.png"');
-          this.downArrow.attr('src', '/images/votearrow.png');
-          this.downArrow.attr('onmouseout', 'src="/images/votearrow.png"');
-          return this.downArrow.attr('onmouseup', 'src="/images/votearrow.png"');
+          this.upArrow.attr('src', this.dirprefix + 'images/votearrow.png');
+          this.upArrow.attr('onmouseout', 'src="' + this.dirprefix + 'images/votearrow.png"');
+          this.upArrow.attr('onmouseup', 'src="' + this.dirprefix + 'images/votearrow.png"');
+          this.downArrow.attr('src', this.dirprefix + 'images/votearrow.png');
+          this.downArrow.attr('onmouseout', 'src="' + this.dirprefix + 'images/votearrow.png"');
+          return this.downArrow.attr('onmouseup', 'src="' + this.dirprefix + 'images/votearrow.png"');
         }
       };
 
