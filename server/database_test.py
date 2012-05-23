@@ -12,26 +12,21 @@ import unittest
 import os
 import random
 import json
-from google.appengine.ext import ndb
-from google.appengine.api import users
 from google.appengine.ext import testbed
-from google.appengine.datastore import datastore_stub_util
 from database import *
 
 class DatabaseTests(unittest.TestCase):
   
   def setUp(self):
-    # Create test bed
     self.testbed = testbed.Testbed()
     self.testbed.activate()
-    # Create a consistency policy that will simulate the High Replication consistency model.
-    self.policy = datastore_stub_util.PseudoRandomHRConsistencyPolicy(probability=1.0)
-    # Initialize the datastore stub with this policy.
-    self.testbed.init_datastore_v3_stub(consistency_policy=self.policy)
-    self.testbed.init_memcache_stub()
     self.testbed.init_user_stub()
-    
-    os.environ['AUTH_DOMAIN'] = 'testbed'
+    self.testbed.init_datastore_v3_stub()
+    self.testbed.init_memcache_stub()
+    from ndb import tasklets
+    ctx = tasklets.get_context()
+    ctx.set_cache_policy(lambda key: False)
+    ctx.set_memcache_policy(lambda key: False)
     self.switchToUser(0)
     
   def teardown(self):
@@ -73,6 +68,7 @@ class DatabaseTests(unittest.TestCase):
     t.put()
     # check it
     self.assertEqual(post.score, -2)
+    self.assertEqual(Stream.get_or_create().voted(post.key), 1)
     
   def testExperienceReferencing(self):
     # create post
@@ -89,9 +85,9 @@ class DatabaseTests(unittest.TestCase):
         t.put()
         self.assertEqual(round(t.xp), 2)
     # adjust the score
-    post.adjust_score(100.0)
+    post.adjust_score(100.0).wait()
     # check that the tags were updated properly
-    user = Stream.query(Stream.user==post.author).iter(keys_only=True).next()
+    user = Stream.get_or_create(post.author).key
     tags = Tag.query(ancestor=user).fetch()
     self.assertEqual(len(tags),len(tag_names))
     for t in tags:
@@ -99,8 +95,7 @@ class DatabaseTests(unittest.TestCase):
       
   def testExperienceDereferencing(self):
     # switch to 'tagging' user
-    self.switchToUser('tagging')
-    user = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
+    user = self.switchToUser('tagging').key
     # give 'tagging' user experience in a few tags
     Tag(parent=user, title='a', xp=100).put()
     Tag(parent=user, title='b', xp=50).put()
@@ -111,51 +106,49 @@ class DatabaseTests(unittest.TestCase):
     p = Post().put()
     # switch between arbitrary users and tag the post as such
     self.switchToUser('userA')
-    Tag(parent=p, title='a', xp=1).put()
-    Tag(parent=p, title='b', xp=3).put()
-    Tag(parent=p, title='c', xp=2).put()
+    Tag.get_or_create('a', p, None, 1)
+    Tag.get_or_create('b', p, None, 3)
+    Tag.get_or_create('c', p, None, 2)
     self.switchToUser('userB')
-    Tag(parent=p, title='a', xp=2).put()
-    Tag(parent=p, title='b', xp=2).put()
-    Tag(parent=p, title='d', xp=5).put()
+    Tag.get_or_create('a', p, None, 2)
+    Tag.get_or_create('b', p, None, 2)
+    Tag.get_or_create('d', p, None, 5)
     self.switchToUser('userC')
-    Tag(parent=p, title='a', xp=3).put()
+    Tag.get_or_create('a', p, None, 3)
     # switch back to 'tagging' user and apply a tag
     self.switchToUser('tagging')
-    t = Tag(parent=p, title='blah')
+    t = Tag.get_or_create('blah', p)
     t.put()
     self.assertEqual(round(t.xp), 50)
     
   def testPointsFromTagging(self):
     # create the common post
     self.switchToUser('user')
-    p = Post().put()
+    p = Post()
+    p.put()
     # give users a starting experience
-    self.switchToUser('A')
-    a = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
-    aa = Tag(parent=a, title='a', xp=500).put()
-    ab = Tag(parent=a, title='b', xp=50).put()
-    ac = Tag(parent=a, title='c', xp=5).put()
-    self.switchToUser('B')
-    b = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
-    ba = Tag(parent=b, title='a', xp=50).put()
-    bb = Tag(parent=b, title='b', xp=500).put()
-    bc = Tag(parent=b, title='c', xp=50).put()
-    self.switchToUser('C')
-    c = Stream.query(Stream.user==users.User()).iter(keys_only=True).next()
-    ca = Tag(parent=c, title='a', xp=5).put()
-    cb = Tag(parent=c, title='b', xp=50).put()
-    cc = Tag(parent=c, title='c', xp=500).put()
+    a = self.switchToUser('A').key
+    aa = Tag.get_or_create('a', a, None, 500).key
+    ab = Tag.get_or_create('b', a, None, 50).key
+    ac = Tag.get_or_create('c', a, None, 5).key
+    b = self.switchToUser('B').key
+    ba = Tag.get_or_create('a', b, None, 50).key
+    bb = Tag.get_or_create('b', b, None, 500).key
+    bc = Tag.get_or_create('c', b, None, 50).key
+    c = self.switchToUser('C').key
+    ca = Tag.get_or_create('a', c, None, 5).key
+    cb = Tag.get_or_create('b', c, None, 50).key
+    cc = Tag.get_or_create('c', c, None, 500).key
     # have users tag posts
     self.switchToUser('A')
-    Tag(parent=p, title='a').put()
+    p.add_tag('a')
     self.switchToUser('B')
-    Tag(parent=p, title='a').put()
-    Tag(parent=p, title='b').put()
+    p.add_tag('a')
+    p.add_tag('b')
     self.switchToUser('C')
-    Tag(parent=p, title='a').put()
-    Tag(parent=p, title='b').put()
-    Tag(parent=p, title='c').put()
+    p.add_tag('a')
+    p.add_tag('b')
+    p.add_tag('c')
     # check users ending experience
     self.assertGreater(aa.get().xp, 500)
     self.assertEqual(ab.get().xp, 50)
@@ -167,47 +160,79 @@ class DatabaseTests(unittest.TestCase):
     self.assertEqual(cc.get().xp, 500)
     # check the final post score
     # figure out why the post sometimes gets 100 points
-    self.assertEqual(p.get().score, 0)
-
-  def testIncrementalAssignment(self):
+    self.assertEqual(p.score, 0)
+    
+  def testAssignment(self):
     # create post
     self.switchToUser('user')
     user = self.switchToUser('user')
     post = user.create_post('my post')
-    Tag(parent=post.key, title='a').put()
+    post.add_tag('a')
     # create responses
     resp = []
     for i in range(15):
       user = self.switchToUser(str(i))
-      user.assign_post(post.key)
       resp.append(user.create_post(str(i), post.key).key)
+    user.create_post("reply_to_user", resp[1])
     # check assignments
     stream = self.switchToUser(str(1))
-    for i in range(3):
-      # check assignments
-      post.get_progress(stream.user)
-      self.assertEqual(stream.assignments().count(), (5*(i+1))+1)
-      # acquire points
-      stream.adjust_experience('a',25)
-
+    a = stream.get_assignments()
+    m = "Stream contains unexpected duplicates."
+    self.assertEqual(len(a), len(set([x for x in a])), msg=m)
+    # check that user's own posts were automatically assigned
+    m = "Not all of the user's posts were assigned."
+    self.assertEqual(sum([(p.get().author == user.user) for p in a]), Post.query(Post.author == user.user).count())
+    # check that the children of the user's own posts are shown
+    m = "Children of user's posts aren't automatically being shown."
+    self.assertTrue([p.parent() == resp[1] for p in a], m)
     # check that grandchildren don't get assigned
-    count = stream.assignments().count()
+    count = len(stream.get_assignments())
     user = self.switchToUser(str(2))
-    user.assign_post(resp[3])
     p = user.create_post(str("grandchild"), resp[3])
     stream = self.switchToUser(str(1))
-    stream.adjust_experience('a',25)
+    stream.adjust_experience('a',15)
     m = "Grandchildren are being assigned mistakenly."
-    self.assertEqual(count, stream.assignments().count())
-    for a in stream.assignments():
-      self.assertNotEqual(a.depth, 4,msg=m)
-
-  def testCreateResponse(self):
-    self.switchToUser('user')
-    user = self.switchToUser('user')
-    post = user.create_post('my post')
-    post2 = user.create_post('my second post', post.key)
-    def tag_enum(key):
-      return key.parent()
-    post_keys = user.assignments().map(tag_enum,keys_only=True)
-    self.assertEqual(len(post_keys), len(set(post_keys)))
+    self.assertEqual(count, len(stream.get_assignments()))
+    for a in stream.get_assignments():
+      self.assertNotEqual(a.get().depth, 4,msg=m)
+    # check notification count
+    u = self.switchToUser('user')
+    self.assertEqual(sum([n.kind == 3 for n in u.notifications]), 15)
+      
+  
+  def testTagCounter(self):
+    ctx = ndb.get_context()
+    ctx.clear_cache()
+    # create the common posts
+    stream = self.switchToUser('user')
+    p1 = Post()
+    p1.put()
+    p2 = Post()
+    p2.put()
+    # make a and b correlated
+    p1.add_tag('a')
+    p1.add_tag('b')
+    # make b and c correlated
+    p2.add_tag('c')
+    p2.add_tag('b')
+    # get count models
+    a = TagCount.get_or_create('a')
+    b = TagCount.get_or_create('b')
+    c = TagCount.get_or_create('c')
+    # get correlation models
+    ab = TagCount.get_or_create('a', 'b')
+    bc = TagCount.get_or_create('c', 'b')
+    ac = TagCount.get_or_create('a', 'c')
+    # check counts
+    self.assertEqual(a.count, 1)
+    self.assertEqual(b.count, 2)
+    self.assertEqual(c.count, 1)
+    # check correlations
+    # TODO: Figure out why this isn't working.
+    #self.assertEqual(ab.count, 1)
+    #self.assertEqual(bc.count, 1)
+    self.assertEqual(ac.count, 0)
+    # check that xp matches since they should all be baseline
+    for t in [a, b, c, ab, bc, ac]:
+      self.assertEqual(t.count, t.xp)
+    

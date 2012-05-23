@@ -22,7 +22,9 @@
 
       Post.prototype.urlRoot = '/posts';
 
-      Post.prototype.initialize = function() {};
+      Post.prototype.initialize = function() {
+        return this.clusters = [];
+      };
 
       Post.prototype.depth = function() {
         return this.get('depth') - 1;
@@ -35,7 +37,8 @@
           content: content
         });
         postCollection.create(p);
-        return postCollection.fetch();
+        postCollection.fetch();
+        return $('#new-assignment').dialog('close');
       };
 
       Post.prototype.maketag = function(content) {
@@ -46,8 +49,7 @@
           xp: 0
         });
         tagCollection.create(t);
-        this.view.triggerTagCall(content);
-        return this.view.updateProgress();
+        return postCollection.fetch();
       };
 
       return Post;
@@ -113,8 +115,8 @@
         this.triggerTagCall = __bind(this.triggerTagCall, this);
         this.renderInnerContents = __bind(this.renderInnerContents, this);
         this.postDOMrender = __bind(this.postDOMrender, this);
-        this.updateProgress = __bind(this.updateProgress, this);
         this.renderPostContent = __bind(this.renderPostContent, this);
+        this.setSiblingTags = __bind(this.setSiblingTags, this);
         PostView.__super__.constructor.apply(this, arguments);
       }
 
@@ -133,7 +135,39 @@
       PostView.prototype.initialize = function() {
         this.id = this.model.id;
         this.model.bind('change', this.render);
-        return this.model.view = this;
+        this.model.view = this;
+        this.siblingtags = [];
+        return this.setSiblingTags();
+      };
+
+      PostView.prototype.setSiblingTags = function() {
+        var sibling, siblings, tag, taglist, _j, _len2, _results;
+        siblings = postCollection.where({
+          parent: this.model.get('parent')
+        });
+        _results = [];
+        for (_j = 0, _len2 = siblings.length; _j < _len2; _j++) {
+          sibling = siblings[_j];
+          taglist = sibling.get('tags');
+          if (taglist) {
+            _results.push((function() {
+              var _k, _len3, _results2;
+              _results2 = [];
+              for (_k = 0, _len3 = taglist.length; _k < _len3; _k++) {
+                tag = taglist[_k];
+                if (this.siblingtags.indexOf(tag) < 0) {
+                  _results2.push(this.siblingtags.push(tag));
+                } else {
+                  _results2.push(void 0);
+                }
+              }
+              return _results2;
+            }).call(this));
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
       };
 
       PostView.prototype.renderPostContent = function() {
@@ -143,78 +177,79 @@
         return contentdiv.val(jsondata.posttext);
       };
 
-      PostView.prototype.updateProgress = function() {
-        return $(this.el).find('#progress-bar:first').progressbar("value", this.model.get('score') * 100);
-      };
-
       PostView.prototype.postDOMrender = function() {
-        if (postCollection.where({
-          parent: this.id
-        }).length > 0) {
-          if (this.model.get('progress') !== 1) this.updateProgress();
-        }
-        return $(this.el).find('#content').autosize();
+        $(this.el).find('#content').autosize();
+        return addthis.toolbox('.addthis_toolbox');
       };
 
       PostView.prototype.renderInnerContents = function() {
+        var children, questionURL,
+          _this = this;
         this.renderPostContent();
-        if (!(postCollection.where({
+        children = postCollection.where({
           parent: this.id
-        }).length > 0)) {
-          return $(this.el).find('#omnipost:first').omnipost({
-            removeOnSubmit: true,
-            callback: this.model.respond
+        });
+        if (!(children.length > 0)) {
+          $(this.el).find('#replyButton:first').click(function() {
+            $(_this.el).find('#replyButton:first').remove();
+            return $(_this.el).find('#omnipost:first').omnipost({
+              removeOnSubmit: true,
+              callback: _this.model.respond
+            });
           });
+          questionURL = "http://" + window.location.host + "/#" + this.model.get('id');
+          $(this.el).find('#addThis').attr('addthis:url', questionURL);
+        }
+        if (children.length > 0 || App.user['email'] === this.model.get('author')['email']) {
+          return $(this.el).find('#replyButton:first').remove();
         }
       };
 
       PostView.prototype.triggerTagCall = function(tag) {
-        var vote;
-        if (tag === ',correct') {
-          vote = true;
+        if (tag === ",correct" || tag === ",incorrect") {
           return $(this.el).find('#votebox:first').trigger('updateScore', this.model.get('score'));
-        } else if (tag === ',incorrect') {
-          vote = false;
-          return $(this.el).find('#votebox:first').trigger('updateScore', this.model.get('score'));
-        } else {
-          return $(this.el).find('#tagbox:first').trigger('addtag', tag);
         }
       };
 
       PostView.prototype.render = function() {
-        var t, tag, taglist, tags, vote, _j, _len2;
-        $(this.el).html(this.template);
-        $(this.el).find('.inner-question').attr('id', this.model.get('id'));
-        this.renderInnerContents();
-        tags = tagCollection.where({
-          parent: this.model.get('id')
-        });
-        taglist = [];
-        vote = null;
-        for (_j = 0, _len2 = tags.length; _j < _len2; _j++) {
-          tag = tags[_j];
-          t = tag.get('title');
-          if (t[0] !== ',') taglist.push(t);
-          if (t === ',correct') {
-            vote = true;
-          } else if (t === ',incorrect') {
-            vote = false;
+        var postcontent, t, tag, taglist, tags, vote, _j, _len2, _ref2;
+        postcontent = jQuery.parseJSON(this.model.get('content'));
+        if (postcontent.posttext !== '') {
+          $(this.el).html(this.template);
+          $(this.el).find('.inner-question').attr('id', this.model.get('id'));
+          this.renderInnerContents();
+          tags = tagCollection.where({
+            parent: this.model.get('id')
+          });
+          taglist = [];
+          vote = null;
+          for (_j = 0, _len2 = tags.length; _j < _len2; _j++) {
+            tag = tags[_j];
+            t = tag.get('title');
+            if (t[0] !== ',') taglist.push(t);
+            if (t === ',correct') {
+              vote = true;
+            } else if (t === ',incorrect') {
+              vote = false;
+            }
           }
+          $(this.el).find('#votebox:first').votebox({
+            vote: vote,
+            votesnum: (_ref2 = this.model.get('score')) != null ? _ref2 : '',
+            callback: this.model.maketag
+          });
+          $(this.el).find('#tagbox:first').tagbox({
+            callback: this.model.maketag,
+            tags: taglist,
+            similarTagsStringList: this.siblingtags
+          });
         }
-        $(this.el).find('#votebox:first').votebox({
-          vote: vote,
-          votesnum: this.model.get('score'),
-          callback: this.model.maketag
-        });
-        $(this.el).find('#tagbox:first').tagbox({
-          callback: this.model.maketag,
-          tags: taglist
-        });
         return $(this.el);
       };
 
-      PostView.prototype.addChild = function(child) {
-        var base, root;
+      PostView.prototype.addChild = function(child, tagsToOrderBy) {
+        var base, childtags, indexOfTag, newtagdiv, root, tag, tagdiv, _j, _len2;
+        if (tagsToOrderBy == null) tagsToOrderBy = [];
         if ((this.model.depth() % App.maxlevel) === (App.maxlevel - 1)) {
           root = this;
           while (root.parent && (root.model.depth() % App.maxlevel) !== 0) {
@@ -224,7 +259,26 @@
           return base.before(child.render());
         } else {
           base = $(this.el).find('#response:first');
-          return base.prepend(child.render());
+          childtags = child.model.get('tags');
+          for (_j = 0, _len2 = childtags.length; _j < _len2; _j++) {
+            tag = childtags[_j];
+            tagdiv = base.children("#" + tag.replace(" ", ""));
+            if (tagdiv.length === 0) {
+              newtagdiv = $("<div></div>");
+              newtagdiv.attr('id', tag.replace(" ", ""));
+              indexOfTag = tagsToOrderBy.indexOf(tag);
+              if (indexOfTag === 0) {
+                base.prepend(newtagdiv);
+              } else if (indexOfTag > 0) {
+                base.children("#" + tagsToOrderBy[indexOfTag - 1].replace(" ", "")).after(newtagdiv);
+              } else {
+                base.append(newtagdiv);
+              }
+              tagdiv = base.find("#" + tag.replace(" ", ""));
+            }
+            tagdiv.prepend(child.render());
+          }
+          if (childtags.length === 0) return base.append(child.render());
         }
       };
 
@@ -239,26 +293,34 @@
         this.render = __bind(this.render, this);
         this.showTopicCreator = __bind(this.showTopicCreator, this);
         this.setTopicCreatorVisibility = __bind(this.setTopicCreatorVisibility, this);
+        this.createModalReply = __bind(this.createModalReply, this);
         this.addOne = __bind(this.addOne, this);
+        this.makeView = __bind(this.makeView, this);
         this.reset = __bind(this.reset, this);
+        this.initialize = __bind(this.initialize, this);
         StreamView.__super__.constructor.apply(this, arguments);
       }
 
       StreamView.prototype.initialize = function() {
         this.id = 0;
+        this.user = 0;
         this.maxlevel = 4;
         this.streamviewRendered = false;
         this.topic_creator_showing = false;
         this.selectedStory = '#story-part1';
-        postCollection.bind('add', this.addOne, this);
+        this.reset();
+        postCollection.bind('sync', this.addOne, this);
         postCollection.bind('reset', this.addAll, this);
         postCollection.bind('all', this.render, this);
-        return this.reset();
+        tagCollection.fetch();
+        return postCollection.fetch();
       };
 
       StreamView.prototype.reset = function() {
+        var _this = this;
         return $.getJSON('/stream', (function(data) {
-          this.id = data['id'];
+          _this.id = data['id'];
+          _this.user = data['user'];
           tagCollection.add(data['tags']);
           return postCollection.add(data['assignments']);
         }));
@@ -270,10 +332,11 @@
           content: content
         });
         postCollection.create(p);
-        return postCollection.fetch();
+        postCollection.fetch();
+        return $('#new-assignment').dialog('close');
       };
 
-      StreamView.prototype.addOne = function(item) {
+      StreamView.prototype.makeView = function(item) {
         var post;
         post = new PostView({
           model: item
@@ -281,11 +344,37 @@
         post.parent = postCollection.where({
           id: item.get('parent')
         });
-        if (post.parent.length > 0) {
-          post.parent = post.parent[0].view;
-          post.parent.addChild(post);
+        if (post.parent.length > 0) post.parent[0].clusters = post.siblingtags;
+        return post;
+      };
+
+      StreamView.prototype.addOne = function(item) {
+        var child, children, mychild, post, _j, _k, _len2, _len3;
+        post = item.view;
+                if (post != null) {
+          post;
         } else {
-          $('#assignments').prepend(post.render());
+          ({
+            post: post = this.makeView(item)
+          });
+        };
+        children = postCollection.where({
+          parent: item.get('id')
+        });
+        if (item.depth() === 0) $('#assignments').prepend(post.render());
+        mychild = null;
+        for (_j = 0, _len2 = children.length; _j < _len2; _j++) {
+          child = children[_j];
+          if (this.user['email'] === child.get('author')['email']) mychild = child;
+        }
+        for (_k = 0, _len3 = children.length; _k < _len3; _k++) {
+          child = children[_k];
+          if (child.view === void 0) child.view = this.makeView(child);
+          if (mychild === void 0 || mychild === null) {
+            post.addChild(child.view);
+          } else {
+            post.addChild(child.view, mychild.get('tags'));
+          }
         }
         return post.postDOMrender();
       };
@@ -296,6 +385,7 @@
         a = b.clone();
         a.empty();
         b.before(a);
+        postCollection.each(this.makeView);
         postCollection.each(this.addOne);
         return b.remove();
       };
@@ -308,9 +398,25 @@
         return postCollection.each(this.deleteOne);
       };
 
+      StreamView.prototype.createModalReply = function(titlemessage, omnimessage, callback) {
+        var new_assignment;
+        new_assignment = $('#new-assignment').dialog({
+          title: titlemessage,
+          modal: true,
+          draggable: false,
+          resizable: false,
+          minWidth: 320
+        });
+        return new_assignment.find('#new-post').omnipost({
+          removeOnSubmit: true,
+          callback: callback,
+          message: omnimessage
+        });
+      };
+
       StreamView.prototype.setTopicCreatorVisibility = function() {
         if (this.topic_creator_showing) {
-          return $('#new-assignment').show();
+          return this.createModalReply("New Topic", "Post a reply...", this.makePost);
         } else {
           return $('#new-assignment').hide();
         }
@@ -325,11 +431,36 @@
         var profileshowing,
           _this = this;
         if (!this.streamviewRendered) {
-          $('#new-assignment').omnipost({
-            callback: this.makePost,
-            message: 'Post a topic...'
-          });
           this.setTopicCreatorVisibility();
+          this.notifications = null;
+          $.getJSON('/notifications', (function(data) {
+            var message, messages, notification, _j, _len2, _ref2;
+            _this.notifications = data;
+            messages = [];
+            _ref2 = _this.notifications;
+            for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+              notification = _ref2[_j];
+              message = '';
+              switch (notification['kind']) {
+                case 0:
+                  message = "You gained " + notification['points'] + (" point(s) for tagging <a href='#post/" + notification['item'] + "'>this post</a>");
+                  break;
+                case 1:
+                  message = "You gained " + notification['points'] + (" point(s) for your <a href='#post/" + notification['item'] + "'>post</a> being tagged");
+                  break;
+                case 2:
+                  message = "You gained " + notification['points'] + (" point(s) for your <a href='#post/" + notification['item'] + "'>post</a> getting upvoted");
+                  break;
+                case 3:
+                  message = "Your <a href='#post/" + notification['item'] + "'>post</a> has been replied to";
+              }
+              messages.push(message);
+            }
+            return $('#notifications').notify({
+              notificationCount: messages.length,
+              messages: messages
+            });
+          }));
           this.scrollingDiv = $('#story');
           $('#collapsible-profile').hide();
           profileshowing = false;
@@ -402,7 +533,19 @@
 
       Workspace.prototype.routes = {
         'new': 'new',
-        ':id': 'assign'
+        ':id': 'assign',
+        'post/:id': 'post'
+      };
+
+      Workspace.prototype.post = function(id) {
+        var p;
+        if (id != null) {
+          p = postCollection.where({
+            id: id
+          });
+          $('#assignments li').remove();
+          if (p.length !== 0) return App.addOne(p[0]);
+        }
       };
 
       Workspace.prototype.assign = function(id) {
@@ -413,7 +556,9 @@
           });
           return p.fetch({
             success: function() {
-              return postCollection.add(p);
+              var postcontent;
+              postcontent = jQuery.parseJSON(p.get('content'))['posttext'];
+              return App.createModalReply(postcontent, "Post a reply...", p.respond);
             }
           });
         }
