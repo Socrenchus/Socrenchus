@@ -12,7 +12,7 @@ Socrenchus
   - Choose a 'p1' issue that you find interesting
   - Open this issue and read about it in the description and comments
   - Find your favorite issue that references the one you have open
-  - Repeat from the second bullet point until you reach an unassigned leaf
+  - Repeat from the second bullet point until you reach an unassigned leaf in the correct milestone
   - Assign the issue you found to yourself and begin working on it
 2. Work on fixing the issue
   - Make sure you assigned the issue you are working on to yourself
