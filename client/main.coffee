@@ -244,12 +244,16 @@ $ ->
           @notifications = data          
           messages = []
           for notification in @notifications
-            message = ''
+            message = ""
+            if notification['points'] > 0
+              message = "+"
+            if notification['points'] != 0
+              message += "#{notification['points']} - "
             switch notification['kind']
-              when 0 then message = "You gained " + notification['points'] + " point(s) for tagging <a href='#post/#{notification['item']}'>this post</a>"
-              when 1 then message = "You gained " + notification['points'] + " point(s) for your <a href='#post/#{notification['item']}'>post</a> being tagged"
-              when 2 then message = "You gained " + notification['points'] + " point(s) for your <a href='#post/#{notification['item']}'>post</a> getting upvoted"
-              when 3 then message = "Your <a href='#post/#{notification['item']}'>post</a> has been replied to"
+              when 0 then message += "You tagged a <a href='#post/#{notification['item']}'>post</a>"
+              when 1 then message += "Someone agreed with your tag of this <a href='#post/#{notification['item']}'>post</a>"
+              when 2 then message += "Your <a href='#post/#{notification['item']}'>post</a> was upvoted"
+              when 3 then message += "Your <a href='#post/#{notification['item']}'>post</a> has been replied to"
             messages.push(message)
           $('#notifications').notify({notificationCount: messages.length, messages: messages})
         ))

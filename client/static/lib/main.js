@@ -442,19 +442,23 @@
             _ref2 = _this.notifications;
             for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
               notification = _ref2[_j];
-              message = '';
+              message = "";
+              if (notification['points'] > 0) message = "+";
+              if (notification['points'] !== 0) {
+                message += "" + notification['points'] + " - ";
+              }
               switch (notification['kind']) {
                 case 0:
-                  message = "You gained " + notification['points'] + (" point(s) for tagging <a href='#post/" + notification['item'] + "'>this post</a>");
+                  message += "You tagged a <a href='#post/" + notification['item'] + "'>post</a>";
                   break;
                 case 1:
-                  message = "You gained " + notification['points'] + (" point(s) for your <a href='#post/" + notification['item'] + "'>post</a> being tagged");
+                  message += "Someone agreed with your tag of this <a href='#post/" + notification['item'] + "'>post</a>";
                   break;
                 case 2:
-                  message = "You gained " + notification['points'] + (" point(s) for your <a href='#post/" + notification['item'] + "'>post</a> getting upvoted");
+                  message += "Your <a href='#post/" + notification['item'] + "'>post</a> was upvoted";
                   break;
                 case 3:
-                  message = "Your <a href='#post/" + notification['item'] + "'>post</a> has been replied to";
+                  message += "Your <a href='#post/" + notification['item'] + "'>post</a> has been replied to";
               }
               messages.push(message);
             }
