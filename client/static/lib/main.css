@@ -256,6 +256,10 @@ h2 {
   border-left: 1px dotted black;
 }
 
+#response div {
+  padding: 0em 0em;
+}
+
 #question-text, #assignment-text {
   border: none;
   width: 100%;

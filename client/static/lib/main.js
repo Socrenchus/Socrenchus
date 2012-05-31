@@ -180,7 +180,9 @@
       PostView.prototype.postDOMrender = function() {
         $(this.el).find('#content').autosize();
         addthis.toolbox('.addthis_toolbox');
-        return $(this.el).find('#response').accordion();
+        return $(this.el).find('#response').accordion({
+          autoHeight: false
+        });
       };
 
       PostView.prototype.renderInnerContents = function() {

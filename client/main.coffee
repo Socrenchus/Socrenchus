@@ -77,7 +77,7 @@ $ ->
     postDOMrender: =>
       $(@el).find('#content').autosize()
       addthis.toolbox('.addthis_toolbox')
-      $(@el).find('#response').accordion()
+      $(@el).find('#response').accordion( autoHeight: false )
 
     renderInnerContents: =>
       @renderPostContent()
