@@ -260,6 +260,10 @@ h2 {
   padding: 0em 0em;
 }
 
+#response h3 {
+  margin-left: 10px;
+}
+
 #question-text, #assignment-text {
   border: none;
   width: 100%;

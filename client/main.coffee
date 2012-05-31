@@ -77,8 +77,12 @@ $ ->
     postDOMrender: =>
       $(@el).find('#content').autosize()
       addthis.toolbox('.addthis_toolbox')
-      $(@el).find('#response').accordion( autoHeight: false )
-
+      #$(@el).find('#response').accordion( autoHeight: false )
+      $('#response > h3').unbind('click').click( ->
+        $(@).next().toggle('slow')
+        return false
+      )
+    
     renderInnerContents: =>
       @renderPostContent()
       children =  postCollection.where({parent: @id})
