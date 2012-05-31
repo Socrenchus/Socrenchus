@@ -77,6 +77,7 @@ $ ->
     postDOMrender: =>
       $(@el).find('#content').autosize()
       addthis.toolbox('.addthis_toolbox')
+      $(@el).find('#response').accordion()
 
     renderInnerContents: =>
       @renderPostContent()
@@ -128,12 +129,13 @@ $ ->
         # TODO: change child's style to 'grand piano' down to the right corner
       else
         base = $(@el).find('#response:first')
-        childtags =  child.model.get('tags')
+        childtags = child.model.get('tags')
+        if childtags.length is 0
+          childtags.push 'Incubator'
         for tag in childtags
           tagdiv = base.children("#"+tag.replace(" ", ""))
           if tagdiv.length == 0
-            newtagdiv = $("<div></div>")
-            newtagdiv.attr('id', tag.replace(" ", ""))
+            newtagdiv = $("<h3><a href='#'>#{tag}</h3></a><div id='#{tag.replace(" ", "")}'></div>")
             indexOfTag = tagsToOrderBy.indexOf(tag)
             if indexOfTag == 0
               base.prepend(newtagdiv)
@@ -143,8 +145,6 @@ $ ->
               base.append(newtagdiv)
             tagdiv = base.find("#"+tag.replace(" ", ""))
           tagdiv.prepend(child.render())
-        if childtags.length is 0
-          base.append(child.render())
    
   class StreamView extends Backbone.View
     initialize: =>

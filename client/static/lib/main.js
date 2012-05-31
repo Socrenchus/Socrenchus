@@ -179,7 +179,8 @@
 
       PostView.prototype.postDOMrender = function() {
         $(this.el).find('#content').autosize();
-        return addthis.toolbox('.addthis_toolbox');
+        addthis.toolbox('.addthis_toolbox');
+        return $(this.el).find('#response').accordion();
       };
 
       PostView.prototype.renderInnerContents = function() {
@@ -248,7 +249,7 @@
       };
 
       PostView.prototype.addChild = function(child, tagsToOrderBy) {
-        var base, childtags, indexOfTag, newtagdiv, root, tag, tagdiv, _j, _len2;
+        var base, childtags, indexOfTag, newtagdiv, root, tag, tagdiv, _j, _len2, _results;
         if (tagsToOrderBy == null) tagsToOrderBy = [];
         if ((this.model.depth() % App.maxlevel) === (App.maxlevel - 1)) {
           root = this;
@@ -260,12 +261,13 @@
         } else {
           base = $(this.el).find('#response:first');
           childtags = child.model.get('tags');
+          if (childtags.length === 0) childtags.push('Incubator');
+          _results = [];
           for (_j = 0, _len2 = childtags.length; _j < _len2; _j++) {
             tag = childtags[_j];
             tagdiv = base.children("#" + tag.replace(" ", ""));
             if (tagdiv.length === 0) {
-              newtagdiv = $("<div></div>");
-              newtagdiv.attr('id', tag.replace(" ", ""));
+              newtagdiv = $("<h3><a href='#'>" + tag + "</h3></a><div id='" + (tag.replace(" ", "")) + "'></div>");
               indexOfTag = tagsToOrderBy.indexOf(tag);
               if (indexOfTag === 0) {
                 base.prepend(newtagdiv);
@@ -276,9 +278,9 @@
               }
               tagdiv = base.find("#" + tag.replace(" ", ""));
             }
-            tagdiv.prepend(child.render());
+            _results.push(tagdiv.prepend(child.render()));
           }
-          if (childtags.length === 0) return base.append(child.render());
+          return _results;
         }
       };
 
