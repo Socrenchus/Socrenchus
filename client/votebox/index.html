@@ -1,0 +1,19 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>jQuery UI Votebox</title>
+    <script type='text/javascript' src='lib/mustache.js'></script>    
+    <link rel="stylesheet" type="text/css" href="main.css" />
+    <link rel="stylesheet" type="text/css" href="ui.votebox.css" />
+    <link rel="stylesheet" type="text/css" href="unitTests/qunit.css" />
+  </head>
+  <body>
+    <div id='votebox' title='Select your vote'></div>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>
+    <script type="text/javascript" src="jquery.ui.votebox.js"></script>
+    <script type="text/javascript">
+      $('#votebox').votebox({local:true});
+    </script>
+  </body>
+</html>
