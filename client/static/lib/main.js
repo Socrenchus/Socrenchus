@@ -463,6 +463,7 @@
                 case 3:
                   message += "Your <a href='#post/" + notification['item'] + "'>post</a> has been replied to";
               }
+              message += "\n" + notification['timestamp'];
               messages.push(message);
             }
             return $('#notifications').notify({

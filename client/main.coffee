@@ -258,6 +258,7 @@ $ ->
               when 1 then message += "Someone agreed with your tag of this <a href='#post/#{notification['item']}'>post</a>"
               when 2 then message += "Your <a href='#post/#{notification['item']}'>post</a> was upvoted"
               when 3 then message += "Your <a href='#post/#{notification['item']}'>post</a> has been replied to"
+            message += "\n#{notification['timestamp']}"
             messages.push(message)
           $('#notifications').notify({notificationCount: messages.length, messages: messages})
         ))
