@@ -49,6 +49,9 @@
             _this.state = _this._states.open;
           } else if (_this.state === _this._states.open) {
             _this.state = _this._states.none;
+            _this.options.notificationCount = 0;
+            _this.init();
+            _this.notifypanel.load();
           }
           $(_this.element).trigger('notifyClicked', _this.state);
           return event.stopPropagation();
