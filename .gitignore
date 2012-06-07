@@ -1,3 +1,4 @@
 *.pyc
 .meteor
 index.yaml
+*.js
