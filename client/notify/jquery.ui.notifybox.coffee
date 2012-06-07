@@ -38,15 +38,18 @@
       @addMessages()
       
       notifycounter.click( (event) =>
-        @notifypanel.fadeToggle("slow")
+        @notifypanel.fadeToggle("slow")        
         if @state is @_states.none
           @state = @_states.open
         else if @state is @_states.open
           @state = @_states.none
+          @options.notificationCount = 0
+          @init()
+          @notifypanel.load()
         $(@element).trigger('notifyClicked', @state)
         event.stopPropagation()
       )
-
+      
       $(document).click( =>
         @notifypanel.hide()
         @state = @_states.none
