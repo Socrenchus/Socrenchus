@@ -1,6 +1,7 @@
 *.pyc
 .meteor
 index.yaml
+*.js
 client/*/spec/images
 client/static/lib/spec
 *~
