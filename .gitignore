@@ -3,3 +3,5 @@
 index.yaml
 client/*/spec/images
 client/static/lib/spec
+*~
+*.kate-swp
