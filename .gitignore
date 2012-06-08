@@ -2,4 +2,7 @@
 .meteor
 index.yaml
 *.js
+client/*/spec/images
+client/static/lib/spec
 *~
+*.kate-swp
