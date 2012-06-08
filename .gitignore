@@ -2,3 +2,4 @@
 .meteor
 index.yaml
 *.js
+*~
