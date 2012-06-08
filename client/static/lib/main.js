@@ -463,6 +463,8 @@
                 case 3:
                   message += "Your <a href='#post/" + notification['item'] + "'>post</a> has been replied to";
               }
+              date = new Date(notification['timestamp']);
+              message += '<br>' + date.toUTCString()
               messages.push(message);
             }
             return $('#notifications').notify({
