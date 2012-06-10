@@ -1,22 +1,26 @@
 Users = new Meteor.Collection("users")
 Posts = new Meteor.Collection("posts")
-Tags = new Meteor.Collection("tags")
 
 Meteor.publish("my_user", (user_id) ->
   return Users.find( _id: user_id )
 )
 
-Meteor.publish("my_tags", ->
-  user_id = Session.get('user_id')
-  if user_id
-    return Tags.find( user_id: user_id )
-)
-
 Meteor.publish("my_posts", ->
   user_id = Session.get('user_id')
   if user_id
-    tags = Tags.find( user_id: user_id, name: ',assignment' ).fetch()
-    return Posts.find( _id: {'$in':( t.post_id for t in tags )} )
+    q = Posts.find( author_id: user_id )
+    Session.set( 'my_posts_query', q)
+    return q
+)
+
+Meteor.publish("assigned_posts", ->
+  user_id = Session.get('user_id')
+  if user_id
+    ids = []
+    for item in Session.get( 'my_posts_query' ).fetch()
+      ids.push item['parent_id'] if 'parent_id' of item
+      ids.push item['_id']
+    return Posts.find( {'$or': [ {_id: {'$in':ids}}, {parent_id: {'$in':ids}}] } )
 )
 
 Meteor.startup( ->
