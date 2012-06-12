@@ -38,7 +38,40 @@ html {
 }
 /*Session Bar*/
 #session-bar {
-  border: 2px solid orange;
-  background-color: white;
+  border: 2px solid yellow;
+  background-color: orange;
+}
+#logout-button {
+  float: right;
 }
 
+
+/*Posts*/
+#post {
+  border: 2px solid #1CFF37;
+  background-color: #BAFFC2;
+}
+#post-section {
+  border: 2px solid #FFE017;
+  background-color: #FFF6BA;
+}
+#post-body {
+  display: block;
+  border: 2px solid #FFAE00;
+  background-color: #FFF6E3;
+}
+#post-attributes {
+  display: block;
+  border: 2px solid #FF3B3B;
+  background-color: #FFD5C9;
+}
+#votebox {
+  display: inline;
+  border: 2px solid #2E58FF;
+  background-color: #C7D2FF;
+}
+#tagbox {
+  display: inline;
+  border: 2px solid #EE2EFF;
+  background-color: #FBC9FF;
+}

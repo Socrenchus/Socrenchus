@@ -83,24 +83,27 @@
 -->
 
 <template name="post">
-  <div class="post">
+  <div id="post">
     <div id='post-section'>
       <div id='post-body'>
         {{content}}
       </div>
       
-      <!--This needs work.-->
-      <div id='votebox'>
-        V
+      <div id='post-attributes'>
+	<!--This needs work.-->
+	<div id='votebox'>
+	  [Votebox]
+	</div>
+	<div id='tagbox'>
+	  [Tagbox]
+	</div>
+	<!---->
       </div>
-      <div id='tagbox'>
-        T
-      </div>
-      <!---->
       
     </div>
     <div id='reply-section'>
       <div id='your-reply'>
+      
       </div>
       <div id='other-replies'>
         <ul id='response' class='ui-helper-reset'>
