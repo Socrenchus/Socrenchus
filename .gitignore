@@ -1,0 +1,19 @@
+# Temp files created by text     #
+# editors                        #
+##################################
+*~
+*.kate-swp
+
+# Stuff from the old .gitignore  #
+# that we might not need anymore #
+##################################
+*.pyc
+client/*/spec/images
+client/static/lib/spec
+index.yaml  
+
+# Shouldn't we keep these?       #
+#                 --Philip       #
+##################################
+#  B/c of sync issues:  .meteor      
+#  B/c of coffeescript: *.js         
