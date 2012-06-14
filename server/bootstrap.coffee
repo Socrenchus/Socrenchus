@@ -35,12 +35,18 @@ Meteor.startup ->
         content: 'Hello, I am a post.'
         tags: {
           'one': {
-            users: ['user1', 'user2']
+            users: [1, 2]
             weight:  4
             }
-          'two': ['user2']
-          'red': ['user1']
-          'blue': ['user2']
+          'two': {
+            users: [2]
+            }
+          'red': {
+            [1]
+            }
+          'blue': {
+            [2]
+            }
         }
       },
       {
@@ -49,10 +55,12 @@ Meteor.startup ->
         content: 'Hi, I\'m another one.'
         tags: {
           'one': {
-            users: ['user1', 'user2']
+            users: [1, 2]
             weight: 2
             }
-          'red': ['user1']
+          'red': {
+            users: [1]
+            }
         }
       },
       {
