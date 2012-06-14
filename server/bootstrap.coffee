@@ -40,12 +40,14 @@ Meteor.startup ->
             }
           'two': {
             users: [2]
+            weight: 2
             }
           'red': {
-            [1]
+            users: [1]
             }
           'blue': {
-            [2]
+            users: [2]
+            weight: 4
             }
         }
       },
@@ -60,6 +62,7 @@ Meteor.startup ->
             }
           'red': {
             users: [1]
+            weight: 3
             }
         }
       },
@@ -100,4 +103,7 @@ Meteor.startup ->
       if 'instance_id' of post
         post.instance_id = instance_ids[post.instance_id]
       post_ids.push Posts.insert(post)
-  
+    for post in posts
+      for tag in post.tags
+       for user in tag.users
+        user = user_ids[user]
