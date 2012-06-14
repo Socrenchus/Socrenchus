@@ -15,62 +15,31 @@
     <div id='page'>
       <div id='page-header'></div>
       <div id='page-body'>
+      <!--Why is this > here?-->
         {{> posts}}
       </div>
       <div id='page-footer'></div>
     </div>
   </div>
 </body>
-<!-- Old body
-<body>
-  <div id='main'>
-    <div id='table-top'>     
-      <a id='logout-link' href="">logout</a>
-      <img onclick='location.href = "/" 'style="cursor:pointer" id='logo' src='/images/logo.png'>
-    </div>
-    <div id='header'>
-    </div>
-    {{> posts}}
-  </div>
-</body>
--->
 
-<!--  -->
 <template name="posts">
   <div id='stream'>
-  
+    <!--http://handlebarsjs.com/#conditionals-->
     {{#if new}}
     <div id='new-assignment'></div>
     {{/if}}
     <ul id='assignments' class='sortable ui-helper-reset'>
+    <!--http://handlebarsjs.com/#iteration-->
       {{#each posts}}
-        {{> post}}
+        <li>
+          {{> post}}
+        </li>
       {{/each}}
       </ul>
     </div>
-    
   </div>
 </template>
-
-
-<!--Change posts to be something that gets embedded in each reply and groups them by tag.-->
-<!-- Old "posts"
-<template name="posts">
-  <div id='stream'>
-    {{#if new}}
-    <div id='new-assignment'></div>
-    {{/if}}
-    <ul id='assignments' class='sortable ui-helper-reset'>
-      {{#each posts}}
-        {{> post}}
-      {{/each}}
-      </ul>
-    </div>
-    <div id='footer'>
-    </div>
-  </div>
-</template>
--->
 
 <!-- 
     Philip's New Post Style 6/12/12
@@ -83,32 +52,34 @@
 -->
 
 <template name="post">
-  <div id="post">
-    <div id='post-section'>
-      <div id='post-body'>
+  <div class="post">
+    <div class="main">
+      <div class="body">
         {{content}}
       </div>
       
-      <div id='post-attributes'>
+      <div class="attributes">
 	<!--This needs work.-->
-	<div id='votebox'>
+	<div class="votebox">
 	  [Votebox]
 	</div>
-	<div id='tagbox'>
+	<div class="tagbox">
 	  [Tagbox]
 	</div>
 	<!---->
       </div>
       
     </div>
-    <div id='reply-section'>
-      <div id='your-reply'>
+    <div class="reply-section">
+      <div class="your-reply">
       
       </div>
-      <div id='other-replies'>
-        <ul id='response' class='ui-helper-reset'>
+      <div class="other-replies">
+        <ul>
 	  {{#each children}}
-	    {{> post}}
+	    <li>
+	      {{> post}}
+	    </li>
 	  {{/each}}
 	</ul>
       </div>      
@@ -135,7 +106,7 @@
 </template>
 <!---->
 
-<!--  Old style of posts
+<!--  Old style of post
 <template name="post">
   <div class="post">
     <div id='inner-question'>
@@ -154,3 +125,37 @@
   </div>
 </template>
  -->
+<!-- Old body
+<body>
+  <div id='main'>
+    <div id='table-top'>     
+      <a id='logout-link' href="">logout</a>
+      <img onclick='location.href = "/" 'style="cursor:pointer" id='logo' src='/images/logo.png'>
+    </div>
+    <div id='header'>
+    </div>
+    {{> posts}}
+  </div>
+</body>
+-->
+
+
+
+<!--Change posts to be something that gets embedded in each reply and groups them by tag.-->
+<!-- Old "posts"
+<template name="posts">
+  <div id='stream'>
+    {{#if new}}
+    <div id='new-assignment'></div>
+    {{/if}}
+    <ul id='assignments' class='sortable ui-helper-reset'>
+      {{#each posts}}
+        {{> post}}
+      {{/each}}
+      </ul>
+    </div>
+    <div id='footer'>
+    </div>
+  </div>
+</template>
+-->

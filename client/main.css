@@ -42,35 +42,37 @@ html {
   background-color: orange;
 }
 #logout-button {
+  /*text-align: right;*/
   float: right;
 }
 
 
 /*Posts*/
-#post {
+div.post {
   border: 2px solid #1CFF37;
   background-color: #BAFFC2;
+  margin: .5em;
 }
-#post-section {
+div.post > div.main {
   border: 2px solid #FFE017;
   background-color: #FFF6BA;
 }
-#post-body {
+div.post > div.body {
   display: block;
   border: 2px solid #FFAE00;
   background-color: #FFF6E3;
 }
-#post-attributes {
+div.post > div.attributes {
   display: block;
   border: 2px solid #FF3B3B;
   background-color: #FFD5C9;
 }
-#votebox {
+div.attributes > div.votebox {
   display: inline;
   border: 2px solid #2E58FF;
   background-color: #C7D2FF;
 }
-#tagbox {
+div.attributes > div.tagbox {
   display: inline;
   border: 2px solid #EE2EFF;
   background-color: #FBC9FF;
