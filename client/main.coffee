@@ -55,6 +55,7 @@ _.extend( Template.stream,
 
 _.extend( Template.post,
   content: -> @content
+<<<<<<< HEAD
   groups: -> 
     children = Posts.find( parent_id: @_id )
     numChildren = children.count()
@@ -69,6 +70,10 @@ _.extend( Template.post,
 _.extend( Template.group,
   name: -> @name
   posts -> @posts
+=======
+  children: -> Posts.find( parent_id: @_id )
+  identifier: -> @_id
+>>>>>>> d58bcf3f9e67bcdf966c6d333553525849daa3c4
 )
 
 # Backbone router
