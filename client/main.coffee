@@ -22,6 +22,7 @@ _.extend( Template.posts,
 _.extend( Template.post,
   content: -> @content
   children: -> Posts.find( parent_id: @_id )
+  identifier: -> @_id
 )
 
 # Backbone router
