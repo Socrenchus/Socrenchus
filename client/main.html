@@ -10,11 +10,11 @@
     </div>
     <div id='header'>
     </div>
-    {{> posts}}
+    {{> stream}}
   </div>
 </body>
 
-<template name="posts">
+<template name="stream">
   <div id='stream'>
     {{#if new}}
     <div id='new-assignment'></div>
@@ -40,11 +40,21 @@
       <div id='omnipost' title='reply to this post...'></div>
       <div id='progress-bar'></div>
       <ul id='response' class='ui-helper-reset'>
-        {{#each children}}
-          {{> post}}
+        {{#each groups}}
+          {{> group}}
         {{/each}}
       </ul>
     </div>
   </div>
 </template>
 
+<template name="group">
+  <div class="group">
+    <textarea disabled="disabled" readonly="readonly" id='content'>{{name}}</textarea>
+    <ul id='tag-specific-replies'>
+      {{#each posts}}
+        {{> post}}
+      {{/each}}
+    </ul>
+  </div>
+</template>
