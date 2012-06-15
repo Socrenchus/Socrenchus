@@ -80,7 +80,7 @@ Meteor.startup ->
         content: 'I\'m a child.'
         parent_id: 0
         tags:{}
-      }
+      },
       {
         instance_id: 0
         author_id: 0
@@ -107,17 +107,8 @@ Meteor.startup ->
       if 'instance_id' of post
         post.instance_id = instance_ids[post.instance_id]
       if 'tags' of post
-        for tag in post.tags
-          tagger_ids = []
-          for user in post.tag.users
-            tagger_ids.push user_ids[user]
-          post.tag.users = tagger_ids
-      Posts.insert(post)
+         for tag, tag_dict of post.tags
+           for user, i in tag_dict.users
+             post.tags[tag].users[i] = user_ids[user]
+      post_ids.push Posts.insert(post)
       
-#         for tag in [0..post.tags.length-1]
-#           tag_user_ids = []
-#           for user in [0..tag.users.length-1]
-#             tag_user_ids.push post[tag][user]
-#             #tag_user_ids.push user_ids[post[tag][user]]
-#           post[tag].users = tag_user_ids
-#       Posts.insert(post)
