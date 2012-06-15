@@ -102,8 +102,10 @@ Meteor.startup ->
         post.parent_id = post_ids[post.parent_id]
       if 'instance_id' of post
         post.instance_id = instance_ids[post.instance_id]
+      if 'tags' of post
+        for tag in [1..post.tags.length]
+          tag_user_ids = []
+          for user in [1..tag.users.length]
+            tag_user_ids.push user_ids[post[tag][user]]
+          post[tag].users = tag_user_ids
       post_ids.push Posts.insert(post)
-    for post in posts
-      for tag in post.tags
-       for user in tag.users
-        user = user_ids[user]
