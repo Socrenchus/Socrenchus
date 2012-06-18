@@ -19,6 +19,7 @@ _.extend( Template.posts,
   new: true
 )
 
+#Philip's Post Stuff
 _.extend( Template.post,
   content: -> @content
   children: -> Posts.find( parent_id: @_id )
