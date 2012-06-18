@@ -41,10 +41,18 @@ makeGroups = (posts) ->
     }`
     if count == 0
       groups[0].posts.push(post)
-      groups[0].name = "Incubator-only"
+      groups[0].name = "Incubator"
   return groups
 
 #Template extensions
+_.extend( Template.body,
+  events: {
+    'click': (event) ->
+      if !(event.isPropagationStopped()) && Session.equals("state", 'open')
+        Session.set("state", 'closed')
+  }
+)
+
 _.extend( Template.stream,
   posts: ->
     user_id = Session.get('user_id')
@@ -55,25 +63,43 @@ _.extend( Template.stream,
 
 _.extend( Template.post,
   content: -> @content
-<<<<<<< HEAD
   groups: -> 
     children = Posts.find( parent_id: @_id )
     numChildren = children.count()
     if numChildren == 0
       return []
     else if numChildren < min_posts
-      return [{name: "inc.", posts: children}]
+      return [{name: "Replies", posts: children}]
     else
       return makeGroups(children)
+  identifier: -> @_id
 )
 
 _.extend( Template.group,
   name: -> @name
-  posts -> @posts
-=======
-  children: -> Posts.find( parent_id: @_id )
-  identifier: -> @_id
->>>>>>> d58bcf3f9e67bcdf966c6d333553525849daa3c4
+  posts: -> @posts
+)
+  
+getNtfs = ->
+  return [{message: 'hi'},{message: 'there'}]
+
+_.extend( Template.notifications,
+  count: -> getNtfs().length
+  ntfs: getNtfs
+  show: -> Session.equals("state",'open')
+  events: {
+    'click #notification-counter': (event) ->
+      if Session.equals("state", 'open')
+        Session.set("state", 'closed')
+      else
+        Session.set("state", 'open')
+    'click': (event) ->
+      event.stopPropagation()
+  }
+)
+
+_.extend( Template.notification,
+  message: -> @message
 )
 
 # Backbone router
