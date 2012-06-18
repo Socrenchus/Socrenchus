@@ -4,7 +4,7 @@ Instances = new Meteor.Collection("instances")
 
 
 Meteor.publish("my_user", ->
-  return Users.find( {} )#_id: user_id )
+  return Users.find( _id: user_id )
 )
 
 Meteor.publish("my_posts", ->
