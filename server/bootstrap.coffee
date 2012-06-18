@@ -71,17 +71,20 @@ Meteor.startup ->
         author_id: 2
         content: 'Me too!!'
         parent_id: 0
+        tags: {}
       },
       {
         instance_id: 0
         author_id: 1
         content: 'I\'m a child.'
         parent_id: 0
+        tags: {}
       }
       {
         instance_id: 0
         author_id: 0
         content: 'whattsup'
+        tags: {}
       }
     ]
     timestamp = (new Date()).getTime()
