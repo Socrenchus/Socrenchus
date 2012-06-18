@@ -11,16 +11,11 @@ Meteor.subscribe( "assigned_posts" )
 Meteor.autosubscribe ->
   Meteor.subscribe( "my_user", Session.get( 'user_id' ) )
 
-#Grouping variables
+#Template variables/functions
 min_posts = 0
 
 graduated = (tag) ->
   return true
-
-###
-    SANDBOX STUFF GOES HERE
-###
-
 
 makeGroups = (posts) ->
   groups = [{'name': "Incubator", 'posts': []}]
@@ -43,6 +38,9 @@ makeGroups = (posts) ->
       groups[0].posts.push(post)
       groups[0].name = "Incubator"
   return groups
+  
+getNtfs = ->
+  return [{message: 'hi'},{message: 'there'}]
 
 #Template extensions
 _.extend( Template.body,
@@ -69,19 +67,15 @@ _.extend( Template.post,
     if numChildren == 0
       return []
     else if numChildren < min_posts
-      return [{name: "Replies", posts: children}]
+      return [{name: "inc.", posts: children}]
     else
       return makeGroups(children)
-  identifier: -> @_id
 )
 
 _.extend( Template.group,
   name: -> @name
   posts: -> @posts
 )
-  
-getNtfs = ->
-  return [{message: 'hi'},{message: 'there'}]
 
 _.extend( Template.notifications,
   count: -> getNtfs().length
@@ -119,3 +113,4 @@ class Router extends Backbone.Router
 Router = new Router()
 Meteor.startup ->
   Backbone.history.start( pushState: true )
+

@@ -2,8 +2,11 @@
   <title>Socrenchus</title>
 </head>
 
-<!-- Phil's New Body -->
 <body>
+  {{> body}}
+</body>
+
+<template name="body">
   <div id='main'>
     <div id='instance-bar'>
       <img id='instance-logo' src='/images/logo.png' onclick='location.href="/"' style="cursor:pointer"><!--Inline style: this should go in css.-->
@@ -15,151 +18,15 @@
     <div id='page'>
       <div id='page-header'></div>
       <div id='page-body'>
-      <!--Why is this > here?-->
-        {{> posts}}
+          {{> notifications}}
+        {{> stream}}
       </div>
       <div id='page-footer'></div>
     </div>
-<<<<<<< HEAD
-    {{> stream}}
-=======
->>>>>>> d58bcf3f9e67bcdf966c6d333553525849daa3c4
   </div>
-</body>
+</template>
 
 <template name="stream">
-  <div id='stream'>
-    <!--http://handlebarsjs.com/#conditionals-->
-    {{#if new}}
-    <div id='new-assignment'></div>
-    {{/if}}
-    <ul id='assignments' class='sortable ui-helper-reset'>
-    <!--http://handlebarsjs.com/#iteration-->
-      {{#each posts}}
-        <li>
-          {{> post}}
-        </li>
-      {{/each}}
-      </ul>
-    </div>
-  </div>
-</template>
-
-<!-- 
-    Philip's New Post Style 6/12/12
-
-    Design goals: 
-      Clarity of structure
-        -Recursive properties of posts evident in the visible structure.        
-      Readability of elements
-      Helpfulness to posters
--->
-
-<template name="post">
-  <div id="post-{{identifier}}" class="post">
-    <div class="main">
-      <div class="body">
-        {{content}}
-      </div>
-      
-      <div class="attributes">
-	<!--This needs work.-->
-	<div class="votebox">
-	  [Votebox]
-	</div>
-	<div class="tagbox">
-	  [Tagbox]
-	</div>
-	<!---->
-      </div>
-      
-    </div>
-    <div class="reply-section">
-      <div class="your-reply">
-      
-      </div>
-      <div class="other-replies">
-        <ul>
-	  {{#each children}}
-	    <li>
-	      {{> post}}
-	    </li>
-	  {{/each}}
-	</ul>
-      </div>      
-    </div>
-  </div>
-</template>
-  
-
-  <!--
-    <div id='inner-question'>
-      <div id='votebox'></div>
-      <textarea disabled="disabled" readonly="readonly" id='content'>{{content}}</textarea>
-      <div id='taglist'></div>
-      <div id='tagbox'></div>
-      <div id='omnipost' title='reply to this post...'></div>
-      <div id='progress-bar'></div>
-      <ul id='response' class='ui-helper-reset'>
-        {{#each children}}
-          {{> post}}
-        {{/each}}
-      </ul>
-    </div>
-  </div>
-</template>
-<!---->
-
-<!--  Old style of post
-<template name="post">
-  <div class="post">
-    <div id='inner-question'>
-      <div id='votebox'></div>
-      <textarea disabled="disabled" readonly="readonly" id='content'>{{content}}</textarea>
-      <div id='taglist'></div>
-      <div id='tagbox'></div>
-      <div id='omnipost' title='reply to this post...'></div>
-      <div id='progress-bar'></div>
-      <ul id='response' class='ui-helper-reset'>
-        {{#each groups}}
-          {{> group}}
-        {{/each}}
-      </ul>
-    </div>
-  </div>
-</template>
- -->
-<!-- Old body
-<body>
-  <div id='main'>
-    <div id='table-top'>     
-      <a id='logout-link' href="">logout</a>
-      <img onclick='location.href = "/" 'style="cursor:pointer" id='logo' src='/images/logo.png'>
-    </div>
-    <div id='header'>
-    </div>
-    {{> posts}}
-  </div>
-</body>
--->
-
-
-
-<<<<<<< HEAD
-<template name="group">
-  <div class="group">
-    <textarea disabled="disabled" readonly="readonly" id='content'>{{name}}</textarea>
-    <ul id='tag-specific-replies'>
-      {{#each posts}}
-        {{> post}}
-      {{/each}}
-    </ul>
-  </div>
-</template>
-=======
-<!--Change posts to be something that gets embedded in each reply and groups them by tag.-->
-<!-- Old "posts"
-<template name="posts">
   <div id='stream'>
     {{#if new}}
     <div id='new-assignment'></div>
@@ -174,5 +41,50 @@
     </div>
   </div>
 </template>
--->
->>>>>>> d58bcf3f9e67bcdf966c6d333553525849daa3c4
+
+<template name="post">
+  <div class="post">
+    <div id='inner-question'>
+      <div id='votebox'></div>
+      <p>{{content}}</p>
+      <div id='taglist'></div>
+      <div id='tagbox'></div>
+      <div id='omnipost' title='reply to this post...'></div>
+      <div id='progress-bar'></div>
+      <ul id='response' class='ui-helper-reset'>
+        {{#each groups}}
+          {{> group}}
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+</template>
+
+<template name="group">
+  <div class="group">
+    <h1>{{name}}</h1>
+    <ul id='tag-specific-replies'>
+      {{#each posts}}
+        {{> post}}
+      {{/each}}
+    </ul>
+  </div>
+</template>
+
+<template name="notifications">
+  <h3 id='notification-counter'>{{count}}</h3>
+  {{#if show}}
+    <div id='notification-box'>
+      {{#each ntfs}}
+        {{> notification}}
+      {{/each}}
+    </div>
+  {{/if}}
+</template>
+
+<template name="notification">
+  <div>
+    <div class='notify-message'>{{message}}</div>
+  </div>
+</template>
+
