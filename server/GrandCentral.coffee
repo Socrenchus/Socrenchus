@@ -14,7 +14,7 @@ class GrandCentral
       posts: {
         insert: (args...) =>
           args[0].author_id = Session.get 'user_id'
-        update: (args...) -> 
+        update: (args...) => 
         remove: (args...) =>
       }
       instances: {
