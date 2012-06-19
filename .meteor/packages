@@ -7,3 +7,5 @@ underscore
 backbone
 coffeescript
 jquery
+stylus
+showdown

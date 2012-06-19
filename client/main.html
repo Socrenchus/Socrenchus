@@ -2,49 +2,94 @@
   <title>Socrenchus</title>
 </head>
 
+<!-- Phil's New Body -->
 <body>
   <div id='main'>
-    <div id='table-top'>     
-      <a id='logout-link' href="">logout</a>
-      <img onclick='location.href = "/" 'style="cursor:pointer" id='logo' src='/images/logo.png'>
+    <div id='instance-bar'>
+      <img id='instance-logo' src='/images/logo.png' onclick='location.href="/"' style="cursor:pointer">
+      <!--Inline style: this should go in css.-->
     </div>
-    <div id='header'>
+    {{> sessionBar}}
+    <div id='page'>
+      <div id='page-header'></div>
+      <div id='page-body'>
+        {{> posts}}
+      </div>
+      <div id='page-footer'></div>
     </div>
-    {{> posts}}
   </div>
 </body>
 
+<template name="sessionBar">
+  <div id='session-bar'>
+    <span id='login-status'>You are logged in as <span class="sessionBarUserName">{{username}}</span>. </span>
+      <span id='logout-button'>
+        <a id='logout-link' href="">Logout</a>
+      </span>
+    </div>
+</template>
+
 <template name="posts">
   <div id='stream'>
+    <!--http://handlebarsjs.com/#conditionals-->
     {{#if new}}
-    <div id='new-assignment'></div>
+      <div id='new-assignment'>
+      </div>
     {{/if}}
     <ul id='assignments' class='sortable ui-helper-reset'>
+      <!--http://handlebarsjs.com/#iteration-->
       {{#each posts}}
-        {{> post}}
+        <li>
+          {{> post}}
+        </li>
       {{/each}}
-      </ul>
-    </div>
-    <div id='footer'>
-    </div>
+    </ul>
   </div>
 </template>
+  
+  <!-- 
+  Philip's New Post Style 6/12/12
+  
+  Design goals: 
+  Clarity of structure
+  -Recursive properties of posts evident in the visible structure.        
+  Readability of elements
+  Helpfulness to posters
+    -->
 
 <template name="post">
-  <div class="post">
-    <div id='inner-question'>
-      <div id='votebox'></div>
-      <textarea disabled="disabled" readonly="readonly" id='content'>{{content}}</textarea>
-      <div id='taglist'></div>
-      <div id='tagbox'></div>
-      <div id='omnipost' title='reply to this post...'></div>
-      <div id='progress-bar'></div>
-      <ul id='response' class='ui-helper-reset'>
-        {{#each children}}
-          {{> post}}
-        {{/each}}
-      </ul>
+  <div id="post-{{identifier}}" class="post">
+    
+    <div class="main">
+      <div class="body">
+        {{{content}}}
+      </div>
+      <div class="attributes">
+        <div class="votebox">
+          [Votebox]
+        </div>
+        <div class="tagbox">
+          [Tagbox]
+        </div>
+      </div>
     </div>
+    
+    <div class="reply-section">
+      <div class="your-reply" id="reply-{{identifier}}">
+        <textarea name="replyText" id="replyText-{{identifier}}" cols="70" rows="7"></textarea>
+        <button name="replySubmit" id="replySubmit-{{identifier}}" type="button">Post Reply!</button>
+        <!--<button name="replyCancel" id="replyCancel-{{identifier}}" type="button">^</button>--><!--Hidden from Bryan-->
+      </div>
+      <div class="other-replies">
+        <ul>
+          {{#each children}}
+            <li>
+              {{> post}}
+            </li>
+          {{/each}}
+        </ul>
+      </div>      
+    </div>
+  
   </div>
 </template>
-
