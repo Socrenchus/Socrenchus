@@ -2,7 +2,6 @@ Users = new Meteor.Collection("users")
 Posts = new Meteor.Collection("posts")
 Instances = new Meteor.Collection("instances")
 
-
 Meteor.publish("my_user", (user_id) ->
   return Users.find( _id: user_id )
 )

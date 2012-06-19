@@ -3,13 +3,14 @@ Users = new Meteor.Collection("users")
 Posts = new Meteor.Collection("posts")
 
 # Session Variables
+###
 Meteor.call('gimmeUserID', 
   (_error, _result) ->
     Session.set('user_id', _result)
     console.log(_result)
     console.log(_error)
-)
-#Session.set('user_id', 'some_user_id')
+)###
+Session.set('user_id', 'some_user_id')
 
 Meteor.subscribe( "my_posts")
 Meteor.subscribe( "assigned_posts" )
