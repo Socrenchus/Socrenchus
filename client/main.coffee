@@ -14,33 +14,39 @@ Meteor.autosubscribe ->
 #Template variables/functions
 min_posts = 0
 
-graduated = (tag) ->
-  return true
+graduated = (tag, post) ->
+  return post.tags[tag].users.length >= 2
 
 makeGroups = (posts) ->
-  groups = [{'name': "Incubator", 'posts': []}]
+  groups = {'Incubator': {'posts': []}}
   for post in posts.fetch()
     count = 0
-    `for(tag in post.tags){
-      if (graduated(tag)) {
-        var tagGroup = [];
-        if (tagGroup.length == 0) {
-          groups.push({name: tag, posts: [post]});
-        } else {
-          groups[0].posts.push(post);
-        }
-      } else {
-        groups[0].posts.push(post);
-      }
-      count++;
-    }`
+    placed = 0
+    for tag,info of post.tags
+      if graduated(tag, post)
+        if groups[tag]?
+          groups[tag].posts.push(post)
+        else
+          groups[tag] = {'posts': [post]}
+        placed++
+      else if placed == 0
+        groups['Incubator'].posts.push(post)
+        placed++
+      count++
     if count == 0
-      groups[0].posts.push(post)
-      groups[0].name = "Incubator"
-  return groups
+      groups['Incubator'].posts.push(post)
+  groupList = []
+  for name,info of groups
+    if info.posts.length != 0
+      groupList.push({'name':name, 'posts':info.posts})
+  return groupList
   
-getNtfs = ->
-  return [{message: 'hi'},{message: 'there'}]
+tempNotfs = [{message: 'hi'},{message: 'there'},
+      {message: 'friend'},{message: 'how'},
+      {message: 'are'},{message: 'you'},
+      {message: 'today'}]
+      
+Session.set("notfs", tempNotfs)
 
 #Template extensions
 _.extend( Template.body,
@@ -67,7 +73,7 @@ _.extend( Template.post,
     if numChildren == 0
       return []
     else if numChildren < min_posts
-      return [{name: "inc.", posts: children}]
+      return [{name: "All Replies", posts: children}]
     else
       return makeGroups(children)
 )
@@ -78,9 +84,10 @@ _.extend( Template.group,
 )
 
 _.extend( Template.notifications,
-  count: -> getNtfs().length
-  ntfs: getNtfs
+  count: -> Session.get("notfs").length
+  ntfs: -> return Session.get("notfs")
   show: -> Session.equals("state",'open')
+  message: -> @message
   events: {
     'click #notification-counter': (event) ->
       if Session.equals("state", 'open')
@@ -90,10 +97,6 @@ _.extend( Template.notifications,
     'click': (event) ->
       event.stopPropagation()
   }
-)
-
-_.extend( Template.notification,
-  message: -> @message
 )
 
 # Backbone router

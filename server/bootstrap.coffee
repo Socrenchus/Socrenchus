@@ -72,14 +72,28 @@ Meteor.startup ->
         author_id: 2
         content: 'Me too!!'
         parent_id: 0
-        tags:{}
+        tags:{
+          'one': {
+            users:[1,2]
+            weight: 1
+          }
+        }
       },
       {
         instance_id: 0
         author_id: 1
         content: 'I\'m a child.'
         parent_id: 0
-        tags:{}
+        tags:{
+          'one': {
+            users: [1,2]
+            weight: 4
+          }
+          'two': {
+            users: [1,2]
+            weight:2
+          }
+        }
       },
       {
         instance_id: 0

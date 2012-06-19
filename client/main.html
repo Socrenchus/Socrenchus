@@ -72,19 +72,13 @@
 </template>
 
 <template name="notifications">
-  <h3 id='notification-counter'>{{count}}</h3>
+  <h3 id='notification-counter' class="unselectable">{{count}}</h3>
   {{#if show}}
     <div id='notification-box'>
       {{#each ntfs}}
-        {{> notification}}
+        <div class='notify-message'>{{message}}</div>
       {{/each}}
     </div>
   {{/if}}
-</template>
-
-<template name="notification">
-  <div>
-    <div class='notify-message'>{{message}}</div>
-  </div>
 </template>
 
