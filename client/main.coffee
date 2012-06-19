@@ -3,13 +3,6 @@ Users = new Meteor.Collection("users")
 Posts = new Meteor.Collection("posts")
 
 # Session Variables
-###
-Meteor.call('gimmeUserID', 
-  (_error, _result) ->
-    Session.set('user_id', _result)
-    console.log(_result)
-    console.log(_error)
-)###
 Session.set('user_id', 'some_user_id')
 
 Meteor.subscribe( "my_posts")
@@ -34,42 +27,18 @@ _.extend( Template.posts,
 #Philip's Post Stuff
 _.extend( Template.post,
   content: -> 
-    ###      
-    //
-    // Showdown usage:
-    //
-    //   var text = "Markdown *rocks*.";
-    //
-    //   var converter = new Showdown.converter();
-    //   var html = converter.makeHtml(text);
-    //
-    //   alert(html);
-    //
-    // Note: move the sample code to the bottom of this
-    // file before uncommenting it.
-    //
-    ###
     showdownConverter = new Showdown.converter()
     postContentHtml = showdownConverter.makeHtml(@content)
     return postContentHtml
-    ###
-    showdownConverter = new Showdown.converter()
-    replyContent = converter.makeHtml(@content)
-    return replyContent
-    ###
     
   children: -> Posts.find( parent_id: @_id )
   identifier: -> @_id
-  #unfinished, trying to do an event.  
   events: {
     "click button[name='replySubmit']:first": ->
-      console.log("ID of Post you're replying to: #{ @_id }")
       replyTextBox = document.getElementById("replyText-#{ @_id }")#Bryan thinks there's a way to do this without traversing the DOM.
       replyContent = replyTextBox.value
-      #debug
-      console.log(replyContent)
-
-      #dbase management
+      console.log("ID of Post you're replying to: #{ @_id }")
+      console.log("Reply content: #{replyContent}")
       console.log("ID of new post: "
         Posts.insert(
           {
@@ -81,8 +50,7 @@ _.extend( Template.post,
           }
         )
       )
-      #clear the textbox for giggles -- should probably do this only if the post succeeds.  
-      replyTextBox.value = ''
+      replyTextBox.value = '' #clear the textbox for giggles -- should probably do this only if the post succeeds.  
   }
 )
 
