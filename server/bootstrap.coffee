@@ -111,4 +111,3 @@ Meteor.startup ->
            for user, i in tag_dict.users
              post.tags[tag].users[i] = user_ids[user]
       post_ids.push Posts.insert(post)
-      
