@@ -19,10 +19,16 @@ Meteor.publish("assigned_posts", ->
   user_id = Session.get('user_id')
   if user_id
     ids = []
-    for item in Session.get( 'my_posts_query' ).fetch()
-      ids.push item['parent_id'] if 'parent_id' of item
-      ids.push item['_id']
-    return Posts.find( {'$or': [ {_id: {'$in':ids}}, {parent_id: {'$in':ids}}] } )
+    for item in Session.get( 'my_posts_query' ).fetch() #For each of my posts
+      ids.push item['parent_id'] if 'parent_id' of item #Add the parent's id
+      ids.push item['_id']                              #Add my post's id
+    return Posts.find( {'$or':                          #Return all posts who
+        [ 
+          {_id: {'$in':ids}},                           #are mine, or my parent's
+          {parent_id: {'$in':ids}}                      #or my siblings, or my children.
+        ] 
+      } 
+    )
 )
 
 Meteor.startup( ->
