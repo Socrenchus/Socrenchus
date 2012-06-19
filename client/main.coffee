@@ -33,7 +33,31 @@ _.extend( Template.posts,
 
 #Philip's Post Stuff
 _.extend( Template.post,
-  content: -> @content
+  content: -> 
+    ###      
+    //
+    // Showdown usage:
+    //
+    //   var text = "Markdown *rocks*.";
+    //
+    //   var converter = new Showdown.converter();
+    //   var html = converter.makeHtml(text);
+    //
+    //   alert(html);
+    //
+    // Note: move the sample code to the bottom of this
+    // file before uncommenting it.
+    //
+    ###
+    showdownConverter = new Showdown.converter()
+    postContentHtml = showdownConverter.makeHtml(@content)
+    return postContentHtml
+    ###
+    showdownConverter = new Showdown.converter()
+    replyContent = converter.makeHtml(@content)
+    return replyContent
+    ###
+    
   children: -> Posts.find( parent_id: @_id )
   identifier: -> @_id
   #unfinished, trying to do an event.  
@@ -44,6 +68,7 @@ _.extend( Template.post,
       replyContent = replyTextBox.value
       #debug
       console.log(replyContent)
+
       #dbase management
       console.log("ID of new post: "
         Posts.insert(
