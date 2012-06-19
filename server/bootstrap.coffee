@@ -44,6 +44,7 @@ Meteor.startup ->
             }
           'red': {
             users: [1]
+            weight: 1
             }
           'blue': {
             users: [2]
@@ -71,20 +72,20 @@ Meteor.startup ->
         author_id: 2
         content: 'Me too!!'
         parent_id: 0
-        tags: {}
+        tags:{}
       },
       {
         instance_id: 0
         author_id: 1
         content: 'I\'m a child.'
         parent_id: 0
-        tags: {}
-      }
+        tags:{}
+      },
       {
         instance_id: 0
         author_id: 0
         content: 'whattsup'
-        tags: {}
+        tags:{}
       }
     ]
     timestamp = (new Date()).getTime()
@@ -105,8 +106,8 @@ Meteor.startup ->
         post.parent_id = post_ids[post.parent_id]
       if 'instance_id' of post
         post.instance_id = instance_ids[post.instance_id]
+      if 'tags' of post
+         for tag, tag_dict of post.tags
+           for user, i in tag_dict.users
+             post.tags[tag].users[i] = user_ids[user]
       post_ids.push Posts.insert(post)
-    for post in posts
-      for tag in post.tags
-       for user in tag.users
-        user = user_ids[user]

@@ -1,6 +1,6 @@
 Users = new Meteor.Collection("users")
 Posts = new Meteor.Collection("posts")
-Instances = new Meteor.Collection("instances");
+Instances = new Meteor.Collection("instances")
 
 
 Meteor.publish("my_user", (user_id) ->
