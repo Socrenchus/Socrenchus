@@ -40,7 +40,8 @@ _.extend( Template.post,
   events: {
     "click button[name='replySubmit']:first": ->
       console.log("ID of Post you're replying to: #{ @_id }")
-      replyContent = document.getElementById("replyText-#{ @_id }").value #Bryan thinks there's a way to do this without traversing the DOM.
+      replyTextBox = document.getElementById("replyText-#{ @_id }")#Bryan thinks there's a way to do this without traversing the DOM.
+      replyContent = replyTextBox.value
       #debug
       console.log(replyContent)
       #dbase management
@@ -55,6 +56,8 @@ _.extend( Template.post,
           }
         )
       )
+      #clear the textbox for giggles -- should probably do this only if the post succeeds.  
+      replyTextBox.value = ''
   }
 )
 
