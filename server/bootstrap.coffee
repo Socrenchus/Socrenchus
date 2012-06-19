@@ -97,6 +97,20 @@ Meteor.startup ->
       },
       {
         instance_id: 0
+        author_id: 1
+        content: 'I\'m a child\'s child.'
+        parent_id: 4
+        tags:{}
+      },
+      {
+        instance_id: 0
+        author_id: 1
+        content: 'I\'m a child\'s child\'s child.'
+        parent_id: 5
+        tags:{}
+      },
+      {
+        instance_id: 0
         author_id: 0
         content: 'whattsup'
         tags:{}
