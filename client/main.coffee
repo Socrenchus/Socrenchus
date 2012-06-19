@@ -1,26 +1,19 @@
 # Collections
-Users = new Meteor.Collection("users")
 Posts = new Meteor.Collection("posts")
+Users = new Meteor.Collection("users")
 
-# Session Variables
-Session.set('user_id', 'some_user_id')
-
+# Subscriptions
 Meteor.subscribe( "my_posts")
 Meteor.subscribe( "assigned_posts" )
-# Subscriptions
-Meteor.autosubscribe ->
-  Meteor.subscribe( "my_user", Session.get( 'user_id' ) )
 
 _.extend( Template.sessionBar,
-  user_id: ->
-    return Session.get('user_id')
+  username: ->
+    return "USERNAME"
 )
 
 _.extend( Template.posts,
   posts: ->
-    user_id = Session.get('user_id')
-    if user_id
-      return Posts.find( 'parent_id': undefined )
+    return Posts.find( 'parent_id': undefined )
   new: true
 )
 
@@ -30,7 +23,6 @@ _.extend( Template.post,
     showdownConverter = new Showdown.converter()
     postContentHtml = showdownConverter.makeHtml(@content)
     return postContentHtml
-    
   children: -> Posts.find( parent_id: @_id )
   identifier: -> @_id
   events: {
@@ -45,8 +37,6 @@ _.extend( Template.post,
             content: replyContent,
             parent_id: @_id
             instance_id: @instance_id
-            author_id: Session.get('user_id')
-            
           }
         )
       )
@@ -64,7 +54,6 @@ class Router extends Backbone.Router
     t = 
       name: ',assignment'
       post_id: post_id
-      user_id: Session.get( 'user_id' )
     unless Tags.findOne( t )
       Tags.insert( t )
 
