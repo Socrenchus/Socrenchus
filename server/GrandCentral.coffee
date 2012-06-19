@@ -1,33 +1,29 @@
+_debug = true
+
 class GrandCentral
   constructor: (@collection, @method) ->
+    @default = Meteor.default_server.method_handlers["/#{@collection}/#{@method}"]
     Meteor.default_server.method_handlers["/#{@collection}/#{@method}"] = @dispatch
   dispatch: (args...) =>
     {
       users: {
         insert: (args...) => 
-          Users.insert(args...)
         update: (args...) => 
-          Users.update(args...)
         remove: (args...) =>
-          Users.remove(args...)
       }
       posts: {
-        insert: (args...) => 
-          Posts.insert(args...)
+        insert: (args...) =>
+          args[0].author_id = Session.get 'user_id'
         update: (args...) -> 
-          Posts.update(args...)
         remove: (args...) =>
-          Posts.remove(args...)
       }
       instances: {
         insert: (args...) => 
-          Instances.insert(args...)
         update: (args...) => 
-          Instances.update(args...)
         remove: (args...) =>
-          Instances.remove(args...)
       }
     }[@collection][@method](args...)
+    @default.apply(@, args)
     console.log "GrandCentral is operational!!"
 
 
