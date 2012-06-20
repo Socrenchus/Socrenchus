@@ -7,7 +7,7 @@ Meteor.subscribe( "my_posts")
 Meteor.subscribe( "assigned_posts" )
 
 #Template variables/functions
-min_posts = 0
+min_posts = 1
 
 graduated = (tag, post) ->
   return post.tags[tag].users.length >= 2
@@ -15,20 +15,20 @@ graduated = (tag, post) ->
 makeGroups = (posts) ->
   groups = {'Incubator': {'posts': []}}
   for post in posts.fetch()
-    count = 0
-    placed = 0
+    tagCount = 0
+    placed = false
     for tag,info of post.tags
       if graduated(tag, post)
-        if groups[tag]?
-          groups[tag].posts.push(post)
+        if groups[tag]? #if there is a group for this tag
+          groups[tag].posts.push(post) #add this post to the group's posts
         else
-          groups[tag] = {'posts': [post]}
-        placed++
-      else if placed == 0
+          groups[tag] = {'posts': [post]} #add a tag group with a "posts" field containing this post
+        placed = true
+      else if not placed
         groups['Incubator'].posts.push(post)
-        placed++
-      count++
-    if count == 0
+        placed = true
+      tagCount++
+    if tagCount == 0
       groups['Incubator'].posts.push(post)
   groupList = []
   for name,info of groups
