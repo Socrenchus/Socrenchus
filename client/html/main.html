@@ -49,7 +49,7 @@
 </template>
 
 <template name="group">
-    <h1>{{name}}</h1>
+    <h1>{{group_name}}</h1>
     <ul>
       {{#each posts}}
         {{> post}}
@@ -79,7 +79,7 @@
     -->
 
 <template name="post">
-  <div id="post-{{identifier}}" class="post">
+  <div id="post-{{identifier}}-{{../group_name}}" class="post">
     
     <div class="main">
       <div class="body">
@@ -96,9 +96,9 @@
     </div>
     
     <div class="reply-section">
-      <div class="your-reply" id="reply-{{identifier}}">
-        <textarea name="replyText" id="replyText-{{identifier}}" cols="70" rows="7"></textarea>
-        <button name="replySubmit" id="replySubmit-{{identifier}}" type="button">Post Reply!</button>
+      <div class="your-reply" id="reply-{{identifier}}-{{../group_name}}">
+        <textarea name="replyText" id="replyText-{{identifier}}-{{../group_name}}" cols="70" rows="7"></textarea>
+        <button name="replySubmit" id="replySubmit-{{identifier}}-{{../group_name}}" type="button">Post Reply!</button>
         <!--<button name="replyCancel" id="replyCancel-{{identifier}}" type="button">^</button>--><!--Hidden from Bryan-->
       </div>
       <div class="other-replies">

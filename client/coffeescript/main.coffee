@@ -12,7 +12,10 @@ min_posts = 1
 #Graduated: Determines whether to group a post by a tag.  Would they make a good couple?  Have they earned each other?  
 graduated = (tag, post) -> #The post/tag pair is graduated if the post is elegible to be grouped by that tag.
   return post.tags[tag].users.length >= 2 # 2 or more users have tagged it with that tag.  
-
+  
+addGroupName = (post, name) ->
+  post['group_name'] = name
+  
 ###
 #MakeGroups: Make a list of groups containing posts, for a given set of posts.
 #    Incubator group
@@ -67,6 +70,7 @@ _.extend( Template.stream,
   posts: ->
     return Posts.find( 'parent_id': undefined )
   new: true
+  group_name: -> ""
 )
 
 _.extend( Template.post,
@@ -83,24 +87,11 @@ _.extend( Template.post,
       return [{name: "All Replies", posts: children}]
     else
       return makeGroups(children)
-  identifier: -> 
-    id = @_id
-    if @group_name?
-      id += @group_name
-    return id
-  
-  ###
-  <div class="your-reply" id="reply-cfa3e5db-97c9-4617-884b-d1e7f173a7ea">
-        <textarea name="replyText" id="replyText-cfa3e5db-97c9-4617-884b-d1e7f173a7ea" cols="70" rows="7"></textarea>
-        <button name="replySubmit" id="replySubmit-cfa3e5db-97c9-4617-884b-d1e7f173a7ea" type="button">Post Reply!</button>
-        <!--<button name="replyCancel" id="replyCancel-cfa3e5db-97c9-4617-884b-d1e7f173a7ea" type="button">^</button>--><!--Hidden from Bryan-->
-      </div>
-  ###
-  
+  identifier: -> @_id
   events: {
     "click button[name='replySubmit']": (event) ->
-      event.stopPropagation()
-      replyTextBox = document.getElementById("replyText-#{ @_id }")#Bryan thinks there's a way to do this without traversing the DOM.
+      
+      replyTextBox = document.getElementById("replyText-#{ @_id }-#{ @group_name }")#Bryan thinks there's a way to do this without traversing the DOM.
       
       replyContent = replyTextBox.value
       console.log("ID of Post you're replying to: #{ @_id }")
@@ -115,12 +106,13 @@ _.extend( Template.post,
         )
       )
       replyTextBox.value = '' #clear the textbox for giggles -- should probably do this only if the post succeeds.
+      event.stopImmediatePropagation()
   }
   
 )
 
 _.extend( Template.group,
-  name: -> @name
+  group_name: -> @name
   posts: -> @posts
 )
 
