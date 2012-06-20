@@ -49,14 +49,12 @@
 </template>
 
 <template name="group">
-  <div class="group">
     <h1>{{name}}</h1>
-    <ul id='tag-specific-replies'>
+    <ul>
       {{#each posts}}
         {{> post}}
       {{/each}}
     </ul>
-  </div>
 </template>
 
 <template name="notifications">

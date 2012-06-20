@@ -79,9 +79,20 @@ _.extend( Template.post,
       return makeGroups(children)
   identifier: -> @_id
   
+  ###
+  <div class="your-reply" id="reply-cfa3e5db-97c9-4617-884b-d1e7f173a7ea">
+        <textarea name="replyText" id="replyText-cfa3e5db-97c9-4617-884b-d1e7f173a7ea" cols="70" rows="7"></textarea>
+        <button name="replySubmit" id="replySubmit-cfa3e5db-97c9-4617-884b-d1e7f173a7ea" type="button">Post Reply!</button>
+        <!--<button name="replyCancel" id="replyCancel-cfa3e5db-97c9-4617-884b-d1e7f173a7ea" type="button">^</button>--><!--Hidden from Bryan-->
+      </div>
+  ###
+  
   events: {
-    "click button[name='replySubmit']:first": ->
+    "click button[name='replySubmit']": (event) ->
+      event.stopPropagation()
+      console.log("a")
       replyTextBox = document.getElementById("replyText-#{ @_id }")#Bryan thinks there's a way to do this without traversing the DOM.
+      
       replyContent = replyTextBox.value
       console.log("ID of Post you're replying to: #{ @_id }")
       console.log("Reply content: #{replyContent}")
