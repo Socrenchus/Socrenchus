@@ -77,7 +77,11 @@ _.extend( Template.post,
       return [{name: "All Replies", posts: children}]
     else
       return makeGroups(children)
-  identifier: -> @_id
+  identifier: -> 
+    id = @_id
+    if @group_name?
+      id += @group_name
+    return id
   
   ###
   <div class="your-reply" id="reply-cfa3e5db-97c9-4617-884b-d1e7f173a7ea">
@@ -90,7 +94,6 @@ _.extend( Template.post,
   events: {
     "click button[name='replySubmit']": (event) ->
       event.stopPropagation()
-      console.log("a")
       replyTextBox = document.getElementById("replyText-#{ @_id }")#Bryan thinks there's a way to do this without traversing the DOM.
       
       replyContent = replyTextBox.value
@@ -100,7 +103,7 @@ _.extend( Template.post,
         Posts.insert(
           {
             content: replyContent,
-            parent_id: @_id
+            parent_id: @_id,
             instance_id: @instance_id
           }
         )
