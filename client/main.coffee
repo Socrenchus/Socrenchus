@@ -7,7 +7,7 @@ Meteor.subscribe( "my_posts")
 Meteor.subscribe( "assigned_posts" )
 
 #Template variables/functions
-min_posts = 0
+min_posts = 999
 
 graduated = (tag, post) ->
   return post.tags[tag].users.length >= 2
@@ -22,19 +22,16 @@ makeGroups = (posts) ->
     placed = 0
     for tag,info of post.tags
       if graduated(tag, post)
-        addGroupName(post, tag)
         if groups[tag]?
           groups[tag].posts.push(post)
         else
           groups[tag] = {'posts': [post]}
         placed++
       else if placed == 0
-        addGroupName(post, 'Incubator')
         groups['Incubator'].posts.push(post)
         placed++
       count++
     if count == 0
-      addGroupName(post, 'Incubator')
       groups['Incubator'].posts.push(post)
   groupList = []
   for name,info of groups
@@ -65,55 +62,50 @@ _.extend( Template.body,
 
 _.extend( Template.stream,
   posts: ->
-    return Posts.find( 'parent_id': undefined )
+    return (Posts.find( 'parent_id': undefined ).map (post) -> {'post':post, 'group':""})
   new: true
 )
 
 _.extend( Template.post,
   content: -> 
     showdownConverter = new Showdown.converter()
-    postContentHtml = showdownConverter.makeHtml(@content)
+    postContentHtml = showdownConverter.makeHtml(@post.content)
     return postContentHtml
   groups: -> 
-    children = Posts.find( parent_id: @_id )
+    children = Posts.find( parent_id: @post._id )
     numChildren = children.count()
     if numChildren == 0
       return []
     else if numChildren < min_posts
-      return [{name: "All Replies", posts: children}]
+      return [{'name': "All Replies", 'posts': children.fetch()}]
     else
       return makeGroups(children)
-  identifier: -> @_id
-  groupname: -> 
-    if !@group_name?
-      @group_name = ""
-    return @group_name
+  identifier: -> @post._id
+  groupname: -> @group
   events: {
     "click button[name='replySubmit']": (event) ->
-      
-      replyTextBox = document.getElementById("replyText-#{ @_id }-#{ @group_name }")#Bryan thinks there's a way to do this without traversing the DOM.
-      
-      replyContent = replyTextBox.value
-      console.log("ID of Post you're replying to: #{ @_id }")
-      console.log("Reply content: #{replyContent}")
-      console.log("ID of new post: "
-        Posts.insert(
+      if !event.isImmediatePropagationStopped()
+        replyTextBox = document.getElementById("replyText-#{ @post._id }-#{ @group }")#Bryan thinks there's a way to do this without traversing the DOM.
+        event.stopImmediatePropagation()
+        replyContent = replyTextBox.value
+        console.log("ID of Post you're replying to: #{ @post._id }-#{ @group }")
+        console.log("Reply content: #{replyContent}")
+        replyID = Posts.insert(
           {
             content: replyContent,
-            parent_id: @_id,
-            instance_id: @instance_id
+            parent_id: @post._id,
+            instance_id: @post.instance_id
           }
         )
-      )
-      replyTextBox.value = '' #clear the textbox for giggles -- should probably do this only if the post succeeds.
-      event.stopImmediatePropagation()
+        console.log("ID of new post: "+replyID)
+        replyTextBox.value = '' #clear the textbox for giggles -- should probably do this only if the post succeeds.
   }
   
 )
 
 _.extend( Template.group,
   name: -> @name
-  posts: -> @posts
+  posts: -> {'post':post, 'group':@name} for post in @posts
 )
 
 _.extend( Template.notifications,
