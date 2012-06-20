@@ -12,6 +12,9 @@ min_posts = 0
 graduated = (tag, post) ->
   return post.tags[tag].users.length >= 2
 
+addGroupName = (post, name) ->
+  post['group_name'] = name
+
 makeGroups = (posts) ->
   groups = {'Incubator': {'posts': []}}
   for post in posts.fetch()
@@ -19,16 +22,19 @@ makeGroups = (posts) ->
     placed = 0
     for tag,info of post.tags
       if graduated(tag, post)
+        addGroupName(post, tag)
         if groups[tag]?
           groups[tag].posts.push(post)
         else
           groups[tag] = {'posts': [post]}
         placed++
       else if placed == 0
+        addGroupName(post, 'Incubator')
         groups['Incubator'].posts.push(post)
         placed++
       count++
     if count == 0
+      addGroupName(post, 'Incubator')
       groups['Incubator'].posts.push(post)
   groupList = []
   for name,info of groups
@@ -77,24 +83,15 @@ _.extend( Template.post,
       return [{name: "All Replies", posts: children}]
     else
       return makeGroups(children)
-  identifier: -> 
-    id = @_id
-    if @group_name?
-      id += @group_name
-    return id
-  
-  ###
-  <div class="your-reply" id="reply-cfa3e5db-97c9-4617-884b-d1e7f173a7ea">
-        <textarea name="replyText" id="replyText-cfa3e5db-97c9-4617-884b-d1e7f173a7ea" cols="70" rows="7"></textarea>
-        <button name="replySubmit" id="replySubmit-cfa3e5db-97c9-4617-884b-d1e7f173a7ea" type="button">Post Reply!</button>
-        <!--<button name="replyCancel" id="replyCancel-cfa3e5db-97c9-4617-884b-d1e7f173a7ea" type="button">^</button>--><!--Hidden from Bryan-->
-      </div>
-  ###
-  
+  identifier: -> @_id
+  groupname: -> 
+    if !@group_name?
+      @group_name = ""
+    return @group_name
   events: {
     "click button[name='replySubmit']": (event) ->
-      event.stopPropagation()
-      replyTextBox = document.getElementById("replyText-#{ @_id }")#Bryan thinks there's a way to do this without traversing the DOM.
+      
+      replyTextBox = document.getElementById("replyText-#{ @_id }-#{ @group_name }")#Bryan thinks there's a way to do this without traversing the DOM.
       
       replyContent = replyTextBox.value
       console.log("ID of Post you're replying to: #{ @_id }")
@@ -109,6 +106,7 @@ _.extend( Template.post,
         )
       )
       replyTextBox.value = '' #clear the textbox for giggles -- should probably do this only if the post succeeds.
+      event.stopImmediatePropagation()
   }
   
 )

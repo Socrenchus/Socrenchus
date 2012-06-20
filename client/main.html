@@ -79,7 +79,7 @@
     -->
 
 <template name="post">
-  <div id="post-{{identifier}}" class="post">
+  <div id="post-{{identifier}}-{{groupname}}" class="post">
     
     <div class="main">
       <div class="body">
@@ -96,9 +96,9 @@
     </div>
     
     <div class="reply-section">
-      <div class="your-reply" id="reply-{{identifier}}">
-        <textarea name="replyText" id="replyText-{{identifier}}" cols="70" rows="7"></textarea>
-        <button name="replySubmit" id="replySubmit-{{identifier}}" type="button">Post Reply!</button>
+      <div class="your-reply" id="reply-{{identifier}}-{{groupname}}">
+        <textarea name="replyText" id="replyText-{{identifier}}-{{groupname}}" cols="70" rows="7"></textarea>
+        <button name="replySubmit" id="replySubmit-{{identifier}}-{{groupname}}" type="button">Post Reply!</button>
         <!--<button name="replyCancel" id="replyCancel-{{identifier}}" type="button">^</button>--><!--Hidden from Bryan-->
       </div>
       <div class="other-replies">
