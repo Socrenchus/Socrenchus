@@ -1,5 +1,5 @@
 _.extend( Template.stream,
   posts: ->
-    return (Posts.find( 'parent_id': undefined ).map (post) -> {'post':post, 'group':""})
+    return Posts.find( 'parent_id': undefined )
   new: true
 )

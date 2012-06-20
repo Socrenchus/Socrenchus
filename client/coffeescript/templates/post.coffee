@@ -1,11 +1,11 @@
 _.extend( Template.post,
   content: -> 
     showdownConverter = new Showdown.converter()
-    postContentHtml = showdownConverter.makeHtml(@post.content)
+    postContentHtml = showdownConverter.makeHtml(@content)
     return postContentHtml
   groups: -> 
     MIN_POSTS = 2
-    children = Posts.find( parent_id: @post._id )
+    children = Posts.find( parent_id: @_id )
     numChildren = children.count()
     if numChildren == 0
       return []
@@ -13,7 +13,7 @@ _.extend( Template.post,
       return [{'name': "All Replies", 'posts': children.fetch()}]
     else
       return makeGroups(children)
-  identifier: -> @post._id
+  identifier: -> @_id
   groupname: -> @group
   events: {
     "click button[name='replySubmit']": (event) ->
@@ -21,7 +21,7 @@ _.extend( Template.post,
         replyTextBox = event.target.parentNode.getElementsByTagName("textarea")[0]
         event.stopImmediatePropagation()
         replyContent = replyTextBox.value
-        console.log("ID of Post you're replying to: #{ @post._id }-#{ @group }")
+        console.log("ID of Post you're replying to: ")
         console.log("Reply content: #{replyContent}")
         if(replyContent=="")
           alert('Selected Reply Box is Null!')#debugging why we're selecting the wrong text box.
@@ -29,8 +29,8 @@ _.extend( Template.post,
           replyID = Posts.insert(
             {
               content: replyContent,
-              parent_id: @post._id,
-              instance_id: @post.instance_id
+              parent_id: @_id,
+              instance_id: @instance_id
             }
           )
           console.log("ID of new post: "+replyID)
