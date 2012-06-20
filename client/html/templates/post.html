@@ -1,0 +1,44 @@
+
+  <!-- 
+  Philip's New Post Style 6/12/12
+  
+  Design goals: 
+  Clarity of structure
+  -Recursive properties of posts evident in the visible structure.        
+  Readability of elements
+  Helpfulness to posters
+    -->
+
+<template name="post">
+  <div class="post">
+    
+    <div class="main">
+      <div class="body">
+        {{{content}}}
+      </div>
+      <div class="attributes">
+        <div class="votebox">
+          [Votebox]
+        </div>
+        <div class="tagbox">
+          [Tagbox]
+        </div>
+      </div>
+    </div>
+    
+    <div class="reply-section">
+      <div class="your-reply">
+        <textarea name="replyText" cols="70" rows="7"></textarea>
+        <button name="replySubmit" type="button">Post Reply!</button>
+        <!--<button name="replyCancel" type="button">^</button>--><!--Hidden from Bryan-->
+      </div>
+      <div class="other-replies">
+        <ul>
+          {{#each groups}}
+            <li>{{> group}}</li>
+          {{/each}}
+        </ul>
+      </div>      
+    </div>
+  </div>
+</template>

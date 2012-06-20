@@ -1,0 +1,14 @@
+<template name="stream">
+  <div id='stream'>
+    {{#if new}}
+      <div id='new-assignment'></div>
+    {{/if}}
+    <ul id='assignments' class='sortable ui-helper-reset'>
+      <!--http://handlebarsjs.com/#iteration-->
+      {{#each posts}}
+        {{> post}}
+      {{/each}}
+    </ul>
+    <div id='footer'></div>
+  </div>
+</template>
