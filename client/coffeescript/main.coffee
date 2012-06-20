@@ -7,7 +7,7 @@ Meteor.subscribe( "my_posts")
 Meteor.subscribe( "assigned_posts" )
 
 #Template variables/functions
-min_posts = 1
+min_posts = 2
 
 #Graduated: Determines whether to group a post by a tag.  Would they make a good couple?  Have they earned each other?  
 graduated = (tag, post) -> #The post/tag pair is graduated if the post is elegible to be grouped by that tag.
@@ -65,52 +65,50 @@ _.extend( Template.body,
 
 _.extend( Template.stream,
   posts: ->
-    return Posts.find( 'parent_id': undefined )
+    return (Posts.find( 'parent_id': undefined ).map (post) -> {'post':post, 'group':""})
   new: true
-  group_name: -> ""
 )
 
 _.extend( Template.post,
   content: -> 
     showdownConverter = new Showdown.converter()
-    postContentHtml = showdownConverter.makeHtml(@content)
+    postContentHtml = showdownConverter.makeHtml(@post.content)
     return postContentHtml
   groups: -> 
-    children = Posts.find( parent_id: @_id )
+    children = Posts.find( parent_id: @post._id )
     numChildren = children.count()
     if numChildren == 0
       return []
     else if numChildren < min_posts
-      return [{name: "All Replies", posts: children}]
+      return [{'name': "All Replies", 'posts': children.fetch()}]
     else
       return makeGroups(children)
-  identifier: -> @_id
+  identifier: -> @post._id
+  groupname: -> @group
   events: {
     "click button[name='replySubmit']": (event) ->
-      
-      replyTextBox = document.getElementById("replyText-#{ @_id }")#Bryan thinks there's a way to do this without traversing the DOM.
-      
-      replyContent = replyTextBox.value
-      console.log("ID of Post you're replying to: #{ @_id }")
-      console.log("Reply content: #{replyContent}")
-      console.log("ID of new post: "
-        Posts.insert(
+      if !event.isImmediatePropagationStopped()
+        replyTextBox = document.getElementById("replyText-#{ @post._id }-#{ @group }")#Bryan thinks there's a way to do this without traversing the DOM.
+        event.stopImmediatePropagation()
+        replyContent = replyTextBox.value
+        console.log("ID of Post you're replying to: #{ @post._id }-#{ @group }")
+        console.log("Reply content: #{replyContent}")
+        replyID = Posts.insert(
           {
             content: replyContent,
-            parent_id: @_id,
-            instance_id: @instance_id
+            parent_id: @post._id,
+            instance_id: @post.instance_id
           }
         )
-      )
-      replyTextBox.value = '' #clear the textbox for giggles -- should probably do this only if the post succeeds.
-      event.stopImmediatePropagation()
+        console.log("ID of new post: "+replyID)
+        replyTextBox.value = '' #clear the textbox for giggles -- should probably do this only if the post succeeds.
   }
   
 )
 
 _.extend( Template.group,
-  group_name: -> @name
-  posts: -> @posts
+  name: -> @name
+  posts: -> {'post':post, 'group':@name} for post in @posts
 )
 
 _.extend( Template.notifications,
