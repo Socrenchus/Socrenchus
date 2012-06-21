@@ -4,7 +4,6 @@ _.extend( Template.post,
     postContentHtml = showdownConverter.makeHtml(@content)
     return postContentHtml
   identifier: -> @_id
-  groupname: -> @group
   events: {
     "click button[name='replySubmit']": (event) ->
       if !event.isImmediatePropagationStopped()
@@ -28,37 +27,3 @@ _.extend( Template.post,
   }
   
 )
-
-###
-# HELPER FUNCTIONS
-#  v v v v v v v
-###
-
-###
-#MakeGroups: Make a list of groups containing posts, for a given set of posts.
-#    Incubator group
-#    Tag group: group for each graduated tag.  
-###
-makeGroups = (posts) ->
-  groups = {'Incubator': {'posts': []}}
-  for post in posts.fetch()
-    tagCount = 0
-    placed = false #post has not been placed into a group yet.
-    for tag of post.tags
-      if graduated(tag, post) 
-        if groups[tag]? #if there is a group for this tag
-          groups[tag].posts.push(post) #add this post to the group's posts
-        else
-          groups[tag] = {'posts': [post]} #add a tag group with a "posts" field containing this post
-        placed = true #this post has been placed
-      else if not placed #if the post isn't graduated and hasn't 
-        groups['Incubator'].posts.push(post)
-        placed = true
-      tagCount++
-    if tagCount == 0
-      groups['Incubator'].posts.push(post)
-  groupList = []
-  for name,info of groups
-    if info.posts.length != 0
-      groupList.push({'name':name, 'posts':info.posts})
-  return groupList
