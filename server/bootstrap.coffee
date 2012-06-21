@@ -92,7 +92,12 @@ Meteor.startup ->
         author_id: 2
         content: 'Me too!!'
         parent_id: 0
-        tags:{}
+        tags:{
+          'one': {
+            users:[1,2]
+            weight: 1
+          }
+        }
         votes:{
             'up': {
               users: []
@@ -109,14 +114,14 @@ Meteor.startup ->
         author_id: 1
         content: 'I\'m a child.'
         parent_id: 0
-        tags: {
+        tags:{
           'one': {
-            users: [1, 2]
-            weight: 2
+            users: [1,2]
+            weight: 4
           }
-          'red': {
-            users: [1]
-            weight: 3
+          'two': {
+            users: [1,2]
+            weight:2
           }
         }
         votes:{

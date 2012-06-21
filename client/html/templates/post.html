@@ -28,13 +28,7 @@
     
     <div class="reply-section">
       {{> reply_box}}
-      <div class="other-replies">
-        <ul>
-          {{#each groups}}
-            <li>{{> group}}</li>
-          {{/each}}
-        </ul>
-      </div>      
+      {{> stream}} 
     </div>
   </div>
 </template>

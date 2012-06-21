@@ -5,9 +5,15 @@
     {{/if}}
     <ul id='assignments' class='sortable ui-helper-reset'>
       <!--http://handlebarsjs.com/#iteration-->
-      {{#each posts}}
-        {{> post}}
-      {{/each}}
+      {{#if group_posts}}
+        {{#each groups}}
+          {{> group}}
+        {{/each}}
+      {{else}}
+        {{#each posts}}
+          {{> post}}
+        {{/each}}
+      {{/if}}
     </ul>
     <div id='footer'></div>
   </div>
