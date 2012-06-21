@@ -13,23 +13,25 @@ class StationMaster
     1 = warning
     2 = error
   ###
-
+  
+  #a list of allowed mongo modifiers, all update reauests need to use one of these.
+  mongo_modifiers_list = ['$inc', '$set', '$push', '$pushAll', '$addToSet', '$each', '$rename' ]
   #not debug mode unless specified in constructor
   debug_mode = false
   constructor: (arg)->
     debug_mode = arg
   
   #the validation functions and sanity checks
-  verify_user_insert: (args...) ->
+  verify_user_insert: (selector, options) ->
      return 0
     
-  verify_user_update: (args...) ->
+  verify_user_update: (selector, mutator, options) ->
     return 0
   
-  verify_user_remove: (args...) ->
+  verify_user_remove: (selector) ->
     return 0
     
-  verify_post_insert: (args...) ->
+  verify_post_insert: (selector, options) ->
     return_code = 0
     # make sure the content is blank
     if ( not 'content' in args[0])
@@ -39,22 +41,22 @@ class StationMaster
       return_code = 2
     return return_code
     
-  verify_post_update: (args...) ->
+  verify_post_update: (selector, mutator, options) ->
     #updating post content also directs here.
     #upvoting or downvoting also directs here
     return 0
   
-  verify_post_remove: (args...) ->
+  verify_post_remove: (selector) ->
     #removing posts is not allowed for now
     return 2
 
-  verify_instance_insert: (args...) ->
+  verify_instance_insert: (selector, options) ->
     return 0
     
-  verify_instance_update: (args...) ->
+  verify_instance_update: (selector, mutator, options) ->
     return 0
   
-  verify_instance_remove: (args...) ->
+  verify_instance_remove: (selector) ->
     #removing an instance is not allowed
     return 2
 
@@ -62,7 +64,7 @@ class StationMaster
   the logic methods go below here
   ###
    
-  post_update_logic: (args) ->
+  post_update_logic: (selector, mutator, options) ->
     #when someone inserts a post, they gain no points
     #a user can gain experience by adding tags (for that tag)
     tagger_id = args[0].author_id
@@ -83,7 +85,7 @@ class GrandCentral
   dispatch: (args...) =>
     {
       users: {
-        insert: (args...) =>
+        insert: (selector, options) =>
           msg = sm.verify_user_insert(args...)
           if (msg is 0)
             #request verified, execute logic
@@ -92,7 +94,7 @@ class GrandCentral
             warning_list.push 'invalid user insert request'
           else if (msg is 2)
             error_list.push 'invalid user insert request'
-        update: (args...) =>
+        update: (selector, mutator, options) =>
           msg = sm.verify_user_update(args...)
           if (msg is 0)
             #request verified, execute logic
@@ -101,7 +103,7 @@ class GrandCentral
             warning_list.push 'invalid user update request'
           else if (msg is 2)
             error_list.push 'invalid user update request'
-        remove: (args...) =>
+        remove: (selector) =>
           msg = sm.verify_user_remove(args...)
           if (msg is 0)
             #request verified, execute logic
@@ -111,7 +113,7 @@ class GrandCentral
             error_list.push 'invalid user remove request'
       }
       posts: {
-        insert: (args...) =>
+        insert: (selector, options) =>
           #add author_id to args
           args[0].author_id = Session.get 'user_id'
           msg = sm.verify_post_insert(args...)
@@ -122,7 +124,7 @@ class GrandCentral
             warning_list.push 'invalid post insert request'
           else if (msg is 2)
             error_list.push 'invalid post insert request'
-        update: (args...) =>
+        update: (selector, mutator, options) =>
           args[0].author_id = Session.get 'user_id'
           msg = sm.verify_post_update(args...)
           if (msg is 0)
@@ -132,7 +134,7 @@ class GrandCentral
             warning_list.push 'invalid post update request'
           else if (msg is 2)
             error_list.push 'invalid post update request'
-        remove: (args...) =>
+        remove: (selector) =>
           msg = sm.verify_post_remove()
           if (msg is 0)
             #request verified, execute logic
@@ -143,7 +145,7 @@ class GrandCentral
           
       }
       instances: {
-        insert: (args...) =>
+        insert: (selector, options) =>
           msg = sm.verify_instance_insert(args...)
           if (msg is 0)
             #request verified, execute logic
@@ -152,7 +154,7 @@ class GrandCentral
             warning_list.push 'invalid instance insert request'
           else if (msg is 2)
             error_list.push 'invalid instance insert request'
-        update: (args...) =>
+        update: (selector, mutator, options) =>
           msg = sm.verify_instance_update(args...)
           if (msg is 0)
             #request verified, execute logic
@@ -161,7 +163,7 @@ class GrandCentral
             warning_list.push 'invalid instance update request'
           else if (msg is 2)
             error_list.push 'invalid instance update request'
-        remove: (args...) =>
+        remove: (selector) =>
           msg = sm.verify_instance_remove()
           if (msg is 0)
             #request verified, execute logic
