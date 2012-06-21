@@ -37,19 +37,29 @@ Meteor.startup ->
           'one': {
             users: [1, 2]
             weight:  4
-            }
+          }
           'two': {
             users: [2]
             weight: 2
-            }
+          }
           'red': {
             users: [1]
             weight: 1
-            }
+          }
           'blue': {
             users: [2]
             weight: 4
-            }
+          }
+        }
+        votes: {
+          'up': {
+            users: [1, 2]
+            weight:  4
+          }
+          'down': {
+            users: [2]
+            weight: 2
+          }
         }
       },
       {
@@ -60,11 +70,21 @@ Meteor.startup ->
           'one': {
             users: [1, 2]
             weight: 2
-            }
+          }
           'red': {
             users: [1]
             weight: 3
-            }
+          }
+        }
+        votes: {
+          'up': {
+            users: [0, 2]
+            weight:  4
+          }
+          'down': {
+            users: [2]
+            weight: 2
+          }
         }
       },
       {
@@ -73,6 +93,16 @@ Meteor.startup ->
         content: 'Me too!!'
         parent_id: 0
         tags:{}
+        votes:{
+            'up': {
+              users: []
+              weight: 0
+            }
+            'down': {
+              users: []
+              weight: 0
+            }
+        }
       },
       {
         instance_id: 0
@@ -80,6 +110,16 @@ Meteor.startup ->
         content: 'I\'m a child.'
         parent_id: 0
         tags:{}
+        votes:{
+            'up': {
+              users: []
+              weight: 0
+            }
+            'down': {
+              users: []
+              weight: 0
+            }
+        }
       },
       {
         instance_id: 0
@@ -87,6 +127,16 @@ Meteor.startup ->
         content: 'I\'m a child\'s child.'
         parent_id: 4
         tags:{}
+        votes:{
+            'up': {
+              users: []
+              weight: 0
+            }
+            'down': {
+              users: []
+              weight: 0
+            }
+        }
       },
       {
         instance_id: 0
@@ -94,12 +144,32 @@ Meteor.startup ->
         content: 'I\'m a child\'s child\'s child.'
         parent_id: 5
         tags:{}
+        votes:{
+            'up': {
+              users: []
+              weight: 0
+            }
+            'down': {
+              users: []
+              weight: 0
+            }
+        }
       },
       {
         instance_id: 0
         author_id: 0
         content: 'whattsup'
         tags:{}
+        votes:{
+            'up': {
+              users: []
+              weight: 0
+            }
+            'down': {
+              users: []
+              weight: 0
+            }
+        }
       }
     ]
     timestamp = (new Date()).getTime()
