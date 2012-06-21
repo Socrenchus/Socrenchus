@@ -30,11 +30,18 @@ class StationMaster
     return 0
     
   verify_post_insert: (args...) ->
-    return 0
+    return_code = 0
+    # make sure the content is blank
+    if ( not 'content' in args[0])
+      console.log 'no content field provided'
+    if (args[0].content is '')
+      console.log 'no content provided'
+      return_code = 2
+    return return_code
     
   verify_post_update: (args...) ->
-    #inserting a post also directs here.
-    #upvoting or downvoting 
+    #updating post content also directs here.
+    #upvoting or downvoting also directs here
     return 0
   
   verify_post_remove: (args...) ->
@@ -48,7 +55,7 @@ class StationMaster
     return 0
   
   verify_instance_remove: (args...) ->
-    #removing an instance not allowed
+    #removing an instance is not allowed
     return 2
 
   ###
@@ -56,12 +63,10 @@ class StationMaster
   ###
    
   post_update_logic: (args...) ->
-    console.log args
+    #console.log args
     #when someone inserts a post, they gain no points
     #a user can gain experience by adding tags
-    if args.indexOf("tags:") > 0
-      user_id = args[0].author_id
-      console.log (args)
+      #console.log (args)
       #Meteor.default_server.method_handlers['/user/update']("{_id: #{user_id}}, {experience: (  
     
 class GrandCentral
@@ -167,15 +172,14 @@ class GrandCentral
     #also call logic functions for experience etc.
     if  _debug || (error_list.length is 0 && warning_list.length is 0)
       @default.apply(@, args)
-    else
-      if error_list.length>0
-        console.log 'Grand Central errors encountered:'
-        for error in error_list
-          console.log error
-      if warning_list.length>0
-        console.log 'warnings encountered:'
-        for warning in warning_list
-          console.log warning 
+    if error_list.length>0
+      console.log 'Grand Central errors encountered:'
+      for error in error_list
+        console.log error
+    if warning_list.length>0
+      console.log 'warnings encountered:'
+      for warning in warning_list
+        console.log warning 
 
 Meteor.startup( ->
   for collection in ['users','posts','instances']
