@@ -21,21 +21,15 @@ _.extend( Template.reply_box,
         Session.set("composing_#{ @_id }", event.target.value) 
         Meteor.flush()
         event.stopImmediatePropagation()
-    "blur textarea[name='reply_text']": (event) ->    
-      #updates the composition string on blur. Captures the last character missed by the keydown function.
-      if not event.isImmediatePropagationStopped()
-        Session.set("composing_#{ @_id }", event.target.value) 
-        Meteor.flush()
-        event.stopImmediatePropagation()# are these needed?  ...I think so.  
-       
+        
     #submit a reply.  
     "click button[name='reply_submit']": (event) ->
       if not event.isImmediatePropagationStopped()
-        #getting from Session.get("composing_#{ @_id }") freezes the button.
         replyTextBox = event.target.parentNode.getElementsByTagName("textarea")[0]
-        replyContent = replyTextBox.value #no longer required --- > Session.get("composing_#{ @_id }")
-        console.log("ID of Post you're replying to: #{ @_id }")
-        console.log("Reply content: #{replyContent}")
+        replyContent = replyTextBox.value
+        #Session.set("composing_#{ @_id }", replyContent) #not strictly necessary unless we're using it again later.
+        #console.log("ID of Post you're replying to: #{ @_id }")
+        #console.log("Reply content: #{replyContent}")
         if(replyContent=="") #can do other checks to prevent them from submitting all whitespace stuff
           alert('Come on bro, write more than that!')#debugging why we're selecting the wrong text box.
         else
