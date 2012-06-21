@@ -62,13 +62,15 @@ class StationMaster
   the logic methods go below here
   ###
    
-  post_update_logic: (args...) ->
+  post_update_logic: (args) ->
     #when someone inserts a post, they gain no points
-    #a user can gain experience by adding tags
+    #a user can gain experience by adding tags (for that tag)
     tagger_id = args[0].author_id
-    tags = args[0].tags
-    console.log 'authorID: '+tagger_id
-    console.log 'tags: '+tags
+    tags = args[1].tags
+    #console.log 'authorID: '+tagger_id
+    #console.log 'tags: '+tags
+    post_object = Posts.find({_id: tagger_id})
+    console.log post_object.tags
     
 class GrandCentral
   error_list = []
