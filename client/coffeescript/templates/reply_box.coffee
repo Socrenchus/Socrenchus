@@ -24,9 +24,8 @@ _.extend( Template.reply_box,
     #submit a reply.  
     "click button[name='reply_submit']": (event) ->
       if not event.isImmediatePropagationStopped()
-        replyTextBox = event.target.parentNode.getElementsByTagName("textarea")[0]
-        replyContent = replyTextBox.value
-        #Session.set("composing_#{ @_id }", replyContent) #not strictly necessary unless we're using it again later.
+        #old way: replyTextBox = event.target.parentNode.getElementsByTagName("textarea")[0]
+        replyContent = Session.get("composing_#{ @_id }") #replyTextBox.value
         #console.log("ID of Post you're replying to: #{ @_id }")
         #console.log("Reply content: #{replyContent}")
         if(replyContent=="") #can do other checks to prevent them from submitting all whitespace stuff
