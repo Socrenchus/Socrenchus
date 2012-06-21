@@ -20,34 +20,46 @@ class StationMaster
     debug_mode = arg
   
   #the validation functions and sanity checks
-  valid_user_insert: (args...) ->
+  verify_user_insert: (args...) ->
      return 0
     
-  valid_user_update: (args...) ->
+  verify_user_update: (args...) ->
     return 0
   
-  valid_user_remove: (args...) ->
+  verify_user_remove: (args...) ->
     return 0
     
-  valid_post_insert: (args...) ->
+  verify_post_insert: (args...) ->
     return 0
     
-  valid_post_update: (args...) ->
+  verify_post_update: (args...) ->
+    #inserting a post also directs here.
+    #upvoting or downvoting 
     return 0
   
-  valid_post_remove: (args...) ->
+  verify_post_remove: (args...) ->
     #removing posts is not allowed for now
     return 2
 
-  valid_instance_insert: (args...) ->
+  verify_instance_insert: (args...) ->
     return 0
     
-  valid_instance_update: (args...) ->
+  verify_instance_update: (args...) ->
     return 0
   
-  valid_instance_remove: (args...) ->
-    return 0
+  verify_instance_remove: (args...) ->
+    #removing an instance not allowed
+    return 2
 
+  ###
+  the logic methods go below here
+  ###
+   
+  post_insert_logic: (args...) ->
+    #when someone inserts a post, they gain points
+    user_id = args[0].author_id
+    Meteor.default_server.method_handlers['/user/update'] (
+    
 class GrandCentral
   error_list = []
   warning_list = []
@@ -60,25 +72,27 @@ class GrandCentral
     {
       users: {
         insert: (args...) =>
-          msg = sm.valid_user_insert(args...)
+          msg = sm.verify_user_insert(args...)
           if (msg is 0)
-            console.log 'valid user insert request'
+            #request verified, execute logic
+            
           else if (msg is 1)
             warning_list.push 'invalid user insert request'
           else if (msg is 2)
             error_list.push 'invalid user insert request'
         update: (args...) =>
-          msg = sm.valid_user_update(args...)
+          msg = sm.verify_user_update(args...)
           if (msg is 0)
-            console.log 'valid user update request'
+            #request verified, execute logic
+            
           else if (msg is 1)
             warning_list.push 'invalid user update request'
           else if (msg is 2)
             error_list.push 'invalid user update request'
         remove: (args...) =>
-          msg = sm.valid_user_remove(args...)
+          msg = sm.verify_user_remove(args...)
           if (msg is 0)
-            console.log 'valid user remove request'
+            #request verified, execute logic
           else if (msg is 1)
             warning_list.push 'invalid user remove request'
           else if (msg is 2)
@@ -88,20 +102,27 @@ class GrandCentral
         insert: (args...) =>
           #add author_id to args
           args[0].author_id = Session.get 'user_id'
-          #check for validity of request
-          msg = sm.valid_user_insert(args...)
+          msg = sm.verify_post_insert(args...)
           if (msg is 0)
-            console.log 'valid user insert request'
+            #request verified, execute logic
+            sm.post_insert_logic(args)
           else if (msg is 1)
-            warning_list.push 'invalid user insert request'
+            warning_list.push 'invalid post insert request'
           else if (msg is 2)
-            error_list.push 'invalid user insert request'
-          #add experience points
-        update: (args...) => 
-        remove: (args...) =>
-          msg = sm.valid_post_remove()
+            error_list.push 'invalid post insert request'
+        update: (args...) =>
+          msg = sm.verify_post_update(args...)
           if (msg is 0)
-            console.log 'valid post remove request'
+            #request verified, execute logic
+            
+          else if (msg is 1)
+            warning_list.push 'invalid post update request'
+          else if (msg is 2)
+            error_list.push 'invalid post update request'
+        remove: (args...) =>
+          msg = sm.verify_post_remove()
+          if (msg is 0)
+            #request verified, execute logic
           else if (msg is 1)
             warning_list.push 'removing a post is not socrench, allowed for debug mode'
           else if (msg is 2)
@@ -110,8 +131,31 @@ class GrandCentral
       }
       instances: {
         insert: (args...) =>
+          msg = sm.verify_instance_insert(args...)
+          if (msg is 0)
+            #request verified, execute logic
+            
+          else if (msg is 1)
+            warning_list.push 'invalid instance insert request'
+          else if (msg is 2)
+            error_list.push 'invalid instance insert request'
         update: (args...) =>
+          msg = sm.verify_instance_update(args...)
+          if (msg is 0)
+            #request verified, execute logic
+            
+          else if (msg is 1)
+            warning_list.push 'invalid instance update request'
+          else if (msg is 2)
+            error_list.push 'invalid instance update request'
         remove: (args...) =>
+          msg = sm.verify_instance_remove()
+          if (msg is 0)
+            #request verified, execute logic
+          else if (msg is 1)
+            warning_list.push 'warning, removing an instance'
+          else if (msg is 2)
+            error_list.push 'instance remove requests not entertained'
       }
     }[@collection][@method](args...)
     
