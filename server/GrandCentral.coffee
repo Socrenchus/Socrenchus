@@ -63,11 +63,12 @@ class StationMaster
   ###
    
   post_update_logic: (args...) ->
-    #console.log args
     #when someone inserts a post, they gain no points
     #a user can gain experience by adding tags
-      #console.log (args)
-      #Meteor.default_server.method_handlers['/user/update']("{_id: #{user_id}}, {experience: (  
+    tagger_id = args[0].author_id
+    tags = args[0].tags
+    console.log 'authorID: '+tagger_id
+    console.log 'tags: '+tags
     
 class GrandCentral
   error_list = []
@@ -120,6 +121,7 @@ class GrandCentral
           else if (msg is 2)
             error_list.push 'invalid post insert request'
         update: (args...) =>
+          args[0].author_id = Session.get 'user_id'
           msg = sm.verify_post_update(args...)
           if (msg is 0)
             #request verified, execute logic
