@@ -32,13 +32,7 @@
         <button name="replySubmit" type="button">Post Reply!</button>
         <!--<button name="replyCancel" type="button">^</button>--><!--Hidden from Bryan-->
       </div>
-      <div class="other-replies">
-        <ul>
-          {{#each groups}}
-            <li>{{> group}}</li>
-          {{/each}}
-        </ul>
-      </div>      
+      {{> stream}} 
     </div>
   </div>
 </template>

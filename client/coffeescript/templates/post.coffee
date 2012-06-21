@@ -3,16 +3,6 @@ _.extend( Template.post,
     showdownConverter = new Showdown.converter()
     postContentHtml = showdownConverter.makeHtml(@content)
     return postContentHtml
-  groups: -> 
-    MIN_POSTS = 2
-    children = Posts.find( parent_id: @_id )
-    numChildren = children.count()
-    if numChildren == 0
-      return []
-    else if numChildren < MIN_POSTS
-      return [{'name': "All Replies", 'posts': children.fetch()}]
-    else
-      return makeGroups(children)
   identifier: -> @_id
   groupname: -> @group
   events: {
@@ -43,10 +33,6 @@ _.extend( Template.post,
 # HELPER FUNCTIONS
 #  v v v v v v v
 ###
-
-#Graduated: Determines whether to group a post by a tag.  Would they make a good couple?  Have they earned each other?  
-graduated = (tag, post) -> #The post/tag pair is graduated if the post is elegible to be grouped by that tag.
-  return post.tags[tag].users.length >= 2 # 2 or more users have tagged it with that tag.  
 
 ###
 #MakeGroups: Make a list of groups containing posts, for a given set of posts.

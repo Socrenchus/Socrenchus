@@ -1,4 +1,8 @@
 _.extend( Template.group,
   name: -> @name
-  posts: -> @posts
+  posts: ->
+    unless @name == 'incubator'
+      return @posts
+    else
+      return [@posts[0]]
 )
