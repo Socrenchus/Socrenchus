@@ -15,8 +15,7 @@ _.extend( Template.reply_box,
         event.stopImmediatePropagation()
     
     #editing
-    "keydown textarea[name='reply_text']": (event) ->  
-    #updates composition string while typing. Does not get the character that's entered in after this event triggers.
+    "keydown textarea[name='reply_text'], keyup textarea[name='reply_text']": (event) ->  
       if not event.isImmediatePropagationStopped()
         Session.set("composing_#{ @_id }", event.target.value) 
         Meteor.flush()
