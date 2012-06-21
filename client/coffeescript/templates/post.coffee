@@ -4,6 +4,7 @@ _.extend( Template.post,
     postContentHtml = showdownConverter.makeHtml(@content)
     return postContentHtml
   identifier: -> @_id
+  tags: -> @tags
   events: {
     "click button[name='replySubmit']": (event) ->
       if !event.isImmediatePropagationStopped()

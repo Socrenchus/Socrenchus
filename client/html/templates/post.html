@@ -20,9 +20,9 @@
         <div class="votebox">
           [Votebox]
         </div>
-        <div class="tagbox">
-          [Tagbox]
-        </div>
+        {{#with this}}
+          {{> tagbox}}
+        {{/with}}
       </div>
     </div>
     
