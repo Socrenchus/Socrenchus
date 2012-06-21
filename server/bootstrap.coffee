@@ -109,7 +109,16 @@ Meteor.startup ->
         author_id: 1
         content: 'I\'m a child.'
         parent_id: 0
-        tags:{}
+        tags: {
+          'one': {
+            users: [1, 2]
+            weight: 2
+          }
+          'red': {
+            users: [1]
+            weight: 3
+          }
+        }
         votes:{
             'up': {
               users: []
