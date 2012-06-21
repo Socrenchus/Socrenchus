@@ -1,6 +1,13 @@
 _.extend( Template.tagbox,
-  #See tags that are graduated on a post
-  #See sibling post tags
-  grad_tags: ->
-    tag for tag of @tags
+  grad_tags: -> tag for tag of @tags
+  suggested_tags: ->
+    suggestions = {}
+    for post in Posts.find( 'parent_id': @parent_id ).fetch() #get siblings
+      for name,info of post.tags #Change to only graduated tags
+        if suggestions[name]?
+          suggestions[name] += info.weight
+        else
+          suggestions[name] = info.weight
+    sug_list = ({'name':name, 'weight':weight} for name,weight of suggestions) #get as list
+    return (sug_list.sort (a,b) -> return a.weight-b.weight).map (a) -> a.name #sort by weight, then return list of names
 )
