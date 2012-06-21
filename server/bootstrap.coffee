@@ -94,8 +94,14 @@ Meteor.startup ->
         parent_id: 0
         tags:{}
         votes:{
-            'up': {}
-            'down': {}
+            'up': {
+              users: []
+              weight: 0
+            }
+            'down': {
+              users: []
+              weight: 0
+            }
         }
       },
       {
@@ -105,8 +111,14 @@ Meteor.startup ->
         parent_id: 0
         tags:{}
         votes:{
-            'up': {}
-            'down': {}
+            'up': {
+              users: []
+              weight: 0
+            }
+            'down': {
+              users: []
+              weight: 0
+            }
         }
       },
       {
@@ -116,8 +128,14 @@ Meteor.startup ->
         parent_id: 4
         tags:{}
         votes:{
-           'up': {}
-           'down': {}
+            'up': {
+              users: []
+              weight: 0
+            }
+            'down': {
+              users: []
+              weight: 0
+            }
         }
       },
       {
@@ -127,8 +145,14 @@ Meteor.startup ->
         parent_id: 5
         tags:{}
         votes:{
-           'up': {}
-           'down': {}
+            'up': {
+              users: []
+              weight: 0
+            }
+            'down': {
+              users: []
+              weight: 0
+            }
         }
       },
       {
@@ -137,8 +161,14 @@ Meteor.startup ->
         content: 'whattsup'
         tags:{}
         votes:{
-           'up': {}
-           'down': {}
+            'up': {
+              users: []
+              weight: 0
+            }
+            'down': {
+              users: []
+              weight: 0
+            }
         }
       }
     ]
