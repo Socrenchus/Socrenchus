@@ -48,6 +48,5 @@ _.extend( Template.reply_box,
      "click button[name='reply_cancel']": (event) ->
        Session.set("composing_#{ @_id }", undefined)
        Meteor.flush()
-       console.log(Session.get("composing_#{ @_id }"))
   }
 )
