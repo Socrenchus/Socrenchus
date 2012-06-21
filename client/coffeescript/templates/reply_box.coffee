@@ -1,8 +1,24 @@
 _.extend( Template.reply_box,
   is_candidate: -> 
-    not Session.equals("composing_#{ @_id }", undefined)  #untested; does it work?
-    
+    Session.equals("composing_#{ @_id }", undefined)  #untested; does it work?
+  reply_box_content: ->
+    if @is_candidate
+      ""
+    else
+      Session.get("composing_#{ @_id }")
   events: {
+    "keypress textarea[name='reply_text']": (event) ->
+      if !event.isImmediatePropagationStopped()
+        Session.set("composing_#{ @_id }", event.target.value)
+        console.log(@reply_box_content)
+        Meteor.flush()
+        event.stopImmediatePropagation()# are these needed?  ...I think so.  
+    
+    "click button[name='start_reply']": (event) ->
+      if !event.isImmediatePropagationStopped()
+        Session.set("composing_#{ @_id }", "")
+        event.stopImmediatePropagation()
+    
     "click button[name='reply_submit']": (event) ->
       if !event.isImmediatePropagationStopped()
         replyTextBox = event.target.parentNode.getElementsByTagName("textarea")[0]
@@ -22,6 +38,5 @@ _.extend( Template.reply_box,
           )
           console.log("ID of new post: "+replyID)
           replyTextBox.value = '' #clear the textbox for giggles -- should probably do this only if the post succeeds.
-     
   }
 )
