@@ -1,4 +1,4 @@
-_.extend( Template.sessionBar,
+_.extend( Template.session_bar,
   username: ->
     return "USERNAME"
 )
