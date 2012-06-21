@@ -55,10 +55,14 @@ class StationMaster
   the logic methods go below here
   ###
    
-  post_insert_logic: (args...) ->
-    #when someone inserts a post, they gain points
-    user_id = args[0].author_id
-    Meteor.default_server.method_handlers['/user/update'] (
+  post_update_logic: (args...) ->
+    console.log args
+    #when someone inserts a post, they gain no points
+    #a user can gain experience by adding tags
+    if args.indexOf("tags:") > 0
+      user_id = args[0].author_id
+      console.log (args)
+      #Meteor.default_server.method_handlers['/user/update']("{_id: #{user_id}}, {experience: (  
     
 class GrandCentral
   error_list = []
@@ -105,7 +109,7 @@ class GrandCentral
           msg = sm.verify_post_insert(args...)
           if (msg is 0)
             #request verified, execute logic
-            sm.post_insert_logic(args)
+            
           else if (msg is 1)
             warning_list.push 'invalid post insert request'
           else if (msg is 2)
@@ -114,7 +118,7 @@ class GrandCentral
           msg = sm.verify_post_update(args...)
           if (msg is 0)
             #request verified, execute logic
-            
+            sm.post_update_logic (args)
           else if (msg is 1)
             warning_list.push 'invalid post update request'
           else if (msg is 2)
