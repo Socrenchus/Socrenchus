@@ -1,16 +1,14 @@
 _.extend( Template.votebox,
   voted: -> Session.get("voted_#{@_id}")
-  score: -> @votes.up.weight - @votes.down.weight
+  score: -> @votes.up.users.length - @votes.down.users.length
   events: {
     "click button[name='upvote']": ->
-      author_id = 0 #How do we get the current user's id?
-      @votes.up.users.push(author_id)
-      @votes.up.weight++
+      user_id = Session.get('user_id')
+      @votes.up.users.push(user_id)
       Session.set("voted_#{@_id}",true)
     "click button[name='downvote']": ->
-      author_id = 0 #Same problem here
-      @votes.down.users.push(author_id)
-      @votes.down.weight++
+      user_id = Session.get('user_id')
+      @votes.down.users.push(user_id)
       Session.set("voted_#{@_id}",true)
   }
 )

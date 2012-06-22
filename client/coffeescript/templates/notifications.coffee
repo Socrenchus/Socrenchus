@@ -1,16 +1,19 @@
 _.extend( Template.notifications,
-  count: -> Session.get("notfs").length
-  ntfs: -> return Session.get("notfs")
-  show: -> Session.equals("state",'open')
+  count: -> Session.get('notfs').length
+  ntfs: -> return Session.get('notfs')
+  show: -> Session.equals('state','open')
   message: -> @message
   events: {
     'click #notification-counter': (event) ->
-      if Session.equals("state", 'open')
-        Session.set("state", 'closed')
+      if Session.equals('state', 'open')
+        Session.set('state', 'closed')
       else
-        Session.set("state", 'open')
+        Session.set('state', 'open')
     'click': (event) ->
       event.stopPropagation()
+    'blur #notification-box': (event) ->
+      if Session.equals('state', 'open')
+        Session.set('state', 'closed')
   }
 )
 
@@ -19,4 +22,8 @@ tempNotfs = [{message: 'hi'},{message: 'there'},
       {message: 'are'},{message: 'you'},
       {message: 'today'}]
       
-Session.set("notfs", tempNotfs)
+Session.set('notfs', tempNotfs)
+
+$(document).click ->
+  if Session.get('state', 'open')
+    Session.set('state', 'closed')
