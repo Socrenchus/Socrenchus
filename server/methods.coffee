@@ -1,5 +1,5 @@
 Meteor.methods
-  userId: -> 
+  user_id: -> 
     if Meteor.accounts?
       return @userId()
     else
