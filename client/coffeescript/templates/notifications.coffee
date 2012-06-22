@@ -11,9 +11,6 @@ _.extend( Template.notifications,
         Session.set('state', 'open')
     'click': (event) ->
       event.stopPropagation()
-    'blur #notification-box': (event) ->
-      if Session.equals('state', 'open')
-        Session.set('state', 'closed')
   }
 )
 
@@ -24,6 +21,6 @@ tempNotfs = [{message: 'hi'},{message: 'there'},
       
 Session.set('notfs', tempNotfs)
 
-$(document).click ->
-  if Session.get('state', 'open')
-    Session.set('state', 'closed')
+#$(document).click ->
+#  if Session.get('state', 'open')
+#    Session.set('state', 'closed')

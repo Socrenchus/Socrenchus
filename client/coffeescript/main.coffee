@@ -3,13 +3,14 @@ Posts = new Meteor.Collection("posts")
 Users = new Meteor.Collection("users")
 
 # Subscriptions
-Meteor.subscribe( "my_user", 0 )
+Meteor.subscribe( "my_user" )
 Meteor.subscribe( "my_posts" )
 Meteor.subscribe( "assigned_posts" )
 
 # Temporary user info
-console.log(Users.findOne())
-Session.set('user_id', Users.findOne()._id)
+# TODO: change this to anup's upcoming Meteor method which gets the current user's id
+Session.set('user_id', 999) #999 is a dummy value
+console.log(Session.get('user_id'))
 
 # Backbone router
 class Router extends Backbone.Router
