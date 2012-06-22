@@ -13,13 +13,8 @@ _.extend( Template.notifications,
       event.stopPropagation()
   }
 )
-
-tempNotes = [{message: 'hi'},{message: 'there'},
-      {message: 'friend'},{message: 'how'},
-      {message: 'are'},{message: 'you'},
-      {message: 'today'}]
       
-Session.set('notifications', tempNotes)
+Session.set('notifications', [])
 
 $(document).click ->
   if Session.get('state', 'open')
