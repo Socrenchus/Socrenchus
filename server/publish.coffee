@@ -6,11 +6,20 @@ Meteor.publish("my_user", (user_id) ->
   return Users.find( _id: user_id )
 )
 
+filterAllTheThings = ->
+  res = [];
+  @forEach((doc) ->
+    doc.content = 'troll'
+    res.push(doc)
+  )
+  return res
+
 Meteor.publish("my_posts", ->
   user_id = Meteor.call('userId')
   if user_id
-    q = Posts.find( author_id: user_id )
+    q = Posts.find( { author_id: user_id } )
     Session.set( 'my_posts_query', q)
+    q.__proto__.fetch = filterAllTheThings
     return q
 )
 
@@ -21,12 +30,14 @@ Meteor.publish("assigned_posts", ->
     for item in Session.get( 'my_posts_query' ).fetch() #For each of my posts
       ids.push item['parent_id'] if 'parent_id' of item #Add the parent's id
       ids.push item['_id']                              #Add my post's id
-    return Posts.find( {'$or':                          #Return all posts who
+    q = Posts.find( {'$or':                          #Return all posts who
         [ 
           {_id: {'$in':ids}},                           #are mine, or my parent's
           {parent_id: {'$in':ids}}                      #or my siblings, or my children.
         ] 
-      } 
+      }
     )
+    q.__proto__.fetch = filterAllTheThings
+    return q
 )
 
