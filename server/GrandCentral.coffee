@@ -13,7 +13,7 @@ class GrandCentral
       }
       posts: {
         insert: (args...) ->
-          args[0].author_id = Meteor.call('user_id')
+          args[0].author_id = Meteor.call('get_user_id')
         update: (args...) => 
         remove: (args...) =>
       }

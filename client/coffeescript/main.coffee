@@ -8,7 +8,7 @@ Meteor.subscribe( "my_posts" )
 Meteor.subscribe( "assigned_posts" )
 
 # Get User ID
-user_id = Meteor.call('user_id', (err, res) ->
+user_id = Meteor.call('get_user_id', (err, res) ->
   Session.set('user_id', res)
 )
 
