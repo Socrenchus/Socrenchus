@@ -1,4 +1,4 @@
-Users = new Meteor.Collection("users")
+Users = new Meteor.Collection("users_proto")
 Posts = new Meteor.Collection("posts")
 Instances = new Meteor.Collection("instances")
 
