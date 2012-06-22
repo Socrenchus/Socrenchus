@@ -7,7 +7,7 @@ Meteor.publish("my_user", (user_id) ->
 )
 
 Meteor.publish("my_posts", ->
-  user_id = Session.get('user_id')
+  user_id = Meteor.call('userId')
   if user_id
     q = Posts.find( author_id: user_id )
     Session.set( 'my_posts_query', q)
@@ -15,7 +15,7 @@ Meteor.publish("my_posts", ->
 )
 
 Meteor.publish("assigned_posts", ->
-  user_id = Session.get('user_id')
+  user_id = Meteor.call('userId')
   if user_id
     ids = []
     for item in Session.get( 'my_posts_query' ).fetch() #For each of my posts
@@ -30,6 +30,3 @@ Meteor.publish("assigned_posts", ->
     )
 )
 
-Meteor.startup( ->
-  Session.set 'user_id', Users.findOne( {} )['_id']
-)
