@@ -38,7 +38,6 @@ _.extend( Template.reply_box,
               content: replyContent,
               parent_id: @_id,
               instance_id: @instance_id
-              author_id: Session.get('user_id')
               votes:{
                 'up': {
                   users: []

@@ -7,10 +7,10 @@ Meteor.subscribe( "my_user" )
 Meteor.subscribe( "my_posts" )
 Meteor.subscribe( "assigned_posts" )
 
-# Temporary user info
-# TODO: change this to anup's upcoming Meteor method which gets the current user's id
-Session.set('user_id', 999) #999 is a dummy value
-console.log(Session.get('user_id'))
+# Get User ID
+user_id = Meteor.call('userId', (err, res) ->
+  Session.set('user_id', res)
+)
 
 # Backbone router
 class Router extends Backbone.Router
