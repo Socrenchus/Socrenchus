@@ -1,0 +1,2 @@
+Meteor.accounts.google.config "592591295899-bf7snrv07q0ee1l7abp8rs2s1trul0ip.apps.googleusercontent.com", "http://meta.socrench.us:3000"
+Meteor.accounts.facebook.config "237173219733778", "http://meta.socrench.us:3000"
