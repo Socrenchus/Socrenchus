@@ -29,7 +29,7 @@ _.extend( Template.reply_box,
         #console.log("ID of Post you're replying to: #{ @_id }")
         #console.log("Reply content: #{replyContent}")
         if(replyContent=="") #can do other checks to prevent them from submitting all whitespace stuff
-          alert('Come on bro, write more than that!')#debugging why we're selecting the wrong text box.
+          alert('Your reply is empty!')
         else
           replyID = Posts.insert(
             {
