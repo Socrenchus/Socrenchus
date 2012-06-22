@@ -5,3 +5,4 @@ _.extend( Template.body,
         Session.set("state", 'closed')
   }
 )
+

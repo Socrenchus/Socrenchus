@@ -51,3 +51,4 @@ _.extend( Template.reply_box,
        Meteor.flush()
   }
 )
+
