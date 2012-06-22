@@ -1,5 +1,8 @@
 _.extend( Template.votebox,
-  voted: -> Session.get("voted_#{@_id}") || Session.get('user_id') in @votes.up.users || Session.get('user_id') in @votes.down.users
+  voted: ->
+    Session.equals("voted_#{@_id}", true) ||
+    Session.get('user_id') in @votes.up.users ||
+    Session.get('user_id') in @votes.down.users
   voted_up: -> Session.get('user_id') in @votes.up.users
   voted_down: -> Session.get('user_id') in @votes.down.users
   score: -> @votes.up.users.length - @votes.down.users.length
