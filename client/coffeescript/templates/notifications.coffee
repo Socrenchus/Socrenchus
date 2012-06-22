@@ -1,6 +1,6 @@
 _.extend( Template.notifications,
-  count: -> Session.get('notfs').length
-  ntfs: -> return Session.get('notfs')
+  count: -> Session.get('notes').length
+  notes: -> return Session.get('notes')
   show: -> Session.equals('state','open')
   message: -> @message
   events: {
@@ -14,12 +14,12 @@ _.extend( Template.notifications,
   }
 )
 
-tempNotfs = [{message: 'hi'},{message: 'there'},
+tempNotes = [{message: 'hi'},{message: 'there'},
       {message: 'friend'},{message: 'how'},
       {message: 'are'},{message: 'you'},
       {message: 'today'}]
       
-Session.set('notfs', tempNotfs)
+Session.set('notes', tempNotes)
 
 #$(document).click ->
 #  if Session.get('state', 'open')
