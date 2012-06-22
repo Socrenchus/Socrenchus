@@ -1,6 +1,6 @@
 _.extend( Template.notifications,
-  count: -> Session.get('notes').length
-  notes: -> return Session.get('notes')
+  count: -> Session.get('notifications').length
+  notifications: -> return Session.get('notifications')
   show: -> Session.equals('state','open')
   message: -> @message
   events: {
@@ -19,8 +19,8 @@ tempNotes = [{message: 'hi'},{message: 'there'},
       {message: 'are'},{message: 'you'},
       {message: 'today'}]
       
-Session.set('notes', tempNotes)
+Session.set('notifications', tempNotes)
 
-#$(document).click ->
-#  if Session.get('state', 'open')
-#    Session.set('state', 'closed')
+$(document).click ->
+  if Session.get('state', 'open')
+    Session.set('state', 'closed')
