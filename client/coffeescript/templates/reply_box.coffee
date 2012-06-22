@@ -38,6 +38,7 @@ _.extend( Template.reply_box,
               content: replyContent,
               parent_id: @_id,
               instance_id: @instance_id
+              #we need to add the author_id field
             }
           )
           console.log("ID of new post: "+replyID)

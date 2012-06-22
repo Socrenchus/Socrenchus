@@ -50,24 +50,37 @@ div.post {
   margin: .5em;
 }
 div.post > div.main {
+  display: inline;
   border: 2px solid #FFE017;
   background-color: #FFF6BA;
 }
 div.post > div.body {
-  display: block;
+  display: inline;
   border: 2px solid #FFAE00;
   background-color: #FFF6E3;
 }
 div.post > div.attributes {
-  display: block;
+  display: inline;
   border: 2px solid #FF3B3B;
   background-color: #FFD5C9;
 }
 div.attributes > div.votebox {
-  display: inline;
+  display: inline-block;
   border: 2px solid #2E58FF;
   background-color: #C7D2FF;
 }
+
+div.votebox > button.votebutton {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 2em;
+}
+
+div.votebox > text.score {
+  text-align: center;
+}
+
 .tag {
   display: inline;
   border: 2px solid #EE2EFF;
