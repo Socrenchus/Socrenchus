@@ -24,6 +24,7 @@ html {
   height: 90px;  
 }
 
+
 .unselectable {
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -44,6 +45,7 @@ span.sessionBarUserName {
   float: right;
 }
 
+
 div.post {
   border: 2px solid #1CFF37;
   background-color: #BAFFC2;
@@ -53,22 +55,33 @@ div.post > div.main {
   border: 2px solid #FFE017;
   background-color: #FFF6BA;
 }
-div.post > div.body {
-  display: block;
+div.post > div.main > div.body {
   border: 2px solid #FFAE00;
   background-color: #FFF6E3;
 }
-div.post > div.attributes {
-  display: block;
+div.post > div.main > div.attributes {
   border: 2px solid #FF3B3B;
   background-color: #FFD5C9;
 }
-div.attributes > div.votebox {
-  display: inline;
+div.attributes > div.vote_box {
+  display: inline-block;
   border: 2px solid #2E58FF;
   background-color: #C7D2FF;
+  width: 3em;
 }
-div.attributes > div.tagbox {
+
+div.vote_box > button.vote_button {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 2em;
+}
+
+div.vote_box > div.score {
+  text-align: center;
+}
+
+.tag {
   display: inline;
   border: 2px solid #EE2EFF;
   background-color: #FBC9FF;

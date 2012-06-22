@@ -7,11 +7,11 @@
       <!--http://handlebarsjs.com/#iteration-->
       {{#if group_posts}}
         {{#each groups}}
-          {{> group}}
+          <li>{{> group}}</li>
         {{/each}}
       {{else}}
         {{#each posts}}
-          {{> post}}
+          <li>{{> post}}</li>
         {{/each}}
       {{/if}}
     </ul>

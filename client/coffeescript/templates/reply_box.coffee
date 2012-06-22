@@ -15,8 +15,7 @@ _.extend( Template.reply_box,
         event.stopImmediatePropagation()
     
     #editing
-    "keydown textarea[name='reply_text']": (event) ->  
-    #updates composition string while typing. Does not get the character that's entered in after this event triggers.
+    "keydown textarea[name='reply_text'], keyup textarea[name='reply_text']": (event) ->  
       if not event.isImmediatePropagationStopped()
         Session.set("composing_#{ @_id }", event.target.value) 
         Meteor.flush()
@@ -25,19 +24,28 @@ _.extend( Template.reply_box,
     #submit a reply.  
     "click button[name='reply_submit']": (event) ->
       if not event.isImmediatePropagationStopped()
-        replyTextBox = event.target.parentNode.getElementsByTagName("textarea")[0]
-        replyContent = replyTextBox.value
-        #Session.set("composing_#{ @_id }", replyContent) #not strictly necessary unless we're using it again later.
+        #old way: replyTextBox = event.target.parentNode.getElementsByTagName("textarea")[0]
+        replyContent = Session.get("composing_#{ @_id }") #replyTextBox.value
         #console.log("ID of Post you're replying to: #{ @_id }")
         #console.log("Reply content: #{replyContent}")
         if(replyContent=="") #can do other checks to prevent them from submitting all whitespace stuff
-          alert('Come on bro, write more than that!')#debugging why we're selecting the wrong text box.
+          alert('Your reply is empty!')
         else
           replyID = Posts.insert(
             {
               content: replyContent,
               parent_id: @_id,
               instance_id: @instance_id
+              votes:{
+                'up': {
+                  users: []
+                  weight: 0
+                }
+                'down': {
+                  users: []
+                  weight: 0
+                }
+              }
             }
           )
           console.log("ID of new post: "+replyID)
@@ -50,3 +58,4 @@ _.extend( Template.reply_box,
        Meteor.flush()
   }
 )
+
