@@ -15,7 +15,7 @@ filterAllTheThings = ->
   return res
 
 Meteor.publish("my_posts", ->
-  user_id = Meteor.call('userId')
+  user_id = Meteor.call('get_user_id')
   if user_id
     q = Posts.find( { author_id: user_id } )
     Session.set( 'my_posts_query', q)
@@ -24,7 +24,7 @@ Meteor.publish("my_posts", ->
 )
 
 Meteor.publish("assigned_posts", ->
-  user_id = Meteor.call('userId')
+  user_id = Meteor.call('get_user_id')
   if user_id
     ids = []
     for item in Session.get( 'my_posts_query' ).fetch() #For each of my posts
