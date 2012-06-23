@@ -25,5 +25,6 @@ class Router extends Backbone.Router
     )
 
 Router = new Router()
-Meteor.startup ->
+Meteor.startup( ->
   Backbone.history.start( pushState: true )
+)

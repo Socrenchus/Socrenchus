@@ -16,6 +16,7 @@ _.extend( Template.notifications,
       
 Session.set('notifications', [])
 
-$(document).click ->
+$(document).click( ->
   if Session.get('notifications_state', 'open')
     Session.set('notifications_state', 'closed')
+)
