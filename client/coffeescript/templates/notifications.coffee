@@ -1,14 +1,14 @@
 _.extend( Template.notifications,
   count: -> Session.get('notifications').length
   notifications: -> return Session.get('notifications')
-  show: -> Session.equals('state','open')
+  show: -> Session.equals('notifications_state','open')
   message: -> @message
   events: {
     'click #notification-counter': (event) ->
-      if Session.equals('state', 'open')
-        Session.set('state', 'closed')
+      if Session.equals('notifications_state', 'open')
+        Session.set('notifications_state', 'closed')
       else
-        Session.set('state', 'open')
+        Session.set('notifications_state', 'open')
     'click': (event) ->
       event.stopPropagation()
   }
@@ -16,6 +16,7 @@ _.extend( Template.notifications,
       
 Session.set('notifications', [])
 
-$(document).click ->
-  if Session.get('state', 'open')
-    Session.set('state', 'closed')
+$(document).click( ->
+  if Session.get('notifications_state', 'open')
+    Session.set('notifications_state', 'closed')
+)
