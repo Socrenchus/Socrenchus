@@ -1,5 +1,5 @@
 _.extend( Template.reply_box,
-  is_candidate: -> 
+  is_candidate: ->
     Session.equals("composing_#{ @_id }", undefined)
   reply_box_content: ->
     if @is_candidate
@@ -15,25 +15,27 @@ _.extend( Template.reply_box,
         event.stopImmediatePropagation()
     
     #editing
-    "keydown textarea[name='reply_text'], keyup textarea[name='reply_text']": (event) ->  
+    """
+    keydown textarea[name='reply_text'],
+    keyup textarea[name='reply_text']
+    """: (event) ->
       if not event.isImmediatePropagationStopped()
-        Session.set("composing_#{ @_id }", event.target.value) 
+        Session.set("composing_#{ @_id }", event.target.value)
         Meteor.flush()
         event.stopImmediatePropagation()
         
-    #submit a reply.  
+    #submit a reply.
     "click button[name='reply_submit']": (event) ->
       if not event.isImmediatePropagationStopped()
-        #old way: replyTextBox = event.target.parentNode.getElementsByTagName("textarea")[0]
-        replyContent = Session.get("composing_#{ @_id }") #replyTextBox.value
+        reply_content = Session.get("composing_#{ @_id }") #replyTextBox.value
         #console.log("ID of Post you're replying to: #{ @_id }")
         #console.log("Reply content: #{replyContent}")
-        if(replyContent=="") #can do other checks to prevent them from submitting all whitespace stuff
+        if(reply_content=="")
           alert('Your reply is empty!')
         else
-          replyID = Posts.insert(
+          reply_id = Posts.insert(
             {
-              content: replyContent,
+              content: reply_content,
               parent_id: @_id,
               instance_id: @instance_id
               votes:{
@@ -48,14 +50,14 @@ _.extend( Template.reply_box,
               }
             }
           )
-          console.log("ID of new post: "+replyID)
+          console.log("ID of new post: "+reply_id)
           Session.set("composing_#{ @_id }", undefined) #the clean up.
         event.stopImmediatePropagation()
      
-     #cancel a reply
-     "click button[name='reply_cancel']": (event) ->
-       Session.set("composing_#{ @_id }", undefined)
-       Meteor.flush()
+    #cancel a reply
+    "click button[name='reply_cancel']": (event) ->
+      Session.set("composing_#{ @_id }", undefined)
+      Meteor.flush()
   }
 )
 

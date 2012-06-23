@@ -1,4 +1,4 @@
 _.extend( Template.session_bar,
   username: ->
-    return "USERNAME"
+    return Session.get('user_id')
 )
