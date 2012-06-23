@@ -199,16 +199,16 @@ Meteor.startup( ->
     post_ids = []
     for post in posts
       id_maps =
-        author_id: -> user_ids[post.author_id]
-        parent_id: -> post_ids[post.parent_id]
-        instance_id: -> instance_ids[post.instance_id]
+        author_id: -> post.author_id = user_ids[post.author_id]
+        parent_id: -> post.parent_id = post_ids[post.parent_id]
+        instance_id: -> post.instance_id = instance_ids[post.instance_id]
         tags: ->
           for tag, tag_dict of post.tags
             for user, i in tag_dict.users
               post.tags[tag].users[i] = user_ids[user]
 
-      for own key in post
-        id_maps[key]()
+      for key of post
+        id_maps[key]?()
 
       post_ids.push(Posts.insert(post))
 )

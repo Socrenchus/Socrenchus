@@ -20,7 +20,7 @@ Meteor.publish("assigned_posts", ->
     # gather ids of my posts and posts i've replied to
     ids = []
     for item in Session.get( 'my_posts_query' ).fetch()
-      ids.push( item['parent_id'] if 'parent_id' of item )
+      ids.push( item['parent_id'] ) if 'parent_id' of item
       ids.push( item['_id'] )
     # query for the children and posts from above
     return Posts.find(
