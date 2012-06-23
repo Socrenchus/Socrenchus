@@ -5,4 +5,6 @@ _.extend( Template.post,
     post_content_html = showdown_converter.makeHtml(escaped)
     return post_content_html
   identifier: -> @_id
+  link_href: ->
+    return "#{ @_id }"
 )
