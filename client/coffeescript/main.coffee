@@ -26,5 +26,5 @@ class Router extends Backbone.Router
 
 Router = new Router()
 Meteor.startup( ->
-  Backbone.history.start( pushState: true ) #!SUPRESS no_headless_camel_case
+  Backbone.history.start( pushState: true ) #!SUPPRESS no_headless_camel_case
 )
