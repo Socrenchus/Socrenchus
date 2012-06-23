@@ -35,7 +35,7 @@ _.extend( Template.reply_box,
         else
           reply_id = Posts.insert(
             {
-              content: replyContent,
+              content: reply_content,
               parent_id: @_id,
               instance_id: @instance_id
               votes:{
