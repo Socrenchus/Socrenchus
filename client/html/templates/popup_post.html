@@ -1,9 +1,12 @@
 <template name="popup_post">
   {{#if show_post}}
     <div class="dimmer"></div>
+    
+    <div class="popup_post">
+      {{#with showing_post}} 
+        {{> post}}
+      {{/with}}
+    </div>
  
-    {{#with showing_post}} 
-      {{> post}}
-    {{/with}}
   {{/if}}
 </template>
