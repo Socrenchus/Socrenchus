@@ -11,18 +11,16 @@
 
 <template name="post">
   <div class="post">
-    
     <div class="main">
       <div class="body">
         {{{content}}}
       </div>
+      <a class="link_href" href="{{link_href}}">Link to this post</a>
       <div class="attributes">
-        <div class="votebox">
-          [Votebox]
-        </div>
-        <div class="tagbox">
-          [Tagbox]
-        </div>
+        {{#with this}}
+          {{> votebox}}
+          [[Tagbox]]
+        {{/with}}
       </div>
     </div>
     

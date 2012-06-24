@@ -7,7 +7,7 @@ Meteor.publish("my_user", (user_id) ->
 )
 
 Meteor.publish("my_posts", ->
-  user_id = Meteor.call('userId')
+  user_id = Meteor.call('get_user_id')
   if user_id
     q = Posts.find( author_id: user_id )
     Session.set( 'my_posts_query', q)
@@ -15,18 +15,26 @@ Meteor.publish("my_posts", ->
 )
 
 Meteor.publish("assigned_posts", ->
-  user_id = Meteor.call('userId')
+  user_id = Meteor.call('get_user_id')
   if user_id
+    # gather ids of my posts and posts i've replied to
     ids = []
-    for item in Session.get( 'my_posts_query' ).fetch() #For each of my posts
-      ids.push item['parent_id'] if 'parent_id' of item #Add the parent's id
-      ids.push item['_id']                              #Add my post's id
-    return Posts.find( {'$or':                          #Return all posts who
-        [ 
-          {_id: {'$in':ids}},                           #are mine, or my parent's
-          {parent_id: {'$in':ids}}                      #or my siblings, or my children.
-        ] 
-      } 
+    for item in Session.get( 'my_posts_query' ).fetch()
+      ids.push( item['parent_id'] ) if 'parent_id' of item
+      ids.push( item['_id'] )
+    # query for the children and posts from above
+    return Posts.find(
+      {
+        '$or':
+          [
+            {
+              _id: { '$in': ids }
+            },
+            {
+              parent_id: { '$in': ids }
+            }
+          ]
+      }
     )
 )
 

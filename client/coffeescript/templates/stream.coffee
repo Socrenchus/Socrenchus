@@ -1,5 +1,5 @@
 _.extend( Template.stream,
-  group_posts: -> 
+  group_posts: ->
     MIN_POSTS = 5
     count = Posts.find( 'parent_id': @_id ).count()
     return count >= MIN_POSTS
@@ -13,7 +13,7 @@ _.extend( Template.stream,
       for tag in tags
         unless tag of groups
           groups[tag] = []
-        groups[tag].push post
+        groups[tag].push(post)
     return ({name:k,posts:v} for k,v of groups)
   new: true
 )

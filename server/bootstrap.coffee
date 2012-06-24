@@ -1,5 +1,5 @@
-Meteor.startup ->
-  if Posts.find().count() is 0 
+Meteor.startup( ->
+  if Posts.find().count() is 0
     instances = [
       {
         admin_id: 0
@@ -188,24 +188,27 @@ Meteor.startup ->
     ]
     timestamp = (new Date()).getTime()
     
-    user_ids = [] 
+    user_ids = []
     for user in users
-      user_ids.push Users.insert(user)
+      user_ids.push(Users.insert(user))
     instance_ids = []
     for instance in instances
-      if 'admin_id' of instance
+      if instance.admin_id?
         instance.admin_id = user_ids[instance.admin_id]
-      instance_ids.push Instances.insert(instance)
+      instance_ids.push(Instances.insert(instance))
     post_ids = []
     for post in posts
-      if 'author_id' of post
-        post.author_id = user_ids[post.author_id]
-      if 'parent_id' of post
-        post.parent_id = post_ids[post.parent_id]
-      if 'instance_id' of post
-        post.instance_id = instance_ids[post.instance_id]
-      if 'tags' of post
-         for tag, tag_dict of post.tags
-           for user, i in tag_dict.users
-             post.tags[tag].users[i] = user_ids[user]
-      post_ids.push Posts.insert(post)
+      id_maps =
+        author_id: -> post.author_id = user_ids[post.author_id]
+        parent_id: -> post.parent_id = post_ids[post.parent_id]
+        instance_id: -> post.instance_id = instance_ids[post.instance_id]
+        tags: ->
+          for tag, tag_dict of post.tags
+            for user, i in tag_dict.users
+              post.tags[tag].users[i] = user_ids[user]
+
+      for key of post
+        id_maps[key]?()
+
+      post_ids.push(Posts.insert(post))
+)
