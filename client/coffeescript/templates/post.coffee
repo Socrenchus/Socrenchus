@@ -1,5 +1,6 @@
 _.extend( Template.post,
   content: -> 
+    @content ?= ""
     escaped = Handlebars._escape(@content)
     showdownConverter = new Showdown.converter()
     postContentHtml = showdownConverter.makeHtml(escaped)
