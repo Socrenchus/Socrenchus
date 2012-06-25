@@ -12,17 +12,19 @@
 <template name="post">
   <div class="post">
     <div class="main">
+      {{#with this}}
+        {{> votebox}}
+      {{/with}}
       <div class="body">
         {{{content}}}
+        <a href="{{link_href}}">Link to this post</a>
       </div>
       <div class="attributes">
         {{#with this}}
-          {{> votebox}}
           [[Tagbox]]
         {{/with}}
       </div>
     </div>
-    <a href="{{link_href}}">Link to this post</a>
     <div class="reply-section">
       {{> reply_box}}
       {{> stream}} 
