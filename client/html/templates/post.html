@@ -11,18 +11,15 @@
 
 <template name="post">
   <div class="post">
-    
     <div class="main">
       <div class="body">
         {{{content}}}
       </div>
       <div class="attributes">
-        <div class="votebox">
-          [Votebox]
-        </div>
-        <div class="tagbox">
-          [Tagbox]
-        </div>
+        {{#with this}}
+          {{> votebox}}
+          [[Tagbox]]
+        {{/with}}
       </div>
     </div>
     
