@@ -1,5 +1,6 @@
 post_basecolor = rgb(89, 122, 255, 1)
-//post_basecolor = rgb(81, 81, 81)
+
+//post_basecolor = rgb(1, 0, 89) //DBLUE
 post_papercolor = post_basecolor + 95%
 post_lightcolor = post_basecolor + 50%
 post_llightcolor = post_lightcolor + 50%
@@ -8,22 +9,42 @@ post_ddarkcolor = post_darkcolor - 50%
 
 div.post
   border 1px solid post_ddarkcolor
+  //Since mixins aren't working correctly, border-radius, box-shadow and background gradients aren't cross-browser compatible yet.  
+  //I can fix this, but I haven't yet. 
   border-radius .5em
-  background-color post_basecolor
-  box-shadow inset 0 -5px 10px post_darkcolor, 0 2px 5px post_darkcolor 
-  //display: table
-  
+  box-shadow inset 0 -5px 10px post_darkcolor, 0 2px 5px post_darkcolor
+  background-image -webkit-linear-gradient(top, post_basecolor 0%, post_darkcolor 100%)
+   
+   
+   
   margin .5em
-  padding .25em
+  padding 0
 
 div.post-content
-  border 1px solid black
-  border-radius 1em 0 0 0
+  border-color post_darkcolor post_darkcolor post_darkcolor post_darkcolor 
+  border-style none solid solid none
+  border-width 0px 1px 1px 0px
+  border-radius .5em 0 0 0
+  
   background-color post_papercolor
   box-shadow inset 0 -3px 5px post_lightcolor
   //display: table-cell;
   
+  padding .5em
 
+  display inline-block
+  width auto
+  
+  p
+    margin 0 0 1em 0
+    
+
+div.post-tagbox-column
+  display inline-block
+
+  float right
+  
+  width 12em
 
 /*
 div.post {
