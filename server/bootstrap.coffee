@@ -57,7 +57,7 @@ Meteor.startup ->
             weight:  4
           }
           'down': {
-            users: [0]
+            users: [3]
             weight: 2
           }
         }

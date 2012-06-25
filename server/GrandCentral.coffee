@@ -30,7 +30,7 @@ class GrandCentral
             }
           }
           args[0].tags = []
-          console.log args[0]
+          #console.log args[0]
         update: (args...) =>
           error_list.push('not implimented yet')
         remove: (args...) =>
