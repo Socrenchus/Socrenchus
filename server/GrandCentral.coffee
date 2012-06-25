@@ -2,10 +2,10 @@ _debug = true
 
 class GrandCentral
   constructor: (@collection, @method) ->
-    @default = Meteor.default_server.method_handlers["/#{@collection}/#{@method}"]
-    Meteor.default_server.method_handlers["/#{@collection}/#{@method}"] = @dispatch
-  
-  error_list = []
+    @default =
+      Meteor.default_server.method_handlers["/#{@collection}/#{@method}"]
+    Meteor.default_server.method_handlers["/#{@collection}/#{@method}"] =
+      @dispatch
   dispatch: (args...) =>
     {
       users: {
@@ -34,7 +34,6 @@ class GrandCentral
         update: (args...) =>
           error_list.push('not implimented yet')
         remove: (args...) =>
-          error_list.push('not implimented yet')
       }
       instances: {
         insert: (args...) =>
@@ -42,7 +41,6 @@ class GrandCentral
         update: (args...) =>
           error_list.push('not implimented yet')
         remove: (args...) =>
-          error_list.push('not implimented yet')
       }
     }[@collection][@method](args...)
     if (error_list.length is 0)

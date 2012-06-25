@@ -1,9 +1,10 @@
 _.extend( Template.post,
-  content: -> 
-    @content ?= ""
+  content: ->
     escaped = Handlebars._escape(@content)
-    showdownConverter = new Showdown.converter()
-    postContentHtml = showdownConverter.makeHtml(escaped)
-    return postContentHtml
+    showdown_converter = new Showdown.converter()
+    post_content_html = showdown_converter.makeHtml(escaped)
+    return post_content_html
   identifier: -> @_id
+  link_href: ->
+    return "#{ @_id }"
 )
