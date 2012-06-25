@@ -1,5 +1,5 @@
 post_basecolor = rgb(89, 122, 255, 1)
-
+//post_basecolor = #4e9a06 //GREEN
 //post_basecolor = rgb(1, 0, 89) //DBLUE
 post_papercolor = post_basecolor + 95%
 post_lightcolor = post_basecolor + 50%
@@ -15,12 +15,25 @@ div.post
   box-shadow inset 0 -5px 10px post_darkcolor, 0 2px 5px post_darkcolor
   background-image -webkit-linear-gradient(top, post_basecolor 0%, post_darkcolor 100%)
    
-   
-   
   margin .5em
   padding 0
+  
+  display table
+
+div post.post-main
+  display table-row
+
+div.post-content-column
+  display table-cell
+  width auto
+  
+div.post-tagbox-column
+  display table-cell
+  width 12em
 
 div.post-content
+  display table-cell
+
   border-color post_darkcolor post_darkcolor post_darkcolor post_darkcolor 
   border-style none solid solid none
   border-width 0px 1px 1px 0px
@@ -30,23 +43,20 @@ div.post-content
   box-shadow inset 0 -3px 5px post_lightcolor
   //display: table-cell;
   
+  position relative
+  top 0
+  left 0
+  
   padding .5em
-
-  display inline-block
-  width auto
+  margin 0 0 0 0
   
   p
     margin 0 0 1em 0
     
 
-div.post-tagbox-column
-  display inline-block
-
-  float right
-  
-  width 12em
-
 div.tagbox
+  display table-cell
+  
   border 1px solid post_darkcolor
   border-radius .5em
   

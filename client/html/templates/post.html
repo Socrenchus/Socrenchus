@@ -14,12 +14,14 @@
     {{#with this}} 
       {{> votebox}}
     {{/with}}
-    <div class="post"> 
+
+    <div class="post">
       <div class="post-main">
-   
-        <div class="post-content">
-          {{{content}}}
-          <a href="{{link_href}}">Link to this post</a>
+        <div class="post-content-column">
+          <div class="post-content">
+            {{{content}}}
+            <a href="{{link_href}}">Link to this post</a>
+          </div>
         </div>
         <div class="post-tagbox-column">
           {{#with this}}
