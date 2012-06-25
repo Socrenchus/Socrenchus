@@ -23,9 +23,15 @@
       </div>
     </div>
     <a href="{{link_href}}">Link to this post</a>
+    <button name="goto-parent">Parent</button>
     <div class="reply-section">
       {{> reply_box}}
-      {{> stream}} 
+      {{#if hide_replies}}
+        <button name="show-replies">Show Replies</button>
+      {{else}}
+        <button name="hide-replies">Hide Replies</button>
+        {{> stream}}
+      {{/if}}
     </div>
   </div>
 </template>

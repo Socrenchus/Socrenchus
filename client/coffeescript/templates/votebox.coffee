@@ -1,5 +1,5 @@
 _.extend( Template.votebox,
-  @votes ?= {}
+  @votes ?= {up: {users:[], weight:0}, down: {users:[], weight:0}}
   voted: ->
     Session.equals("voted_#{@_id}", true) ||
     Session.get('user_id') in @votes.up.users ||

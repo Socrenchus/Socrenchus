@@ -7,4 +7,24 @@ _.extend( Template.post,
   identifier: -> @_id
   link_href: ->
     return "#{ @_id }"
+  hide_replies: -> Session.equals("hide_replies_#{ @_id }", 'true')
+  events: {
+    "click button[name='goto-parent']": (event) ->
+      if not event.isImmediatePropagationStopped()
+        parent = event.target
+        #Climb the DOM tree once to get the current post, then again for the parent post
+        for _ in [1,2]
+          parent = parent.parentNode
+          #Until we hit a post or the top of the stream, keep looking
+          while parent.className != 'post' && parent.id != 'page-body'
+            parent = parent.parentNode
+        window.scrollTo(parent.offsetLeft, parent.offsetTop)
+        event.stopImmediatePropagation()
+        
+    "click button[name='show-replies']": (event) ->
+      Session.set("hide_replies_#{ @_id }", 'false')
+        
+    "click button[name='hide-replies']": (event) ->
+      Session.set("hide_replies_#{ @_id }", 'true')
+  }
 )
