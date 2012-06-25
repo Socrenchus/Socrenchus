@@ -26,7 +26,7 @@ filter_posts = ->
       my_vote : null
       vote_weight : 0
     }
-    
+    client_doc._id = doc._id
     client_doc.author_id = doc.author_id
     client_doc.content = doc.content
     client_doc.instance_id = doc.instance_id
@@ -49,10 +49,12 @@ filter_posts = ->
       client_doc.vote_weight = up_votes - down_votes
     
     #only graduated tags are visible
-    #needs a better function to determine if a tag has graduated
+    
     tag_list = {content: [], weight: []}
     my_tag_list = {content: [], weight: []}
     for tag in doc.tags?
+      #needs a better function to determine if a tag has graduated,
+      #graduated if more than one user.
       if (tag.users.length > 1)
         tag_list.content.push tag.toString
         tag_list.weight.push tag.weight
