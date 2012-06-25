@@ -15,7 +15,6 @@
       <div class="body">
         {{{content}}}
       </div>
-      <a class="link_href" href="{{link_href}}">Link to this post</a>
       <div class="attributes">
         {{#with this}}
           {{> votebox}}
@@ -23,7 +22,7 @@
         {{/with}}
       </div>
     </div>
-    
+    <a href="{{link_href}}">Link to this post</a>
     <div class="reply-section">
       {{> reply_box}}
       {{> stream}} 
