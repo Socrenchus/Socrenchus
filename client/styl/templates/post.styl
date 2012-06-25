@@ -1,0 +1,112 @@
+post_basecolor = rgb(89, 122, 255, 1)
+//post_basecolor = rgb(81, 81, 81)
+post_papercolor = post_basecolor + 95%
+post_lightcolor = post_basecolor + 50%
+post_llightcolor = post_lightcolor + 50%
+post_darkcolor = post_basecolor - 50%
+post_ddarkcolor = post_darkcolor - 50%
+
+div.post
+  border 1px solid post_ddarkcolor
+  border-radius .5em
+  background-color post_basecolor
+  box-shadow inset 0 -5px 10px post_darkcolor, 0 2px 5px post_darkcolor 
+  //display: table
+  
+  margin .5em
+  padding .25em
+
+div.post-content
+  border 1px solid black
+  border-radius 1em 0 0 0
+  background-color post_papercolor
+  box-shadow inset 0 -3px 5px post_lightcolor
+  //display: table-cell;
+  
+
+
+/*
+div.post {
+  border: 2px solid #1CFF37;
+  background-color: #BAFFC2;
+  margin: .5em;
+}
+div.post > div.main {
+  display: table;
+  width: 100%;
+  border: 2px solid #FFE017;
+  background-color: #FFF6BA;
+}
+div.post > div.main > div.body {
+  display: table-cell;
+  border: 2px solid #FFAE00;
+  background-color: #FFF6E3;
+}
+div.post > div.main > div.attributes {
+  display: table-cell;
+  width: 30%;
+  border: 2px solid #FF3B3B;
+  background-color: #FFD5C9;
+}
+div.vote_box {
+  display: table-cell;
+  border: 2px solid #2E58FF;
+  background-color: #C7D2FF;
+  width: 3em;
+}
+
+div.vote_box > button.vote_button {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 2em;
+}
+
+div.vote_box > div.score {
+  text-align: center;
+}
+
+.tag {
+  display: inline;
+  border: 2px solid #EE2EFF;
+  background-color: #FBC9FF;
+}
+
+div.your-reply {
+  border: 1px solid #2E58FF;
+  background-color: #C7D2FF;
+  border-bottom-width: 2px;
+}
+div.your-reply > textarea {
+  display: block;
+  width: 90%;
+  minHeight: 8em;
+  margin: .5em;
+  
+  resize: none;
+
+  border: 1px solid #2E58FF;
+  border-top-width: 2px;
+  border-left-color: #738FFF;
+  border-left-width: 2px;
+  border-right-color: #738FFF;
+  border-right-width: 2px;
+  
+  background: #e3ebf7;
+  background: -moz-linear-gradient(top, #e3ebf7 0%, #ffffff 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e3ebf7), color-stop(100%,#ffffff)); 
+  background: -webkit-linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
+  background: -o-linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
+  background: -ms-linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
+  background: linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
+   
+  font-family: Helvetica, Arial, "Luxi Sans", sans-serif;
+}
+div.your-reply > button {
+  margin: .5em;
+}
+
+ul {
+  list-style-type: none;
+}
+*/

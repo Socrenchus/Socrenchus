@@ -10,23 +10,28 @@
     -->
 
 <template name="post">
-  <div class="post">
-    <div class="main">
-      {{#with this}}
-        {{> votebox}}
-      {{/with}}
-      <div class="body">
-        {{{content}}}
-        <a href="{{link_href}}">Link to this post</a>
-      </div>
-      <div class="attributes">
+  <div class="post-container">
+    <div class="post">    
+      <div class="post-main">
         {{#with this}}
-          [[Tagbox]]
+          <!--votebox-->
         {{/with}}
+        <div class="post-content">
+          {{{content}}}
+          <a href="{{link_href}}">Link to this post</a>
+        </div>
+        <div class="post-attributes">
+          {{#with this}}
+            {{> votebox}}
+            {{> tagbox}}
+          {{/with}}
+        </div>
+      </div>
+      <div class="reply-section">
+        {{> reply_box}}
       </div>
     </div>
-    <div class="reply-section">
-      {{> reply_box}}
+    <div class="post-replies">
       {{> stream}} 
     </div>
   </div>
