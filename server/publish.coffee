@@ -6,10 +6,11 @@ Meteor.publish("my_user", (user_id) ->
   return Users.find( _id: user_id )
 )
 
-filterAllTheThings = ->
+filter_posts = ->
   res = [];
   @forEach((doc) ->
-    doc.content = 'troll'
+    #doc.content = 'troll'
+    
     res.push(doc)
   )
   return res
@@ -19,8 +20,7 @@ Meteor.publish("my_posts", ->
   if user_id
     q = Posts.find( { author_id: user_id } )
     Session.set( 'my_posts_query', q)
-    #Bryans proff of concept
-    #q.__proto__.fetch = filterAllTheThings
+    q.__proto__.fetch = filter_posts
     return q
 )
 
@@ -38,8 +38,7 @@ Meteor.publish("assigned_posts", ->
         ] 
       }
     )
-    #Bryans proff of concept
-    #q.__proto__.fetch = filterAllTheThings
+    q.__proto__.fetch = filter_posts
     return q
 )
 
