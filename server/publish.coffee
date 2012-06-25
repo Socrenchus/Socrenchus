@@ -19,7 +19,8 @@ Meteor.publish("my_posts", ->
   if user_id
     q = Posts.find( { author_id: user_id } )
     Session.set( 'my_posts_query', q)
-    q.__proto__.fetch = filterAllTheThings
+    #Bryans proff of concept
+    #q.__proto__.fetch = filterAllTheThings
     return q
 )
 
@@ -37,7 +38,8 @@ Meteor.publish("assigned_posts", ->
         ] 
       }
     )
-    q.__proto__.fetch = filterAllTheThings
+    #Bryans proff of concept
+    #q.__proto__.fetch = filterAllTheThings
     return q
 )
 

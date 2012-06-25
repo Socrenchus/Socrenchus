@@ -4,27 +4,53 @@ class GrandCentral
   constructor: (@collection, @method) ->
     @default = Meteor.default_server.method_handlers["/#{@collection}/#{@method}"]
     Meteor.default_server.method_handlers["/#{@collection}/#{@method}"] = @dispatch
+  
+  error_list = []
   dispatch: (args...) =>
     {
       users: {
-        insert: (args...) => 
-        update: (args...) => 
+        insert: (args...) =>
+          error_list.push('not implimented yet')
+        update: (args...) =>
+          error_list.push('not implimented yet')
         remove: (args...) =>
+          error_list.push('not implimented yet')
       }
       posts: {
-        insert: (args...) ->
+        insert: (args...) =>
           args[0].author_id = Meteor.call('get_user_id')
-        update: (args...) => 
+          args[0].votes = {
+            'up': {
+              users: []
+              weight: 0
+            }
+            'down': {
+              users: []
+              weight: 0
+            }
+          }
+          args[0].tags = []
+          console.log args[0]
+        update: (args...) =>
+          error_list.push('not implimented yet')
         remove: (args...) =>
+          error_list.push('not implimented yet')
       }
       instances: {
-        insert: (args...) => 
-        update: (args...) => 
+        insert: (args...) =>
+          error_list.push('not implimented yet')
+        update: (args...) =>
+          error_list.push('not implimented yet')
         remove: (args...) =>
+          error_list.push('not implimented yet')
       }
     }[@collection][@method](args...)
-    @default.apply(@, args)
-    console.log "GrandCentral is operational!!"
+    if (error_list.length is 0)
+      @default.apply(@, args)
+    else
+      console.log error_list
+    console.log 'GrandCentral is operational!!'
+    error_list = []
 
 
 Meteor.startup( ->

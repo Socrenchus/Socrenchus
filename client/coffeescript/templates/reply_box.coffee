@@ -36,15 +36,6 @@ _.extend( Template.reply_box,
               content: replyContent,
               parent_id: @_id,
               instance_id: @instance_id
-              votes:{
-                'up': {
-                  users: []
-                  weight: 0
-                }
-                'down': {
-                  users: []
-                  weight: 0
-                }
               }
             }
           )
