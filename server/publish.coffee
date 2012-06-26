@@ -54,15 +54,15 @@ filter_posts = ->
     if client_doc.my_vote?
       up_votes = 0
       down_votes = 0
-      up_votes = doc.votes['up'].users?.length
-      down_votes = doc.votes['down'].users?.length
+      up_votes = doc.votes?['up'].users?.length
+      down_votes = doc.votes?['down'].users?.length
       client_doc.votes['up'] = {
         count: up_votes
-        weight: doc.votes['up'].weight
+        weight: doc.votes?['up'].weight
       }
       client_doc.votes['down'] = {
         count: up_votes
-        weight: doc.votes['down'].weight
+        weight: doc.votes?['down'].weight
       }
     
       
