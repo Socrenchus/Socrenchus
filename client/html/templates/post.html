@@ -15,17 +15,20 @@
     <div class="colgroup">
       <div class="col votebox_col"></div>
       <div class="col content_col"></div>
-      <div class="col tagging_col"></div>
+      <div class="col tag_col"></div>
     </div>
     <div class="tr">
       <div class="td">A</div>
-      <div class="td post_content">B</div>
-      <div class="td">C</div>
+      <div class="td post_content">{{{content}}}</div>
+      <div class="td tag_cell">
+        {{#with this}}
+          {{> tagbox}}
+        {{/with}}
+      </div>
     </div>
     <div class="tr">
       <div class="td">D</div>
-      <div class="td">E</div>
-      <div class="td">F</div>
+
     </div>
   </div>
 
