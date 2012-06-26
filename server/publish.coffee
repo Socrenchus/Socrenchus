@@ -8,18 +8,16 @@ Meteor.publish("my_user", (user_id) ->
 
 #i dont know if this is really the current user, 
 #looks like calling get_user_id, too many times causes stack overflow error.
-#this is a workaround for the same.
+#this is a workaround for the same. -anup
 current_user = 'dummy'
 
 filter_posts = ->
   res = []
-  #console.log current_user
   @forEach((doc) ->
     #client schema is outlined here.
     client_doc = {
       author_id : ''
       content : ''
-      instance_id : ''
       parent_id : ''
       tags : {
         #the tag text and corrosponding weight
@@ -43,9 +41,7 @@ filter_posts = ->
     client_doc._id = doc._id
     client_doc.author_id = doc.author_id
     client_doc.content = doc.content
-    client_doc.instance_id = doc.instance_id
     client_doc.parent_id = doc.parent_id
-    #leaving instance_id intact for now, consider removing this field
     
     #find out if user upvoted or downvoted
     if (current_user ?= username in doc.votes['up'].users)
@@ -53,17 +49,24 @@ filter_posts = ->
     else if (current_user ?= username in doc.votes['down'].users)
       client_doc.my_vote = false
     
+    
     #votes only visible if user has voted
     if client_doc.my_vote?
       up_votes = 0
       down_votes = 0
       up_votes = doc.votes['up'].users?.length
       down_votes = doc.votes['down'].users?.length
-      #need a better vote_weight function
-      client_doc.vote_weight = up_votes - down_votes
+      client_doc.votes['up'] = {
+        count: up_votes
+        weight: doc.votes['up'].weight
+      }
+      client_doc.votes['down'] = {
+        count: up_votes
+        weight: doc.votes['down'].weight
+      }
     
+      
     #only graduated tags are visible
-    
     tag_dict = {}
     my_tag_dict = {}
     for tag of doc.tags?
@@ -89,7 +92,7 @@ Meteor.publish("my_posts", ->
   if user_id
     q = Posts.find( { author_id: user_id } )
     Session.set( 'my_posts_query', q)
-    q::fetch  = filter_posts
+    q.__proto__.fetch = filter_posts
     return q
 )
 
@@ -116,7 +119,7 @@ Meteor.publish("assigned_posts", ->
       }
     )
     current_user = user_id
-    q::fetch  = filter_posts
+    q.__proto__.fetch = filter_posts
     return q
 )
 
