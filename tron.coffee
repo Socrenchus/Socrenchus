@@ -4,21 +4,22 @@ class Tron
   test:   (args...) ->
     usage = """
 
-     This simple function will define the way we test Socrenchus.
+     This simple function will define the way we test Socrenchus. You can do
+     things in most of the same ways you did them with the console.
 
      Call it with your test function like this:
 
-      console.test( ->
-        console.log( 'this writes to the log' )
-        console.info( 'this is an info message' )
-        console.warn( 'this is a warning' )
-        console.error( 'this is an error' )
+      tron.test( ->
+        tron.log( 'this writes to the log' )
+        tron.info( 'this is an info message' )
+        tron.warn( 'this is a warning' )
+        tron.error( 'this is an error' )
       )
 
     """
     for a in args
       unless typeof a == 'function'
-        console.warn(usage)
+        @warn(usage)
       else
         a()
 
