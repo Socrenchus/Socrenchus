@@ -7,7 +7,6 @@ _.extend( Template.post,
   identifier: -> @_id
   link_href: ->
     return "#{ @_id }"
-  hide_replies: -> Session.equals("hide_replies_#{ @_id }", 'true')
   events: {
     "click button[name='goto-parent']": (event) ->
       if not event.isImmediatePropagationStopped()
@@ -20,11 +19,5 @@ _.extend( Template.post,
             parent = parent.parentNode
         window.scrollTo(parent.offsetLeft, parent.offsetTop)
         event.stopImmediatePropagation()
-        
-    "click button[name='show-replies']": (event) ->
-      Session.set("hide_replies_#{ @_id }", 'false')
-        
-    "click button[name='hide-replies']": (event) ->
-      Session.set("hide_replies_#{ @_id }", 'true')
   }
 )

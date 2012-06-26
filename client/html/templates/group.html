@@ -1,8 +1,12 @@
 <template name="group">
-  <h1>{{name}}</h1>
-  <ul>
-    {{#each posts}}
-      <li>{{> post}}</li>
-    {{/each}}
-  </ul>
+  <h1 name='tag-name'>{{name}}</h1>
+  {{#if show_replies}}
+    <ul>
+      {{#each posts}}
+        <li>{{> post}}</li>
+      {{/each}}
+    </ul>
+  {{else}}
+    
+  {{/if}}
 </template>

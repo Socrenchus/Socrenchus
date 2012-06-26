@@ -1,6 +1,6 @@
 _.extend( Template.stream,
   group_posts: ->
-    MIN_POSTS = 5
+    MIN_POSTS = 0
     count = Posts.find( 'parent_id': @_id ).count()
     return count >= MIN_POSTS
   posts: ->

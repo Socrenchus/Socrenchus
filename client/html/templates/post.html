@@ -26,12 +26,7 @@
     <button name="goto-parent">Parent</button>
     <div class="reply-section">
       {{> reply_box}}
-      {{#if hide_replies}}
-        <button name="show-replies">Show Replies</button>
-      {{else}}
-        <button name="hide-replies">Hide Replies</button>
-        {{> stream}}
-      {{/if}}
+      {{> stream}}
     </div>
   </div>
 </template>
