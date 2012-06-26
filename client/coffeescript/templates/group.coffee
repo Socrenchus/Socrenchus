@@ -1,5 +1,4 @@
 _.extend( Template.group,
-  #id: -> {id: Meteor.uuid()}
   name: -> @name
   show_replies: ->
     @show ?= true
