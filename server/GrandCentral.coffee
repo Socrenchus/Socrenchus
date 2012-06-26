@@ -46,7 +46,7 @@ class GrandCentral
     if (error_list.length is 0)
       @default.apply(@, args)
     else
-      console.log error_list
+      console.error (error_list)
     console.log 'GrandCentral is operational!!'
     error_list = []
 
