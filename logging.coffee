@@ -1,20 +1,24 @@
-###
- 
- This simple override will define the way we test Socrenchus.
+_.extend(console,
+  warn: (args...) ->
+    _console.warn(args...)
+  test: (args...) ->
+    usage = """
 
- Call it like this:
+     This simple function will define the way we test Socrenchus.
 
-  console.debug( -> 
-    console.log( 'this writes to the log' )
-    console.info( 'this is an info message' )
-    console.warn( 'this is a warning' )
-    console.error( 'this is an error' )
-  )
-  
-###
-console.debug = (args...) ->
-  for a in args
-    unless typeof a == 'function'
-      console.error('You need to pass a function that can throw its own errors to debug.')
-    else
-      a()
+     Call it with your test function like this:
+
+      console.test( -> 
+        console.log( 'this writes to the log' )
+        console.info( 'this is an info message' )
+        console.warn( 'this is a warning' )
+        console.error( 'this is an error' )
+      )
+
+    """
+    for a in args
+      unless typeof a == 'function'
+        console.warn(usage)
+      else
+        a()
+)
