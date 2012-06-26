@@ -1,3 +1,5 @@
+#when _debug is on, all db actions are executed ignoring the errors which are printed on console
+#when off, db actions are blocked if any errors are encountered.
 _debug = true
 
 class GrandCentral
@@ -6,6 +8,8 @@ class GrandCentral
       Meteor.default_server.method_handlers["/#{@collection}/#{@method}"]
     Meteor.default_server.method_handlers["/#{@collection}/#{@method}"] =
       @dispatch
+      
+  error_list = []
   dispatch: (args...) =>
     {
       users: {
@@ -30,7 +34,7 @@ class GrandCentral
             }
           }
           args[0].tags = []
-          #console.log args[0]
+
         update: (args...) =>
           error_list.push('not implimented yet')
         remove: (args...) =>
@@ -45,9 +49,9 @@ class GrandCentral
     }[@collection][@method](args...)
     if (error_list.length is 0)
       @default.apply(@, args)
-    else
+    if (error_list.length>0)
       console.error (error_list)
-    console.log 'GrandCentral is operational!!'
+    #console.info 'GrandCentral is operational!!'
     error_list = []
 
 
