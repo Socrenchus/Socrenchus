@@ -12,11 +12,12 @@ div.post
   //Since mixins aren't working correctly, border-radius, box-shadow and background gradients aren't cross-browser compatible yet.  
   //I can fix this, but I haven't yet. 
   border-radius .5em
-  box-shadow inset 0 -5px 10px post_darkcolor, 0 2px 5px post_darkcolor
+  box-shadow inset 0 -5px 10px post_darkcolor, 1px 2px 5px post_darkcolor
   background-image -webkit-linear-gradient(top, post_basecolor 0%, post_darkcolor 100%)
   margin .5em
   padding 0
 
+//Table structure
 div.table
   display table
 div.colgroup
@@ -28,7 +29,9 @@ div.tr
 div.td
   display table-cell
  
-
+//Post size-tuning and layout
+div.post_container
+  display inline-block
 
 div.post_content
 div.post-content
@@ -37,7 +40,7 @@ div.post-content
   border-width 0px 1px 1px 0px
   border-radius .5em 0 0 0
   background-color post_papercolor
-  box-shadow inset 0 -3px 5px post_lightcolor
+  box-shadow inset -2px -3px 10px post_lightcolor
   position relative
   top 0
   left 0
@@ -60,7 +63,6 @@ div.tagbox
 
 
 
-
 div.post-main
   display table
 
@@ -77,7 +79,42 @@ div.post-main
 
 
 
+
+
+
+div.your-reply {
+  //border: 1px solid #2E58FF;
+  //background-color: #C7D2FF;
+  //border-bottom-width: 2px;
+}
+div.your-reply > textarea {
+  display: block;
+  width: 90%;
+  minHeight: 8em;
+  margin: .5em;
   
+  resize: none;
+
+  border: 1px solid #2E58FF;
+  border-top-width: 2px;
+  border-left-color: #738FFF;
+  border-left-width: 2px;
+  border-right-color: #738FFF;
+  border-right-width: 2px;
+  
+  background: #e3ebf7;
+  background: -moz-linear-gradient(top, #e3ebf7 0%, #ffffff 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e3ebf7), color-stop(100%,#ffffff)); 
+  background: -webkit-linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
+  background: -o-linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
+  background: -ms-linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
+  background: linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
+   
+  font-family: Helvetica, Arial, "Luxi Sans", sans-serif;
+}
+div.your-reply > button {
+  margin: .5em;
+}
 
 /*
 div.post {
