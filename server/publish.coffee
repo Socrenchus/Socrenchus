@@ -22,15 +22,23 @@ filter_posts = ->
       instance_id : ''
       parent_id : ''
       tags : {
-        content: ''
-        weight: 0
+        #the tag text and corrosponding weight
+        'tag_name' :  0
       }
       my_tags : {
-        content: ''
-        weight: 0
+        'tag_name' :  0
       }
-      my_vote : null
-      vote_weight : 0
+      my_vote : undefined
+      votes :{
+        'up' : {
+          count: 0
+          weight: 0
+        }
+        'down' : {
+          count: 0
+          weight: 0
+        }
+      }
     }
     client_doc._id = doc._id
     client_doc.author_id = doc.author_id
@@ -49,28 +57,27 @@ filter_posts = ->
     if client_doc.my_vote?
       up_votes = 0
       down_votes = 0
-      up_votes = doc.votes?['up'].users.length?
-      down_votes = doc.votes?['down'].users.length?
+      up_votes = doc.votes['up'].users?.length
+      down_votes = doc.votes['down'].users?.length
       #need a better vote_weight function
       client_doc.vote_weight = up_votes - down_votes
     
     #only graduated tags are visible
     
-    tag_list = {}
-    my_tag_list = {}
-    for tag in doc.tags?
+    tag_dict = {}
+    my_tag_dict = {}
+    for tag of doc.tags?
       #needs a better function to determine if a tag has graduated,
       #graduated if more than one user.
       if (tag.users.length > 1)
-        tag_list.push ({content: tag[0], weight: tag[0].weight})
-        
+        tag_dict[tag] = doc.tags[tag].weight
       if (current_user is user in tag.users)
-        my_tag_list.push ({content: tag[0], weight: tag[0].weight})
+        my_tag_dict[tag] = doc.tags[tag].weight
         
     #TODO: tag_list seems to be empty, maybe becuse the user has not tagged anything yet
     
-    client_doc.tags = tag_list
-    client_doc.my_tags = my_tag_list
+    client_doc.tags = tag_dict
+    client_doc.my_tags = my_tag_dict
     
     #console.log(client_doc)
     res.push(client_doc)
@@ -82,7 +89,7 @@ Meteor.publish("my_posts", ->
   if user_id
     q = Posts.find( { author_id: user_id } )
     Session.set( 'my_posts_query', q)
-    q.__proto__.fetch = filter_posts
+    q::fetch  = filter_posts
     return q
 )
 
@@ -109,7 +116,7 @@ Meteor.publish("assigned_posts", ->
       }
     )
     current_user = user_id
-    q.__proto__.fetch = filter_posts
+    q::fetch  = filter_posts
     return q
 )
 
