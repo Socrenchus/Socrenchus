@@ -11,12 +11,13 @@
 
 <template name="post">
   <div class="post-container">
-    {{#with this}} 
-      {{> votebox}}
-    {{/with}}
-
-    <div class="post">
+    <div class="post">  
       <div class="post-main">
+        <div class="post-votebox-column">
+          {{#with this}}
+            {{> votebox}}
+          {{/with}}
+        </div>
         <div class="post-content-column">
           <div class="post-content">
             {{{content}}}
