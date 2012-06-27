@@ -77,12 +77,14 @@ filter_posts = ->
       for tag of doc.tags
         #needs a better function to determine if a tag has graduated,
         #graduated if more than one user.
-        if (tag.users?.length > 1)
+        #console.log "here is a tag: #{tag}, and its users #{doc.tags[tag].users}"
+        if (doc.tags[tag].users.length > 1)
+          #console.log "here is a graduated tag: #{tag}"
           tag_dict[tag] = doc.tags[tag].weight
-        if (current_user_id in tag.users?)
+        if (current_user_id in doc.tags[tag].users)
+          #console.log "here is my tag: #{tag}"
           my_tag_dict[tag] = doc.tags[tag].weight
-        
-    #TODO: test the tag section above
+    
     
     client_doc.tags = tag_dict
     client_doc.my_tags = my_tag_dict
