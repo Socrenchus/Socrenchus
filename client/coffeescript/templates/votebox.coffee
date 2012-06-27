@@ -4,6 +4,8 @@ _.extend( Template.votebox,
   voted_down: -> @my_vote==false
   weight_diff: -> 
     @votes['up'].weight - @votes['down'].weight
+  count_diff: ->
+    @votes['up'].count - @votes['down'].count
     ###
       votes :{
         'up' : {
