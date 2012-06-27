@@ -7,12 +7,16 @@ Meteor.publish("my_user", (user_id) ->
 )
 
 #i dont know if this is really the current user, 
-#looks like calling get_user_id, too many times causes stack overflow error.
+#looks like using Meteor.call('get_user_id'), within filter_posts causes error.
+#  meteor console error message:
+#    'Maximum call stack size exceeded'
+#    'Exited with code: 1'
 #this is a workaround for the same. -anup
 current_user_id = 'dummy'
 
 filter_posts = ->
   res = []
+  @current_user_id = Meteor.call('get_user_id')
   @forEach((doc) ->
     #client schema is outlined here.
     client_doc = {
