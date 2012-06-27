@@ -14,11 +14,11 @@ class GrandCentral
     {
       users: {
         insert: (args...) =>
-          error_list.push('not implimented yet')
+          error_list.push('not implemented yet')
         update: (args...) =>
-          error_list.push('not implimented yet')
+          error_list.push('not implemented yet')
         remove: (args...) =>
-          error_list.push('not implimented yet')
+          error_list.push('not implemented yet')
       }
       posts: {
         insert: (args...) =>
@@ -39,18 +39,18 @@ class GrandCentral
         update: (args...) =>
           console.log args[0]
         
-          error_list.push('not implimented yet')
+          error_list.push('not implemented yet')
         remove: (args...) =>
       }
       instances: {
         insert: (args...) =>
-          error_list.push('not implimented yet')
+          error_list.push('not implemented yet')
         update: (args...) =>
-          error_list.push('not implimented yet')
+          error_list.push('not implemented yet')
         remove: (args...) =>
       }
     }[@collection][@method](args...)
-    if (error_list.length is 0)
+    if (error_list.length is 0 || @_debug)
       @default.apply(@, args)
     if (error_list.length>0)
       console.error (error_list)
