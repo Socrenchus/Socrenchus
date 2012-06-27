@@ -37,9 +37,27 @@ class GrandCentral
           if (args[0].content == '')
             error_list.push 'blank content in post/insert'
         update: (args...) =>
-          console.log args[0]
-        
-          error_list.push('not implemented yet')
+          update_user_id = Meteor.call('get_user_id')
+          #tagging, voting also comes in here
+          console.log "raw args: "
+          console.log args
+          #for voting
+          if (args[0]._id? and args[1].$set?)
+            #console.log args
+            #if (args[1].$set?)
+            if (args[1].$set.my_vote?)
+              post = Posts.find(args[0]._id).fetch()
+              console.log 'post to be updated in mongo'
+              console.log post
+              #TODO why does Posts.find().fetch() return client side db
+              #TODO why is post.content undefined??
+              if (args[1].$set.my_vote)
+                console.log "found up_vote from #{update_user_id}"
+                
+              else
+                console.log "found down_vote from #{update_user_id}"
+                
+          error_list.push('this GrandCentral function (posts/update) is a work in progress')
         remove: (args...) =>
       }
       instances: {
