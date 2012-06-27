@@ -37,6 +37,8 @@ class GrandCentral
           if (args[0].content == '')
             error_list.push 'blank content in post/insert'
         update: (args...) =>
+          console.log args[0]
+        
           error_list.push('not implimented yet')
         remove: (args...) =>
       }
