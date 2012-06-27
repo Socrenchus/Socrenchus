@@ -1,8 +1,8 @@
 <template name="votebox">
   <div class="vote_box">
       {{#if voted}}
-          <button name="up_vote_done" class="vote_button done" disabled="disabled">^</button>
-        <div class="score">{{score}}</div>
+         <button name="up_vote_done" class="vote_button done" disabled="disabled">^</button>
+        <div class="score">{{count_diff}}</div>
         <button name="down_vote_done" class="vote_button done" disabled="disabled">v</button>
       {{else}}
         <button name="up_vote" class="vote_button">^</button>
