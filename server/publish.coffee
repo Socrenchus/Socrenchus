@@ -9,7 +9,7 @@ Meteor.publish("my_user", (user_id) ->
 #i dont know if this is really the current user, 
 #looks like calling get_user_id, too many times causes stack overflow error.
 #this is a workaround for the same. -anup
-current_user = 'dummy'
+current_user_id = 'dummy'
 
 filter_posts = ->
   res = []
@@ -43,12 +43,16 @@ filter_posts = ->
     client_doc.content = doc.content
     client_doc.parent_id = doc.parent_id
     
-    #find out if user upvoted or downvoted
-    if (current_user ?= username in doc.votes['up'].users)
-      client_doc.my_vote = true
-    else if (current_user ?= username in doc.votes['down'].users)
-      client_doc.my_vote = false
+    #testing if votes loop if
+    #if (doc.votes?)
+    #  doc.votes['up'].users = [current_user_id, 'dummy_user']
     
+    #find out if user upvoted or downvoted
+    if (doc.votes?)
+      if (current_user_id in doc.votes['up'].users)
+        client_doc.my_vote = true
+      else if (current_user_id in doc.votes['down'].users)
+        client_doc.my_vote = false
     
     #votes only visible if user has voted
     if client_doc.my_vote?
@@ -69,15 +73,16 @@ filter_posts = ->
     #only graduated tags are visible
     tag_dict = {}
     my_tag_dict = {}
-    for tag of doc.tags?
-      #needs a better function to determine if a tag has graduated,
-      #graduated if more than one user.
-      if (tag.users.length > 1)
-        tag_dict[tag] = doc.tags[tag].weight
-      if (current_user is user in tag.users)
-        my_tag_dict[tag] = doc.tags[tag].weight
+    if (doc.tags?)
+      for tag of doc.tags
+        #needs a better function to determine if a tag has graduated,
+        #graduated if more than one user.
+        if (tag.users?.length > 1)
+          tag_dict[tag] = doc.tags[tag].weight
+        if (current_user_id in tag.users?)
+          my_tag_dict[tag] = doc.tags[tag].weight
         
-    #TODO: tag_list seems to be empty, maybe becuse the user has not tagged anything yet
+    #TODO: test the tag section above
     
     client_doc.tags = tag_dict
     client_doc.my_tags = my_tag_dict
@@ -118,7 +123,7 @@ Meteor.publish("assigned_posts", ->
           ]
       }
     )
-    current_user = user_id
+    current_user_id = user_id
     q.__proto__.fetch = filter_posts
     return q
 )

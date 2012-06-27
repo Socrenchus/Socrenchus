@@ -34,7 +34,8 @@ class GrandCentral
             }
           }
           args[0].tags = []
-
+          if (args[0].content == '')
+            error_list.push 'blank content in post/insert'
         update: (args...) =>
           error_list.push('not implimented yet')
         remove: (args...) =>
