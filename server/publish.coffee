@@ -85,7 +85,7 @@ filter_posts = ->
         if (doc.tags[tag].users?.length > 1)
           #console.log "here is a graduated tag: #{tag}"
           tag_dict[tag] = doc.tags[tag].weight
-        if (current_user_id in doc.tags[tag].users)
+        if (current_user_id in doc.tags[tag].users?)
           #console.log "here is my tag: #{tag}"
           my_tag_dict[tag] = doc.tags[tag].weight
     
