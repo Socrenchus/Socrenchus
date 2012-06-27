@@ -52,9 +52,9 @@ div.content_cell
   border-width 0px 1px 1px 0px
   border-radius .5em 0 .5em 0
   background-color post_papercolor
-  box-shadow inset -2px -3px 10px post_lightcolor, inset 1px 1px 0px post_basecolor
+  box-shadow inset -2px -3px 10px post_lightcolor, inset 1px 1px 1px post_basecolor
   margin 0 0 0 0
-  min-height tagbox_width
+  min-height tagbox_width + .6m
   width post_content_width
 
 div.tag_cell
@@ -66,7 +66,7 @@ div.tag_cell
 
 div.post_content
   //Layout
-  min-height 10em
+  min-height tagbox_width + .6em
   width post_content_width - 1em
   padding .5em
   
