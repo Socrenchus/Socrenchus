@@ -1,4 +1,5 @@
 post_basecolor = rgb(89, 122, 255, 1)
+//post_basecolor = white
 //post_basecolor = #555 //GREY
 //post_basecolor = #4e9a06 //GREEN
 //post_basecolor = blue
@@ -8,6 +9,7 @@ post_lightcolor = post_basecolor + 50%
 post_llightcolor = post_lightcolor + 50%
 post_darkcolor = post_basecolor - 50%
 post_ddarkcolor = post_darkcolor - 50%
+post_shadecolor = post_darkcolor
 
 tagbox_width = 10em
 tagbox_padding = .5em
@@ -46,7 +48,7 @@ div.post
   border 1px solid post_ddarkcolor
   border-radius .5em
   box-shadow inset 0 -5px 10px post_darkcolor, 1px 2px 5px post_darkcolor
-  background-image -webkit-linear-gradient(top, post_basecolor 0%, post_darkcolor 100%)
+  background-image -webkit-linear-gradient(top, post_basecolor 0%, post_shadecolor 100%)
   
 div.content_cell
   position: relative
