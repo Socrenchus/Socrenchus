@@ -50,7 +50,7 @@ class GrandCentral
         remove: (args...) =>
       }
     }[@collection][@method](args...)
-    if (error_list.length is 0 || @_debug)
+    if (error_list.length is 0 or @_debug)
       @default.apply(@, args)
     if (error_list.length>0)
       console.error (error_list)
