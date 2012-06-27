@@ -72,7 +72,6 @@ filter_posts = ->
         count: up_votes
         weight: doc.votes?['down'].weight
       }
-    
       
     #only graduated tags are visible
     tag_dict = {}
