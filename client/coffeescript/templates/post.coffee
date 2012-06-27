@@ -7,4 +7,9 @@ _.extend( Template.post,
   identifier: -> @_id
   link_href: ->
     return "#{ @_id }"
+  parent_href: ->
+    if @parent_id? 
+      return "#{ @parent_id }"
+    else
+      return false
 )

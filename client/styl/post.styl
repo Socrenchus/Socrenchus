@@ -11,6 +11,23 @@ post_darkcolor = post_basecolor - 50%
 post_ddarkcolor = post_darkcolor - 50%
 post_shadecolor = post_darkcolor
 
+//Link colors
+post_linkcolor = post_basecolor
+post_visitedcolor = post_shadecolor
+
+//Link style
+a
+  .link
+    :link
+      color post_linkcolor
+      text-decoration none
+    :hover
+      color post_linkcolor
+      text-decoration underline
+    :visited
+      color post_visitedcolor
+      text-decoration none
+
 tagbox_width = 10em
 tagbox_padding = .5em
 post_content_width = 30em
@@ -48,6 +65,7 @@ div.post
   border 1px solid post_ddarkcolor
   border-radius .5em
   box-shadow inset 0 -5px 10px post_darkcolor, 1px 2px 5px post_darkcolor
+  linear-gradient(top, post_basecolor, post_shadecolor)
   background-image -webkit-linear-gradient(top, post_basecolor 0%, post_shadecolor 100%)
   
 div.content_cell
@@ -76,7 +94,9 @@ div.post_info
   right 0
   float right
   
+  font-size 1em
   
+  text-shadow 1px 1px 1px post_lightcolor
 
 div.tag_cell
   position: relative
@@ -149,12 +169,6 @@ div.your-reply > textarea {
   border-right-width: 2px;
   
   background: #e3ebf7;
-  background: -moz-linear-gradient(top, #e3ebf7 0%, #ffffff 100%);
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e3ebf7), color-stop(100%,#ffffff)); 
-  background: -webkit-linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
-  background: -o-linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
-  background: -ms-linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
-  background: linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
    
   font-family: Helvetica, Arial, "Luxi Sans", sans-serif;
 }

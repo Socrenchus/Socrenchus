@@ -20,7 +20,12 @@
       <div class="tr">
         <div class="td content_cell">
           <div class="post_content">
-            <div class="post_info">Parent - Link - User</div>
+            <div class="post_info">
+              {{#if parent_href}}
+                <a class="link" href="{{parent_href}}">Parent</a>
+                <text> - </text>
+              {{/if}}
+              <a class="link" href="{{link_href}}">Link</a> - User</div>
             {{{content}}}
           </div>
         </div>
