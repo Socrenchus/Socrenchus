@@ -16,7 +16,7 @@ current_user_id = 'dummy'
 
 filter_posts = ->
   res = []
-  @current_user_id = Meteor.call('get_user_id')
+  #@current_user_id = Meteor.call('get_user_id')
   @forEach((doc) ->
     #client schema is outlined here.
     client_doc = {
@@ -82,7 +82,7 @@ filter_posts = ->
         #needs a better function to determine if a tag has graduated,
         #graduated if more than one user.
         #console.log "here is a tag: #{tag}, and its users #{doc.tags[tag].users}"
-        if (doc.tags[tag].users.length > 1)
+        if (doc.tags[tag].users?.length > 1)
           #console.log "here is a graduated tag: #{tag}"
           tag_dict[tag] = doc.tags[tag].weight
         if (current_user_id in doc.tags[tag].users)
