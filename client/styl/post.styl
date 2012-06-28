@@ -208,7 +208,8 @@ div.your-reply
   
   > textarea
     min-height tagbox_width + .6em
-    width content_width - padcompens
+    //width content_width - padcompens//Same size as content box
+    width content_width + tagbox_width - .4em
   
     resize none
     padding genpad
