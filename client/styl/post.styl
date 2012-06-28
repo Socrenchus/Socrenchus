@@ -73,11 +73,14 @@ div.post
   linear-gradient(top, post_basecolor, post_shadecolor)
   background-image -webkit-linear-gradient(top, post_basecolor 0%, post_shadecolor 100%)
   
+div.vote_cell
 div.content_cell
+div.tag_cell
   position: relative
   left 0
   top 0
 
+div.content_cell
   border-color post_lightcolor post_darkcolor post_darkcolor post_lightcolor 
   border-style none solid solid none
   border-width 0px 1px 1px 0px
@@ -87,6 +90,10 @@ div.content_cell
   margin 0 0 0 0
   //min-height tagbox_width + .6em
   //width cell2_width
+//div.vote_cell
+//  width cell1_width
+//div.tag_cell
+//  width cell3_width
 
 div.post_info
   height 1em
@@ -102,13 +109,6 @@ div.post_info
   font-size 1em
   
   text-shadow 1px 1px 1px post_lightcolor
-
-div.tag_cell
-  position: relative
-  left 0
-  top 0
-  padding genpad
-  width cell3_width
 
 div.post_content
   //Layout
@@ -129,7 +129,7 @@ div.post_content
     text-shadow 1px 1px 1px post_lightcolor
   code
     text-shadow 1px 1px 1px post_lightcolor
-  p:first-child
+  p:first-child  //There should be a more compact way of doing this. 
     margin-top 0
   h1:first-child
     margin-top 0
@@ -144,9 +144,22 @@ div.post_content
   h6:first-child
     margin-top 0
 
+div.votebox
+  position: absolute
+  left 0
+  top 0
+  //Layout + Sizing
+  height votebox_width
+  width votebox_width
+  margin genpad
+  padding genpad
 
-
-
+  //Styling
+  border 1px solid post_darkcolor
+  border-radius .5em
+  background-color post_llightcolor
+  box-shadow inset 0 3px 5px post_basecolor
+  
 
 div.tagbox
   position: absolute
@@ -164,7 +177,7 @@ div.tagbox
   background-color post_llightcolor
   box-shadow inset 0 3px 5px post_basecolor
   
-  ul
+  li
     display inline-block
 
 

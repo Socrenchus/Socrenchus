@@ -24,7 +24,11 @@
             <div class="col tag_col"></div>
           </div>
           <div class="tr post_top_part">
-            <div class="td vote_cell">V</div>
+            <div class="td vote_cell">
+              {{#with this}}
+                {{> votebox}}
+              {{/with}}
+            </div>
             <div class="td content_cell">
               <div class="post_content">
                 <div class="post_info">
