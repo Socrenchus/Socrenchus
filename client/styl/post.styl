@@ -28,15 +28,16 @@ a
       color post_visitedcolor
       text-decoration none
 
+genpad = .5em
+genrad = .5em
+padcompens = genpad*2
+votebox_width = 4em
+content_width = 28em
 tagbox_width = 10em
-tagbox_padding = .5em
-post_content_width = 30em
-post_width = tagbox_width + 4*(tagbox_padding) + post_content_width
-
-//div.post_container
-//  padding 1em
-//  border-radius 1em
-//  border 1px solid post_basecolor 
+cell1_width = votebox_width+padcompens
+cell2_width = content_width
+cell3_width = tagbox_width+padcompens
+post_width = cell1_width+cell2_width+cell3_width
 
 //Table structure
 div.table
@@ -53,6 +54,10 @@ div.post.table
   table-layout fixed  //not necessary
   border-collapse separate //default anyway
   border-spacing 0
+
+//Sizing
+  
+
 
 //Stylistics
 div.post
@@ -80,8 +85,8 @@ div.content_cell
   background-color post_papercolor
   box-shadow inset -2px -3px 10px post_lightcolor, inset 1px 1px 1px post_basecolor
   margin 0 0 0 0
-  min-height tagbox_width + .6m
-  width post_content_width
+  min-height tagbox_width + .6em
+  width cell2_width
 
 div.post_info
   height 1em
@@ -102,16 +107,15 @@ div.tag_cell
   position: relative
   left 0
   top 0
-  padding .5em
-  width tagbox_width + 4.5*(tagbox_padding)
+  padding genpad
+  width cell3_width
 
 div.post_content
   //Layout
-  min-height tagbox_width + .6em
-  width post_content_width - 1em
-  padding .5em
+  //min-height tagbox_width + .6em
+  width content_width - padcompens
+  padding genpad
   
-   
   //Text styles
   p
     margin 0 0 1em 0
@@ -135,8 +139,8 @@ div.tagbox
   //Layout + Sizing
   height tagbox_width
   width tagbox_width
-  margin .5em//.5em  
-  padding .5em
+  margin genpad
+  padding genpad
 
   //Styling
   border 1px solid post_darkcolor
