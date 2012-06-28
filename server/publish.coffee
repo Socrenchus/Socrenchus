@@ -11,7 +11,7 @@ Meteor.publish("my_posts", ->
   if user_id
     q = Posts.find( author_id: user_id )
     Session.set( 'my_posts_query', q)
-    return q
+    #return q
 )
 
 Meteor.publish("assigned_posts", ->
