@@ -1,18 +1,21 @@
 <template name="tagbox">
   <div class="tag_box">
     <div class="grad-tags">
-      {{#each visible_tags}}
-        <div>{{this}}</div>
-      {{/each}}
+      {{#vis_tags visible_tags}}
+        {{this}}
+      {{/vis_tags}}
     </div>
-    <div class="suggested-tags">
+    <div class="add-tags">
       {{#if tagging_post}}
-        {{#each suggested_tags}}
-          <div>{{this}}</div>
-        {{/each}}
+        <div class="suggestions">
+          {{#sug_tags suggested_tags}}
+             {{this}}
+          {{/sug_tags}}
+        </div>
       <div class="tag-input">
         <textarea name="tag_text"></textarea>
         <button name="enter_tag">></button>
+        <div><button name="done_tagging">Done.</button></div>
       </div>
       {{else}}
         <button name="tagbutton">Tag This Post!</button>

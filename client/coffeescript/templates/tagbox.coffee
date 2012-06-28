@@ -6,6 +6,7 @@
 ###
 
 _.extend( Template.tagbox,
+
   visible_tags: ->
     visible = (tag for tag of @tags)  #graduated tags
     @my_tags ?= {}                    #REMOVE on schema change
@@ -13,44 +14,102 @@ _.extend( Template.tagbox,
       if not (name in visible)
         visible.push(name)
     return visible
+    
   suggested_tags: ->
-    @my_tags ?= {}                    #REMOVE on schema change
+    @my_tags = {test: 0}              #REMOVE on schema change
     suggestions = {}
     #get graduated tags from siblings
     for post in Posts.find( 'parent_id': @parent_id ).fetch()
       for name,info of post.tags
-        if not (name in @my_tags)
+        if post.tags[name]? && (not @my_tags[name]?) && (not Session.get("hide_#{ @_id }_#{ name }")?)
           suggestions[name] ?= 0
           suggestions[name] += info.weight
     sug_list = ({'name':name, 'weight':weight} for name,weight of suggestions)
     #sort by weight, then return list of names
     cmp_weight = (a,b) -> a.weight - b.weight
     return sug_list.sort( cmp_weight ).map( (a) -> a.name )
-  tagging_post: ->
-    @tagging ?= false
-    @context = Meteor.deps.Context.current
-    return @context.run(=>
-      @context = Meteor.deps.Context.current
-      return @tagging
-    )
+    
+  tagging_post: -> Session.equals("tagging_#{ @_id }", true)
+  
   events: {
-    "click button[name='tagbutton']": (event) ->
+    'focus .suggested': (event) ->
       if not event.isImmediatePropagationStopped()
-        @tagging = true
-        @context.invalidate()
-        Meteor.flush()
+        #console.log(event.target,"clicked")
+        event.target.focus()
+        
         event.stopImmediatePropagation()
-    "click button[name='enter_tag']": (event) ->
+        
+    'keydown .suggested': (event) ->
       if not event.isImmediatePropagationStopped()
-        @tagging = true
-        tag_text = event.target.parentNode.getElementsByTagName("textarea")[0].value
-        if tag_text != ""
+        tag_text = event.target.innerText
+        if event.keyCode == 74 #J/Check
           @tags[tag_text] ?= { users: [], weight: 0}
           @tags[tag_text].users.push(Meteor.call("get_user_id"))
-          console.log(@context)
           Posts.update(@_id, {$set: {tags: @tags}})
-          console.log(@context)
+        else if event.keyCode == 75 #K/Kill
+          Session.set("hide_#{ @_id }_#{ tag_text }", "")
+          Session.get("hide_#{ @_id }").push(tag_text)
+          event.target.parentNode.getElementsByTagName("div")[0]?.focus()
+          
+        event.stopImmediatePropagation()
+        
+    "keydown textarea[name='tag_text']": (event) ->
+      if not event.isImmediatePropagationStopped()
+        if event.keyCode == 13 #Enter
+          event.preventDefault()
+          tag_text = event.target.value
+          @tags[tag_text] ?= { users: [], weight: 0}
+          @tags[tag_text].users.push(Meteor.call("get_user_id"))
+          Posts.update(@_id, {$set: {tags: @tags}})
+          event.target.value = "" #clear textbox
+        #else                  #Update suggestions
+          
+        event.stopImmediatePropagation()
+    
+    "click button[name='tagbutton']": (event) ->
+      if not event.isImmediatePropagationStopped()
+        Session.set("tagging_#{ @_id }", true)
+        Session.set("hide_#{ @_id }", [])
+        event.stopImmediatePropagation()
+        
+    "click button[name='enter_tag']": (event) ->
+      if not event.isImmediatePropagationStopped()
+        tag_text = event.target.parentNode.getElementsByTagName("textarea")[0].value
+        if tag_text != "" # && not @my_tags[tag_text]?
+          #add to @my_tags not @tags
+          @tags[tag_text] ?= { users: [], weight: 0}
+          @tags[tag_text].users.push(Meteor.call("get_user_id"))
+          Posts.update(@_id, {$set: {tags: @tags}})
+        event.stopImmediatePropagation()
+        
+    "click button[name='done_tagging']": (event) ->
+      if not event.isImmediatePropagationStopped()
+        Session.set("tagging_#{ @_id }", false)
+        for tag in Session.get("hide_#{ @_id }")
+          Session.set("hide_#{ @_id }_#{ tag }", undefined)
         event.stopImmediatePropagation()
   }
 )
 
+Handlebars.registerHelper('vis_tags', (context, object) ->
+  @my_tags = {test: 0}          #REMOVE
+  ret = ""
+  for tag in context
+    ret += "<div class='tag"
+    if @tags[tag]?
+      ret += " grad"
+    if @my_tags?.tag?
+      ret += " mytag"
+    ret += "'>" + tag + "</div>"
+  return ret
+)
+
+Handlebars.registerHelper('sug_tags', (context, object) ->
+  ret = ""
+  for tag in context
+    ret += "<div class='tag"
+    if @tags[tag]?
+      ret += " grad"
+    ret += " suggested' tabindex='0'>" + tag + "</div>"
+  return ret
+)
