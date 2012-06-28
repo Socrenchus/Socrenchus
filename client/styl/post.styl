@@ -17,23 +17,22 @@ post_visitedcolor = post_shadecolor
 
 //Link style
 a
-  .link
-    :link
-      color post_linkcolor
-      text-decoration none
-    :hover
-      color post_linkcolor
-      text-decoration underline
-    :visited
-      color post_visitedcolor
-      text-decoration none
+  .link:link
+    color post_linkcolor
+    text-decoration none
+  .link:hover
+    color post_linkcolor
+    text-decoration underline
+  .link:visited
+    color post_visitedcolor
+    text-decoration none
 
 genpad = .5em
 genrad = .5em
-padcompens = genpad*2
-votebox_width = 4em
+padcompens = genpad*4
+votebox_width = 3em
 content_width = 28em
-tagbox_width = 10em
+tagbox_width = 9em
 cell1_width = votebox_width+padcompens
 cell2_width = content_width
 cell3_width = tagbox_width+padcompens
@@ -76,10 +75,12 @@ div.post
 div.vote_cell
 div.content_cell
 div.tag_cell
-  position: relative
+  position relative
   left 0
   top 0
 
+div.vote_cell
+  width cell1_width
 div.content_cell
   border-color post_lightcolor post_darkcolor post_darkcolor post_lightcolor 
   border-style none solid solid none
@@ -90,10 +91,8 @@ div.content_cell
   margin 0 0 0 0
   //min-height tagbox_width + .6em
   //width cell2_width
-//div.vote_cell
-//  width cell1_width
-//div.tag_cell
-//  width cell3_width
+div.tag_cell
+  width cell3_width
 
 div.post_info
   height 1em
