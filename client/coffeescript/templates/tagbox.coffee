@@ -15,19 +15,7 @@ _.extend( Template.tagbox,
         visible.push(name)
     return visible
     
-  suggested_tags: ->
-    @my_tags = {test: 0}              #REMOVE on schema change
-    suggestions = {}
-    #get graduated tags from siblings
-    for post in Posts.find( 'parent_id': @parent_id ).fetch()
-      for name,info of post.tags
-        if post.tags[name]? && (not @my_tags[name]?) && (not Session.get("hide_#{ @_id }_#{ name }")?)
-          suggestions[name] ?= 0
-          suggestions[name] += info.weight
-    sug_list = ({'name':name, 'weight':weight} for name,weight of suggestions)
-    #sort by weight, then return list of names
-    cmp_weight = (a,b) -> a.weight - b.weight
-    return sug_list.sort( cmp_weight ).map( (a) -> a.name )
+  suggested_tags: -> Session.get("suggestions_#{ @_id }")
     
   tagging_post: -> Session.equals("tagging_#{ @_id }", true)
   
@@ -36,7 +24,7 @@ _.extend( Template.tagbox,
       if not event.isImmediatePropagationStopped()
         #console.log(event.target,"clicked")
         event.target.focus()
-        
+
         event.stopImmediatePropagation()
         
     'keydown .suggested': (event) ->
@@ -46,9 +34,12 @@ _.extend( Template.tagbox,
           @tags[tag_text] ?= { users: [], weight: 0}
           @tags[tag_text].users.push(Meteor.call("get_user_id"))
           Posts.update(@_id, {$set: {tags: @tags}})
-        else if event.keyCode == 75 #K/Kill
-          Session.set("hide_#{ @_id }_#{ tag_text }", "")
-          Session.get("hide_#{ @_id }").push(tag_text)
+        if event.keyCode == 74 || event.keyCode == 75 #J/Check or K/Kill
+          #remove tag from suggestions list if added or ignored
+          res = Session.get("suggestions_#{ @_id }")
+          res.remove(tag_text)
+          Session.set("suggestions_#{ @_id }",res)
+          Session.get("context_#{@_id}").invalidate()
           event.target.parentNode.getElementsByTagName("div")[0]?.focus()
           
         event.stopImmediatePropagation()
@@ -64,12 +55,28 @@ _.extend( Template.tagbox,
           event.target.value = "" #clear textbox
         #else                  #Update suggestions
           
+          
         event.stopImmediatePropagation()
     
     "click button[name='tagbutton']": (event) ->
       if not event.isImmediatePropagationStopped()
         Session.set("tagging_#{ @_id }", true)
-        Session.set("hide_#{ @_id }", [])
+        
+        #MAKE SUGGESTIONS
+        @my_tags = {}              #REMOVE on schema change
+        suggestions = {}
+        #get graduated tags from siblings
+        for post in Posts.find( 'parent_id': @parent_id ).fetch()
+          for name,info of post.tags
+            if post.tags[name]? && (not @my_tags[name]?)
+              suggestions[name] ?= 0
+              suggestions[name] += info.weight
+        sug_list = ({'name':name, 'weight':weight} for name,weight of suggestions)
+        #sort by weight, then return list of names
+        cmp_weight = (a,b) -> a.weight - b.weight
+        res = sug_list.sort( cmp_weight ).map( (a) -> a.name )
+        Session.set("suggestions_#{ @_id }", res)
+        
         event.stopImmediatePropagation()
         
     "click button[name='enter_tag']": (event) ->
@@ -85,8 +92,6 @@ _.extend( Template.tagbox,
     "click button[name='done_tagging']": (event) ->
       if not event.isImmediatePropagationStopped()
         Session.set("tagging_#{ @_id }", false)
-        for tag in Session.get("hide_#{ @_id }")
-          Session.set("hide_#{ @_id }_#{ tag }", undefined)
         event.stopImmediatePropagation()
   }
 )
@@ -105,6 +110,7 @@ Handlebars.registerHelper('vis_tags', (context, object) ->
 )
 
 Handlebars.registerHelper('sug_tags', (context, object) ->
+  Session.set("context_#{@_id}",Meteor.deps.Context.current)
   ret = ""
   for tag in context
     ret += "<div class='tag"
