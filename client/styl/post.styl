@@ -143,12 +143,13 @@ div.post_content
   h6:first-child
     margin-top 0
 
+
+//Could go in votebox, but uses Stylus variables defined in this document.
 div.votebox
   position: absolute
   left 0
   top 0
   //Layout + Sizing
-  height votebox_width
   width votebox_width
   margin genpad
   padding genpad
@@ -159,6 +160,13 @@ div.votebox
   background-color post_llightcolor
   box-shadow inset 0 3px 5px post_basecolor
   
+  .vote_button 
+    width 100%
+    height 2em
+  
+  .score
+    width 100%
+    text-align center
 
 //Could go in tagbox, but uses Stylus variables defined in this document. 
 div.tagbox
@@ -209,6 +217,8 @@ div.your-reply > textarea {
 div.your-reply > button {
   margin: .5em;
 }
+
+
 
 /*
 div.post {
