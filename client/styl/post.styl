@@ -203,11 +203,20 @@ div.tagbox
 div.your-reply
   margin-left cell1_width - .5em
   
+  button
+    margin genpad
+  
   > textarea
-    margin .5em
+    min-height tagbox_width + .6em
+    width content_width - padcompens
+  
+    resize none
+    padding genpad
+    margin genpad  
+
     border 1px solid post_darkcolor
     border-radius .5em
-    border-top-left-radius 0
+    //border-top-left-radius 0
     background-color post_papercolor
     box-shadow inset -2px -3px 10px post_lightcolor, inset 1px 1px 1px post_basecolor
 

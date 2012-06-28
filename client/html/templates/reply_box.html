@@ -5,8 +5,10 @@
       <button name="start_reply" type="button">Reply to this! <span class="large_icon">✍</span></button>
     {{else}}
       <textarea name="reply_text" cols="70" rows="7">{{reply_box_content}}</textarea>
-      <button name="reply_submit" type="button">Post Reply! <span class="large_icon">✔</span></button>
-      <button name="reply_cancel" type="button">Discard <span class="large_icon">✘</span></button>
+      <div>
+        <button name="reply_submit" type="button">Post Reply! <span class="large_icon">✔</span></button>
+        <button name="reply_cancel" type="button">Discard <span class="large_icon">✘</span></button>
+      </div>
     {{/if}}
   </div>
 
