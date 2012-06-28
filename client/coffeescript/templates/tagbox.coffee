@@ -36,25 +36,30 @@ _.extend( Template.tagbox,
           Posts.update(@_id, {$set: {tags: @tags}})
         if event.keyCode == 74 || event.keyCode == 75 #J/Check or K/Kill
           #remove tag from suggestions list if added or ignored
-          res = Session.get("suggestions_#{ @_id }")
-          res.remove(tag_text)
-          Session.set("suggestions_#{ @_id }",res)
+          sugs = Session.get("suggestions_#{ @_id }")
+          sugs.remove(tag_text)
           Session.get("context_#{@_id}").invalidate()
           event.target.parentNode.getElementsByTagName("div")[0]?.focus()
           
         event.stopImmediatePropagation()
         
-    "keydown textarea[name='tag_text']": (event) ->
+    "keyup textarea[name='tag_text']": (event) ->
       if not event.isImmediatePropagationStopped()
+        tag_text = event.target.value
         if event.keyCode == 13 #Enter
           event.preventDefault()
-          tag_text = event.target.value
           @tags[tag_text] ?= { users: [], weight: 0}
           @tags[tag_text].users.push(Meteor.call("get_user_id"))
           Posts.update(@_id, {$set: {tags: @tags}})
           event.target.value = "" #clear textbox
-        #else                  #Update suggestions
-          
+        else                  #Update suggestions
+          sugs = Session.get("suggestions_#{ @_id }")
+          results = []
+          for tag in sugs
+            console.log(tag,"|",tag_text, tag.search(tag_text))
+            results.push(tag) if tag? && tag.search(tag_text) != -1
+          Session.set("suggestions_#{ @_id }", results)
+          Session.get("context_#{@_id}").invalidate()
           
         event.stopImmediatePropagation()
     
@@ -75,6 +80,7 @@ _.extend( Template.tagbox,
         #sort by weight, then return list of names
         cmp_weight = (a,b) -> a.weight - b.weight
         res = sug_list.sort( cmp_weight ).map( (a) -> a.name )
+        console.log(res)
         Session.set("suggestions_#{ @_id }", res)
         
         event.stopImmediatePropagation()
