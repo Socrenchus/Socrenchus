@@ -27,6 +27,14 @@ a
     color post_visitedcolor
     text-decoration none
 
+
+input
+textarea
+button//, keygen, select, isindex
+  font-family 'PT Sans', Helvetica, Arial, "Luxi Sans", sans-serif
+  font-size 1em
+  text-shadow 1px 1px 1px post_lightcolor
+
 genpad = .5em
 genrad = .5em
 padcompens = genpad*4
@@ -89,8 +97,6 @@ div.content_cell
   background-color post_papercolor
   box-shadow inset -2px -3px 10px post_lightcolor, inset 1px 1px 1px post_basecolor
   margin 0 0 0 0
-  //min-height tagbox_width + .6em
-  //width cell2_width
 div.tag_cell
   width cell3_width
 
@@ -188,13 +194,24 @@ div.tagbox
   li
     display inline-block
 
+.large_icon
+  font-size 1.5em
 
+.start_reply
+  height 2em
 
-div.your-reply {
-  //border: 1px solid #2E58FF;
-  //background-color: #C7D2FF;
-  //border-bottom-width: 2px;
-}
+div.your-reply
+  margin-left cell1_width - .5em
+  
+  > textarea
+    margin .5em
+    border 1px solid post_darkcolor
+    border-radius .5em
+    border-top-left-radius 0
+    background-color post_papercolor
+    box-shadow inset -2px -3px 10px post_lightcolor, inset 1px 1px 1px post_basecolor
+
+/*
 div.your-reply > textarea {
   display: block;
   width: post_content_width
@@ -218,7 +235,7 @@ div.your-reply > button {
   margin: .5em;
 }
 
-
+*/
 
 /*
 div.post {
