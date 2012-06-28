@@ -85,8 +85,8 @@ div.content_cell
   background-color post_papercolor
   box-shadow inset -2px -3px 10px post_lightcolor, inset 1px 1px 1px post_basecolor
   margin 0 0 0 0
-  min-height tagbox_width + .6em
-  width cell2_width
+  //min-height tagbox_width + .6em
+  //width cell2_width
 
 div.post_info
   height 1em
@@ -112,14 +112,14 @@ div.tag_cell
 
 div.post_content
   //Layout
-  //min-height tagbox_width + .6em
+  min-height tagbox_width + .6em
   width content_width - padcompens
   padding genpad
   
   //Text styles
   p
-    margin 0 0 1em 0
-    text-shadow 1px 1px 1px post_lightcolor
+    margin 1em 0 0 0
+  p
   h1
   h2
   h3
@@ -129,6 +129,22 @@ div.post_content
     text-shadow 1px 1px 1px post_lightcolor
   code
     text-shadow 1px 1px 1px post_lightcolor
+  p:first-child
+    margin-top 0
+  h1:first-child
+    margin-top 0
+  h2:first-child
+    margin-top 0
+  h3:first-child
+    margin-top 0
+  h4:first-child
+    margin-top 0
+  h5:first-child
+    margin-top 0
+  h6:first-child
+    margin-top 0
+
+
 
 
 
