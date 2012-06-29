@@ -27,6 +27,8 @@ a
     color post_visitedcolor
     text-decoration none
 
+li
+  list-style-type none
 
 input
 textarea
@@ -210,8 +212,10 @@ div.your-reply
     min-height tagbox_width + .6em
     //width content_width - padcompens//Same size as content box
     width content_width + tagbox_width - .4em
+    min-width content_width + tagbox_width - .4em
+    max-width content_width + tagbox_width - .4em
   
-    resize none
+    //resize none
     padding genpad
     margin genpad  
 
