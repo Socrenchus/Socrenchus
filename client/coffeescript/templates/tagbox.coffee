@@ -103,7 +103,7 @@ _.extend( Template.tagbox,
             if post.tags[name]? && (not @my_tags[name]?)
               suggestions[name] ?= 0
               suggestions[name] += info.weight
-        sug_list = {'name':n, 'weight':w} for n,w of suggestions
+        sug_list = ({'name':n, 'weight':w} for n,w of suggestions)
         #sort by weight, then return list of names
         cmp_weight = (a,b) -> a.weight - b.weight
         res = sug_list.sort( cmp_weight ).map( (a) -> a.name )
