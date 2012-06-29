@@ -11,7 +11,8 @@ _.extend( Template.post,
     "click button[name='goto-parent']": (event) ->
       if not event.isImmediatePropagationStopped()
         parent = event.target
-        #Climb the DOM tree once to get the current post, then again for the parent post
+        #Climb the DOM tree once to get the current post
+        #then again for the parent post
         for _ in [1,2]
           parent = parent.parentNode
           #Until we hit a post or the top of the stream, keep looking
