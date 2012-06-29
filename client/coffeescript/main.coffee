@@ -1,11 +1,11 @@
 # Collections
-Posts = new Meteor.Collection("posts")
+Posts = new Meteor.Collection("client_posts")
 Users = new Meteor.Collection("users_proto")
 
 # Subscriptions
 Meteor.subscribe( "my_user" )
 Meteor.subscribe( "my_posts" )
-Meteor.subscribe( "assigned_posts" )
+#Meteor.subscribe( "assigned_posts" )
 
 # Backbone router
 class Router extends Backbone.Router

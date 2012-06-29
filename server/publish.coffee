@@ -8,19 +8,34 @@ Meteor.publish("my_user", (user_id) ->
 
 Meteor.publish("my_posts", ->
   user_id = Meteor.call('get_user_id')
+  uuid = Meteor.uuid
   self = this
-  if user_id
-    q = Posts.find( author_id: user_id )
-    Session.set( 'my_posts_query', q)
+  if user_id?
+    # gather ids of my posts and posts i've replied to
+    ids = []
+    for item in Posts.find( author_id: user_id ).fetch()
+      ids.push( item['parent_id'] ) if 'parent_id' of item
+      ids.push( item['_id'] )
+    # query for the children and posts from above
+    q = Posts.find(
+      {
+        '$or':
+          [{_id: { '$in': ids }},
+            {parent_id: { '$in': ids }}
+          ]
+      }
+    )
+    #working shit
+    #q = Posts.find( author_id: user_id )
+    #Session.set( 'my_posts_query', q)
     handle = q.observe (
       added: (doc, idx) ->
-        console.log 'some shit got added to my_posts'
-        console.log doc
-        console.log idx
-        self.set('my_posts', user_id,
-          author_id : ''
-          content : ''
-          parent_id : ''
+        console.log 'publish my_post added:'
+        ###
+        self.set('my_posts', idx,
+          author_id : doc.author_id
+          content : doc.content
+          parent_id : doc.parent_id
           tags : {
             #the tag text and corrosponding weight
             'tag_name' :  0
@@ -40,17 +55,31 @@ Meteor.publish("my_posts", ->
             }
           }
         )
+        
+        ###
+        self.set("client_posts", doc._id, {
+          content: 'troll'
+          votes: {'up': {}, 'down': {}}
+        })
         self.flush()
       removed: (doc, idx) ->
-        console.log 'some shit got removed from my_posts'
+        console.log 'publish my_post removed:'
       moved: (doc, idx) ->
-        console.log 'some shit got just moved within my_posts'
+        console.log 'publish my_post moved:'
       changed: (doc, idx) ->
-        console.log 'some shit got just changed to my_posts'
+        console.log 'publish my_post changed:'
+        
+      
     )
+    self.onStop ->
+    handle.stop()
+    self.unset "client_posts", uuid, [
+          'author_id', 'doc.author_id', 'content', 'parent_id', 'tags', 'my_tags', 'my_vote', 'votes'
+          ]
+    self.flush()
     #return q
   )
-
+###
 Meteor.publish("assigned_posts", ->
   user_id = Meteor.call('get_user_id')
   if user_id
@@ -74,4 +103,5 @@ Meteor.publish("assigned_posts", ->
       }
     )
 )
+###
 
