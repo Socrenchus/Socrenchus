@@ -30,8 +30,8 @@ Meteor.publish("my_posts", ->
     #Session.set( 'my_posts_query', q)
     handle = q.observe (
       added: (doc, idx) ->
-        console.log 'publish my_post added:'
         ###
+        console.log 'publish my_post added:'
         self.set('my_posts', idx,
           author_id : doc.author_id
           content : doc.content
@@ -57,9 +57,29 @@ Meteor.publish("my_posts", ->
         )
         
         ###
+        client_tags = {}
+        client_my_tags = {}
+        client_votes = {}
+        client_my_vote = undefined
+        for tag of doc.tags
+          client_tags[tag] = doc.tags[tag].weight
+          #console.log doc.tags[tag].users
+          #doc.tags[tag].users?.push(user_id) #used to test the following loop
+          if (doc.tags[tag].users? and (user_id in doc.tags[tag].users))
+            #console.log 'personal tag'
+            client_my_tags[tag] = doc.tags[tag].weight
+        
+        #console.log doc
+        for vote of doc.votes
+          console.log vote
+          #console.log doc
         self.set("client_posts", doc._id, {
-          content: 'troll'
-          votes: {'up': {}, 'down': {}}
+          author_id : doc.author_id
+          content : doc.content
+          parent_id : doc.parent_id
+          tags: client_tags
+          my_tags: client_my_tags
+          votes: client_votes
         })
         self.flush()
       removed: (doc, idx) ->
@@ -79,29 +99,4 @@ Meteor.publish("my_posts", ->
     self.flush()
     #return q
   )
-###
-Meteor.publish("assigned_posts", ->
-  user_id = Meteor.call('get_user_id')
-  if user_id
-    # gather ids of my posts and posts i've replied to
-    ids = []
-    for item in Session.get( 'my_posts_query' ).fetch()
-      ids.push( item['parent_id'] ) if 'parent_id' of item
-      ids.push( item['_id'] )
-    # query for the children and posts from above
-    return Posts.find(
-      {
-        '$or':
-          [
-            {
-              _id: { '$in': ids }
-            },
-            {
-              parent_id: { '$in': ids }
-            }
-          ]
-      }
-    )
-)
-###
 
