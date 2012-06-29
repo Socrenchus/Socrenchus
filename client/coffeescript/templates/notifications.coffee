@@ -11,12 +11,11 @@ _.extend( Template.notifications,
         Session.set('notifications_state', 'open')
     'click': (event) ->
       event.stopPropagation()
+    'blur': ->
+      if Session.get('notifications_state', 'open')
+        Session.set('notifications_state', 'closed')
   }
 )
       
 Session.set('notifications', [])
 
-$(document).click( ->
-  if Session.get('notifications_state', 'open')
-    Session.set('notifications_state', 'closed')
-)
