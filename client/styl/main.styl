@@ -52,14 +52,19 @@ div.post {
   margin: .5em;
 }
 div.post > div.main {
+  display: table;
+  width: 100%;
   border: 2px solid #FFE017;
   background-color: #FFF6BA;
 }
 div.post > div.main > div.body {
+  display: table-cell;
   border: 2px solid #FFAE00;
   background-color: #FFF6E3;
 }
 div.post > div.main > div.attributes {
+  display: table-cell;
+  width: 30%;
   border: 2px solid #FF3B3B;
   background-color: #FFD5C9;
 }
@@ -119,4 +124,8 @@ div.your-reply > textarea {
 }
 div.your-reply > button {
   margin: .5em;
+}
+
+ul {
+  list-style-type: none;
 }
