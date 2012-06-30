@@ -71,7 +71,10 @@ Meteor.publish("my_posts", ->
         
         #console.log doc
         for vote of doc.votes
+          #TODO:need to fix bootstrap before fixing this
+          console.log 'votes thingie in publish/added'
           console.log vote
+          console.log doc.votes['up']
           #console.log doc
         self.set("client_posts", doc._id, {
           author_id : doc.author_id
