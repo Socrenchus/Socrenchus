@@ -59,7 +59,16 @@ Meteor.publish("my_posts", ->
         ###
         client_tags = {}
         client_my_tags = {}
-        client_votes = {}
+        client_votes = {
+            'up' : {
+              count: 0
+              weight: 0
+            }
+            'down' : {
+              count: 0
+              weight: 0
+            }
+          }
         client_my_vote = undefined
         for tag of doc.tags
           client_tags[tag] = doc.tags[tag].weight
@@ -71,11 +80,10 @@ Meteor.publish("my_posts", ->
         
         #console.log doc
         for vote of doc.votes
-          #TODO:need to fix bootstrap before fixing this
-          console.log 'votes thingie in publish/added'
-          console.log vote
-          console.log doc.votes['up']
-          #console.log doc
+          #console.log doc.votes[vote]
+          client_votes[vote].count = doc.votes[vote].users.length
+          client_votes[vote].weight = doc.votes[vote].weight
+          
         self.set("client_posts", doc._id, {
           author_id : doc.author_id
           content : doc.content
