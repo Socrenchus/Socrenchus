@@ -100,11 +100,11 @@ Meteor.startup( ->
         }
         votes:{
             'up': {
-              users: []
-              weight: 0
+              users: [1]
+              weight: 1
             }
             'down': {
-              users: []
+              users: [2, 0]
               weight: 0
             }
         }
@@ -126,12 +126,12 @@ Meteor.startup( ->
         }
         votes:{
             'up': {
-              users: []
-              weight: 0
+              users: [1]
+              weight: 4
             }
             'down': {
-              users: []
-              weight: 0
+              users: [2]
+              weight: 1
             }
         }
       },
@@ -143,12 +143,12 @@ Meteor.startup( ->
         tags:{}
         votes:{
             'up': {
-              users: []
-              weight: 0
+              users: [1]
+              weight: 2
             }
             'down': {
-              users: []
-              weight: 0
+              users: [0]
+              weight: 1
             }
         }
       },
@@ -160,12 +160,12 @@ Meteor.startup( ->
         tags:{}
         votes:{
             'up': {
-              users: []
-              weight: 0
+              users: [1, 2]
+              weight: 3
             }
             'down': {
-              users: []
-              weight: 0
+              users: [0]
+              weight: 1
             }
         }
       },
@@ -176,12 +176,12 @@ Meteor.startup( ->
         tags:{}
         votes:{
             'up': {
-              users: []
-              weight: 0
+              users: [1]
+              weight: 1
             }
             'down': {
-              users: []
-              weight: 0
+              users: [2]
+              weight: 2
             }
         }
       }
@@ -206,9 +206,11 @@ Meteor.startup( ->
           for tag, tag_dict of post.tags
             for user, i in tag_dict.users
               post.tags[tag].users[i] = user_ids[user]
-
+        votes: ->
+          for vote, vote_dict of post.votes
+            for user, i in vote_dict.users
+              post.votes[vote].users[i] = user_ids[user]
       for key of post
         id_maps[key]?()
-
       post_ids.push(Posts.insert(post))
 )
