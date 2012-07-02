@@ -1,0 +1,338 @@
+post_basecolor = rgb(89, 122, 255, 1)
+//post_basecolor = white
+//post_basecolor = #555 //GREY
+//post_basecolor = #4e9a06 //GREEN
+//post_basecolor = blue
+//post_basecolor = rgb(1, 0, 89) //DBLUE
+post_papercolor = post_basecolor + 95%
+post_lightcolor = post_basecolor + 50%
+post_llightcolor = post_lightcolor + 50%
+post_darkcolor = post_basecolor - 50%
+post_ddarkcolor = post_darkcolor - 50%
+post_shadecolor = post_darkcolor
+
+//Link colors
+post_linkcolor = post_basecolor
+post_visitedcolor = post_shadecolor
+
+//Link style
+a
+  .link:link
+    color post_linkcolor
+    text-decoration none
+  .link:hover
+    color post_linkcolor
+    text-decoration underline
+  .link:visited
+    color post_visitedcolor
+    text-decoration none
+
+ul#assignments
+  list-style-type none
+
+input
+textarea
+button//, keygen, select, isindex
+  font-family 'PT Sans', Helvetica, Arial, "Luxi Sans", sans-serif
+  font-size 1em
+  text-shadow 1px 1px 1px post_lightcolor
+
+genpad = .5em
+genrad = .5em
+padcompens = genpad*4
+votebox_width = 3em
+content_width = 28em
+tagbox_width = 9em
+cell1_width = votebox_width+padcompens
+cell2_width = content_width
+cell3_width = tagbox_width+padcompens +.2em
+post_width = cell1_width+cell2_width+cell3_width
+
+//Table structure
+div.table
+  display table
+div.colgroup
+  display table-column-group
+div.col
+  display table-column
+div.tr
+  display table-row
+div.td
+  display table-cell
+div.post.table
+  table-layout fixed  //not necessary
+  border-collapse separate //default anyway
+  border-spacing 0
+
+//Sizing
+  
+
+
+//Stylistics
+div.post
+  //Layout
+  margin .5em
+  padding 0
+  width post_width - .5em
+
+  //Styling
+  border 1px solid post_ddarkcolor
+  border-radius .5em
+  box-shadow inset 0 -5px 10px post_darkcolor, 1px 2px 5px post_darkcolor
+  linear-gradient(top, post_basecolor, post_shadecolor)
+  background-image -webkit-linear-gradient(top, post_basecolor 0%, post_shadecolor 100%)
+  
+div.vote_cell
+div.content_cell
+div.tag_cell
+  position relative
+  left 0
+  top 0
+
+div.vote_cell
+  width cell1_width
+div.content_cell
+  border-color post_lightcolor post_darkcolor post_darkcolor post_darkcolor 
+  border-style none solid solid solid
+  border-width 0px 1px 1px 1px
+  border-radius 0 0 .5em .5em
+  background-color post_papercolor
+  box-shadow inset -2px -3px 10px post_lightcolor, inset 1px 1px 1px post_basecolor
+  margin 0 0 0 0
+div.tag_cell
+  width cell3_width
+
+div.post_info
+  height 1em
+  margin 0 0 0 0
+  padding 0 0 .25em .25em
+  border-bottom 1px solid post_lightcolor
+  display inline-block
+  position relative
+  top 0
+  right 0
+  float right
+  
+  font-size 1em
+  
+  text-shadow 1px 1px 1px post_lightcolor
+
+div.post_content
+  //Layout
+  min-height tagbox_width + .6em
+  width content_width - padcompens
+  padding genpad
+  
+  //Text styles
+  p
+    margin 1em 0 0 0
+  p
+  h1
+  h2
+  h3
+  h4
+  h5
+  h6
+    text-shadow 1px 1px 1px post_lightcolor
+  code
+    text-shadow 1px 1px 1px post_lightcolor
+  p:first-child  //There should be a more compact way of doing this. 
+    margin-top 0
+  h1:first-child
+    margin-top 0
+  h2:first-child
+    margin-top 0
+  h3:first-child
+    margin-top 0
+  h4:first-child
+    margin-top 0
+  h5:first-child
+    margin-top 0
+  h6:first-child
+    margin-top 0
+
+
+//Could go in votebox, but uses Stylus variables defined in this document.
+div.votebox
+  position: absolute
+  left 0
+  top 0
+  //Layout + Sizing
+  width votebox_width
+  margin genpad
+  padding genpad
+
+  //Styling
+  border 1px solid post_darkcolor
+  border-radius .5em
+  background-color post_llightcolor
+  box-shadow inset 0 3px 5px post_basecolor
+  
+  .vote_button 
+    width 100%
+    height 2em
+  
+  .score
+    width 100%
+    text-align center
+
+//Could go in tagbox, but uses Stylus variables defined in this document. 
+div.tagbox
+  position: absolute
+  left 0
+  top 0
+  //Layout + Sizing
+  height tagbox_width
+  width tagbox_width
+  margin genpad
+  padding genpad
+
+  //Styling
+  border 1px solid post_darkcolor
+  border-radius .5em
+  background-color post_llightcolor
+  box-shadow inset 0 3px 5px post_basecolor
+  
+  li
+    display inline-block
+
+.large_icon
+  font-size 1.5em
+
+.start_reply
+  height 2em
+
+div.your-reply
+  margin-left cell1_width - .5em
+  
+  button
+    margin genpad
+  
+  > textarea
+    min-height tagbox_width + .6em
+    //width content_width - padcompens//Same size as content box
+    width content_width + tagbox_width - .4em
+    min-width content_width + tagbox_width - .4em
+    max-width content_width + tagbox_width - .4em
+  
+    //resize none
+    padding genpad
+    margin genpad  
+
+    border 1px solid post_darkcolor
+    border-radius .5em
+    //border-top-left-radius 0
+    background-color post_papercolor
+    box-shadow inset -2px -3px 10px post_lightcolor, inset 1px 1px 1px post_basecolor
+
+/*
+div.your-reply > textarea {
+  display: block;
+  width: post_content_width
+  min-height: 8em;
+  margin: .5em;
+  
+  resize: none;
+
+  border: 1px solid #2E58FF;
+  border-top-width: 2px;
+  border-left-color: #738FFF;
+  border-left-width: 2px;
+  border-right-color: #738FFF;
+  border-right-width: 2px;
+  
+  background: #e3ebf7;
+   
+  font-family: Helvetica, Arial, "Luxi Sans", sans-serif;
+}
+div.your-reply > button {
+  margin: .5em;
+}
+
+*/
+
+/*
+div.post {
+  border: 2px solid #1CFF37;
+  background-color: #BAFFC2;
+  margin: .5em;
+}
+div.post > div.main {
+  display: table;
+  width: 100%;
+  border: 2px solid #FFE017;
+  background-color: #FFF6BA;
+}
+div.post > div.main > div.body {
+  display: table-cell;
+  border: 2px solid #FFAE00;
+  background-color: #FFF6E3;
+}
+div.post > div.main > div.attributes {
+  display: table-cell;
+  width: 30%;
+  border: 2px solid #FF3B3B;
+  background-color: #FFD5C9;
+}
+div.vote_box {
+  display: table-cell;
+  border: 2px solid #2E58FF;
+  background-color: #C7D2FF;
+  width: 3em;
+}
+
+div.vote_box > button.vote_button {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 2em;
+}
+
+div.vote_box > div.score {
+  text-align: center;
+}
+
+.tag {
+  display: inline;
+  border: 2px solid #EE2EFF;
+  background-color: #FBC9FF;
+}
+
+div.your-reply {
+  border: 1px solid #2E58FF;
+  background-color: #C7D2FF;
+  border-bottom-width: 2px;
+}
+div.your-reply > textarea {
+  display: block;
+  width: 90%;
+  minHeight: 8em;
+  margin: .5em;
+  
+  resize: none;
+
+  border: 1px solid #2E58FF;
+  border-top-width: 2px;
+  border-left-color: #738FFF;
+  border-left-width: 2px;
+  border-right-color: #738FFF;
+  border-right-width: 2px;
+  
+  background: #e3ebf7;
+  background: -moz-linear-gradient(top, #e3ebf7 0%, #ffffff 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e3ebf7), color-stop(100%,#ffffff)); 
+  background: -webkit-linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
+  background: -o-linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
+  background: -ms-linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
+  background: linear-gradient(top, #e3ebf7 0%,#ffffff 100%);
+   
+  font-family: Helvetica, Arial, "Luxi Sans", sans-serif;
+}
+div.your-reply > button {
+  margin: .5em;
+}
+
+ul {
+  list-style-type: none;
+}
+*/
