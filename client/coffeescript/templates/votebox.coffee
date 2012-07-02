@@ -14,7 +14,6 @@ _.extend( Template.votebox,
       #@votes.up.users.push(Session.get('user_id'))
       #Posts.update(@_id, {$set: {votes: @votes}})
     "click button[name='down_vote']": ->
-      alert 'push'
       Posts.update(@_id, {$set: {my_vote: false}})
       #Session.set("voted_#{@_id}",true)
       #@votes.down.users.push(Session.get('user_id'))

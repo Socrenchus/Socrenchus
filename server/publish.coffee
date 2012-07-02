@@ -57,7 +57,11 @@ Meteor.publish("my_posts", ->
           #console.log doc.votes[vote]
           client_votes[vote].count = doc.votes[vote].users.length
           client_votes[vote].weight = doc.votes[vote].weight
-          
+          if (user_id in doc.votes[vote].users)
+            if (vote is 'up')
+              client_my_vote = true
+            if (vote is 'down')
+              client_my_vote = false
         self.set("client_posts", doc._id, {
           author_id : doc.author_id
           content : doc.content
@@ -65,6 +69,7 @@ Meteor.publish("my_posts", ->
           tags: client_tags
           my_tags: client_my_tags
           votes: client_votes
+          my_vote: client_my_vote
         })
         self.flush()
       removed: (doc, idx) ->

@@ -13,6 +13,13 @@ _.extend( Template.reply_box,
       if not event.isImmediatePropagationStopped()
         Session.set("composing_#{ @_id }", "")
         event.stopImmediatePropagation()
+      
+    ###
+    "load textarea[name='reply_text']": (event) ->
+      if not event.isImmediatePropagationStopped()
+        event.target.focus()
+        event.stopImmediatePropagation()
+    ###
     
     #editing
     """
