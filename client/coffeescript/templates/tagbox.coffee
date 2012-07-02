@@ -25,46 +25,23 @@ _.extend( Template.tagbox,
   tagging_post: -> Session.equals("tagging_#{ @_id }", true)
   
   events: {
-    ###
-    'focus .suggested': (event) ->
-      if not event.isImmediatePropagationStopped()
-        #console.log(event.target,"clicked")
-        #event.target.focus()
-
-        event.stopImmediatePropagation()
-    ###
-    ###
+    
     'keydown .suggested': (event) ->
       if not event.isImmediatePropagationStopped()
         tag_text = event.target.innerText
         
-        #remove tag from suggestions list if added or ignored
-        remove_suggestion = =>
-          sugs = Session.get("suggestions_#{ @_id }")
-          sugs.remove(tag_text)
-          Session.get("context_#{@_id}").invalidate()
-          nextofkin = event.target.parentNode.getElementsByTagName("form")[1]
-          #console.log(document.activeElement)
-          nextofkin?.focus()
-          console.log(document.activeElement)
-          
+        #TODO: modify for new HTML layout,
+        #      or find less convoluted way to get particular elements
+        tag_box = event.target.parentNode.parentNode.
+          getElementsByTagName('div')[1].
+          getElementsByTagName('textarea')[0]
+        
         switch event.keyCode
           when 74 #J/Check
-            @tags[tag_text] ?= { users: [], weight: 0}
-            @tags[tag_text].users.push(Meteor.call("get_user_id"))
-            Posts.update(@_id, {$set: {tags: @tags}})
-            remove_suggestion()
-          when 75 #J/Check or K/Kill
-            remove_suggestion()
-            
-          
-        event.stopImmediatePropagation()
-    ###
-    "keydown textarea[name='tag_text']": (event) -> #Suppresses newline
-      if not event.isImmediatePropagationStopped()
-        switch event.keyCode
-          when 13 #Enter
-            event.preventDefault()
+            Template.tagbox.add_tag(@_id, @tags, [], tag_text, tag_box)
+          when 75 #K/Kill
+            Session.get("suggestions_#{ @_id }").remove(tag_text)
+            Session.get("context_#{@_id}").invalidate()
           
         event.stopImmediatePropagation()
     
@@ -80,21 +57,29 @@ _.extend( Template.tagbox,
           getElementsByTagName("form")[0]?.innerText
         
         switch event.keyCode
-          when 13 #Enter
+          when 13 #Enter: ADD ENTERED TEXT
             Template.tagbox.add_tag(@_id, @tags, [], entered_text, event.target)
-          when 37 #Left-arrow: ADD
+          when 37 #Left-arrow: ADD SUGGESTED TAG
             if suggested_tag?
               @tags[suggested_tag] ?= { users: [], weight: 0}
               @tags[suggested_tag].users.push(Session.get('user_id'))
               Posts.update(@_id, {$set: {tags: @tags}})
-              Session.get("suggestions_#{ @_id }").remove(suggested_tag) #TODO: REMOVE
-              Session.get("context_#{@_id}").invalidate()  #TODO: REMOVE
-          when 39 #Right-arrow: REMOVE
+              Session.get("suggestions_#{ @_id }").remove(suggested_tag)
+              Session.get("context_#{@_id}").invalidate()
+          when 39 #Right-arrow: REMOVE SUGGESTED TAG
             Session.get("suggestions_#{ @_id }").remove(suggested_tag)
             Session.get("context_#{@_id}").invalidate()
           else    #Update suggestions with new text
             Session.set("filter_text_#{ @_id }", entered_text)
             Session.get("context_#{@_id}").invalidate()
+          
+        event.stopImmediatePropagation()
+        
+    "keydown textarea[name='tag_text']": (event) -> #Suppresses newline
+      if not event.isImmediatePropagationStopped()
+        switch event.keyCode
+          when 13 #Enter
+            event.preventDefault()
           
         event.stopImmediatePropagation()
     
@@ -121,6 +106,8 @@ _.extend( Template.tagbox,
         
     "click button[name='enter_tag']": (event) ->
       if not event.isImmediatePropagationStopped()
+        #TODO: modify for new HTML layout,
+        #      or find less convoluted way to get particular elements
         tag_box = event.target.parentNode.getElementsByTagName(
           "textarea")[0]
         Template.tagbox.add_tag(@_id, @tags, [], tag_box.value, tag_box)
@@ -132,8 +119,7 @@ _.extend( Template.tagbox,
         event.stopImmediatePropagation()
   }
   
-  add_tag: (id, grad_tags, my_tags, tag_text, text_box) =>
-    console.log(_this)
+  add_tag: (id, grad_tags, my_tags, tag_text, text_box) ->
     if tag_text != "" && not my_tags[tag_text]?
       #TODO: add to my_tags not grad_tags
       grad_tags[tag_text] ?= { users: [], weight: 0}
@@ -142,6 +128,7 @@ _.extend( Template.tagbox,
       #clear textbox and update suggestion filter
       text_box.value = ''
       Session.set("filter_text_#{ id }", '')
+      Session.get("suggestions_#{ id }").remove(tag_text)
       Session.get("context_#{ id }").invalidate()
 )
 

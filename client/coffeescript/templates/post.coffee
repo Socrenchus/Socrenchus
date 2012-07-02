@@ -6,7 +6,13 @@ _.extend( Template.post,
     return post_content_html
   identifier: -> @_id
   link_href: ->
-    return "#{ @_id }"
+    return "/#{ @_id }"
+  parent_href: ->
+    if @parent_id?
+      return "/#{ @parent_id }"
+    else
+      return false
+
   events: {
     "click button[name='goto-parent']": (event) ->
       if not event.isImmediatePropagationStopped()
