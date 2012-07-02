@@ -6,18 +6,6 @@
 # -'TODO's indicate case-specific changes
 ###
 _.extend( Template.tagbox,
-  add_tag: (tags, tag_text, event, id) =>
-    console.log(tags, tag_text, event, id)
-    if tag_text != "" #TODO: && not @my_tags[tag_text]?
-      #TODO: add to @my_tags not @tags
-      tags[tag_text] ?= { users: [], weight: 0}
-      tags[tag_text].users.push(Session.get('user_id'))
-      Posts.update(id, {$set: {tags: tags}})
-      #clear textbox and update suggestion filter
-      event.target.value = ''
-      Session.set("filter_text_#{ id }", '')
-      Session.get("context_#{ id }").invalidate()
-    
   visible_tags: ->
     visible = (tag for tag of @tags)  #graduated tags
     @my_tags ?= {}                    #TODO: REMOVE on schema change
@@ -93,20 +81,7 @@ _.extend( Template.tagbox,
         
         switch event.keyCode
           when 13 #Enter
-            ###TODO: Encapsulate this code so the click event calls it too
-            if entered_text != "" #TODO: && not @my_tags[tag_text]?
-              #TODO: add to @my_tags not @tags
-              @tags[entered_text] ?= { users: [], weight: 0}
-              @tags[entered_text].users.push(Session.get('user_id'))
-              Posts.update(@_id, {$set: {tags: @tags}})
-              #clear textbox and update suggestion filter
-              event.target.value = ''
-              Session.set("filter_text_#{ @_id }", '')
-              Session.get("context_#{@_id}").invalidate()
-            ###
-            #Does this work?  It encapsulates the code pretty well
-            #$("button[name='enter_tag']").click()
-            Template.tagbox.add_tag(@tags, entered_text, event, @_id)
+            Template.tagbox.add_tag(@_id, @tags, [], entered_text, event.target)
           when 37 #Left-arrow: ADD
             if suggested_tag?
               @tags[suggested_tag] ?= { users: [], weight: 0}
@@ -148,17 +123,7 @@ _.extend( Template.tagbox,
       if not event.isImmediatePropagationStopped()
         tag_box = event.target.parentNode.getElementsByTagName(
           "textarea")[0]
-        tag_text = tag_box.value
-        #TODO: Encapsulate this code
-        if tag_text != "" #TODO: && not @my_tags[tag_text]?
-          #TODO: add to @my_tags not @tags
-          @tags[tag_text] ?= { users: [], weight: 0}
-          @tags[tag_text].users.push(Session.get('user_id'))
-          Posts.update(@_id, {$set: {tags: @tags}})
-          #clear textbox and update suggestion filter
-          tag_box.value = ''
-          Session.set("filter_text_#{ @_id }", '')
-          Session.get("context_#{@_id}").invalidate()
+        Template.tagbox.add_tag(@_id, @tags, [], tag_box.value, tag_box)
         event.stopImmediatePropagation()
         
     "click button[name='done_tagging']": (event) ->
@@ -166,10 +131,22 @@ _.extend( Template.tagbox,
         Session.set("tagging_#{ @_id }", false)
         event.stopImmediatePropagation()
   }
+  
+  add_tag: (id, grad_tags, my_tags, tag_text, text_box) =>
+    console.log(_this)
+    if tag_text != "" && not my_tags[tag_text]?
+      #TODO: add to my_tags not grad_tags
+      grad_tags[tag_text] ?= { users: [], weight: 0}
+      grad_tags[tag_text].users.push(Session.get('user_id'))
+      Posts.update(id, {$set: {tags: grad_tags}})
+      #clear textbox and update suggestion filter
+      text_box.value = ''
+      Session.set("filter_text_#{ id }", '')
+      Session.get("context_#{ id }").invalidate()
 )
 
 Handlebars.registerHelper('vis_tags', (context, object) ->
-  @my_tags = {test: 0}          #TODO: REMOVE
+  @my_tags = {}          #TODO: REMOVE
   ret = ""
   for tag in context
     ret += "<div class='tag"
