@@ -1,8 +1,10 @@
 <template name="tagbox">
   <div class="tagbox">
-    {{#each grad_tags}}
-      <text>{{this}}</text>
-    {{/each}}
-    <button name="tagbutton">Tag This Post!</button>
+    <ul>
+      {{#each grad_tags}}
+        <li>{{this}}</li>
+      {{/each}}
+    </ul>
+    <!--<button name="tagbutton">Tag This Post!</button>-->
   </div>
 </template>
