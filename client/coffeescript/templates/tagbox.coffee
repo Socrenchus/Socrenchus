@@ -61,16 +61,12 @@ _.extend( Template.tagbox,
             Template.tagbox.add_tag(@_id, @tags, [], entered_text, event.target)
           when 37 #Left-arrow: ADD SUGGESTED TAG
             if event.ctrlKey && suggested_tag?
-              @tags[suggested_tag] ?= { users: [], weight: 0}
-              @tags[suggested_tag].users.push(Session.get('user_id'))
-              Posts.update(@_id, {$set: {tags: @tags}})
-              Session.get("suggestions_#{ @_id }").remove(suggested_tag)
-              Session.get("context_#{@_id}").invalidate()
+              Template.tagbox.add_tag(@_id, @tags, [], suggested_tag, event.target)
           when 39 #Right-arrow: REMOVE SUGGESTED TAG
             if event.ctrlKey
               Session.get("suggestions_#{ @_id }").remove(suggested_tag)
               Session.get("context_#{@_id}").invalidate()
-          else    #Update suggestions with new text
+          else    #Update filter with new text
             Session.set("filter_text_#{ @_id }", entered_text)
             Session.get("context_#{@_id}").invalidate()
           
