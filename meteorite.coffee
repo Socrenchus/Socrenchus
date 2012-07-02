@@ -13,6 +13,6 @@ if Meteor.is_client
       Meteor.call( 'use_branch', branch )
       if other?
         Backbone.history.navigate(other, trigger: true)
-        @navigate("/branch/#{branch}")
+        @navigate("/branch/#{branch}#{other}")
     
   Router = new Router()
