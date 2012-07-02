@@ -9,12 +9,14 @@ _.extend( Template.votebox,
   score: -> @votes['up'].count - @votes['down'].count
   events: {
     "click button[name='up_vote']": (event) ->
-      Posts.update(@_id, {$set: {my_vote: true}})
+      #_id required for this request to go through GrandCentral
+      Posts.update(_id: @_id, {$set: {my_vote: true}})
       #Session.set("voted_#{@_id}",true)
       #@votes.up.users.push(Session.get('user_id'))
       #Posts.update(@_id, {$set: {votes: @votes}})
     "click button[name='down_vote']": ->
-      Posts.update(@_id, {$set: {my_vote: false}})
+      #_id required for this request to go through GrandCentral
+      Posts.update(_id: @_id, {$set: {my_vote: false}})
       #Session.set("voted_#{@_id}",true)
       #@votes.down.users.push(Session.get('user_id'))
       #Posts.update(@_id, {$set: {votes: @votes}})

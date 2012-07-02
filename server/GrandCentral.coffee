@@ -42,6 +42,10 @@ class GrandCentral
           #tagging, voting also comes in here
           console.log "raw args: "
           console.log args
+          console.log "args[0]: "
+          console.log args[0]
+          console.log "args[1]: "
+          console.log args[1]
           #for voting
           if (args[0]._id? and args[1].$set?)
             #console.log args
@@ -50,15 +54,25 @@ class GrandCentral
               post = Posts.find(args[0]._id).fetch()
               console.log 'post to be updated in mongo'
               console.log post
-              #TODO why does Posts.find().fetch() return client side db
-              #TODO why is post.content undefined??
               if (args[1].$set.my_vote)
                 console.log "found up_vote from #{update_user_id}"
+                #console.log _.keys(post.votes)
+                new_args0 = "{_id: #{args[0]._id}}"
+                new_args1 = "{$push: {votes.up.users: #{update_user_id}}, $inc: {votes.up.weight: 1}})"
+                args[0] = new_args0
+                args[1] = new_args1
+                console.log 'formatted args'
+                console.log args
+                ###
+                this syntax works when tried in mongo
+                 db.posts.update({'content': 'whattsup'}, {'$push': {'votes.up.users': 'made up id'}, '$inc': {'votes.up.weight': 1}})
+                *TODO: my_vote seems to be changing with clicking, not other fields though
+                ###
                 
               else
                 console.log "found down_vote from #{update_user_id}"
                 
-          error_list.push('this GrandCentral function (posts/update) is a work in progress')
+          #error_list.push('this GrandCentral function (posts/update) is a work in progress')
         remove: (args...) =>
       }
       instances: {
