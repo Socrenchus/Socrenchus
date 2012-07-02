@@ -7,8 +7,8 @@
 ###
 _.extend( Template.tagbox,
   visible_tags: ->
-    visible = (tag for tag of @tags)  #graduated tags
     @my_tags ?= {}                    #TODO: REMOVE on schema change
+    visible = (tag for tag of @tags)  #graduated tags
     for name of @my_tags              #my tags
       if not (name in visible)
         visible.push(name)
@@ -84,7 +84,7 @@ _.extend( Template.tagbox,
           
         event.stopImmediatePropagation()
     
-    "click button[name='tagbutton']": (event) ->
+    "click button[name='tag_button']": (event) ->
       if not event.isImmediatePropagationStopped()
         Session.set("tagging_#{ @_id }", true)  #Display tagbox
         
