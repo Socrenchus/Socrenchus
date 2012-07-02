@@ -7,7 +7,7 @@ Meteor.publish("my_user", (user_id) ->
 )
 
 Meteor.publish("my_posts", ->
-  user_id = Meteor.call('get_user_id')
+  user_id = @userId()
   if user_id
     q = Posts.find( author_id: user_id )
     Session.set( 'my_posts_query', q)
@@ -15,7 +15,7 @@ Meteor.publish("my_posts", ->
 )
 
 Meteor.publish("assigned_posts", ->
-  user_id = Meteor.call('get_user_id')
+  user_id = @userId()
   if user_id
     # gather ids of my posts and posts i've replied to
     ids = []

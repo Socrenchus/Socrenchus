@@ -1,4 +1,7 @@
 _.extend( Template.session_bar,
   username: ->
-    return Session.get('user_id')
+    if (Session.get('branch') is 'TEST_BRANCH')
+      return "You're a winner!!"
+    else
+      return Session.get('user_id')
 )
