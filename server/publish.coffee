@@ -25,37 +25,13 @@ Meteor.publish("my_posts", ->
           ]
       }
     )
-    #working shit
+    #my_post_query session variable depricated
     #q = Posts.find( author_id: user_id )
     #Session.set( 'my_posts_query', q)
     handle = q.observe (
       added: (doc, idx) ->
         ###
-        console.log 'publish my_post added:'
-        self.set('my_posts', idx,
-          author_id : doc.author_id
-          content : doc.content
-          parent_id : doc.parent_id
-          tags : {
-            #the tag text and corrosponding weight
-            'tag_name' :  0
-          }
-          my_tags : {
-            'tag_name' :  0
-          }
-          my_vote : undefined
-          votes :{
-            'up' : {
-              count: 0
-              weight: 0
-            }
-            'down' : {
-              count: 0
-              weight: 0
-            }
-          }
-        )
-        
+        every time a post is added, translate to client schema and publish
         ###
         client_tags = {}
         client_my_tags = {}
@@ -77,8 +53,6 @@ Meteor.publish("my_posts", ->
           if (doc.tags[tag].users? and (user_id in doc.tags[tag].users))
             #console.log 'personal tag'
             client_my_tags[tag] = doc.tags[tag].weight
-        
-        #console.log doc
         for vote of doc.votes
           #console.log doc.votes[vote]
           client_votes[vote].count = doc.votes[vote].users.length
