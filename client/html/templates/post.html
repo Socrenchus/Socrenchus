@@ -10,28 +10,54 @@
     -->
 
 <template name="post">
-  <div class="post">
-    <div class="main">
-      <div class="body">
-        {{{content}}}
+  <div class="post_container">
+    <div class="table post">
+      <div class="colgroup">
+        <div class="col"></div>
       </div>
-      <div class="attributes">
-        {{#with this}}
-          {{> votebox}}
-          [[Tagbox]]
-        {{/with}}
+      <div class="tr post_top_part">
+        <div class="table post_top_part">
+          <div class="colgroup">
+            <div class="col vote_col"></div>
+            <div class="col content_col"></div>
+            <div class="col tag_col"></div>
+          </div>
+          <div class="tr post_top_part">
+            <div class="td vote_cell">
+              {{#with this}}
+                {{> votebox}}
+              {{/with}}
+            </div>
+            <div class="td content_cell">
+              <div class="post_content">
+                <div class="post_info">
+                  {{#if parent_href}}
+                    <a class="link" href="{{parent_href}}">Parent</a>
+                    <text> - </text>
+                  {{/if}}
+                  <a class="link" href="{{link_href}}">Share</a> - User</div>
+                  <div>
+                    {{{content}}}
+                  </div>
+              </div>
+            </div>
+            <div class="td tag_cell">
+              {{#with this}}
+                {{> tagbox}}
+              {{/with}}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tr post_reply_part">
+        {{> reply_box}}
       </div>
     </div>
-    <a href="{{link_href}}">Link to this post</a>
-    <button name="goto-parent">Parent</button>
     <div class="reply-section">
-      {{> reply_box}}
-      {{#if hide_replies}}
-        <button name="show-replies">Show Replies</button>
-      {{else}}
-        <button name="hide-replies">Hide Replies</button>
-        {{> stream}}
-      {{/if}}
+      {{> stream}} 
     </div>
   </div>
+  
+  <!--Button temporarily out of service.-->
+  <!--<button name="goto-parent">Parent</button>-->
 </template>
