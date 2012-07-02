@@ -3,31 +3,49 @@
 # -@tags -> @graduated_tags
 # -info -> weight
 # -info.weight -> weight
+# -'TODO's indicate case-specific changes
 ###
-
 _.extend( Template.tagbox,
-
+  add_tag: (tags, tag_text, event, id) =>
+    console.log(tags, tag_text, event, id)
+    if tag_text != "" #TODO: && not @my_tags[tag_text]?
+      #TODO: add to @my_tags not @tags
+      tags[tag_text] ?= { users: [], weight: 0}
+      tags[tag_text].users.push(Session.get('user_id'))
+      Posts.update(id, {$set: {tags: tags}})
+      #clear textbox and update suggestion filter
+      event.target.value = ''
+      Session.set("filter_text_#{ id }", '')
+      Session.get("context_#{ id }").invalidate()
+    
   visible_tags: ->
     visible = (tag for tag of @tags)  #graduated tags
-    @my_tags ?= {}                    #REMOVE on schema change
+    @my_tags ?= {}                    #TODO: REMOVE on schema change
     for name of @my_tags              #my tags
       if not (name in visible)
         visible.push(name)
     return visible
     
-  suggested_tags: -> Session.get("suggestions_#{ @_id }")
-    
+  suggested_tags: -> 
+    suggestions = Session.get("suggestions_#{ @_id }")
+    filtered = []
+    for tag in suggestions
+      filtered.push(tag) if tag? &&
+        tag.search(Session.get("filter_text_#{ @_id }")) != -1
+    return filtered
+
   tagging_post: -> Session.equals("tagging_#{ @_id }", true)
   
   events: {
-    'load': ->
+    ###
     'focus .suggested': (event) ->
       if not event.isImmediatePropagationStopped()
         #console.log(event.target,"clicked")
         #event.target.focus()
 
         event.stopImmediatePropagation()
-        
+    ###
+    ###
     'keydown .suggested': (event) ->
       if not event.isImmediatePropagationStopped()
         tag_text = event.target.innerText
@@ -53,49 +71,64 @@ _.extend( Template.tagbox,
             
           
         event.stopImmediatePropagation()
-    
+    ###
     "keydown textarea[name='tag_text']": (event) -> #Suppresses newline
       if not event.isImmediatePropagationStopped()
         switch event.keyCode
           when 13 #Enter
             event.preventDefault()
-          when 37 #Left-arrow: ADD
-            @tags[tag_text] ?= { users: [], weight: 0}
-            @tags[tag_text].users.push(Meteor.call("get_user_id"))
-            Posts.update(@_id, {$set: {tags: @tags}})
-            Session.get("suggestions_#{ @_id }").shift() #REMOVE
-            Session.get("context_#{@_id}").invalidate()  #REMOVE
-          when 39 #Right-arrow: REMOVE
-            Session.get("suggestions_#{ @_id }").shift()
-            Session.get("context_#{@_id}").invalidate()
+          
         event.stopImmediatePropagation()
     
     "keyup textarea[name='tag_text']": (event) ->
       if not event.isImmediatePropagationStopped()
-        tag_text = event.target.value
+      
+        entered_text = event.target.value
+        
+        #TODO: modify for new HTML layout,
+        #      or find less convoluted way to get particular elements
+        suggested_tag = event.target.parentNode.parentNode.
+          getElementsByTagName("div")[0].
+          getElementsByTagName("form")[0]?.innerText
+        
         switch event.keyCode
           when 13 #Enter
-            event.target.value = "" #clear textbox
-            @tags[tag_text] ?= { users: [], weight: 0}
-            @tags[tag_text].users.push(Meteor.call("get_user_id"))
-            Posts.update(@_id, {$set: {tags: @tags}})
-          else                  #Update suggestions with new text
-            sugs = Session.get("suggestions_#{ @_id }")
-            results = []
-            for tag in sugs
-              results.push(tag) if tag? && tag.search(tag_text) != -1
-            Session.set("suggestions_#{ @_id }", results)
+            ###TODO: Encapsulate this code so the click event calls it too
+            if entered_text != "" #TODO: && not @my_tags[tag_text]?
+              #TODO: add to @my_tags not @tags
+              @tags[entered_text] ?= { users: [], weight: 0}
+              @tags[entered_text].users.push(Session.get('user_id'))
+              Posts.update(@_id, {$set: {tags: @tags}})
+              #clear textbox and update suggestion filter
+              event.target.value = ''
+              Session.set("filter_text_#{ @_id }", '')
+              Session.get("context_#{@_id}").invalidate()
+            ###
+            #Does this work?  It encapsulates the code pretty well
+            #$("button[name='enter_tag']").click()
+            Template.tagbox.add_tag(@tags, entered_text, event, @_id)
+          when 37 #Left-arrow: ADD
+            if suggested_tag?
+              @tags[suggested_tag] ?= { users: [], weight: 0}
+              @tags[suggested_tag].users.push(Session.get('user_id'))
+              Posts.update(@_id, {$set: {tags: @tags}})
+              Session.get("suggestions_#{ @_id }").remove(suggested_tag) #TODO: REMOVE
+              Session.get("context_#{@_id}").invalidate()  #TODO: REMOVE
+          when 39 #Right-arrow: REMOVE
+            Session.get("suggestions_#{ @_id }").remove(suggested_tag)
+            Session.get("context_#{@_id}").invalidate()
+          else    #Update suggestions with new text
+            Session.set("filter_text_#{ @_id }", entered_text)
             Session.get("context_#{@_id}").invalidate()
           
         event.stopImmediatePropagation()
     
     "click button[name='tagbutton']": (event) ->
       if not event.isImmediatePropagationStopped()
-        #Display tagbox
-        Session.set("tagging_#{ @_id }", true)
+        Session.set("tagging_#{ @_id }", true)  #Display tagbox
         
         #MAKE SUGGESTIONS
-        @my_tags = {}              #REMOVE on schema change
+        @my_tags = {} #TODO: REMOVE on schema change
         suggestions = {}
         #get graduated tags from siblings
         for post in Posts.find( 'parent_id': @parent_id ).fetch()
@@ -107,20 +140,25 @@ _.extend( Template.tagbox,
         #sort by weight, then return list of names
         cmp_weight = (a,b) -> a.weight - b.weight
         res = sug_list.sort( cmp_weight ).map( (a) -> a.name )
-        #console.log(res)
         Session.set("suggestions_#{ @_id }", res)
         
         event.stopImmediatePropagation()
         
     "click button[name='enter_tag']": (event) ->
       if not event.isImmediatePropagationStopped()
-        tag_text = event.target.parentNode.getElementsByTagName(
-          "textarea")[0].value
-        if tag_text != "" # && not @my_tags[tag_text]?
-          #add to @my_tags not @tags
+        tag_box = event.target.parentNode.getElementsByTagName(
+          "textarea")[0]
+        tag_text = tag_box.value
+        #TODO: Encapsulate this code
+        if tag_text != "" #TODO: && not @my_tags[tag_text]?
+          #TODO: add to @my_tags not @tags
           @tags[tag_text] ?= { users: [], weight: 0}
-          @tags[tag_text].users.push(Meteor.call("get_user_id"))
+          @tags[tag_text].users.push(Session.get('user_id'))
           Posts.update(@_id, {$set: {tags: @tags}})
+          #clear textbox and update suggestion filter
+          tag_box.value = ''
+          Session.set("filter_text_#{ @_id }", '')
+          Session.get("context_#{@_id}").invalidate()
         event.stopImmediatePropagation()
         
     "click button[name='done_tagging']": (event) ->
@@ -131,7 +169,7 @@ _.extend( Template.tagbox,
 )
 
 Handlebars.registerHelper('vis_tags', (context, object) ->
-  @my_tags = {test: 0}          #REMOVE
+  @my_tags = {test: 0}          #TODO: REMOVE
   ret = ""
   for tag in context
     ret += "<div class='tag"
@@ -152,9 +190,4 @@ Handlebars.registerHelper('sug_tags', (context, object) ->
       ret += " grad"
     ret += " suggested' tabindex='0'>" + tag + "</form>"
   return ret
-)
-
-$(document).keydown( (event) ->
-  console.log(document.activeElement)
-  event.stopPropagation()
 )
