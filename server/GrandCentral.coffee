@@ -22,6 +22,7 @@ class GrandCentral
       }
       posts: {
         insert: (args...) =>
+          console.log "GC post/insert"
           args[0].author_id = Meteor.call('get_user_id')
           args[0].votes = {
             'up': {

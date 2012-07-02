@@ -62,7 +62,8 @@ Meteor.publish("my_posts", ->
               client_my_vote = true
             if (vote is 'down')
               client_my_vote = false
-        self.set("client_posts", doc._id, {
+        #self.set("client_posts", doc._id, {
+        self.set("posts", doc._id, {
           author_id : doc.author_id
           content : doc.content
           parent_id : doc.parent_id

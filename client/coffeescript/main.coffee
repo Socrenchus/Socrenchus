@@ -1,5 +1,6 @@
 # Collections
-Posts = new Meteor.Collection("client_posts")
+#Posts = new Meteor.Collection("client_posts")
+Posts = new Meteor.Collection("posts")
 Users = new Meteor.Collection("users_proto")
 
 # Subscriptions
