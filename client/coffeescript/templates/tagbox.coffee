@@ -13,7 +13,7 @@ _.extend( Template.tagbox,
         visible.push(tag)
     return visible
     
-  suggested_tags: -> 
+  suggested_tags: ->
     suggestions = Session.get("suggestions_#{ @_id }")
     filtered = []
     for tag in suggestions
@@ -60,7 +60,8 @@ _.extend( Template.tagbox,
             Template.tagbox.add_tag(@_id, @my_tags, entered_text, event.target)
           when 37 #Left-arrow: ADD SUGGESTED TAG
             if event.ctrlKey && suggested_tag?
-              Template.tagbox.add_tag(@_id, @my_tags, suggested_tag, event.target)
+              Template.tagbox.add_tag(@_id, @my_tags,
+                suggested_tag, event.target)
           when 39 #Right-arrow: REMOVE SUGGESTED TAG
             if event.ctrlKey
               Session.get("suggestions_#{ @_id }").remove(suggested_tag)
@@ -101,7 +102,8 @@ _.extend( Template.tagbox,
         Session.set("suggestions_#{ @_id }", res)
         ###
         
-        Session.set("suggestions_#{ @_id }", if @suggestions? then @suggestions else [])
+        Session.set("suggestions_#{ @_id }",
+          if @suggestions? then @suggestions else [])
         
         event.stopImmediatePropagation()
         
