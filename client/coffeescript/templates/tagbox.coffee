@@ -1,17 +1,16 @@
 ###
 #Rules for switching to new schema:
-# -@tags -> @graduated_tags
 # -info -> weight
 # -info.weight -> weight
 # -'TODO's indicate case-specific changes
 ###
 _.extend( Template.tagbox,
   visible_tags: ->
-    @my_tags ?= {}                    #TODO: REMOVE on schema change
+    @my_tags ?= []                    #TODO: REMOVE on schema change
     visible = (tag for tag of @tags)  #graduated tags
-    for name of @my_tags              #my tags
-      if not (name in visible)
-        visible.push(name)
+    for tag in @my_tags              #my tags
+      if not (tag in visible)
+        visible.push(tag)
     return visible
     
   suggested_tags: -> 
@@ -38,7 +37,7 @@ _.extend( Template.tagbox,
         
         switch event.keyCode
           when 74 #J/Check
-            Template.tagbox.add_tag(@_id, @tags, [], tag_text, tag_box)
+            Template.tagbox.add_tag(@_id, @my_tags, tag_text, tag_box)
           when 75 #K/Kill
             Session.get("suggestions_#{ @_id }").remove(tag_text)
             Session.get("context_#{@_id}").invalidate()
@@ -58,10 +57,10 @@ _.extend( Template.tagbox,
         
         switch event.keyCode
           when 13 #Enter: ADD ENTERED TEXT
-            Template.tagbox.add_tag(@_id, @tags, [], entered_text, event.target)
+            Template.tagbox.add_tag(@_id, @my_tags, entered_text, event.target)
           when 37 #Left-arrow: ADD SUGGESTED TAG
             if event.ctrlKey && suggested_tag?
-              Template.tagbox.add_tag(@_id, @tags, [], suggested_tag, event.target)
+              Template.tagbox.add_tag(@_id, @my_tags, suggested_tag, event.target)
           when 39 #Right-arrow: REMOVE SUGGESTED TAG
             if event.ctrlKey
               Session.get("suggestions_#{ @_id }").remove(suggested_tag)
@@ -72,19 +71,21 @@ _.extend( Template.tagbox,
           
         event.stopImmediatePropagation()
         
-    "keydown textarea[name='tag_text']": (event) -> #Suppresses newline
+    #Suppresses newline
+    "keydown textarea[name='tag_text']": (event) ->
       if not event.isImmediatePropagationStopped()
         switch event.keyCode
           when 13 #Enter
             event.preventDefault()
-          
         event.stopImmediatePropagation()
     
     "click button[name='tag_button']": (event) ->
       if not event.isImmediatePropagationStopped()
+      
         Session.set("tagging_#{ @_id }", true)  #Display tagbox
         
-        #MAKE SUGGESTIONS
+        ###
+        #MAKE SUGGESTIONS.  Will be on server side eventually.
         @my_tags = {} #TODO: REMOVE on schema change
         suggestions = {}
         #get graduated tags from siblings
@@ -98,6 +99,9 @@ _.extend( Template.tagbox,
         cmp_weight = (a,b) -> a.weight - b.weight
         res = sug_list.sort( cmp_weight ).map( (a) -> a.name )
         Session.set("suggestions_#{ @_id }", res)
+        ###
+        
+        Session.set("suggestions_#{ @_id }", if @suggestions? then @suggestions else [])
         
         event.stopImmediatePropagation()
         
@@ -107,7 +111,7 @@ _.extend( Template.tagbox,
         #      or find less convoluted way to get particular elements
         tag_box = event.target.parentNode.getElementsByTagName(
           "textarea")[0]
-        Template.tagbox.add_tag(@_id, @tags, [], tag_box.value, tag_box)
+        Template.tagbox.add_tag(@_id, @my_tags, tag_box.value, tag_box)
         event.stopImmediatePropagation()
         
     "click button[name='done_tagging']": (event) ->
@@ -116,27 +120,26 @@ _.extend( Template.tagbox,
         event.stopImmediatePropagation()
   }
   
-  add_tag: (id, grad_tags, my_tags, tag_text, text_box) ->
-    if tag_text != "" && not my_tags[tag_text]?
-      #TODO: add to my_tags not grad_tags
-      grad_tags[tag_text] ?= { users: [], weight: 0}
-      grad_tags[tag_text].users.push(Session.get('user_id'))
-      Posts.update(id, {$set: {tags: grad_tags}})
+  add_tag: (id, my_tags, tag_text, text_box) ->
+    my_tags ?= []
+    if tag_text != "" && not (tag_text in my_tags)
+      my_tags.push(tag_text)
+      Posts.update(id, {$set: {'my_tags': my_tags}})
       #clear textbox and update suggestion filter
-      text_box.value = ''
-      Session.set("filter_text_#{ id }", '')
       Session.get("suggestions_#{ id }").remove(tag_text)
-      Session.get("context_#{ id }").invalidate()
+    text_box.value = ''
+    Session.set("filter_text_#{ id }", '')
+    Session.get("context_#{ id }").invalidate()
 )
 
 Handlebars.registerHelper('vis_tags', (context, object) ->
-  @my_tags = {}          #TODO: REMOVE
+  @my_tags ?= []          #TODO: REMOVE
   ret = ""
   for tag in context
     ret += "<div class='tag"
     if @tags[tag]?
       ret += " grad"
-    if @my_tags?.tag?
+    if tag in @my_tags
       ret += " mytag"
     ret += "'>" + tag + "</div>"
   return ret

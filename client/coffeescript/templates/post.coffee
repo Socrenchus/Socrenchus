@@ -22,9 +22,35 @@ _.extend( Template.post,
         for val in [1,2]
           parent = parent.parentNode
           #Until we hit a post or the top of the stream, keep looking
-          while parent.className != 'post_container' && parent.id != 'page-body'
+          while parent.tagName != 'LI' && parent.id != 'page-body'
             parent = parent.parentNode
         window.scrollTo(parent.offsetLeft, parent.offsetTop)
+        event.stopImmediatePropagation()
+        
+    "click button[name='goto-next-post']": (event) ->
+      if not event.isImmediatePropagationStopped()
+        post = event.target
+        #Climb the DOM tree once to get the current post list-item
+        post = post.parentNode
+        while post.tagName != 'LI'
+          post = post.parentNode
+        #then get the next post list-item
+        post = $(post).next()[0]
+        if post?
+          window.scrollTo(post.offsetLeft, post.offsetTop)
+        event.stopImmediatePropagation()
+        
+    "click button[name='goto-prev-post']": (event) ->
+      if not event.isImmediatePropagationStopped()
+        post = event.target
+        #Climb the DOM tree once to get the current post list-item
+        post = post.parentNode
+        while post.tagName != 'LI'
+          post = post.parentNode
+        #then get the previous post list-item
+        post = $(post).prev()[0]
+        if post?
+          window.scrollTo(post.offsetLeft, post.offsetTop)
         event.stopImmediatePropagation()
   }
 )
