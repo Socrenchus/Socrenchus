@@ -127,7 +127,8 @@ Handlebars.registerHelper('tags', (context, object) ->
     ret += " grad" if @tags[tag]?
     ret += " mytag" if tag in @my_tags
     ret += " suggested" if context.suggested
-    ret += "'>" + tag + "</div>"
+    ret += "'>" + tag
+    ret += if context.suggested then "</form>" else "</div>"
   return ret
 )
 
