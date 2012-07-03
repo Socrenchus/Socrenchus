@@ -122,13 +122,13 @@ Handlebars.registerHelper('tags', (context, object) ->
   @my_tags ?= []          #TODO: REMOVE
   ret = ""
   for tag in context.tags
-    ret += if context.suggested then "<form tabindex='0'" else "<div"
+    ret += if context.suggested then "<div tabindex='0'" else "<div"
     ret += " class='tag"
     ret += " grad" if @tags[tag]?
     ret += " mytag" if tag in @my_tags
     ret += " suggested" if context.suggested
     ret += "'>" + tag
-    ret += if context.suggested then "</form>" else "</div>"
+    ret += "</div>"
   return ret
 )
 
