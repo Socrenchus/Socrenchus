@@ -1,0 +1,50 @@
+_.extend( Template.votebox,
+<<<<<<< HEAD
+  voted: -> (@my_vote==true or @my_vote==false)
+  voted_up: -> @my_vote==true
+  voted_down: -> @my_vote==false
+  weight_diff: -> 
+    @votes['up'].weight - @votes['down'].weight
+  count_diff: ->
+    @votes['up'].count - @votes['down'].count
+    ###
+      votes :{
+        'up' : {
+          count: 0
+          weight: 0
+        }
+        'down' : {
+          count: 0
+          weight: 0
+        }
+      }
+    ###
+
+  events: {
+    "click button[name='up_vote']": (event) ->
+      Posts.update({_id: @_id}, {$set: {my_vote: true}})
+    "click button[name='down_vote']": ->
+      Posts.update({_id: @_id}, {$set: {my_vote: false}})
+=======
+  voted: ->
+    if (@my_vote is undefined)
+      return false
+    else
+      return true
+  voted_up: -> @my_vote is true
+  voted_down: -> @my_vote is false
+  score: -> @votes['up'].count - @votes['down'].count
+  events: {
+    "click button[name='up_vote']": (event) ->
+      Posts.update(@_id, {$set: {my_vote: true}})
+      #Session.set("voted_#{@_id}",true)
+      #@votes.up.users.push(Session.get('user_id'))
+      #Posts.update(@_id, {$set: {votes: @votes}})
+    "click button[name='down_vote']": ->
+      Posts.update(@_id, {$set: {my_vote: false}})
+      #Session.set("voted_#{@_id}",true)
+      #@votes.down.users.push(Session.get('user_id'))
+      #Posts.update(@_id, {$set: {votes: @votes}})
+>>>>>>> publish-set
+  }
+)
