@@ -57,7 +57,6 @@ _.extend( Template.tagbox,
         
         switch event.keyCode
           when 13 #Enter: ADD ENTERED TEXT
-            console.log(@_id)
             Template.tagbox.add_tag(@_id, @my_tags, entered_text, event.target)
           when 37 #Left-arrow: ADD SUGGESTED TAG
             if event.ctrlKey && suggested_tag?
@@ -119,10 +118,11 @@ _.extend( Template.tagbox,
 )
 
 Handlebars.registerHelper('tags', (context, object) ->
+  Session.set("context_#{ @_id }", Meteor.deps.Context.current)
   @my_tags ?= []          #TODO: REMOVE
   ret = ""
   for tag in context.tags
-    ret += if context.suggested then "<form" else "<div"
+    ret += if context.suggested then "<form tabindex='0'" else "<div"
     ret += " class='tag"
     ret += " grad" if @tags[tag]?
     ret += " mytag" if tag in @my_tags

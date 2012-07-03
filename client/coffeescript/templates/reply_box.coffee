@@ -45,6 +45,7 @@ _.extend( Template.reply_box,
               content: reply_content,
               parent_id: @_id,
               instance_id: @instance_id
+              tags: {}
               votes:{
                 'up': {
                   users: []
