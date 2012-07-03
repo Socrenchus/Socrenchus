@@ -12,3 +12,9 @@ _.extend( Template.tagbox,
     return sug_list.sort( cmp_weight ).map( (a) -> a.name )
 )
 
+###
+Grand Central expects the tag db action to look something like this:
+Posts.update({_id: 'id'},
+  {'$set: {tags.ex_tag: <1 or 0 or -1>}})
+
+###

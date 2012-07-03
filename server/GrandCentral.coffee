@@ -54,13 +54,13 @@ class GrandCentral
               tron.test ->
                 tron.log 'post to be updated in mongo'
                 tron.log post
-              if (args[1].$set.my_vote)
+              if (args[1].$set.my_vote )
                 tron.log "found up_vote from #{update_user_id}"
-                #console.log _.keys(post.votes)
                 new_args0 = 
                   '_id': args[0]._id
                 new_args1 =
-                  $push:
+                  #$push:
+                  $addToSet:
                     'votes.up.users': update_user_id
                   $inc:
                     'votes.up.weight': 1
@@ -68,18 +68,35 @@ class GrandCentral
                 args[1] = new_args1
                 tron.test ->
                   tron.log 'formatted args'
-                  tron.log args
-                ###
-                this syntax works when tried in mongo
-                 db.posts.update({'content': 'whattsup'}, {'$push': {'votes.up.users': 'made up id'}, '$inc': {'votes.up.weight': 1}})
-                *TODO: my_vote seems to be changing with clicking, not other fields though
-                ###
-                
+                  tron.log args                
               else
-                console.log "found down_vote from #{update_user_id}"
-                
+                tron.log "found down_vote from #{update_user_id}"
+                new_args0 = 
+                  '_id': args[0]._id
+                new_args1 =
+                  #$push:
+                  $addToSet:
+                    'votes.up.users': update_user_id
+                  $inc:
+                    'votes.up.weight': 1
+                args[0] = new_args0
+                args[1] = new_args1
+                tron.test ->
+                  tron.log 'formatted args'
+                  tron.log args 
+          #for tagging
+          #TODO check if the tag exists, if not, create an empty dictionary, then do below
+          if (args[0]['_id']? and args[1]['$set']?)
+            tron.log 'client wants to tag'
+            for tag_string,weight of args[1]['$set']
+              a = tag_string.split('.')
+              if a.length is 2 and a[0] is 'tags'
+                tron.log 'tag request verified'
+                args[1]["$addToSet"]["tags.#{a[1]}.users"] = update_user_id 
+                args[1]["$inc"]["tags.#{a[1]}.weight"] = 1
           #error_list.push('this GrandCentral function (posts/update) is a work in progress')
         remove: (args...) =>
+          error_list.push('not implemented yet')
       }
       instances: {
         insert: =>
@@ -95,6 +112,7 @@ class GrandCentral
       console.error (error_list)
     #console.info 'GrandCentral is operational!!'
     error_list = []
+   
 
 
 Meteor.startup( ->

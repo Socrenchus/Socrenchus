@@ -79,8 +79,49 @@ Meteor.publish("my_posts", ->
         console.log 'publish my_post moved:'
       changed: (doc, idx) ->
         console.log 'publish my_post changed:'
-        
-      
+        ###
+        every time a post is updated, translate to client schema and publish
+        ###
+        client_tags = {}
+        client_my_tags = {}
+        client_votes = {
+            'up' : {
+              count: 0
+              weight: 0
+            }
+            'down' : {
+              count: 0
+              weight: 0
+            }
+          }
+        client_my_vote = undefined
+        for tag of doc.tags
+          client_tags[tag] = doc.tags[tag].weight
+          #console.log doc.tags[tag].users
+          #doc.tags[tag].users?.push(user_id) #used to test the following loop
+          if (doc.tags[tag].users? and (user_id in doc.tags[tag].users))
+            #console.log 'personal tag'
+            client_my_tags[tag] = doc.tags[tag].weight
+        for vote of doc.votes
+          #console.log doc.votes[vote]
+          client_votes[vote].count = doc.votes[vote].users.length
+          client_votes[vote].weight = doc.votes[vote].weight
+          if (user_id in doc.votes[vote].users)
+            if (vote is 'up')
+              client_my_vote = true
+            if (vote is 'down')
+              client_my_vote = false
+        #self.set("client_posts", doc._id, {
+        self.set("posts", doc._id, {
+          author_id : doc.author_id
+          content : doc.content
+          parent_id : doc.parent_id
+          tags: client_tags
+          my_tags: client_my_tags
+          votes: client_votes
+          my_vote: client_my_vote
+        })
+        self.flush()
     )
     self.onStop ->
     handle.stop()
