@@ -40,7 +40,7 @@ _.extend( Template.tagbox,
             Template.tagbox.add_tag(@_id, @my_tags, tag_text, tag_box)
           when 75 #K/Kill
             Session.get("suggestions_#{ @_id }").remove(tag_text)
-            Session.get("context_#{@_id}").invalidate()
+            Session.get("context_#{@_id}")?.invalidate()
           
         event.stopImmediatePropagation()
     
@@ -66,10 +66,10 @@ _.extend( Template.tagbox,
           when 39 #Right-arrow: REMOVE SUGGESTED TAG
             if event.ctrlKey
               Session.get("suggestions_#{ @_id }").remove(suggested_tag)
-              Session.get("context_#{@_id}").invalidate()
+              Session.get("context_#{ @_id }")?.invalidate()
           else    #Update filter with new text
             Session.set("filter_text_#{ @_id }", entered_text)
-            Session.get("context_#{@_id}").invalidate()
+            Session.get("context_#{ @_id }")?.invalidate()
           
         event.stopImmediatePropagation()
         
@@ -87,7 +87,7 @@ _.extend( Template.tagbox,
         Session.set("tagging_#{ @_id }", true)  #Display tagbox
         
         Session.set("suggestions_#{ @_id }",
-          if @suggestions? then @suggestions else [])
+          if @suggestions? then @suggestions else ['tag'])
         
         event.stopImmediatePropagation()
         
@@ -115,7 +115,7 @@ _.extend( Template.tagbox,
     #clear textbox and update suggestion filter
     text_box.value = ''
     Session.set("filter_text_#{ id }", '')
-    Session.get("context_#{ id }").invalidate()
+    Session.get("context_#{ id }")?.invalidate()
 )
 
 Handlebars.registerHelper('tags', (context, object) ->
