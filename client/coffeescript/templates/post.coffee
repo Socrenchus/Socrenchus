@@ -22,7 +22,7 @@ _.extend( Template.post,
         for val in [1,2]
           parent = parent.parentNode
           #Until we hit a post or the top of the stream, keep looking
-          while parent.className != 'post' && parent.id != 'page-body'
+          while parent.className != 'post_container' && parent.id != 'page-body'
             parent = parent.parentNode
         window.scrollTo(parent.offsetLeft, parent.offsetTop)
         event.stopImmediatePropagation()
