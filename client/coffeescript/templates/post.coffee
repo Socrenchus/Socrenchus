@@ -1,3 +1,9 @@
+get_post = (target) ->
+  post = target.parentNode
+  while post.tagName != 'LI'
+    post = post.parentNode
+  return post
+
 _.extend( Template.post,
   content: ->
     escaped = Handlebars._escape(@content)
@@ -16,41 +22,22 @@ _.extend( Template.post,
   events: {
     "click button[name='goto-parent']": (event) ->
       if not event.isImmediatePropagationStopped()
-        parent = event.target
-        #Climb the DOM tree once to get the current post
-        #then again for the parent post
-        for val in [1,2]
+        parent = get_post(event.target).parentNode
+        while parent.tagName != 'LI' && parent.id != 'page-body'
           parent = parent.parentNode
-          #Until we hit a post or the top of the stream, keep looking
-          while parent.tagName != 'LI' && parent.id != 'page-body'
-            parent = parent.parentNode
         window.scrollTo(parent.offsetLeft, parent.offsetTop)
         event.stopImmediatePropagation()
         
     "click button[name='goto-next-post']": (event) ->
       if not event.isImmediatePropagationStopped()
-        post = event.target
-        #Climb the DOM tree once to get the current post list-item
-        post = post.parentNode
-        while post.tagName != 'LI'
-          post = post.parentNode
-        #then get the next post list-item
-        post = $(post).next()[0]
-        if post?
-          window.scrollTo(post.offsetLeft, post.offsetTop)
+        next_post = $(get_post(event.target)).next()[0]
+        window.scrollTo(next_post.offsetLeft, next_post.offsetTop) if next_post?
         event.stopImmediatePropagation()
         
     "click button[name='goto-prev-post']": (event) ->
       if not event.isImmediatePropagationStopped()
-        post = event.target
-        #Climb the DOM tree once to get the current post list-item
-        post = post.parentNode
-        while post.tagName != 'LI'
-          post = post.parentNode
-        #then get the previous post list-item
-        post = $(post).prev()[0]
-        if post?
-          window.scrollTo(post.offsetLeft, post.offsetTop)
+        prev_post = $(get_post(event.target)).prev()[0]
+        window.scrollTo(prev_post.offsetLeft, prev_post.offsetTop) if prev_post?
         event.stopImmediatePropagation()
   }
 )

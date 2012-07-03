@@ -11,7 +11,7 @@ _.extend( Template.tagbox,
     for tag in @my_tags              #my tags
       if not (tag in visible)
         visible.push(tag)
-    return visible
+    return {suggested:false,tags:visible}
     
   suggested_tags: ->
     suggestions = Session.get("suggestions_#{ @_id }")
@@ -19,7 +19,7 @@ _.extend( Template.tagbox,
     for tag in suggestions
       filtered.push(tag) if tag? &&
         tag.search(Session.get("filter_text_#{ @_id }")) != -1
-    return filtered
+    return {suggested:true,tags:filtered}
 
   tagging_post: -> Session.equals("tagging_#{ @_id }", true)
   
@@ -57,6 +57,7 @@ _.extend( Template.tagbox,
         
         switch event.keyCode
           when 13 #Enter: ADD ENTERED TEXT
+            console.log(@_id)
             Template.tagbox.add_tag(@_id, @my_tags, entered_text, event.target)
           when 37 #Left-arrow: ADD SUGGESTED TAG
             if event.ctrlKey && suggested_tag?
@@ -85,23 +86,6 @@ _.extend( Template.tagbox,
       
         Session.set("tagging_#{ @_id }", true)  #Display tagbox
         
-        ###
-        #MAKE SUGGESTIONS.  Will be on server side eventually.
-        @my_tags = {} #TODO: REMOVE on schema change
-        suggestions = {}
-        #get graduated tags from siblings
-        for post in Posts.find( 'parent_id': @parent_id ).fetch()
-          for name,info of post.tags
-            if post.tags[name]? && (not @my_tags[name]?)
-              suggestions[name] ?= 0
-              suggestions[name] += info.weight
-        sug_list = ({'name':n, 'weight':w} for n,w of suggestions)
-        #sort by weight, then return list of names
-        cmp_weight = (a,b) -> a.weight - b.weight
-        res = sug_list.sort( cmp_weight ).map( (a) -> a.name )
-        Session.set("suggestions_#{ @_id }", res)
-        ###
-        
         Session.set("suggestions_#{ @_id }",
           if @suggestions? then @suggestions else [])
         
@@ -127,33 +111,23 @@ _.extend( Template.tagbox,
     if tag_text != "" && not (tag_text in my_tags)
       my_tags.push(tag_text)
       Posts.update(id, {$set: {'my_tags': my_tags}})
-      #clear textbox and update suggestion filter
       Session.get("suggestions_#{ id }").remove(tag_text)
+    #clear textbox and update suggestion filter
     text_box.value = ''
     Session.set("filter_text_#{ id }", '')
     Session.get("context_#{ id }").invalidate()
 )
 
-Handlebars.registerHelper('vis_tags', (context, object) ->
+Handlebars.registerHelper('tags', (context, object) ->
   @my_tags ?= []          #TODO: REMOVE
   ret = ""
-  for tag in context
-    ret += "<div class='tag"
-    if @tags[tag]?
-      ret += " grad"
-    if tag in @my_tags
-      ret += " mytag"
+  for tag in context.tags
+    ret += if context.suggested then "<form" else "<div"
+    ret += " class='tag"
+    ret += " grad" if @tags[tag]?
+    ret += " mytag" if tag in @my_tags
+    ret += " suggested" if context.suggested
     ret += "'>" + tag + "</div>"
   return ret
 )
 
-Handlebars.registerHelper('sug_tags', (context, object) ->
-  Session.set("context_#{@_id}",Meteor.deps.Context.current)
-  ret = ""
-  for tag in context
-    ret += "<form class='tag"
-    if @tags[tag]?
-      ret += " grad"
-    ret += " suggested' tabindex='0'>" + tag + "</form>"
-  return ret
-)

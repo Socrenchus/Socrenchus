@@ -1,16 +1,16 @@
 <template name="tagbox">
   <div class="tag_box">
     <div class="grad-tags">
-      {{#vis_tags visible_tags}}
+      {{#tags visible_tags}}
         {{this}}
-      {{/vis_tags}}
+      {{/tags}}
     </div>
     <div class="add-tags">
       {{#if tagging_post}}
         <div class="suggestions">
-          {{#sug_tags suggested_tags}}
+          {{#tags suggested_tags}}
              {{this}}
-          {{/sug_tags}}
+          {{/tags}}
         </div>
         <div class="tag-input">
           <textarea name="tag_text"></textarea>
