@@ -21,7 +21,7 @@ _.extend( Template.tagbox,
           tag.search(Session.get("filter_text_#{ @_id }")) != -1
     return {suggested:true,tags:filtered}
 
-  tagging_post: -> Session.equals("tagging_#{ @_id }", true)
+  tagging_post: -> @tagging
   
   events: {
     
@@ -82,9 +82,7 @@ _.extend( Template.tagbox,
     
     "click button[name='tag_button']": (event) ->
       if not event.isImmediatePropagationStopped()
-      
-        Session.set("tagging_#{ @_id }", true)  #Display tagbox
-        
+        Posts.update(@_id, {$set: {'tagging': true}})  #Display tagbox
         event.stopImmediatePropagation()
         
     "click button[name='enter_tag']": (event) ->
@@ -98,7 +96,7 @@ _.extend( Template.tagbox,
         
     "click button[name='done_tagging']": (event) ->
       if not event.isImmediatePropagationStopped()
-        Session.set("tagging_#{ @_id }", false)
+        Posts.update(@_id, {$set: {'tagging': false}}) #Stop displaying tagbox
         event.stopImmediatePropagation()
   }
   
