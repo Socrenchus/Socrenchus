@@ -14,11 +14,11 @@ _.extend( Template.tagbox,
     return {suggested:false,tags:visible}
     
   suggested_tags: ->
-    suggestions = Session.get("suggestions_#{ @_id }")
     filtered = []
-    for tag in suggestions
-      filtered.push(tag) if tag? &&
-        tag.search(Session.get("filter_text_#{ @_id }")) != -1
+    if @suggestions?
+      for tag in @suggestions
+        filtered.push(tag) if tag? &&
+          tag.search(Session.get("filter_text_#{ @_id }")) != -1
     return {suggested:true,tags:filtered}
 
   tagging_post: -> Session.equals("tagging_#{ @_id }", true)
@@ -39,7 +39,7 @@ _.extend( Template.tagbox,
           when 74 #J/Check
             Template.tagbox.add_tag(@_id, @my_tags, tag_text, tag_box)
           when 75 #K/Kill
-            Session.get("suggestions_#{ @_id }").remove(tag_text)
+            @suggestions?.remove(tag_text)
             Session.get("context_#{@_id}")?.invalidate()
           
         event.stopImmediatePropagation()
@@ -64,7 +64,7 @@ _.extend( Template.tagbox,
                 suggested_tag, event.target)
           when 39 #Right-arrow: REMOVE SUGGESTED TAG
             if event.ctrlKey
-              Session.get("suggestions_#{ @_id }").remove(suggested_tag)
+              @suggestions?.remove(suggested_tag)
               Session.get("context_#{ @_id }")?.invalidate()
           else    #Update filter with new text
             Session.set("filter_text_#{ @_id }", entered_text)
@@ -84,9 +84,6 @@ _.extend( Template.tagbox,
       if not event.isImmediatePropagationStopped()
       
         Session.set("tagging_#{ @_id }", true)  #Display tagbox
-        
-        Session.set("suggestions_#{ @_id }",
-          if @suggestions? then @suggestions else ['tag'])
         
         event.stopImmediatePropagation()
         
@@ -110,7 +107,7 @@ _.extend( Template.tagbox,
     if tag_text != "" && not (tag_text in my_tags)
       my_tags.push(tag_text)
       Posts.update(id, {$set: {'my_tags': my_tags}})
-      Session.get("suggestions_#{ id }").remove(tag_text)
+      @suggestions?.remove(tag_text)
     #clear textbox and update suggestion filter
     text_box.value = ''
     Session.set("filter_text_#{ id }", '')
