@@ -1,6 +1,11 @@
 # Very useful helper function to remove array items
 Array::remove = (e) -> @[t..t] = [] if (t = @indexOf(e)) > -1
 
+if (Meteor.is_client)
+  Meteor.methods(
+    log: (args) -> tron.log(args...)
+  )
+
 class Tron
   constructor: ->
     @timers = []
@@ -44,7 +49,11 @@ class Tron
       @timers.remove( timer_name )
       return r
 
-  log:    (args...) -> console.log(args...)
+  log:    (args...) -> 
+    if (Meteor.is_server)
+      Meteor.call('log', args)
+    else if (Meteor.is_client)
+      console.log(args...)
   info:   (args...) -> console.info(args...)
   warn:   (args...) -> console.warn(args...)
   error:  (args...) -> console.error(args...)
