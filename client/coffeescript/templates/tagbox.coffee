@@ -5,7 +5,7 @@
 # -'TODO's indicate case-specific changes
 ###
 _.extend( Template.tagbox,
-  visible_tags: ->
+  displayed_tags: ->
     @my_tags ?= []                    #TODO: REMOVE on schema change
     visible = (tag for tag of @tags)  #graduated tags
     for tag in @my_tags              #my tags
