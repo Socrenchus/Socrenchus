@@ -9,10 +9,9 @@ _.extend( Template.tagbox,
     
   suggested_tags: ->
     filtered = []
-    if @suggestions?
-      for tag in @suggestions
-        if tag? && tag.search(Session.get("filter_text")) != -1
-          filtered.push(tag) 
+    for tag in Session.get("suggested_tags")
+      if tag? && tag.search(Session.get("filter_text")) != -1
+        filtered.push(tag)
     return { suggested: true, tags: filtered }
 
   tagging_post: -> Session.equals("current_post", @_id)
@@ -28,8 +27,7 @@ _.extend( Template.tagbox,
           when 74 #J/Check
             Template.tagbox.add_tag(@_id, @my_tags, tag_text)
           when 75 #K/Kill
-            @suggestions?.remove(tag_text)
-            Session.get("tagging_context")?.invalidate()
+            Session.get("suggested_tags").remove(tag_text)
           
         event.stopImmediatePropagation()
     
@@ -40,7 +38,7 @@ _.extend( Template.tagbox,
           Session.set('tag_input_box', event.target)
         
         entered_text = event.target.value
-        suggested_tag = Session.get("suggested_tag")
+        suggested_tag = Session.get("suggested_tags")[0]
         
         switch event.keyCode
           when 13 #Enter: ADD ENTERED TEXT
@@ -50,11 +48,9 @@ _.extend( Template.tagbox,
               Template.tagbox.add_tag(@_id, @my_tags, suggested_tag)
           when 39 #Right-arrow: REMOVE SUGGESTED TAG
             if event.ctrlKey
-              @suggestions?.remove(suggested_tag)
-              Session.get("tagging_context")?.invalidate()
+              Session.get("suggested_tags").remove(suggested_tag)
           else    #Update filter with new text
             Session.set("filter_text", entered_text)
-            Session.get("tagging_context")?.invalidate()
           
         event.stopImmediatePropagation()
     
@@ -71,6 +67,7 @@ _.extend( Template.tagbox,
         Session.set("current_post", @_id)
         Session.set("filter_text", '')
         Session.set('tag_input_box', undefined)
+        Session.set("suggested_tags", @suggestions)
         event.stopImmediatePropagation()
         
     "click button[name='enter_tag']": (event) ->
@@ -95,13 +92,9 @@ _.extend( Template.tagbox,
       my_tags.push(tag_text)
       Posts.update(id, {$set: {'my_tags': my_tags}})
       @suggestions?.remove(tag_text)
-    Session.get("tagging_context")?.invalidate()
 )
 
 Handlebars.registerHelper('tags', (context, object) ->
-  if context.suggested
-    Session.set("tagging_context", Meteor.deps.Context.current)
-    Session.set("suggested_tag", context.tags[0])
   @my_tags ?= []          #TODO: REMOVE
   ret = ""
   for tag in context.tags
