@@ -9,12 +9,12 @@ _.extend( Template.tagbox,
     
   suggested_tags: ->
     filtered = []
-    for tag in Session.get("suggested_tags")
-      if tag? && tag.search(Session.get("filter_text")) != -1
+    for tag in Session.get('suggested_tags')
+      if tag? && tag.search(Session.get('filter_text')) != -1
         filtered.push(tag)
     return { suggested: true, tags: filtered }
 
-  tagging_post: -> Session.equals("current_post", @_id)
+  tagging_post: -> Session.equals('current_post', @_id)
   
   events: {
     
@@ -27,7 +27,7 @@ _.extend( Template.tagbox,
           when 74 #J/Check
             Template.tagbox.add_tag(@_id, @my_tags, tag_text)
           when 75 #K/Kill
-            Session.get("suggested_tags").remove(tag_text)
+            Session.get('suggested_tags').remove(tag_text)
           
         event.stopImmediatePropagation()
     
@@ -38,7 +38,12 @@ _.extend( Template.tagbox,
           Session.set('tag_input_box', event.target)
         
         entered_text = event.target.value
-        suggested_tag = Session.get("suggested_tags")[0]
+        #TODO: change so we get the first FILTERED tag
+        
+        for tag in Session.get('suggested_tags')
+          if tag.search(Session.get('filter_text')) != -1
+            suggested_tag = tag
+            break
         
         switch event.keyCode
           when 13 #Enter: ADD ENTERED TEXT
@@ -48,9 +53,9 @@ _.extend( Template.tagbox,
               Template.tagbox.add_tag(@_id, @my_tags, suggested_tag)
           when 39 #Right-arrow: REMOVE SUGGESTED TAG
             if event.ctrlKey
-              Session.get("suggested_tags").remove(suggested_tag)
+              Session.get('suggested_tags').remove(suggested_tag)
           else    #Update filter with new text
-            Session.set("filter_text", entered_text)
+            Session.set('filter_text', entered_text)
           
         event.stopImmediatePropagation()
     
@@ -64,21 +69,21 @@ _.extend( Template.tagbox,
     
     "click button[name='start_tagging']": (event) ->
       if not event.isImmediatePropagationStopped()
-        Session.set("current_post", @_id)
-        Session.set("filter_text", '')
+        Session.set('current_post', @_id)
+        Session.set('suggested_tags', @suggestions)
+        Session.set('filter_text', '')
         Session.set('tag_input_box', undefined)
-        Session.set("suggested_tags", @suggestions)
         event.stopImmediatePropagation()
         
     "click button[name='enter_tag']": (event) ->
       if not event.isImmediatePropagationStopped()
         Template.tagbox.add_tag(@_id, @my_tags,
-          Session.get('tag_input_box').value)
+          Session.get('filter_text'))
       return false
         
     "click button[name='done_tagging']": (event) ->
       if not event.isImmediatePropagationStopped()
-        Session.set("current_post", undefined)
+        Session.set('current_post', undefined)
       return false
   }
   
@@ -87,7 +92,7 @@ _.extend( Template.tagbox,
     
     #clear textbox and update suggestion filter
     Session.get('tag_input_box')?.value = ''
-    Session.set("filter_text", '')
+    Session.set('filter_text', '')
     if tag_text != "" && not (tag_text in my_tags)
       my_tags.push(tag_text)
       Posts.update(id, {$set: {'my_tags': my_tags}})
