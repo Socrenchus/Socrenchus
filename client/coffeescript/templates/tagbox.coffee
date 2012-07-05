@@ -1,77 +1,63 @@
-###
-#Rules for switching to new schema:
-# -info -> weight
-# -info.weight -> weight
-# -'TODO's indicate case-specific changes
-###
 _.extend( Template.tagbox,
   displayed_tags: ->
     @my_tags ?= []                    #TODO: REMOVE on schema change
-    visible = (tag for tag of @tags)  #graduated tags
-    for tag in @my_tags              #my tags
+    visible = (tag for tag of @tags)
+    for tag in @my_tags
       if not (tag in visible)
         visible.push(tag)
-    return {suggested:false,tags:visible}
+    return { suggested: false, tags: visible }
     
   suggested_tags: ->
     filtered = []
     if @suggestions?
       for tag in @suggestions
-        filtered.push(tag) if tag? &&
-          tag.search(Session.get("filter_text_#{ @_id }")) != -1
-    return {suggested:true,tags:filtered}
+        if tag? && tag.search(Session.get("filter_text")) != -1
+          filtered.push(tag) 
+    return { suggested: true, tags: filtered }
 
-  tagging_post: -> @tagging
+  tagging_post: -> Session.equals("current_post", @_id)
   
   events: {
     
+    #Key interaction with suggested tag items
     'keydown .suggested': (event) ->
       if not event.isImmediatePropagationStopped()
         tag_text = event.target.innerText
         
-        #TODO: modify for new HTML layout,
-        #      or find less convoluted way to get particular elements
-        tag_box = event.target.parentNode.parentNode.
-          getElementsByTagName('div')[1].
-          getElementsByTagName('textarea')[0]
-        
         switch event.keyCode
           when 74 #J/Check
-            Template.tagbox.add_tag(@_id, @my_tags, tag_text, tag_box)
+            Template.tagbox.add_tag(@_id, @my_tags, tag_text)
           when 75 #K/Kill
             @suggestions?.remove(tag_text)
-            Session.get("context_#{@_id}")?.invalidate()
+            Session.get("tagging_context")?.invalidate()
           
         event.stopImmediatePropagation()
     
+    #Key interaction with text area
     "keyup textarea[name='tag_text']": (event) ->
       if not event.isImmediatePropagationStopped()
-      
-        entered_text = event.target.value
+        unless Session.get('tag_input_box')?
+          Session.set('tag_input_box', event.target)
         
-        #TODO: modify for new HTML layout,
-        #      or find less convoluted way to get particular elements
-        suggested_tag = event.target.parentNode.parentNode.
-          getElementsByTagName("div")[0].
-          getElementsByTagName("form")[0]?.innerText
+        entered_text = event.target.value
+        suggested_tag = Session.get("suggested_tag")
         
         switch event.keyCode
           when 13 #Enter: ADD ENTERED TEXT
-            Template.tagbox.add_tag(@_id, @my_tags, entered_text, event.target)
+            Template.tagbox.add_tag(@_id, @my_tags, entered_text)
           when 37 #Left-arrow: ADD SUGGESTED TAG
             if event.ctrlKey && suggested_tag?
-              Template.tagbox.add_tag(@_id, @my_tags,
-                suggested_tag, event.target)
+              Template.tagbox.add_tag(@_id, @my_tags, suggested_tag)
           when 39 #Right-arrow: REMOVE SUGGESTED TAG
             if event.ctrlKey
               @suggestions?.remove(suggested_tag)
-              Session.get("context_#{ @_id }")?.invalidate()
+              Session.get("tagging_context")?.invalidate()
           else    #Update filter with new text
-            Session.set("filter_text_#{ @_id }", entered_text)
-            Session.get("context_#{ @_id }")?.invalidate()
+            Session.set("filter_text", entered_text)
+            Session.get("tagging_context")?.invalidate()
           
         event.stopImmediatePropagation()
-        
+    
     #Suppresses newline
     "keydown textarea[name='tag_text']": (event) ->
       if not event.isImmediatePropagationStopped()
@@ -80,40 +66,42 @@ _.extend( Template.tagbox,
             event.preventDefault()
         event.stopImmediatePropagation()
     
-    "click button[name='tag_button']": (event) ->
+    "click button[name='start_tagging']": (event) ->
       if not event.isImmediatePropagationStopped()
-        Posts.update(@_id, {$set: {'tagging': true}})  #Display tagbox
+        Session.set("current_post", @_id)
+        Session.set("filter_text", '')
+        Session.set('tag_input_box', undefined)
         event.stopImmediatePropagation()
         
     "click button[name='enter_tag']": (event) ->
       if not event.isImmediatePropagationStopped()
-        #TODO: modify for new HTML layout,
-        #      or find less convoluted way to get particular elements
-        tag_box = event.target.parentNode.getElementsByTagName(
-          "textarea")[0]
-        Template.tagbox.add_tag(@_id, @my_tags, tag_box.value, tag_box)
-        event.stopImmediatePropagation()
+        Template.tagbox.add_tag(@_id, @my_tags,
+          Session.get('tag_input_box').value)
+      return false
         
     "click button[name='done_tagging']": (event) ->
       if not event.isImmediatePropagationStopped()
-        Posts.update(@_id, {$set: {'tagging': false}}) #Stop displaying tagbox
-        event.stopImmediatePropagation()
+        Session.set("current_post", undefined)
+      return false
   }
   
-  add_tag: (id, my_tags, tag_text, text_box) ->
-    my_tags ?= []
+  add_tag: (id, my_tags, tag_text) ->
+    my_tags ?= []             #TODO: Remove on schema change
+    
+    #clear textbox and update suggestion filter
+    Session.get('tag_input_box')?.value = ''
+    Session.set("filter_text", '')
     if tag_text != "" && not (tag_text in my_tags)
       my_tags.push(tag_text)
       Posts.update(id, {$set: {'my_tags': my_tags}})
       @suggestions?.remove(tag_text)
-    #clear textbox and update suggestion filter
-    text_box.value = ''
-    Session.set("filter_text_#{ id }", '')
-    Session.get("context_#{ id }")?.invalidate()
+    Session.get("tagging_context")?.invalidate()
 )
 
 Handlebars.registerHelper('tags', (context, object) ->
-  Session.set("context_#{ @_id }", Meteor.deps.Context.current)
+  if context.suggested
+    Session.set("tagging_context", Meteor.deps.Context.current)
+    Session.set("suggested_tag", context.tags[0])
   @my_tags ?= []          #TODO: REMOVE
   ret = ""
   for tag in context.tags
@@ -122,8 +110,7 @@ Handlebars.registerHelper('tags', (context, object) ->
     ret += " grad" if @tags[tag]?
     ret += " mytag" if tag in @my_tags
     ret += " suggested" if context.suggested
-    ret += "'>" + tag
-    ret += "</div>"
+    ret += "'>" + tag + "</div>"
   return ret
 )
 
