@@ -18,7 +18,8 @@ _.extend( Template.tagbox,
         filtered.push(tag)
     return { suggested: true, tags: filtered }
 
-  tagging_post: -> Session.equals('current_post', @_id)
+  tagging_post: -> 
+  Session.equals('tagging', true) && Session.equals('current_post', @_id)
   
   events: {
     
@@ -80,6 +81,7 @@ _.extend( Template.tagbox,
     
     "click button[name='start_tagging']": (event) ->
       if not event.isImmediatePropagationStopped()
+        Session.set('tagging', true)
         Session.set('current_post', @_id)
         @suggestions ?= []    #TODO: REMOVE after schema change
         Session.set('suggested_tags', @suggestions)
@@ -94,14 +96,14 @@ _.extend( Template.tagbox,
         
     "click button[name='done_tagging']": (event) ->
       if not event.isImmediatePropagationStopped()
-        Session.set('current_post', undefined)
+        Session.set('tagging', false)
       return false
   }
   
   add_tag: (id, my_tags, tag_text) ->
     my_tags ?= []             #TODO: Remove on schema change
     Session.set('filter_text', '')
-    if tag_text != "" && not (tag_text in my_tags)
+    if tag_text != '' && not (tag_text in my_tags)
       my_tags.push(tag_text)
       Posts.update(id, {$set: {'my_tags': my_tags}})
       @suggestions?.remove(tag_text)
@@ -110,14 +112,14 @@ _.extend( Template.tagbox,
 
 Handlebars.registerHelper('tags', (context, object) ->
   @my_tags ?= []          #TODO: REMOVE
-  ret = ""
+  ret = ''
   for tag in context.tags
-    ret += if context.suggested then "<div tabindex='0'" else "<div"
+    ret += if context.suggested then "<div tabindex='0'" else '<div'
     ret += " class='tag"
-    ret += " grad" if @tags[tag]?
-    ret += " mytag" if tag in @my_tags
-    ret += " suggested" if context.suggested
-    ret += "'>" + tag + "</div>"
+    ret += ' grad' if @tags[tag]?
+    ret += ' mytag' if tag in @my_tags
+    ret += ' suggested' if context.suggested
+    ret += "'>" + tag + '</div>'
   return ret
 )
 
