@@ -18,7 +18,8 @@ _.extend( Template.tagbox,
         filtered.push(tag)
     return { suggested: true, tags: filtered }
 
-  tagging_post: -> Session.equals('current_post', @_id)
+  tagging_post: -> 
+  Session.equals("tagging", true) && Session.equals('current_post', @_id)
   
   events: {
     
@@ -80,6 +81,7 @@ _.extend( Template.tagbox,
     
     "click button[name='start_tagging']": (event) ->
       if not event.isImmediatePropagationStopped()
+        Session.set('tagging', true)
         Session.set('current_post', @_id)
         @suggestions ?= []    #TODO: REMOVE after schema change
         Session.set('suggested_tags', @suggestions)
@@ -94,7 +96,7 @@ _.extend( Template.tagbox,
         
     "click button[name='done_tagging']": (event) ->
       if not event.isImmediatePropagationStopped()
-        Session.set('current_post', undefined)
+        Session.set('tagging', false)
       return false
   }
   
