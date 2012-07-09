@@ -1,4 +1,8 @@
+Array.prototype.clone = ->
+  return this.slice(0)
+
 _.extend( Template.tagbox,
+
   displayed_tags: ->
     @my_tags ?= []                    #TODO: REMOVE on schema change
     visible = (tag for tag of @tags)
@@ -27,18 +31,17 @@ _.extend( Template.tagbox,
           when 74 #J/Check
             Template.tagbox.add_tag(@_id, @my_tags, tag_text)
           when 75 #K/Kill
-            Session.get('suggested_tags').remove(tag_text)
+            #WORKAROUND.  Session is not yet reactive with arrays or objects.
+            temp = Session.get('suggested_tags')
+            temp.remove(tag_text)
+            Session.set('suggested_tags',temp.clone())
           
         event.stopImmediatePropagation()
     
     #Key interaction with text area
     "keyup textarea[name='tag_text']": (event) ->
       if not event.isImmediatePropagationStopped()
-        unless Session.get('tag_input_box')?
-          Session.set('tag_input_box', event.target)
-        
         entered_text = event.target.value
-        #TODO: change so we get the first FILTERED tag
         
         for tag in Session.get('suggested_tags')
           if tag.search(Session.get('filter_text')) != -1
@@ -53,10 +56,18 @@ _.extend( Template.tagbox,
               Template.tagbox.add_tag(@_id, @my_tags, suggested_tag)
           when 39 #Right-arrow: REMOVE SUGGESTED TAG
             if event.ctrlKey
-              Session.get('suggested_tags').remove(suggested_tag)
+              #WORKAROUND.  Session is not yet reactive with arrays or objects.
+              temp = Session.get('suggested_tags')
+              temp.remove(suggested_tag)
+              Session.set('suggested_tags',temp.clone())
           else    #Update filter with new text
             Session.set('filter_text', entered_text)
-          
+        
+        Meteor.autosubscribe(=>
+          if Session.equals('filter_text', '')
+            event.target.value = ''
+        )
+        
         event.stopImmediatePropagation()
     
     #Suppresses newline
@@ -70,9 +81,9 @@ _.extend( Template.tagbox,
     "click button[name='start_tagging']": (event) ->
       if not event.isImmediatePropagationStopped()
         Session.set('current_post', @_id)
+        @suggestions ?= []    #TODO: REMOVE after schema change
         Session.set('suggested_tags', @suggestions)
         Session.set('filter_text', '')
-        Session.set('tag_input_box', undefined)
         event.stopImmediatePropagation()
         
     "click button[name='enter_tag']": (event) ->
@@ -89,14 +100,12 @@ _.extend( Template.tagbox,
   
   add_tag: (id, my_tags, tag_text) ->
     my_tags ?= []             #TODO: Remove on schema change
-    
-    #clear textbox and update suggestion filter
-    Session.get('tag_input_box')?.value = ''
     Session.set('filter_text', '')
     if tag_text != "" && not (tag_text in my_tags)
       my_tags.push(tag_text)
       Posts.update(id, {$set: {'my_tags': my_tags}})
       @suggestions?.remove(tag_text)
+    Meteor.flush()
 )
 
 Handlebars.registerHelper('tags', (context, object) ->
