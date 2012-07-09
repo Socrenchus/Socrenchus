@@ -3,10 +3,7 @@ _.extend( Template.reply_box,
     Session.equals('composing', undefined) ||
     !Session.equals('current_post', @_id)
   reply_box_content: ->
-    if @is_candidate
-      ''
-    else
-      Session.get('composing')
+    Session.get('composing')
   
   events: {
     #start composing
