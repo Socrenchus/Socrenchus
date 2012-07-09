@@ -13,7 +13,7 @@ _.extend( Template.notifications,
       event.stopPropagation()
   }
 )
-      
+
 Session.set('notifications', [])
 
 $(document).click( ->
