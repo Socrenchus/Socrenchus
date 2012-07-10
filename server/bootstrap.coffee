@@ -45,12 +45,17 @@ Meteor.startup( ->
         experience: {
           'tag': 2
           'tag2': 3
+          'one' : 4
+          'two' : 1
+          'red': 2
+          'blue': 1
         }
       },
       {
         email: 'test1@example.com'
         experience: {
-          'one': 5
+          'one': 3
+          'two': 3
         }
       },
       {
