@@ -4,6 +4,8 @@ Instances = new Meteor.Collection("instances")
 Notifications = new Meteor.Collection("notifications")
 
 Meteor.publish("my_notifs", ->
+  #TODO: only return notifications in which the 'user'
+  #      field matches the current user_id
   return Notifications.find()
 )
 
