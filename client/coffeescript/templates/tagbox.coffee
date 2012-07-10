@@ -18,8 +18,8 @@ _.extend( Template.tagbox,
         filtered.push(tag)
     return { suggested: true, tags: filtered }
 
-  tagging_post: -> 
-  Session.equals('tagging', true) && Session.equals('current_post', @_id)
+  tagging_post: ->
+    Session.equals('tagging', true) && Session.equals('current_post', @_id)
   
   events: {
     
