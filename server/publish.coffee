@@ -1,6 +1,11 @@
 Users = new Meteor.Collection("users_proto")
 Posts = new Meteor.Collection("posts")
 Instances = new Meteor.Collection("instances")
+Notifications = new Meteor.Collection("notifications")
+
+Meteor.publish("my_notifs", ->
+  return Notifications.find()
+)
 
 Meteor.publish("my_user", (user_id) ->
   return Users.find( _id: user_id )
