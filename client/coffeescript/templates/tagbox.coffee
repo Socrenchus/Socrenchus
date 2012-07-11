@@ -104,8 +104,7 @@ _.extend( Template.tagbox,
     my_tags ?= []             #TODO: Remove on schema change
     Session.set('filter_text', '')
     if tag_text != '' && not (tag_text in my_tags)
-      my_tags.push(tag_text)
-      Posts.update(id, {$set: {'my_tags': my_tags}})
+      Posts.update({ _id: id}, {$set: {'my_tags': tag_text}})
       @suggestions?.remove(tag_text)
     Meteor.flush()
 )
