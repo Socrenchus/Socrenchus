@@ -23,13 +23,14 @@ class GrandCentral
       }
       posts: {
         insert: =>
-          #console.log 'initial Posts.insert fields received:\n', args
+          author_id = Meteor.call('get_user_id')
+          tron.test(gctest.insertpost, args[0], author_id)
           #pick out only the appropriate fields
           args[0] =
             _.pick( args[0], 'content', 'parent_id', 'instance_id', '_id')
-          #console.log "after pick statement\n", args
-          console.log("GC post/insert")
-          args[0].author_id = Meteor.call('get_user_id')
+          if (args[0].content == '')
+            error_list.push('blank content in post/insert')
+          args[0].author_id = author_id
           args[0].votes = {
             'up': {
               users: []
@@ -41,14 +42,13 @@ class GrandCentral
             }
           }
           args[0].tags = []
-          if (args[0].content == '')
-            error_list.push('blank content in post/insert')
         update: =>
           update_user_id = Meteor.call('get_user_id')
           #tagging, voting also comes in here
           tron.test(->
-            console.log("selector: \n", args[0])
-            console.log("args[1]: \n", args[1]))
+            tron.log("selector: \n", args[0])
+            tron.log("args[1]: \n", args[1])
+          )
           if (args[0]._id? and args[1].$set?)
             #for tagging
             if (args[1].$set.my_tags?)
@@ -64,18 +64,15 @@ class GrandCentral
                 #TODO: Tag weight set will differ when updating existing tags
                 #      Currently always 1, should be changed in server logic
                 all_tags.tags[tag_string] ?= {users:[],weight:1}
-                all_tags.tags[tag_string].users
-                  .push( Meteor.call('get_user_id') )
-                tron.log('Values of all tags:\n', all_tags.tags)
-                update_user_id = Meteor.call('get_user_id')
+                all_tags.tags[tag_string].users.push( update_user_id )
+                tron.log('Values of all tags in post:\n', all_tags.tags)
                 args[1] = { '$set' : all_tags }
             else
-              args = null
+              error_list.push('Posts.update(): Invalid $set parameters')
           else
-            args = null
+            error_list.push('Posts.update(): Invalid update request')
                 
         remove: (args...) =>
-          args = null #currently disallowing removal
           error_list.push('not implemented yet')
       }
       instances: {
