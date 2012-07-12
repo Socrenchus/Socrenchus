@@ -2,9 +2,7 @@
   <h3 id='notification-counter' class="unselectable">{{count}}</h3>
   {{#if show}}
     <div id='notification-box'>
-      {{#notifs notifications}}
-        {{this}}
-      {{/notifs}}
+      {{notifications}}
     </div>
   {{/if}}
 </template>
