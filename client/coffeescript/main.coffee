@@ -3,7 +3,6 @@ Posts = new Meteor.Collection("posts")
 Users = new Meteor.Collection("users_proto")
 
 # Subscriptions
-#the subscription my_user has been removed.
 #Meteor.subscribe( "my_user" )
 Meteor.subscribe( "my_posts" )
 Meteor.subscribe( "assigned_posts" )

@@ -1,9 +1,21 @@
 _.extend( Template.votebox,
+  #voted: ->
+    #Session.get('user_id') in @votes?.up.users ||
+    #Session.get('user_id') in @votes?.down.users
   voted: ->
-    Session.get('user_id') in @votes?.up.users ||
-    Session.get('user_id') in @votes?.down.users
-  voted_up: -> Session.get('user_id') in @votes?.up.users
-  voted_down: -> Session.get('user_id') in @votes?.down.users
+    not @my_vote is undefined
+  #voted_up: -> Session.get('user_id') in @votes?.up.users
+  voted_up: -> 
+    if (voted)
+      @my_vote
+    else
+      false
+  #voted_down: -> Session.get('user_id') in @votes?.down.users
+  voted_down: -> 
+    if (voted)
+      not @my_vote
+    else
+      false
   score: -> @votes?.up.users.length - @votes?.down.users.length
   events: {
     "click button[name='up_vote']": (event) ->
