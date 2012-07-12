@@ -1,34 +1,30 @@
 _.extend( Template.notifications,
   count: -> Notifications.find().fetch().length
-  notifications: ->
+  notifications: -> return Notifications.find().fetch()
+  message: ->
     message = ''
-    for notification in Notifications.find().fetch()
-      message += "<div class='notify-message'>"
-      if notification['points'] > 0
-        message += '+'
-      if notification['points'] != 0
-        message += "#{notification['points']} - "
-      
-      
-      
-      switch notification['kind']
-        when 0
-          users = notification['other_users'].length
-          if users > 1
-            message += "#{users} people "
-          else
-            message += "This person "  #TODO: link to user's page
-          message += "replied to your <a href='/#{notification['post']}'>post</a>."
-        when 1 then message += "<span style='background-color: #FFFF00' title='#{notification['tag']}'>Your tag</span> on <a href='/#{notification['post']}'>this post</a> graduated."
-        when 2 then message += "<span style='background-color: #FFFF00' title='#{notification['tag']}'>This tag</span> graduated on your <a href='/#{notification['post']}'>post</a>."
-      message += "<br>#{notification['timestamp']}"
-      message += "</div>"
+    if @points > 0
+      message += '+'
+    if @points != 0
+      message += "#{@points} - "
+    
+    switch @kind
+      when 0
+        users = @other_users.length
+        if users > 1
+          message += "#{users} people "
+        else
+          message += "This person "  #TODO: link to user's page
+        message += "replied to your <a href='/#{@post}'>post</a>."
+      when 1 then message += "<span style='background-color: #FFFF00' title='#{@tag}'>Your tag</span> on <a href='/#{@post}'>this post</a> graduated."
+      when 2 then message += "<span style='background-color: #FFFF00' title='#{@tag}'>This tag</span> graduated on your <a href='/#{@post}'>post</a>."
+    message += "<br>#{@timestamp}"
     return new Handlebars.SafeString(message)
     
     
   show: -> Session.equals('notifications_state','open')
-  message: -> @message
-  date: -> @date
+
+
   events: {
     'click #notification-counter': (event) ->
       if Session.equals('notifications_state', 'open')
