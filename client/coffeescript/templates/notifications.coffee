@@ -16,14 +16,18 @@ _.extend( Template.notifications,
         else
           message += "This person "  #TODO: link to user's page
         message += "replied to your <a href='/#{@post}'>post</a>."
-      when 1 then message += "<span style='background-color: #FFFF00' title='#{@tag}'>Your tag</span> on <a href='/#{@post}'>this post</a> graduated."
-      when 2 then message += "<span style='background-color: #FFFF00' title='#{@tag}'>This tag</span> graduated on your <a href='/#{@post}'>post</a>."
-    message += "<br>#{@timestamp}"
+      when 1
+        message += "<span style='background-color: #FFFF00' title='#{@tag}'>"
+        message += "Your tag</span> on <a href='/#{@post}'>this post</a>"
+        message += " graduated."
+      when 2
+        message += "<span style='background-color: #FFFF00' title='#{@tag}'>"
+        message += "This tag</span> graduated on your "
+        message += "<a href='/#{@post}'>post</a>."
+    message += "<br>#{@timestamp}"  #TODO: change to 'x hours ago' format
     return new Handlebars.SafeString(message)
-    
-    
+  
   show: -> Session.equals('notifications_state','open')
-
 
   events: {
     'click #notification-counter': (event) ->
@@ -36,31 +40,6 @@ _.extend( Template.notifications,
   }
 )
 
-###
-Handlebars.registerHelper('notifs', (context, object) ->
-  message = ''
-  for notification in context
-    message += "<div class='notify-message'>"
-    if notification['points'] > 0
-      message += '+'
-    if notification['points'] != 0
-      message += "#{notification['points']} - "
-    
-    users = notification['other_users'].length
-    if users > 1
-      message += "#{users} people "
-    else if users == 1
-      message += "This person "  #TODO: link to user's page
-    
-    switch notification['kind']
-      when 0 then message += "replied to your <a href='/#{notification['post']}'>post</a>."
-      when 1 then message += "<span style='background-color: #FFFF00' title='#{notification['tag']}'>Your tag</span> on <a href='/#{notification['post']}'>this post</a> graduated."
-      when 2 then message += "tagged your <a href='/#{notification['post']}'>post</a>."
-    message += "<br>#{notification['timestamp']}"
-    message += "</div>"
-  return message
-)
-###
 $(document).click( ->
   if Session.get('notifications_state', 'open')
     Session.set('notifications_state', 'closed')

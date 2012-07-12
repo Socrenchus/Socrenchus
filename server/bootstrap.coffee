@@ -5,7 +5,7 @@ Meteor.startup( ->
         user: 'post_id' #id
         kind: 0 # 0 || 1 || 2
         post: 'post_id' #id
-        other_users: ['post_id'] #[id]
+        other_users: ['post_id', 'post_id2'] #[id]
         points: 0 #int
         tag: 'tagtext' #string
         timestamp: 'date' #Date object
@@ -23,15 +23,14 @@ Meteor.startup( ->
         user: 'post_id' #id
         kind: 2 # 0 || 1 || 2
         post: 'post_id' #id
-        other_users: ['post_id', 'a'] #[id]
+        other_users: ['post_id'] #[id]
         points: 1 #int
         tag: 'tagtext' #string
         timestamp: 'date' #Date object
       }
     ]
-    notif_ids = []
     for notif in notifs
-      notif_ids.push(Notifications.insert(notif))
+      Notifications.insert(notif)
     instances = [
       {
         admin_id: 0
