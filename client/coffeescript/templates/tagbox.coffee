@@ -1,10 +1,8 @@
-Array.prototype.clone = ->
-  return this.slice(0)
+Array::clone = -> this[..]
 
 _.extend( Template.tagbox,
 
   displayed_tags: ->
-    @my_tags ?= []                    #TODO: REMOVE on schema change
     visible = (tag for tag of @tags)
     for tag in @my_tags
       if not (tag in visible)
@@ -44,6 +42,7 @@ _.extend( Template.tagbox,
       if not event.isImmediatePropagationStopped()
         entered_text = event.target.value
         
+        #Get first filtered suggestion
         for tag in Session.get('suggested_tags')
           if tag.search(Session.get('filter_text')) != -1
             suggested_tag = tag
@@ -83,8 +82,7 @@ _.extend( Template.tagbox,
       if not event.isImmediatePropagationStopped()
         Session.set('tagging', true)
         Session.set('current_post', @_id)
-        @suggestions ?= []    #TODO: REMOVE after schema change
-        Session.set('suggested_tags', @suggestions)
+        Session.set('suggested_tags', @suggested_tags)
         Session.set('filter_text', '')
         event.stopImmediatePropagation()
         
@@ -107,7 +105,10 @@ _.extend( Template.tagbox,
       q['$set']["my_tags.#{tag_text}"] = 1
       tron.log(q)
       Posts.update({ '_id': id}, q)
-      @suggestions?.remove(tag_text)
+      #WORKAROUND.  Session is not yet reactive with arrays or objects.
+      temp = Session.get('suggested_tags')
+      temp.remove(tag_text)
+      Session.set('suggested_tags',temp.clone())
     Meteor.flush()
 )
 
@@ -116,7 +117,6 @@ _.extend( Template.tagbox,
 #   files, if I wanted to do this I would have kept the old app engine
 #   system.
 Handlebars.registerHelper('tags', (context, object) ->
-  @my_tags ?= []          #TODO: REMOVE
   ret = ''
   for tag in context.tags
     ret += if context.suggested then "<div tabindex='0'" else '<div'
