@@ -24,24 +24,20 @@ Meteor.publish("my_posts", ->
       }
     )
 
-    handle = q.observe (
-      added: (doc, idx) =>
-        client_post = new ClientPost( doc )
-        @set("posts", client_post._id, client_post)
-        @flush()
-      removed: (doc, idx) =>
-        console.log 'publish my_post removed:'
-      moved: (doc, idx) =>
-        console.log 'publish my_post moved:'
-      changed: (doc, idx) =>
-        t = new ClientPost( doc )
-        @set("posts", client_post._id, client_post)
-        @flush()
+    action = (doc, idx) =>
+      client_post = new ClientPost( doc )
+      @set("posts", client_post._id, client_post)
+      @flush()
+
+    handle = q.observe(
+      added: action
+      changed: action
     )
+    
     @onStop( ->
       handle.stop()
       for post in q.fetch()
-        fields = (key for key of Translator.client)  
+        fields = (key for key of Translator.client)
         @unset( "client_posts", post._id, fields )
       @flush()
     )
