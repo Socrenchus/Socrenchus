@@ -43,6 +43,14 @@ class GrandCentral
           }
           args[0].tags = []
         update: =>
+          [selector, modifier] = args
+          doc = Posts.findOne( selector._id ) 
+          doc = new ClientPost( doc )
+          LocalCollection._modify( doc, modifier )
+          result = new ServerPost( doc )
+          tron.log result
+          args[1] = result
+          ###
           gctest.run()
           post_id = args[0]
           update_user_id = Meteor.call('get_user_id')
@@ -78,6 +86,7 @@ class GrandCentral
               error_list.push('Posts.update(): Invalid $set parameters')
           else
             error_list.push('Posts.update(): Invalid update request')
+          ###
                 
         remove: (args...) =>
           error_list.push('not implemented yet')
