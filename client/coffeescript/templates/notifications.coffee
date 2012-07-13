@@ -1,30 +1,34 @@
 _.extend( Template.notifications,
-  count: -> Notifications.find().fetch().length
-  notifications: -> return Notifications.find().fetch().posts
+  count: -> Notifications.findOne()?.groups.length
+  notifications: -> return Notifications.findOne().groups
   message: ->
+    points = 0
+    for notif in @
+      points += notif.points
     message = ''
-    if @points > 0
+    if points > 0
       message += '+'
-    if @points != 0
-      message += "#{@points} - "
+    if points != 0
+      message += "#{points} - "
     
-    switch @type
+    first = @[0]
+    switch first.type
       when 0
-        users = @other_users.length
+        users = @length
         if users > 1
           message += "#{users} people "
         else
           message += "This person "  #TODO: link to user's page
-        message += "replied to your <a href='/#{@post}'>post</a>."
+        message += "replied to your <a href='/#{first.post}'>post</a>."
       when 1
         message += "<span style='background-color: #FFFF00' title='#{@tag}'>"
-        message += "Your tag</span> on <a href='/#{@post}'>this post</a>"
+        message += "Your tag</span> on <a href='/#{first.post}'>this post</a>"
         message += " graduated."
       when 2
         message += "<span style='background-color: #FFFF00' title='#{@tag}'>"
         message += "This tag</span> graduated on your "
-        message += "<a href='/#{@post}'>post</a>."
-    message += "<br>#{@timestamp}"  #TODO: change to 'x hours ago' format
+        message += "<a href='/#{first.post}'>post</a>."
+    message += "<br>#{first.timestamp}"  #TODO: change to 'x hours ago' format
     return new Handlebars.SafeString(message)
   
   show: -> Session.equals('notifications_state','open')
