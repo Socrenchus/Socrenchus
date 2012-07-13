@@ -8,7 +8,6 @@ Meteor.publish("my_user", (user_id) ->
 
 Meteor.publish("my_posts", ->
   user_id = Meteor.call('get_user_id')
-  uuid = Meteor.uuid
   self = this
   if user_id?
     # gather ids of my posts and posts i've replied to
@@ -40,7 +39,8 @@ Meteor.publish("my_posts", ->
     )
     self.onStop( ->
       handle.stop()
-      self.unset("client_posts", uuid, [
+      #self.unset("client_posts", uuid, [
+      self.unset("client_posts", [
         'author_id', 'doc.author_id', 'content',
         'parent_id', 'tags', 'my_tags', 'my_vote', 'votes'
       ])
