@@ -24,7 +24,7 @@ class GrandCentral
       posts: {
         insert: =>
           author_id = Meteor.call('get_user_id')
-          tron.test(gctest.insertpost, args[0], author_id)
+          tron.test(gctest.insert_post, args[0], author_id)
           #pick out only the appropriate fields
           args[0] =
             _.pick( args[0], 'content', 'parent_id', 'instance_id', '_id')
@@ -43,6 +43,8 @@ class GrandCentral
           }
           args[0].tags = []
         update: =>
+          gctest.run()
+          post_id = args[0]
           update_user_id = Meteor.call('get_user_id')
           #tagging, voting also comes in here
           tron.test(->
@@ -57,15 +59,20 @@ class GrandCentral
                 tron.log('tag_string value:', tag_string)
                 #check if tag already exists
                 #   may/may not be needed when server logic is in place
-                if tag_string in _.keys(Posts.findOne(args[0]).tags)
+                if tag_string in _.keys(Posts.findOne(post_id).tags)
                   tron.log('tag update, no new tag needed')
                   tag_exist = 1
-                all_tags = _.pick( Posts.findOne(args[0]), 'tags')
+                  #check if user has already used this tag
+                  tag_users = _.values(Posts.findOne(post_id).tags["#{tag_string}"].users)
+                  if update_user_id in tag_users
+                    tron.log 'User has already applied this tag to this post'
+                all_tags = _.pick( Posts.findOne(post_id), 'tags')
                 #TODO: Tag weight set will differ when updating existing tags
-                #      Currently always 1, should be changed in server logic
-                all_tags.tags[tag_string] ?= {users:[],weight:1}
+                #      Starts at 1 and inc's, should be changed in server logic
+                all_tags.tags[tag_string] ?= {users:[],weight:0}
                 all_tags.tags[tag_string].users.push( update_user_id )
-                tron.log('Values of all tags in post:\n', all_tags.tags)
+                all_tags.tags[tag_string].weight++
+                #tron.log('Values of all tags in post:\n', all_tags.tags)
                 args[1] = { '$set' : all_tags }
             else
               error_list.push('Posts.update(): Invalid $set parameters')
