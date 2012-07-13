@@ -28,21 +28,22 @@ Meteor.publish("my_posts", ->
     #my_post_query session variable depricated
     #q = Posts.find( author_id: user_id )
     #Session.set( 'my_posts_query', q)
-    handle = q.observe (
+    handle = q.observe(
       added: (doc, idx) ->
-        translator.add_change doc, idx, self
+        translator.add_change(doc, idx, self)
       removed: (doc, idx) ->
-        console.log 'publish my_post removed:'
+        console.log('publish my_post removed:')
       moved: (doc, idx) ->
-        console.log 'publish my_post moved:'
+        console.log('publish my_post moved:')
       changed: (doc, idx) ->
-        translator.add_change doc, idx, self
+        translator.add_change(doc, idx, self)
     )
     self.onStop ->
-    handle.stop()
-    self.unset "client_posts", uuid, [
-          'author_id', 'doc.author_id', 'content', 'parent_id', 'tags', 'my_tags', 'my_vote', 'votes'
-          ]
+      handle.stop()
+      self.unset("client_posts", uuid, [
+        'author_id', 'doc.author_id', 'content',
+        'parent_id', 'tags', 'my_tags', 'my_vote', 'votes'
+      ])
     self.flush()
     #return q
   )

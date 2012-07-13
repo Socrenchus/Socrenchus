@@ -108,7 +108,7 @@ _.extend( Template.tagbox,
       #Posts.update(id, {$set: {'my_tags': my_tags}})
       q = {'$set': {}}
       q['$set']["my_tags.#{tag_text}"] = 1
-      tron.log q
+      tron.log(q)
       Posts.update({ '_id': id}, q)
       @suggestions?.remove(tag_text)
     Meteor.flush()

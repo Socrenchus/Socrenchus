@@ -5,13 +5,13 @@ _.extend( Template.votebox,
   voted: ->
     not @my_vote is undefined
   #voted_up: -> Session.get('user_id') in @votes?.up.users
-  voted_up: -> 
+  voted_up: ->
     if (voted)
       @my_vote
     else
       false
   #voted_down: -> Session.get('user_id') in @votes?.down.users
-  voted_down: -> 
+  voted_down: ->
     if (voted)
       not @my_vote
     else
