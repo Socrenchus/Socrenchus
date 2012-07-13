@@ -8,7 +8,6 @@ Meteor.publish("my_user", (user_id) ->
 
 Meteor.publish("my_posts", ->
   user_id = Meteor.call('get_user_id')
-  self = this
   if user_id?
     # gather ids of my posts and posts i've replied to
     ids = []
@@ -24,28 +23,25 @@ Meteor.publish("my_posts", ->
           ]
       }
     )
-    #my_post_query session variable depricated
-    #q = Posts.find( author_id: user_id )
-    #Session.set( 'my_posts_query', q)
-    handle = q.observe(
-      added: (doc, idx) ->
-        translator.add_change(doc, idx, self)
-      removed: (doc, idx) ->
-        console.log('publish my_post removed:')
-      moved: (doc, idx) ->
-        console.log('publish my_post moved:')
-      changed: (doc, idx) ->
-        translator.add_change(doc, idx, self)
+
+    handle = q.observe (
+      added: (doc, idx) =>
+        t = new Translator( doc )
+        @set("posts", t.server._id, t.client)
+        @flush()
+      removed: (doc, idx) =>
+        console.log 'publish my_post removed:'
+      moved: (doc, idx) =>
+        console.log 'publish my_post moved:'
+      changed: (doc, idx) =>
+        translator.add_change doc, idx, @
     )
-    self.onStop( ->
+    @onStop( ->
       handle.stop()
-      #self.unset("client_posts", uuid, [
-      self.unset("client_posts", [
-        'author_id', 'doc.author_id', 'content',
-        'parent_id', 'tags', 'my_tags', 'my_vote', 'votes'
-      ])
+      for post in q.fetch()
+        fields = (key for key of Translator.client)  
+        @unset( "client_posts", post._id, fields )
+      @flush()
     )
-    self.flush()
-    #return q
-  )
+)
 
