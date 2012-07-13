@@ -38,12 +38,13 @@ Meteor.publish("my_posts", ->
       changed: (doc, idx) ->
         translator.add_change(doc, idx, self)
     )
-    self.onStop ->
+    self.onStop( ->
       handle.stop()
       self.unset("client_posts", uuid, [
         'author_id', 'doc.author_id', 'content',
         'parent_id', 'tags', 'my_tags', 'my_vote', 'votes'
       ])
+    )
     self.flush()
     #return q
   )
