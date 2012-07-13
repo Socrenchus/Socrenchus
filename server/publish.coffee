@@ -26,15 +26,17 @@ Meteor.publish("my_posts", ->
 
     handle = q.observe (
       added: (doc, idx) =>
-        t = new Translator( doc )
-        @set("posts", t.server._id, t.client)
+        client_post = new ClientPost( doc )
+        @set("posts", client_post._id, client_post)
         @flush()
       removed: (doc, idx) =>
         console.log 'publish my_post removed:'
       moved: (doc, idx) =>
         console.log 'publish my_post moved:'
       changed: (doc, idx) =>
-        translator.add_change doc, idx, @
+        t = new ClientPost( doc )
+        @set("posts", client_post._id, client_post)
+        @flush()
     )
     @onStop( ->
       handle.stop()
