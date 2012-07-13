@@ -2,6 +2,8 @@ class ClientPost
   
   
   constructor: ( server ) ->
+    #Default values were not being set when these fields were declared as
+    #  properties for some reason.  This is probably not the most elegant fix.
     @_id = ''
     @author_id = ''
     @parent_id = ''
