@@ -2,30 +2,48 @@ Meteor.startup( ->
   if Posts.find().count() is 0
     notifs = [
       {
-        user: 'post_id' #id
-        kind: 0 # 0 || 1 || 2
+        user: 'user_id' #id
+        type: 0 # 0 || 1 || 2
         post: 'post_id' #id
-        other_users: ['post_id', 'post_id2'] #[id]
+        other_user: 'i_replied' #id
         points: 0 #int
-        tag: 'tagtext' #string
+        tag: '' #string
         timestamp: 'date' #Date object
       },
       {
-        user: 'post_id' #id
-        kind: 1 # 0 || 1 || 2
+        user: 'user_id' #id
+        type: 1 # 0 || 1 || 2
         post: 'post_id' #id
-        other_users: [] #[id]
+        other_user: '' #id
         points: 1 #int
-        tag: 'tagtext' #string
+        tag: 'my_tag' #string
         timestamp: 'date' #Date object
       },
       {
-        user: 'post_id' #id
-        kind: 2 # 0 || 1 || 2
+        user: 'user_id' #id
+        type: 2 # 0 || 1 || 2
         post: 'post_id' #id
-        other_users: ['post_id'] #[id]
+        other_user: '' #id
         points: 1 #int
-        tag: 'tagtext' #string
+        tag: 'tag_on_my_post' #string
+        timestamp: 'date' #Date object
+      },
+      {
+        user: 'user_id' #id
+        type: 2 # 0 || 1 || 2
+        post: 'post_id2' #id
+        other_user: '' #id
+        points: 1 #int
+        tag: 'tag_on_my_post' #string
+        timestamp: 'date' #Date object
+      },
+      {
+        user: 'user_id' #id
+        type: 2 # 0 || 1 || 2
+        post: 'post_id' #id
+        other_user: '' #id
+        points: 1 #int
+        tag: 'tag_on_my_post' #string
         timestamp: 'date' #Date object
       }
     ]

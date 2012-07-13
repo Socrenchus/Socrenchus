@@ -1,6 +1,6 @@
 _.extend( Template.notifications,
   count: -> Notifications.find().fetch().length
-  notifications: -> return Notifications.find().fetch()
+  notifications: -> return Notifications.find().fetch().posts
   message: ->
     message = ''
     if @points > 0
@@ -8,7 +8,7 @@ _.extend( Template.notifications,
     if @points != 0
       message += "#{@points} - "
     
-    switch @kind
+    switch @type
       when 0
         users = @other_users.length
         if users > 1
