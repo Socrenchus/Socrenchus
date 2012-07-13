@@ -101,13 +101,16 @@ _.extend( Template.tagbox,
   }
   
   add_tag: (id, my_tags, tag_text) ->
-    my_tags ?= []             #TODO: Remove on schema change
     Session.set('filter_text', '')
     if tag_text != '' && not (tag_text in my_tags)
+<<<<<<< HEAD
+      Posts.update({ _id: id}, {$set: {'my_tags': tag_text}})
+=======
       q = {'$set': {}}
       q['$set']["my_tags.#{tag_text}"] = 1
       tron.log(q)
       Posts.update({ '_id': id}, q)
+>>>>>>> 2ec32505f41dd6712d0d579a23274ed4e01077fe
       @suggestions?.remove(tag_text)
     Meteor.flush()
 )
