@@ -5,7 +5,7 @@ class Tron
   constructor: ->
     @timers = []
     
-  test: (fn, args...) ->
+  test: (args...) ->
     u = """
 
      This simple function will define the way we test Socrenchus. You can do
@@ -21,10 +21,11 @@ class Tron
       )
 
     """
-    unless typeof fn == 'function'
-      @warn(usage)
-    else
-      fn(args...)
+    for a in args
+      unless typeof a == 'function'
+        @warn(usage)
+      else
+        a()
         
   stopwatch: ( timer_name ) ->
     u = """
