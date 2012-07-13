@@ -40,6 +40,7 @@ class GrandCentral
         update: =>
           error_list.push('not implemented yet')
         remove: =>
+          error_list.push('not implemented yet')
       }
     }[@collection][@method]()
     if (error_list.length is 0 or @_debug)
