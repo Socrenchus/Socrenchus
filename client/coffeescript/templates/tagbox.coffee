@@ -100,15 +100,20 @@ _.extend( Template.tagbox,
   }
   
   add_tag: (id, my_tags, tag_text) ->
-    my_tags ?= []             #TODO: Remove on schema change
     Session.set('filter_text', '')
     if tag_text != '' && not (tag_text in my_tags)
-      my_tags.push(tag_text)
-      Posts.update(id, {$set: {'my_tags': my_tags}})
+      q = {'$set': {}}
+      q['$set']["my_tags.#{tag_text}"] = 1
+      tron.log(q)
+      Posts.update({ '_id': id}, q)
       @suggestions?.remove(tag_text)
     Meteor.flush()
 )
 
+# TODO: Remove this helper ASAP, handle bar helper abuse is bad and ugly.
+#   The point of templates is so that we don't generate HTML in our script
+#   files, if I wanted to do this I would have kept the old app engine
+#   system.
 Handlebars.registerHelper('tags', (context, object) ->
   @my_tags ?= []          #TODO: REMOVE
   ret = ''

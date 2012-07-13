@@ -5,7 +5,6 @@ Notifications = new Meteor.Collection("notifications")
 
 # Subscriptions
 Meteor.subscribe( "my_notifs" )
-Meteor.subscribe( "my_user" )
 Meteor.subscribe( "my_posts" )
 Meteor.subscribe( "assigned_posts" )
 
