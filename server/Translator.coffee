@@ -1,23 +1,25 @@
 class SharedPost
-  schema:
-    _id: ''
-    author_id: ''
-    parent_id: undefined
-    content: ''
-  
   constructor: ( either ) ->
-    _.extend( @, SharedPost::schema )
+    # define the shared client-server schema
+    _.extend( @,
+      _id: ''
+      author_id: ''
+      parent_id: undefined
+      content: ''
+    )
+    
     for key in [ '_id', 'author_id', 'parent_id', 'content' ]
       @[key] = either[key] if either[key]?
        
 class ClientPost extends SharedPost
-  schema:
-    tags: {} # tag: weight
-    my_tags: {} # same as tags
-    suggested_tags: []
-  
   constructor: ( server ) ->
-    _.extend( @, ClientPost::schema )
+    # define the client schema
+    _.extend( @,
+      tags: {} # tag: weight
+      my_tags: {} # same as tags
+      suggested_tags: []
+    )
+
     user_id = Meteor.call('get_user_id')
     
     super server
@@ -33,12 +35,13 @@ class ClientPost extends SharedPost
         @suggested_tags.push( key ) unless key in @my_tags
 
 class ServerPost extends SharedPost
-  schema:
-    instance_id: ''
-    tags: {} # tag: {users:[], weight:#}
-  
   constructor: ( client ) ->
-    _.extend( @, ServerPost::schema )
+    # define the server schema
+    _.extend( @,
+      instance_id: ''
+      tags: {} # tag: {users:[], weight:#}
+    )
+    
     user_id = Meteor.call('get_user_id')
     
     super client
