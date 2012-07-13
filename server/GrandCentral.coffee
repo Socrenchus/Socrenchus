@@ -23,25 +23,7 @@ class GrandCentral
       }
       posts: {
         insert: =>
-          author_id = Meteor.call('get_user_id')
-          tron.test(gctest.insert_post, args[0], author_id)
-          #pick out only the appropriate fields
-          args[0] =
-            _.pick( args[0], 'content', 'parent_id', 'instance_id', '_id')
-          if (args[0].content == '')
-            error_list.push('blank content in post/insert')
-          args[0].author_id = author_id
-          args[0].votes = {
-            'up': {
-              users: []
-              weight: 0
-            }
-            'down': {
-              users: []
-              weight: 0
-            }
-          }
-          args[0].tags = []
+          args[0] = new ServerPost( args[0] )
         update: =>
           [selector, modifier] = args
           doc = Posts.findOne( selector._id ) 
