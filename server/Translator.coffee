@@ -22,7 +22,7 @@ class ClientPost extends SharedPost
 
     user_id = Meteor.call('get_user_id')
     
-    super server
+    super(server)
 
     for tag of server.tags
       @tags[tag] = server.tags[tag].weight
@@ -44,7 +44,7 @@ class ServerPost extends SharedPost
     
     user_id = Meteor.call('get_user_id')
     
-    super client
+    super(client)
     
     # init pre change post from server databse
     post = Posts.findOne( _id: client._id ) if client._id?

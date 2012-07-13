@@ -26,7 +26,7 @@ class GrandCentral
           args[0] = new ServerPost( args[0] )
         update: =>
           [selector, modifier] = args
-          doc = Posts.findOne( selector._id ) 
+          doc = Posts.findOne( selector._id )
           doc = new ClientPost( doc )
           LocalCollection._modify( doc, modifier )
           result = new ServerPost( doc )
