@@ -14,15 +14,10 @@ Meteor.publish("my_posts", ->
     for item in Posts.find( author_id: user_id ).fetch()
       ids.push( item['parent_id'] ) if 'parent_id' of item
       ids.push( item['_id'] )
-    # query for the children and posts from above
-    q = Posts.find(
-      {
-        '$or':
-          [{_id: { '$in': ids }},
-            {parent_id: { '$in': ids }}
-          ]
-      }
-    )
+    # query for posts or children of my posts or parents
+    in_ids = { '$in': ids }
+    in_or_child_of_ids = { '$or': [ {_id: in_ids}, {parent_id: in_ids} ] }
+    q = Posts.find( in_or_child_of_ids )
 
     action = (doc, idx) =>
       client_post = new ClientPost( doc )
