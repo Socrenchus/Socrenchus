@@ -8,7 +8,7 @@ Meteor.startup( ->
         other_user: 'i_replied' #id
         points: 0 #int
         tag: '' #string
-        timestamp: 'date' #Date object
+        timestamp: new Date(2012, 6, 15, 5) #Date object
       },
       {
         user: 'user_id' #id
@@ -17,7 +17,7 @@ Meteor.startup( ->
         other_user: '' #id
         points: 1 #int
         tag: 'my_tag' #string
-        timestamp: 'date' #Date object
+        timestamp: new Date() #Date object
       },
       {
         user: 'user_id' #id
@@ -25,8 +25,8 @@ Meteor.startup( ->
         post: 'post_id' #id
         other_user: '' #id
         points: 1 #int
-        tag: 'tag_on_my_post' #string
-        timestamp: 'date' #Date object
+        tag: 'tag_on_my_post1' #string
+        timestamp: new Date() #Date object
       },
       {
         user: 'user_id' #id
@@ -35,7 +35,7 @@ Meteor.startup( ->
         other_user: '' #id
         points: 1 #int
         tag: 'tag_on_my_post' #string
-        timestamp: 'date' #Date object
+        timestamp: new Date() #Date object
       },
       {
         user: 'user_id' #id
@@ -43,8 +43,8 @@ Meteor.startup( ->
         post: 'post_id' #id
         other_user: '' #id
         points: 1 #int
-        tag: 'tag_on_my_post' #string
-        timestamp: 'date' #Date object
+        tag: 'tag_on_my_post2' #string
+        timestamp: new Date() #Date object
       }
     ]
     for notif in notifs
