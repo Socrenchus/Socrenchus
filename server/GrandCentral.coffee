@@ -25,6 +25,9 @@ class GrandCentral
         insert: =>
           args[0] = new ServerPost( args[0] )
         update: =>
+          #if _.isString(args[1]['$set']['my_tags'])
+          if typeof(args[1]['$set']['my_tags']) is 'string'
+            tron.log 'don\'t allow this!'
           [selector, modifier] = args
           doc = Posts.findOne( selector._id )
           doc = new ClientPost( doc )
