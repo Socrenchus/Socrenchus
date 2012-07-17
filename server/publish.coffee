@@ -37,4 +37,3 @@ Meteor.publish("my_posts", ->
       @flush()
     )
 )
-
