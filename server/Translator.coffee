@@ -106,4 +106,12 @@ class ServerPost extends SharedPost
     reward = @tags[tag].weight / users.length
     for user in Users.find( '_id': { '$in': users } )
       # add reward to user for tag
+      q = {'_id': '', '$set': {} }
+      q['_id'] = user['_id']
+      exp_obj = {}
+      for u_tag, exp of user.experience
+        exp_obj['$set'][u_tag] = exp
+      exp_obj['$set'][u_tag] = reward
+      q['$set'] = exp_obj
+      Users.update(q)
     
