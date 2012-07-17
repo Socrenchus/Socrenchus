@@ -76,7 +76,7 @@ class ServerPost extends SharedPost
     # check if graduated
     graduated = @is_graduated( tag )
     if not already_graduate and graduated
-      # award points to users
+      award_points( @tags[tag].users, tag )
   
   is_graduated: ( tag ) =>
     # TODO: Improve this function
@@ -84,95 +84,26 @@ class ServerPost extends SharedPost
   
   get_user_post_experience: ( user_id ) =>
     # loop through tags in post (aka this)
-    # normalize tag weights
-    # multiply normalize tag weight by user's tag experience
-    # sum all those up
-    # return sum
-  
+    weights = {}
+    weight_total = 0
+    for tag, obj of @tags
+      weights[tag] = obj.weight 
+      weight_total += obj.weight
+    unless weight_total is 0
+      users_post_experience = 0
+      for tag, weight of weights
+        # normalize tag weights
+        weights[tag] /= weight_total
+        user = Users.findOne('_id': user_id)
+        # multiply normalize tag weight by user's tag experience
+        # sum all those up
+        users_post_experience += weights[tag] * user.experience[tag]
+      # return the sum
+      return users_post_experience
+    else return 1 # TODO: Default to some function of experience
+
   award_points: ( users, tag ) =>
     reward = @tags[tag].weight / users.length
     for user in Users.find( '_id': { '$in': users } )
       # add reward to user for tag
-
-class ServerPost extends SharedPost
-  constructor: ( client ) ->
-    #define server side schema
-    _.extend(@,
-      tags: {} #'tag': {users: [], weight: num}
-    )
-    super( client )
-    user_id = Meteor.call('get_user_id')
-    mongo_post = Posts.findOne(client._id)
-    if mongo_post?
-      #console.log 'its a post/update action'
-      #translate client side tag to server format
-      #all tags
-      for tag, weight of client.tags
-        #console.log tag, weight
-        @tags["#{tag}"] = mongo_post.tags[tag] 
-      #tags specific to user  
-      for tag, weight of client.my_tags
-        @add_tag(tag, weight, user_id)
-      #update document to mongo
-      Posts.update({'_id': @_id}, {'$set': {'tags': @tags}})
-    else
-      console.log 'its a post/insert action'
     
-  #a method to check if a users tag action caused it to graduate.
-  is_graduated: (tag) =>
-    graduated = false
-    #TODO update to something better than just >2
-    if @tags[tag]?.weight > 1
-      console.log 'tag graduates'
-      graduated = true
-    return graduated
- 
-  inc_exp: (tag, points) =>
-    #the author of the post gets a fraction of exp for all tags
-    author = Users.findOne({'_id': @author_id})
-    num_tags = _.keys(author.experience).length
-    exp_gain = points/num_tags
-    for tag of author.experience
-      q = {'_id': '', '$inc': ''}
-      q._id = @author_id
-      q['$inc'] = "experience[#{tag}], #{exp_gain}"
-      Users.update(q)
-    #all users gain exp for this particular tag
-    for user in @tags[tag].users
-      q = {'_id': '', '$inc': ''}
-      q._id = user
-      q['$inc'] = "experience[#{tag}], #{points}"
-      Users.update(q)
-      
-  #a method to handle tag insersion
-  add_tag: ( tag ) =>
-    tron.log( 'serverLogic/add_tag' )
-    #upvoting an existing tag
-    if @tags[tag]?
-      #check if this tag insertion graduates the tag
-      if @tag_graduates(tag)
-        #if yes, give points to author and taggers
-        @inc_exp(tag)
-      #add user to the list of users for the tag
-      @tags["#{tag}"].users.push(tagger_id)
-      @tags["#{tag}"].weight++
-    #inserting a new tag
-    else
-      #add the tag to the doc and update weight
-      tag_obj = {}
-      tag_obj["#{tag}"] = {users: [], weight: 1}
-      tag_obj["#{tag}"].users.push(tagger_id)
-      for key, val of Posts.findOne({'_id': @_id}).tags
-        tag_obj["#{key}"] = val
-      #console.log 'should  be all the tags', tag_obj
-      @tags = tag_obj
-      
-    #add user.experience[tag] : 0
-    q = {_id: '', $set:''}
-    q._id = tagger_id
-    exp_obj = {}
-    for e_tag, exp of Users.findOne({'_id': tagger_id}).experience
-      exp_obj["#{e_tag}"] = exp
-    exp_obj["#{tag}"] = 1
-    q.$set = {experience: exp_obj}
-    Users.update(q)
