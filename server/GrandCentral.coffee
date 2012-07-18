@@ -24,6 +24,7 @@ class GrandCentral
       posts: {
         insert: =>
           args[0] = new ServerPost( args[0] )
+          #checks for post replies
           if args[0].parent_id?
             tron.test("check_reply", args[0]) #check
             tron.test("check_parent", args[0]) #check
