@@ -24,8 +24,13 @@ class GrandCentral
       posts: {
         insert: =>
           args[0] = new ServerPost( args[0] )
+          if args[0].parent_id?
+            tron.test("check_reply", args[0]) #check
+            tron.test("check_parent", args[0]) #check
+            tron.test("check_tagging", args[0]) #check
         update: =>
           [selector, modifier] = args
+          tron.test("check_tag_quality", modifier) #check
           doc = Posts.findOne( selector._id )
           doc = new ClientPost( doc )
           LocalCollection._modify( doc, modifier )
