@@ -23,7 +23,7 @@ class Tron
     """
     for a in args
       unless typeof a == 'function'
-        @warn(usage)
+        @warn(u)
       else
         a()
         
