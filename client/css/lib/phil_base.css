@@ -66,9 +66,20 @@ table {
 /* Philip’s Base Socrenchus Style
    It belongs here if it’s needed globally, but it’s not in the reset.
 */
+main {
+  font-family: 'PT Sans', Helvetica, Arial, "Luxi Sans", sans-serif;
+}
 /* Philip’s Styling Classes 
    It belongs here if it’s going to be re-used.  Clearfixes, navfonts...
 */
+.unselectable { /*From Prash's code.  Do we still need this?*/
+  -webkit-user-select: none; /*Should rename it noselect if we do.*/
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
 /* Philip’s Coordinated Component Classes 
 At this point, style continues to the next components.  
 So, CSS stuff goes on in its own files.  
