@@ -21,10 +21,17 @@
     <div class="footer nav">
       <span class="reply_count"><em>x</em> replies.</span>
       <!--if haven't replied-->
-      <span class="reply_ops"><button>Reply</button></span>
+      {{#unless has_replied}}
+        {{#unless composing_any_reply}}
+          <span class="reply_ops"><button name="reply">Reply</button></span>
+        {{/unless}}
+      {{/unless}}
       <!--/endif-->
     </div>  
   </div><!--/post-->
+  {{#if composing_reply}}
+    {{> reply_box}}
+  {{/if}}
   
   <div class="ind">
     {{> stream}}

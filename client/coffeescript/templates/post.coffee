@@ -23,13 +23,27 @@ _.extend( Template.post,
     else
       return false
   author: -> @author_id
-  author_short: -> @author_id.slice(0, 5)
+  author_short: -> 
+    if typeof @author_id is "string" and @author_id.length>5
+      @author_id.slice(0, 5)
+    else
+      @author_id
     #hack to get a short author name.  remove
     #  when we have access to usernames.  
   
   tag_on: ->  # July 19
     return Session.equals('tagging', true) and 
       Session.equals('current_post', @_id)
+  
+  has_replied: ->
+    Posts.findOne( {'parent_id': @_id, 'author_id': Session.get('user_id')} ) isnt undefined
+  
+  composing_reply: ->
+    return Session.equals('current_post', @_id) and
+      not Session.equals('composing', undefined)
+  
+  composing_any_reply: -> not Session.equals('composing', undefined)
+  
   events: { # July 19
     "click button[name='see_tags']": (event) ->
       if not event.isImmediatePropagationStopped()
@@ -48,5 +62,13 @@ _.extend( Template.post,
           #console.log("Started tagging on post #{@_id}")
         
         event.stopImmediatePropagation()
+    
+    "click button[name='reply']": (event) ->
+      if not event.isImmediatePropagationStopped()
+        Session.set('current_post', @_id)
+        Session.set('composing', '')
+        event.stopImmediatePropagation()
+        
+    
   }
 )
