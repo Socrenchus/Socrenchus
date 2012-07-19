@@ -5,14 +5,20 @@
     <div class="header nav">
       <a href="#">
         <span class="author">
-          <img src="" height="24" width="24" /><em>{{author_short}}</em>
+          <img src="" height="24" width="24" /><em>{{author_short}}.</em>
         </span>
       </a>
-      <a href="#[post]" target="_blank"><span class="relativetime">x hours ago</span></a>
+      <a href="{{link_href}}" target="_blank"><span class="relativetime">x hours ago</span></a>
     </div>
-  
-  
-    <div class="footer"></div>  
+    <div class="mkd">
+      {{{content}}}
+    </div>
+    <div class="footer nav">
+      <span class="reply_count"><em>x</em> replies.</span>
+      <!--if haven't replied-->
+      <span class="reply_ops"><button>Reply</button></span>
+      <!--/endif-->
+    </div>  
   </div><!--/post-->
   {{> stream}}
 </template>
