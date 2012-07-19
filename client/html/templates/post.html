@@ -1,5 +1,6 @@
 <!--Newpost, Created July 19, 2012-->
 <template name="post">
+  {{init}}
   <div class="post">
   
     <div class="header nav">
@@ -9,6 +10,10 @@
         </span>
       </a>
       <a href="{{link_href}}" target="_blank"><span class="relativetime">x hours ago</span></a>
+      <span class="tag_ops"><button name="see_tags">T</button></span>
+      <div class="tag_callout" style="display:{{#if tag_on}}block{{else}}none{{/if}};">
+        {{> tagbox}}
+      </div>
     </div>
     <div class="mkd">
       {{{content}}}
