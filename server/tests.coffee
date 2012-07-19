@@ -70,5 +70,5 @@ class Tests
   check_tag_quality: (post_update) ->
     if _.isString(post_update['$set']['my_tags'])
       tron.error('Tag update sent as string, not object')
-  
+
 tron.test( new Tests() )

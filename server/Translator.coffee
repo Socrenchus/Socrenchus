@@ -130,12 +130,9 @@ class ServerPost extends SharedPost
     else return 1 # TODO: Default to some function of experience
 
   award_points: ( users, tag ) =>
-    tron.log 'award_points', users, tag
     reward = @tags[tag].weight / users.length
-    tron.log 'reward:', reward
     #for user of Users.find( '_id': { '$in': users } )
     for user_id in users  
-      tron.log 'user_loop', user_id
       user_doc = Users.findOne( user_id )
       # add reward to user for tag
       q = {'_id': '', '$set': {'experience': {}} }
@@ -149,7 +146,12 @@ class ServerPost extends SharedPost
       #insert the new tag exp
       exp_obj[tag] = reward
       q['$set']['experience'] = exp_obj
-      tron.log 'the query', q
-      tron.log Users.update(q)
-  
+      tron.test( ->
+        tron.log 'the query', q
+        tron.log Users.update(q)
+      )
+      
+Meteor.startup( ->
+  tron.test()
+)
   
