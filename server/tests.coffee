@@ -14,16 +14,26 @@ class Tests
     tron.log('Inserting randomized tag:\n', q, '\n...with author_id:', id)
     Posts.update({ '_id': id}, q)
 
-  #update existing tag in random post - not sure why this isn't working
-  # BECAUSE IT SHOULD
+  #update existing tag in random post - not working...
   try_update_tag: ->
     post = Posts.findOne()
     q = {'$set': {}}
     for tag of post.tags
       tron.log("Updating tag \"#{tag}\" in post \"#{post._id}\"")
       q['$set']["my_tags.#{tag}"] = 1
+      # = new ServerPost(  )
       Posts.update({ '_id': post._id }, q)
       break
+
+  #attempt to reply to a post before tagging - untested
+  try_post_before_tag: ->
+    for post of Posts.find().fetch()
+      for tag of post.tags
+        if Meteor.call('get_user_id') in parent.tags["#{tag}"].users
+          pretagged = true
+      if !pretagged?
+        Posts.insert({parent_id: post._id, content: "reply before tag"})
+        break
 
   ##replying to own post - works
   #args: post to be inserted
@@ -42,17 +52,6 @@ class Tests
       tron.log('User has already replied to this post')
     else
       tron.log('User has not replied to this post yet')
-        
-  
-  #attempt to reply to a post before tagging - untested
-  try_post_before_tag: ->
-    for post of Posts.find().fetch()
-      for tag of post.tags
-        if Meteor.call('get_user_id') in parent.tags["#{tag}"].users
-          pretagged = true
-      if !pretagged?
-        Posts.insert({parent_id: post._id, content: "reply before tag"})
-        break
   
   ##reply only after you tag - works
   #args: post to be inserted
