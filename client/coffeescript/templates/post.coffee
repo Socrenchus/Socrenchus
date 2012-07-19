@@ -12,4 +12,8 @@ _.extend( Template.post,
       return "/#{ @parent_id }"
     else
       return false
+  author: -> @author_id
+  author_short: -> @author_id.slice(0, 5)
+    #hack to get a short author name.  remove
+    #  when we have access to usernames.  
 )

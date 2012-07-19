@@ -69,9 +69,24 @@ table {
 main {
   font-family: 'PT Sans', Helvetica, Arial, "Luxi Sans", sans-serif;
 }
+button {
+  font: inherit;
+}
+a:link {text-decoration: none; }
+a:active {text-decoration: underline; }
+a:visited {text-decoration: none; }
+a:hover {text-decoration: underline; }
+em {
+  font-weight: bolder;
+}
+
 /* Philip’s Styling Classes 
    It belongs here if it’s going to be re-used.  Clearfixes, navfonts...
 */
+.nav {
+  font-family: 'Economica', sans-serif;
+}
+
 .unselectable { /*From Prash's code.  Do we still need this?*/
   -webkit-user-select: none; /*Should rename it noselect if we do.*/
   -khtml-user-select: none;

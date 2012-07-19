@@ -1,63 +1,18 @@
-
-  <!-- 
-  Philip's New Post Style 6/12/12
-  
-  Design goals: 
-  Clarity of structure
-  -Recursive properties of posts evident in the visible structure.        
-  Readability of elements
-  Helpfulness to posters
-    -->
-
+<!--Newpost, Created July 19, 2012-->
 <template name="post">
-  <div class="post_container">
-    <div class="table post">
-      <div class="colgroup">
-        <div class="col"></div>
-      </div>
-      <div class="tr post_top_part">
-        <div class="table post_top_part">
-          <div class="colgroup">
-            <div class="col vote_col"></div>
-            <div class="col content_col"></div>
-            <div class="col tag_col"></div>
-          </div>
-          <div class="tr post_top_part">
-            <div class="td vote_cell">
-              {{#with this}}
-                {{> votebox}}
-              {{/with}}
-            </div>
-            <div class="td content_cell">
-              <div class="post_content">
-                <div class="post_info">
-                  {{#if parent_href}}
-                    <a class="link" href="{{parent_href}}">Parent</a>
-                    <text> - </text>
-                  {{/if}}
-                  <a class="link" href="{{link_href}}">Link</a> - User</div>
-                  <div>
-                    {{{content}}}
-                  </div>
-              </div>
-            </div>
-            <div class="td tag_cell">
-              {{#with this}}
-                {{> tagbox}}
-              {{/with}}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="tr post_reply_part">
-        {{> reply_box}}
-      </div>
-    </div>
-    <div class="reply-section">
-      {{> stream}} 
-    </div>
-  </div>
+  <div class="post">
   
-  <!--Button temporarily out of service.-->
-  <!--<button name="goto-parent">Parent</button>-->
+    <div class="header nav">
+      <a href="#">
+        <span class="author">
+          <img src="" height="24" width="24" /><em>{{author_short}}</em>
+        </span>
+      </a>
+      <a href="#[post]" target="_blank"><span class="relativetime">x hours ago</span></a>
+    </div>
+  
+  
+    <div class="footer"></div>  
+  </div><!--/post-->
+  {{> stream}}
 </template>
