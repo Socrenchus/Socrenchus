@@ -33,19 +33,19 @@ _.extend( Template.post,
   events: { # July 19
     "click button[name='see_tags']": (event) ->
       if not event.isImmediatePropagationStopped()
-        #alert(Session.equals('current_post', @_id))
-        
+        #TODO: Turn these commented-out console.logs 
+        #      into their proper tron actions.  
         if Session.equals('tagging', true)
           if Session.equals('current_post', @_id)
             Session.set('tagging', false)
-            console.log("Turned off tagging for this post.")
+            #console.log("Turned off tagging for this post.")
           else
             Session.set('current_post', @_id)
-            console.log("Switched to post #{@_id}")
+            #console.log("Switched to post #{@_id}")
         else
           Session.set('tagging', true)
           Session.set('current_post', @_id)
-          console.log("Started tagging on post #{@_id}")
+          #console.log("Started tagging on post #{@_id}")
         
         event.stopImmediatePropagation()
   }
