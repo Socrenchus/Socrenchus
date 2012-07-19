@@ -37,6 +37,13 @@ class ClientPost extends SharedPost
 
 class ServerPost extends SharedPost
   constructor: ( client ) ->
+    tron.test( ->
+      unless typeof( client ) is 'object'
+        tron.error( 'serverPost constructor args is not an object' )
+      #TODO check client for fields
+      #TODO why does not client have a _id?
+    )
+
     # define the server schema
     _.extend( @,
       instance_id: ''
@@ -75,8 +82,28 @@ class ServerPost extends SharedPost
     @tags[tag].weight += @get_user_post_experience( user_id )
     # check if graduated
     graduated = @is_graduated( tag )
-    if not already_graduate and graduated
-      award_points( @tags[tag].users, tag )
+    #if not already_graduated and graduated
+    if true
+      @award_points( @tags[tag].users, tag )
+      user = Users.findOne('_id': user_id)
+      console.log 'the user:', user
+      tron.test( ->
+        #check if the user has some experience for the tags
+        tron.info( 'after award_points user:', user )
+        unless tag in _.keys( user.experience ) && user.experience[tag].weight?
+        #unless true
+          tron.error( "user does not have experience for #{tag} at the end of add_tag")
+        
+      )
+      
+    tron.test( ->
+      #check if tag is present for post
+      if true
+        tron.info( 'write the add_tag tests' )
+      #check that the tag object has the user_id in users[]
+      
+    )
+  
   
   is_graduated: ( tag ) =>
     # TODO: Improve this function
@@ -103,15 +130,26 @@ class ServerPost extends SharedPost
     else return 1 # TODO: Default to some function of experience
 
   award_points: ( users, tag ) =>
+    tron.log 'award_points', users, tag
     reward = @tags[tag].weight / users.length
-    for user in Users.find( '_id': { '$in': users } )
+    tron.log 'reward:', reward
+    #for user of Users.find( '_id': { '$in': users } )
+    for user_id in users  
+      tron.log 'user_loop', user_id
+      user_doc = Users.findOne( user_id )
       # add reward to user for tag
-      q = {'_id': '', '$set': {} }
-      q['_id'] = user['_id']
+      q = {'_id': '', '$set': {'experience': {}} }
+      q['_id'] = user_doc['_id']
+      console.log "user_doc.['_id']", user_doc['_id']
       exp_obj = {}
-      for u_tag, exp of user.experience
-        exp_obj['$set'][u_tag] = exp
-      exp_obj['$set'][u_tag] = reward
-      q['$set'] = exp_obj
-      Users.update(q)
-    
+      #copy existing tag exp
+      for u_tag, exp of user_doc.experience
+        #exp_obj['$set'][u_tag] = exp
+        exp_obj[u_tag] = exp
+      #insert the new tag exp
+      exp_obj[tag] = reward
+      q['$set']['experience'] = exp_obj
+      tron.log 'the query', q
+      tron.log Users.update(q)
+  
+  
