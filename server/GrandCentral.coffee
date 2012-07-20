@@ -25,16 +25,17 @@ class GrandCentral
         insert: =>
           args[0] = new ServerPost( args[0] )
           #checks for post replies
-          if args[0].parent_id?
-            tron.test("check_reply", args[0]) #check
-            tron.test("check_parent", args[0]) #check
-            tron.test("check_tagging", args[0]) #check
+          #if args[0].parent_id?
+            #tron.test("check_reply", args[0]) #check
+            #tron.test("check_parent", args[0]) #check
+            #tron.test("check_tagging", args[0]) #check
         update: =>
+          console.log( 'posts/update' )
           [selector, modifier] = args
-          tron.test("check_tag_quality", modifier) #check
           doc = Posts.findOne( selector._id )
           doc = new ClientPost( doc )
           LocalCollection._modify( doc, modifier )
+          #tron.test('check_client_post_doc', doc) #check
           result = new ServerPost( doc )
           args[1] = result
         remove: (args...) =>

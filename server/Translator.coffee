@@ -37,12 +37,7 @@ class ClientPost extends SharedPost
 
 class ServerPost extends SharedPost
   constructor: ( client ) ->
-    tron.test( ->
-      unless typeof( client ) is 'object'
-        tron.error( 'serverPost constructor args is not an object' )
-      #TODO check client for fields
-      #TODO why does not client have a _id?
-    )
+    console.log 'serverPost costructor'
 
     # define the server schema
     _.extend( @,
@@ -53,6 +48,7 @@ class ServerPost extends SharedPost
     user_id = Meteor.call('get_user_id')
     
     super(client)
+    
     
     # init pre change post from server databse
     post = Posts.findOne( _id: client._id ) if client._id?
@@ -74,6 +70,7 @@ class ServerPost extends SharedPost
           @add_tag( tag, user_id )
   
   add_tag: ( tag, user_id ) =>
+    console.log( 'add_tag')
     # check if already graduated
     already_graduated = @is_graduated( tag )
     # add the tag
@@ -82,11 +79,12 @@ class ServerPost extends SharedPost
     @tags[tag].weight += @get_user_post_experience( user_id )
     # check if graduated
     graduated = @is_graduated( tag )
-    #if not already_graduated and graduated
-    if true
+    if not already_graduated and graduated
+    #if true
       @award_points( @tags[tag].users, tag )
       user = Users.findOne('_id': user_id)
       console.log 'the user:', user
+      ###
       tron.test( ->
         #check if the user has some experience for the tags
         tron.info( 'after award_points user:', user )
@@ -94,15 +92,10 @@ class ServerPost extends SharedPost
         #unless true
           tron.error( "user does not have experience for #{tag} at the end of add_tag")
         
-      )
-      
-    tron.test( ->
-      #check if tag is present for post
-      if true
-        tron.info( 'write the add_tag tests' )
-      #check that the tag object has the user_id in users[]
-      
-    )
+      )###
+    
+    tron.test( 'check_tagged', @, tag, user_id)
+    console.log( 'end add_tag:  ', this)
   
   
   is_graduated: ( tag ) =>
@@ -146,10 +139,11 @@ class ServerPost extends SharedPost
       #insert the new tag exp
       exp_obj[tag] = reward
       q['$set']['experience'] = exp_obj
+      ###
       tron.test( ->
-        tron.log 'the query', q
-        tron.log Users.update(q)
-      )
+        tron.log( 'the query', q )
+        tron.log( 'query returns', Users.update(q) )
+      )###
       
 Meteor.startup( ->
   tron.test()
