@@ -24,18 +24,12 @@ class GrandCentral
       posts: {
         insert: =>
           args[0] = new ServerPost( args[0] )
-          #checks for post replies
-          #if args[0].parent_id?
-            #tron.test("check_reply", args[0]) #check
-            #tron.test("check_parent", args[0]) #check
-            #tron.test("check_tagging", args[0]) #check
         update: =>
           console.log( 'posts/update' )
           [selector, modifier] = args
           doc = Posts.findOne( selector._id )
           doc = new ClientPost( doc )
           LocalCollection._modify( doc, modifier )
-          #tron.test('check_client_post_doc', doc) #check
           result = new ServerPost( doc )
           args[1] = result
         remove: (args...) =>
@@ -52,6 +46,8 @@ class GrandCentral
     }[@collection][@method]()
     if (error_list.length is 0 or @_debug)
       @default.apply(@, args)
+      if @collection is 'posts' and @method is 'insert'
+        tron.test( 'check_post_insert', args[0]._id, args[0].content )
     if (error_list.length>0)
       console.error(error_list)
     #console.info 'GrandCentral is operational!!'

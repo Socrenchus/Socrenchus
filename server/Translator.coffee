@@ -119,19 +119,24 @@ class ServerPost extends SharedPost
       # return the sum
       return users_post_experience
     else return 1 # TODO: Default to some function of experience
-
+  
   award_points: ( users, tag ) =>
     tron.log( 'award_points' )
     reward = @tags[tag].weight / users.length
+    
     tron.test( check_reward: ->
+      console.log 'checking reward'
       unless _.isNumber(reward) is number
         tron.error( 'reward is not a number' )
     )
+    
     for user_id in users  
       user_doc = Users.findOne( user_id )
       # add reward to user for tag
-      q = {'_id': '', '$set': {'experience': {}} }
-      q['_id'] = user_doc['_id']
+      q = {
+        '$set':
+          {'experience': {}}
+      }
       #console.log "user_doc.['_id']", user_doc['_id']
       exp_obj = {}
       #copy existing tag exp
@@ -144,10 +149,12 @@ class ServerPost extends SharedPost
         exp = exp_obj[tag]
       exp_obj[tag] = reward + exp
       q['$set']['experience'] = exp_obj
-      Users.update( q )
-      console.log (q)
-      tron.test( 'check_if_user_exp', user_id, tag )
-      
+  
+      previous_exp = Users.findOne(user_id).experience[tag]
+      Users.update( {'_id': user_doc._id}, q )
+      tron.test( 'check_if_user_exp', user_id, tag, previous_exp )
+  
+    
 Meteor.startup( ->
   tron.test()
 )
