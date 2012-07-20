@@ -27,14 +27,5 @@ Meteor.startup( ->
 
   Backbone.history.start( pushState: true ) #!SUPPRESS no_headless_camel_case
   
-  tron.subscribe( ( fn, args ) ->
-      Meteor.call( 'update_client_tron', tron, fn, args )
-  )
   #tron.test()
-)
-
-Meteor.methods(
-  update_client_tron: ( server_tron, fn, args ) ->
-    tron.announce = server_tron.announce
-    console[fn](args)
 )

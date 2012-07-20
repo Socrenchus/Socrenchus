@@ -38,6 +38,7 @@ class GrandCentral
           #tron.test('check_client_post_doc', doc) #check
           result = new ServerPost( doc )
           args[1] = result
+          console.log args
         remove: (args...) =>
           error_list.push('not implemented yet')
       }

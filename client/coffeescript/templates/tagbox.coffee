@@ -105,7 +105,7 @@ _.extend( Template.tagbox,
     if tag_text != '' && not (tag_text in my_tags)
       q = {'$set': {}}
       q['$set']["my_tags.#{tag_text}"] = 1
-      tron.log(q)
+      #tron.log(q)
       Posts.update({ '_id': id}, q)
       @suggestions?.remove(tag_text)
     Meteor.flush()

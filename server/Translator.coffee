@@ -70,20 +70,20 @@ class ServerPost extends SharedPost
           @add_tag( tag, user_id )
   
   add_tag: ( tag, user_id ) =>
-    console.log( 'add_tag')
+    console.log( 'add_tag', tag, user_id)
     # check if already graduated
     already_graduated = @is_graduated( tag )
     # add the tag
-    @tags[tag].users.push( user_id )
+    @tags[tag].users.push( user_id ) 
     # add user's post experience to the tag
     @tags[tag].weight += @get_user_post_experience( user_id )
     # check if graduated
     graduated = @is_graduated( tag )
     if not already_graduated and graduated
-    #if true
+      #if true
       @award_points( @tags[tag].users, tag )
       user = Users.findOne('_id': user_id)
-      console.log 'the user:', user
+      #console.log 'the user:', user
       ###
       tron.test( ->
         #check if the user has some experience for the tags
@@ -93,9 +93,10 @@ class ServerPost extends SharedPost
           tron.error( "user does not have experience for #{tag} at the end of add_tag")
         
       )###
-    
-    tron.test( 'check_tagged', @, tag, user_id)
-    console.log( 'end add_tag:  ', this)
+    tron.log( 'before check add tag' )
+    tron.test( 'check_add_tag', @, tag, user_id)
+    tron.log( 'after check add tag' )
+    console.log( tron.subscriptions )
   
   
   is_graduated: ( tag ) =>
@@ -103,9 +104,9 @@ class ServerPost extends SharedPost
     return @tags[tag].weight > 1
   
   get_user_post_experience: ( user_id ) =>
-    # loop through tags in post (aka this)
     weights = {}
     weight_total = 0
+    # loop through tags in post (aka this)
     for tag, obj of @tags
       weights[tag] = obj.weight 
       weight_total += obj.weight
