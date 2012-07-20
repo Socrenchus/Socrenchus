@@ -27,5 +27,5 @@ Meteor.startup( ->
 
   Backbone.history.start( pushState: true ) #!SUPPRESS no_headless_camel_case
   
-  #tron.test()
+  tron.test()
 )

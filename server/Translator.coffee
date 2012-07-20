@@ -93,10 +93,7 @@ class ServerPost extends SharedPost
           tron.error( "user does not have experience for #{tag} at the end of add_tag")
         
       )###
-    tron.log( 'before check add tag' )
     tron.test( 'check_add_tag', @, tag, user_id)
-    tron.log( 'after check add tag' )
-    console.log( tron.subscriptions )
   
   
   is_graduated: ( tag ) =>
@@ -124,27 +121,32 @@ class ServerPost extends SharedPost
     else return 1 # TODO: Default to some function of experience
 
   award_points: ( users, tag ) =>
+    tron.log( 'award_points' )
     reward = @tags[tag].weight / users.length
-    #for user of Users.find( '_id': { '$in': users } )
+    tron.test( check_reward: ->
+      unless _.isNumber(reward) is number
+        tron.error( 'reward is not a number' )
+    )
     for user_id in users  
       user_doc = Users.findOne( user_id )
       # add reward to user for tag
       q = {'_id': '', '$set': {'experience': {}} }
       q['_id'] = user_doc['_id']
-      console.log "user_doc.['_id']", user_doc['_id']
+      #console.log "user_doc.['_id']", user_doc['_id']
       exp_obj = {}
       #copy existing tag exp
       for u_tag, exp of user_doc.experience
         #exp_obj['$set'][u_tag] = exp
         exp_obj[u_tag] = exp
-      #insert the new tag exp
-      exp_obj[tag] = reward
+      #the new tag exp, increment/insert
+      past_exp = 0
+      if exp_obj[tag]?
+        exp = exp_obj[tag]
+      exp_obj[tag] = reward + exp
       q['$set']['experience'] = exp_obj
-      ###
-      tron.test( ->
-        tron.log( 'the query', q )
-        tron.log( 'query returns', Users.update(q) )
-      )###
+      Users.update( q )
+      console.log (q)
+      tron.test( 'check_if_user_exp', user_id, tag )
       
 Meteor.startup( ->
   tron.test()
