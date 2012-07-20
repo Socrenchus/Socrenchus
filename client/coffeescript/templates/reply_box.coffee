@@ -65,6 +65,7 @@ _.extend( Template.reply_box,
           console.log('ID of new post: '+reply_id)
           Session.set('composing', undefined) #the clean up.
         event.stopImmediatePropagation()
+        Meteor.flush()
      
     #cancel a reply
     "click button[name='reply_cancel']": (event) ->
