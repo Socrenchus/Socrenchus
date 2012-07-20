@@ -19,3 +19,12 @@
 .ind {
   margin-left: 14px;
 }
+
+h1.group {
+  background-color: #ACE;
+  margin-bottom: -4px;
+  margin-top: 8px;
+}
+ul.group {
+  border-left: 4px solid #ACE;
+}
