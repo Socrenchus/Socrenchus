@@ -18,22 +18,28 @@
       </div>
     </div>
   </div>
-  <div class="alert alert-info">
-    {{> session_bar}}
-  </div>
   
-  <div id='main'>
-  
+  <div class="container">
     
-    <div id='page'>
-      <div id='page-header'></div>
-      <div id='page-body'>
-        {{> notifications}}
-        {{> popup_post }}
-        {{> reply_box }}
-        {{> stream}}
+    <div class="row">
+      <div class="span12">
+        <div class="alert alert-info">
+          {{> session_bar}}
+        </div>  
       </div>
-      <div id='page-footer'></div>
+    </div>
+    
+    <div id='main'>  
+      <div id='page'>
+        <div id='page-header'></div>
+        <div id='page-body'>
+          {{> notifications}}
+          {{> popup_post }}
+          {{> reply_box }}
+          {{> stream}}
+        </div>
+        <div id='page-footer'></div>
+      </div>
     </div>
   </div>
 </body>
