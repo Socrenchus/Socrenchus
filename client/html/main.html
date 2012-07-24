@@ -1,17 +1,30 @@
 <head>
+  <!--
   <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'>
   <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
   <link href='http://fonts.googleapis.com/css?family=Economica' rel='stylesheet' type='text/css'>
+  --><!--Pretend we don't need these for now.-->
   <title>Socrenchus</title>
 </head>
 
 <body>
-  <div id='main'>
-    <div id='instance-bar'>
-      <img id='instance-logo' src='/images/logo.png' onclick='location.href="/"' style="cursor:pointer">
-      <!--Inline style: this should go in css.-->
+  <!--http://twitter.github.com/bootstrap/components.html-->
+  <div class="navbar navbar-fixed-top"><!--TODO: Add 40px top padding to body in CSS-->
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="#">
+          Socrenchus
+        </a>
+      </div>
     </div>
+  </div>
+  <div class="alert alert-info">
     {{> session_bar}}
+  </div>
+  
+  <div id='main'>
+  
+    
     <div id='page'>
       <div id='page-header'></div>
       <div id='page-body'>
