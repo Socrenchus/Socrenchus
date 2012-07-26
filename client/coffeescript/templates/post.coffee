@@ -9,6 +9,11 @@ _.extend( Template.post,
     if Session.equals('suggested_tags', undefined)
       Session.set('suggested_tags', [])
     return ""
+    
+  avatar: ->
+    hash = hex_md5("#{@_id}@example.com")
+    return "http://www.gravatar.com/avatar/#{hash}"
+    
   content: ->
     escaped = Handlebars._escape(@content)
     showdown_converter = new Showdown.converter()

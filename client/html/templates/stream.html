@@ -1,20 +1,29 @@
 <template name="stream">
-  <div id='stream'>
-    {{#if new}}
-      <div id='new-assignment'></div>
+  <div class='stream'>
+    <div class='groups'>
+      {{#each groups}}
+        {{#if is_selected_group}}
+          <button name='group' class='{{name}}'>{{name}}</button>
+        {{else}}
+          <button name='group' class='{{name}}' style='color:green;'>{{name}}</button>
+        {{/if}}
+      {{/each}}
+    </div>
+    {{#if replies.group_chosen}}
+      <div class='posts'>
+      {{#each replies.replies}}
+        {{#both ../this}}
+            <button name='individual_post' class='{{cur}}' {{#if is_selected_post}}style='color:red;'{{/if}}>
+              <img src="{{avatar}}?s=24&d=identicon" />
+            </button>
+        {{/both}}
+      {{/each}}
+      </div>
     {{/if}}
-    <ul id='assignments' class='sortable ui-helper-reset'>
-      <!--http://handlebarsjs.com/#iteration-->
-      {{#if group_posts}}
-        {{#each groups}}
-          <li>{{> group}}</li>
-        {{/each}}
-      {{else}}
-        {{#each posts}}
-          <li>{{> post}}</li>
-        {{/each}}
-      {{/if}}
-    </ul>
-    <div id='footer'></div>
+    {{#if replies.reply_chosen}}
+      {{#with replies.reply}}
+        {{> post}}
+      {{/with}}
+    {{/if}}
   </div>
 </template>

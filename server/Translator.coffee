@@ -23,6 +23,9 @@ class ClientPost extends SharedPost
     user_id = Meteor.call('get_user_id')
     
     super(server)
+    
+    @my_tags = {}
+    @tags = {}
 
     for tag of server.tags
       @tags[tag] = server.tags[tag].weight
@@ -32,7 +35,8 @@ class ClientPost extends SharedPost
         
     for post in Posts.find( 'parent_id': server.parent_id ).fetch()
       for key of post.tags
-        @suggested_tags.push( key ) unless key in @my_tags
+        unless key in @my_tags || key in @suggested_tags
+          @suggested_tags.push( key )
 
 class ServerPost extends SharedPost
   constructor: ( client ) ->
@@ -64,5 +68,3 @@ class ServerPost extends SharedPost
         unless user_id in @tags[tag].users
           # apply the tag
           @tags[tag].users.push( user_id )
-    
-      
