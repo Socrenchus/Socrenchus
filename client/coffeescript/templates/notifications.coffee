@@ -40,31 +40,7 @@ _.extend( Template.notifications,
   
   timestamp: -> 
     timestamp = new Date(@[0].timestamp)
-    
-    #Get smart timestamp
-    timediff = (new Date()).getTime() - timestamp.getTime()
-    if timediff < (1000*60) #under one minute ago
-      smart = "#{Math.round(timediff / 1000)} seconds ago"
-    else if timediff < (1000*60*60) #under one hour ago
-      smart = "#{Math.round(timediff / 1000 / 60)} minutes ago"
-    else if timediff < (1000*60*60*24) #under one day ago
-      smart = "#{Math.round(timediff / 1000 / 60 / 60)} hours ago"
-    else if timediff < (1000*60*60*24*7) #under one week ago
-      days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-      smart = "on #{days[timestamp.getDay()]}"
-    else
-      smart = timestamp.toDateString()
-    
-    #Get full timestamp
-    ap = 'am'
-    hour = timestamp.getHours()
-    ap = 'pm' if hour > 11
-    hour = hour - 12 if hour > 12
-    hour = 12 if hour == 0
-    minutes = timestamp.getMinutes()
-    minutes = "0#{minutes}" if minutes < 10
-    full = "#{timestamp.toDateString()} at #{hour}:#{minutes}#{ap}"
-    return {smart: smart, full: full}
+    return {smart: timestamp.smart(), full: timestamp.readable()}
   
   show: -> Session.equals('notifications_state','open')
 
