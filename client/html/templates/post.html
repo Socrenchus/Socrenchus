@@ -1,6 +1,11 @@
 <!--Newpost, Created July 19, 2012-->
 <template name="post">
   {{init}}
+  {{#if parent.exists}}
+    {{#with parent.post}}
+      {{> post}}
+    {{/with}}
+  {{/if}}
   <div class="row">
     <div class="span6">
       <div class="well">

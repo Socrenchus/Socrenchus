@@ -1,4 +1,8 @@
 _.extend( Template.post,
+  parent: ->
+    parent = Posts.findOne(_id: @parent_id)
+    return {exists: parent?, post: parent}
+
   init: ->
     #function runs on initialization of post
     #takes care of dependencies

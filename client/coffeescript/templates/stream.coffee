@@ -1,7 +1,9 @@
 Session.set('streams', {})
+Session.set('test', {})
 
 _.extend( Template.stream,
-
+  all_replies: ->
+    return Posts.find( 'parent_id': @_id ).fetch()
   replies: ->
     reply = Posts.findOne('_id': Session.get('streams')[@_id]?.reply)
     group = Session.get('streams')[@_id]?.group
@@ -32,26 +34,24 @@ _.extend( Template.stream,
         groups[tag].push(post._id)
     return [] if groups.all.length == 0
     return ({name:k,posts:v,id:@_id} for k,v of groups)
-  
+
+  posts: ->
+    a = Session.get('test')[@id]
+    console.log(@id)
+    return a
+
   events: {
     "click button[name='individual_post']": (event) ->
       if not event.isPropagationStopped()
-        replies = Session.get('streams')
-        replies[@_id] ?= {}
-        replies[@_id].reply = event.target.className
-        Session.set('streams', _.clone(replies))
+        Router.navigate("#{@_id}", { trigger: true })
         event.stopPropagation()
     
     "click button[name='group']": (event) ->
       if not event.isPropagationStopped()
-        replies = Session.get('streams')
-        replies[@id] ?= {}
-        replies[@id].group = event.target.className
-        replies[@id].replies = @posts
-        replies[@id].reply = undefined
-        Session.set('streams', _.clone(replies))
+        test = Session.get('streams')
+        test[@id] ?= {}
+        test[@id][replies] = @posts
+        Session.set('streams', _.clone(test))
         event.stopPropagation()
   }
 )
-
-doop = -> console.log('DOOP')

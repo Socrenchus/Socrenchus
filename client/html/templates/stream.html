@@ -2,24 +2,16 @@
   <div class='stream'>
     <div class='groups'>
       {{#each groups}}
-        {{#if is_selected_group}}
-          <button name='group' class='{{name}}'>{{name}}</button>
-        {{else}}
-          <button name='group' class='{{name}}' style='color:green;'>{{name}}</button>
-        {{/if}}
+          <button name='group' class='{{name}}' {{#unless is_selected_group}}style='color:green;'{{/unless}}>
+            {{name}}
+          </button>
       {{/each}}
     </div>
-    {{#if replies.group_chosen}}
-      <div class='posts'>
+    <div class='posts'>
       {{#each replies.replies}}
-        {{#both ../this}}
-            <button name='individual_post' class='{{cur}}' {{#if is_selected_post}}style='color:red;'{{/if}}>
-              <img src="{{avatar}}?s=24&d=identicon" />
-            </button>
-        {{/both}}
+        <button name='individual_post' {{#if is_selected_post}}style='color:red;'{{/if}} />
       {{/each}}
-      </div>
-    {{/if}}
+    </div>
     {{#if replies.reply_chosen}}
       {{#with replies.reply}}
         {{> post}}
