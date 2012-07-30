@@ -1,16 +1,20 @@
 <template name="tagbox">
   <div class="tag_box">
     <div class="grad-tags">
-      {{#tags displayed_tags}}
-        {{this}}
-      {{/tags}}
+      {{#each displayed_tags}}
+        {{#both ../this}}<div class="tag{{classes}}">{{/both}}
+          {{this}}
+        </div>
+      {{/each}}
     </div>
     <div class="add-tags">
       {{#if tagging_post}}
         <div class="suggestions">
-          {{#tags suggested_tags}}
-             {{this}}
-          {{/tags}}
+          {{#each suggested_tags}}
+            {{#both ../this}}<div tabindex='0' class="tag suggested{{classes}}">{{/both}}
+              {{this}}
+            </div>
+          {{/each}}
         </div>
         <div class="tag-input">
           <textarea name="tag_text"></textarea>
