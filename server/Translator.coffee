@@ -24,9 +24,6 @@ class ClientPost extends SharedPost
     
     super(server)
     
-    @my_tags = {}
-    @tags = {}
-
     for tag of server.tags
       @tags[tag] = server.tags[tag].weight
       users = server.tags[tag].users
@@ -35,8 +32,7 @@ class ClientPost extends SharedPost
         
     for post in Posts.find( 'parent_id': server.parent_id ).fetch()
       for key of post.tags
-        unless key in @my_tags || key in @suggested_tags
-          @suggested_tags.push( key )
+        @suggested_tags.push( key ) unless key in @my_tags
 
 class ServerPost extends SharedPost
   constructor: ( client ) ->
