@@ -15,6 +15,7 @@ _.extend( Template.post,
     # NotImplementedYet
     cooked_showdown = raw_showdown
     #4. Links made ready for Oembed.
+    $("a").attr('class', 'oembed')
     
     return cooked_showdown
   identifier: -> @_id
