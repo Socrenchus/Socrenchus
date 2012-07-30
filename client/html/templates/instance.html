@@ -1,0 +1,12 @@
+<template name="instance">
+  <!--do all of this in one check on the server-->
+  <!--Check session variable-->
+  {{#if instance_is_set}}
+    <!--display instance-->
+  {{else}}
+    <!--instance not set in session var - don't attempt to load session.
+        create a new instance/attempt to set the session variable-->
+    {{set_instance}}
+    <!--instance session var should be set at this point...-->
+  {{/if}}
+</template>

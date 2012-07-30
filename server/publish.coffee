@@ -2,6 +2,10 @@ Users = new Meteor.Collection("users_proto")
 Posts = new Meteor.Collection("posts")
 Instances = new Meteor.Collection("instances")
 
+Meteor.publish("instance", (hostname) ->
+  return Instances.find( domain: hostname )
+)
+
 Meteor.publish("my_user", (user_id) ->
   return Users.find( _id: user_id )
 )

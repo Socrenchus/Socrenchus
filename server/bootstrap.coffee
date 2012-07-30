@@ -3,7 +3,7 @@ Meteor.startup( ->
     instances = [
       {
         admin_id: 0
-        domain: "www.socrench.us"
+        domain: "socrench.us"
         }
     ]
     
