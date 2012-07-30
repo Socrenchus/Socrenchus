@@ -34,5 +34,3 @@ Meteor.startup( ->
 Handlebars.registerHelper('both', (context, options) ->
   return options.fn(_.extend(context ? {}, {cur:@}))
 )
-
-Array::clone = -> this[..]
