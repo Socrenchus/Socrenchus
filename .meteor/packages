@@ -7,6 +7,6 @@ underscore
 backbone
 coffeescript
 jquery
-stylus
 showdown
 tron
+less
