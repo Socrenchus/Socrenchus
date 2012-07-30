@@ -1,12 +1,19 @@
 <template name="popup_post">
   {{#if show_post}}
-    <a id="dimmer_link" href="/"><div id="dimmer" class="dimmer"></div></a>
-    
+    <!--a id="dimmer_link" href="/"><div id="dimmer" class="dimmer"></div></a-->
     <div class="popup_post">
+      {{#each ancestors}}
+        BUTTS
+        {{> post}}
+      {{/each}}
       {{#with showing_post}}
+        THEPOST
         {{> post}} <!--TODO: scroll to this post-->
       {{/with}}
+      {{#each descendants}}
+        NOT BUTTS
+        {{> post}}
+      {{/each}}
     </div>
- 
   {{/if}}
 </template>

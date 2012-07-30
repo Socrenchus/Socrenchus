@@ -3,6 +3,26 @@ _.extend( Template.popup_post,
     not Session.equals('showing_post', undefined)
   showing_post: ->
     Session.get('showing_post')
+  ancestors: ->
+    ancestors = []
+    cur_post = Session.get('showing_post')
+    while cur_post?.parent_id?
+      cur_post = Posts.findOne( _id: cur_post.parent_id )
+      ancestors.unshift( cur_post )
+    console.log('ancestors:', ancestors)
+    return ancestors
+  
+  descendants: ->
+    descendants = []
+    cur_post = Session.get('showing_post')
+    cur_post = Posts.findOne( parent_id: cur_post._id )
+    while cur_post?
+      descendants.push(cur_post)
+      cur_post = Posts.findOne( parent_id: cur_post._id )
+    console.log('descendants:', descendants)
+    return descendants
+      
+    
   
   ###
   #   This event map provides a way to
