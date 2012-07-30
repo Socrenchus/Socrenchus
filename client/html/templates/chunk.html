@@ -1,14 +1,17 @@
 <template name="chunk">
-  {{init}}
   {{#if not_root}}
     <div>
       {{#each groups}}
-        <button name='group' class='{{this}}'>{{this}}</button>
+        {{#both ../this}}
+          <button name='group' class='{{cur}}'>{{cur}}</button>
+        {{/both}}
       {{/each}}
     </div>
     <div>
       {{#each vis_posts}}
-        <button name='post' class='{{this}}'>{{this}}</button>
+        {{#both ../this}}
+          <button name='post' class='{{cur}}'>{{cur}}</button>
+        {{/both}}
       {{/each}}
     </div>
   {{/if}}

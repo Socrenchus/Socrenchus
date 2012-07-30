@@ -1,7 +1,4 @@
 _.extend( Template.chunk,
-  init: ->
-    console.log('fuck meteor')
-    Session.set("reply_group_#{@parent_id}", {group: null, reply: @_id})
   not_root: -> @parent_id?
   groups: ->
     groups = ['all']
@@ -12,19 +9,31 @@ _.extend( Template.chunk,
     return groups
   
   vis_posts: ->
-    selected_group = Session.get("reply_group_#{@parent_id}")
-    if selected_group?
-      
-    else
-      return Posts.find( 'parent_id': @parent_id ).fetch()
+    console.log(@parent_id)
+    selected_group = Session.get("group_#{@parent_id}")
+    unless selected_group?
+      selected_group = 'all'
+    posts = []
+    for post in Posts.find( 'parent_id': @parent_id ).fetch()
+      posts.push(post._id) if selected_group == 'all' || selected_group of post.tags
+    return posts
   
   reply: ->
-    Posts.find( _id: Session.get("reply_group_#{@parent_id}").reply )
+    reply = Session.get("reply_#{@parent_id}")
+    if reply?
+      return Posts.findOne( _id: reply )
+    else
+      return @
   
   events: {
     "click button[name='group']": (event) ->
       if not event.isPropagationStopped()
-        Session.set("reply_group_#{@parent_id}", {group: event.target.className} )
+        Session.set("group_#{@parent_id}", event.target.className)
+        event.stopPropagation()
+    
+    "click button[name='post']": (event) ->
+      if not event.isPropagationStopped()
+        Session.set("reply_#{@parent_id}", event.target.className)
         event.stopPropagation()
   }
   
