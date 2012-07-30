@@ -1,3 +1,18 @@
 <template name="chunk">
-  
+  {{init}}
+  {{#if not_root}}
+    <div>
+      {{#each groups}}
+        <button name='group' class='{{this}}'>{{this}}</button>
+      {{/each}}
+    </div>
+    <div>
+      {{#each vis_posts}}
+        <button name='post' class='{{this}}'>{{this}}</button>
+      {{/each}}
+    </div>
+  {{/if}}
+  {{#with reply}}
+    {{> post}}
+  {{/with}}
 </template>

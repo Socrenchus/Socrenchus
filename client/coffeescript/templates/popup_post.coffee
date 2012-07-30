@@ -9,7 +9,6 @@ _.extend( Template.popup_post,
     while cur_post?.parent_id?
       cur_post = Posts.findOne( _id: cur_post.parent_id )
       ancestors.unshift( cur_post )
-    console.log('ancestors:', ancestors)
     return ancestors
   
   descendants: ->
@@ -19,9 +18,7 @@ _.extend( Template.popup_post,
     while cur_post?
       descendants.push(cur_post)
       cur_post = Posts.findOne( parent_id: cur_post._id )
-    console.log('descendants:', descendants)
     return descendants
-      
     
   
   ###
