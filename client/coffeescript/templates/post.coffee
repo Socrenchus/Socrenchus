@@ -7,15 +7,16 @@ _.extend( Template.post,
     4. Links are made ready for oembed.
     ###
     #1. @content contains the raw input.
-    raw_input = @content;
+    raw_input = @content
     #2. Convert raw input using Showdown.
     showdown_converter = new Showdown.converter()
     raw_showdown = showdown_converter.makeHtml(raw_input)
-    #3. Output subjected to whitelist.  
+    #3. Output subjected to whitelist.
     # NotImplementedYet
-    cooked_showdown = raw_showdown;
-    #4. Links made ready for Oembed.  
-    return post_content_html
+    cooked_showdown = raw_showdown
+    #4. Links made ready for Oembed.
+    
+    return cooked_showdown
   identifier: -> @_id
   link_href: ->
     return "/#{ @_id }"
