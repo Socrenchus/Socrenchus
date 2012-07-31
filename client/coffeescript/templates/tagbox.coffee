@@ -1,5 +1,4 @@
-Array.prototype.clone = ->
-  return this.slice(0)
+Array::clone = -> this[..]
 
 _.extend( Template.tagbox,
 

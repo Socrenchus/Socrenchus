@@ -1,5 +1,54 @@
 Meteor.startup( ->
   if Posts.find().count() is 0
+    notifs = [
+      {
+        user: 'user_id' #id
+        type: 0 # 0 || 1 || 2
+        post: 'post_id' #id
+        other_user: 'i_replied' #id
+        points: 0 #int
+        tag: '' #string
+        timestamp: new Date(2012, 6, 15, 5) #Date object
+      },
+      {
+        user: 'user_id' #id
+        type: 1 # 0 || 1 || 2
+        post: 'post_id' #id
+        other_user: '' #id
+        points: 1 #int
+        tag: 'my_tag' #string
+        timestamp: new Date() #Date object
+      },
+      {
+        user: 'user_id' #id
+        type: 2 # 0 || 1 || 2
+        post: 'post_id' #id
+        other_user: '' #id
+        points: 1 #int
+        tag: 'tag_on_my_post1' #string
+        timestamp: new Date() #Date object
+      },
+      {
+        user: 'user_id' #id
+        type: 2 # 0 || 1 || 2
+        post: 'post_id2' #id
+        other_user: '' #id
+        points: 1 #int
+        tag: 'tag_on_my_post' #string
+        timestamp: new Date() #Date object
+      },
+      {
+        user: 'user_id' #id
+        type: 2 # 0 || 1 || 2
+        post: 'post_id' #id
+        other_user: '' #id
+        points: 1 #int
+        tag: 'tag_on_my_post2' #string
+        timestamp: new Date() #Date object
+      }
+    ]
+    for notif in notifs
+      Notifications.insert(notif)
     instances = [
       {
         admin_id: 0
@@ -56,6 +105,9 @@ Meteor.startup( ->
             weight: 4
           }
         }
+        suggestions: [
+          'tag', 'tron', 'bootstrap', 'stuff'
+        ]
         votes: {
           'up': {
             users: [1, 2]
