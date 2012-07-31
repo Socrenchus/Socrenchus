@@ -5,7 +5,8 @@ Instances = new Meteor.Collection("instances")
 Meteor.publish("instance", (hostname) ->
   user_id = Session.get('user_id')
   #get instance id...
-  instance = Instances.findOne({domain: hostname})
+  instance_query = Instances.find({domain: hostname})
+  instance = instance_query.fetch()[0]
   if instance?
     tron.log('instance id: ', instance._id)
     Session.set('instance_id', instance._id)
@@ -37,12 +38,12 @@ Meteor.publish("instance", (hostname) ->
       tron.log('create_instance: Creating new instance')
       #Insert new instance info in db...
       id = Instances.insert({
-        admin_id: user_id,
+        admin_id: current_user_id,
         domain: domain
       })
       #...and then set the instance_id session variable to the new instance
       Session.set('instance_id', id)
-  return Instances.find( domain: hostname )
+  return instance_query
 )
 
 Meteor.publish("my_user", (user_id) ->
