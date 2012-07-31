@@ -17,12 +17,11 @@ _.extend( Template.post,
     #4. Links made ready for Oembed.
     #Need to add a way to add "oembed" class to all links.  
     #NotImplementedYet
-    oembedded = cooked_showdown.replace(/(\s|>|^)(https?:[^\s<]*)/igm,'$1<div><a href="$2" class="oembed">$2</a></div>')
-    oembedded = oembedded.replace(/(\s|>|^)(mailto:[^\s<]*)/igm,'$1<div><a href="$2" class="oembed">$2</a></div>')
-    return oembedded
-  run_oembed: ->
+    oembedded = cooked_showdown.replace('<a', "<a class='oembed'") #adds oembed classes to all links
+    oembedded = oembedded.replace(/(\s|>|^)(https?:[^\s<]*)/igm,'$1<div><a href="$2" class="oembed">$2</a></div>')
+    oembedded = oembedded.replace(/(\s|>|^)(mailto:[^\s<]*)/igm,'$1<div><a href="$2" class="oembed">$2</a></div>') 
     Meteor.defer( -> $('a.oembed').oembed().removeClass('oembed') )
-    return "";
+    return oembedded
   identifier: -> @_id
   link_href: ->
     return "/#{ @_id }"
