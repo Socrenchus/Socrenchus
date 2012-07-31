@@ -3,10 +3,10 @@
 # 'meteor add' and 'meteor remove' will edit this file for you,
 # but you can also edit it by hand.
 
-coffeescript
-handlebars
 underscore
 backbone
+coffeescript
+jquery
 stylus
 showdown
-jquery
+tron

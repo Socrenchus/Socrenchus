@@ -2,11 +2,13 @@
 Posts = new Meteor.Collection("posts")
 Users = new Meteor.Collection("users_proto")
 Notifications = new Meteor.Collection("notifications")
+Instances = new Meteor.Collection("instances")
 
 # Subscriptions
 Meteor.subscribe( "my_notifs" )
 Meteor.subscribe( "my_posts" )
 Meteor.subscribe( "assigned_posts" )
+Meteor.subscribe( 'instance', window.location.host )
 
 # Backbone router
 class Router extends Backbone.Router
