@@ -9,7 +9,6 @@ Meteor.publish("instance", (hostname) ->
   if instance?
     tron.log('instance id: ', instance._id)
     Session.set('instance_id', instance._id)
-    instance_exists = true
   else
     tron.log("Method get_instance_id: instance \"#{hostname}\" does not exist")
     #confirm instance dns...
