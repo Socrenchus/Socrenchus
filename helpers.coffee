@@ -9,7 +9,7 @@ Clone an array
 Array::clone = -> this[..]
 
 ###
-Pass a string 'trigger' where the callback should go and this 
+Pass a string 'trigger' where the callback should go and this
 should wait for the callback and returning its arguments.
 ###
 Function::wait = (args...) ->
