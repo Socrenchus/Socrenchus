@@ -2,7 +2,7 @@
   <div class="tag_box">
     <div class="grad-tags">
       {{#each displayed_tags}}
-        {{#both ../this}}<div class="tag{{classes}}">{{/both}}
+        {{#both ../this}}<div class="{{classes}}">{{/both}}
           {{this}}
         </div>
       {{/each}}
@@ -11,7 +11,7 @@
       {{#if tagging_post}}
         <div class="suggestions">
           {{#each suggested_tags}}
-            {{#both ../this}}<div tabindex='0' class="tag suggested{{classes}}">{{/both}}
+            {{#both ../this}}<div tabindex='0' class="{{classes}} suggested">{{/both}}
               {{this}}
             </div>
           {{/each}}

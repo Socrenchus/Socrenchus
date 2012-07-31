@@ -1,9 +1,10 @@
 _.extend( Template.tagbox,
   classes: ->
-    classes = ''
-    classes += ' grad' if @tags[@cur]?
-    classes += ' mytag' if @cur in @my_tags
-    return classes
+    classes = ['tag']
+    classes.push('grad') if @tags[@cur]?
+    classes.push('mytag') if @cur in @my_tags
+    formatted_classes = classes.join(' ')
+    return formatted_classes
 
   displayed_tags: ->
     visible = (tag for tag of @tags)
