@@ -15,9 +15,14 @@ _.extend( Template.post,
     # NotImplementedYet
     cooked_showdown = raw_showdown
     #4. Links made ready for Oembed.
-    $("a").attr('class', 'oembed')
-    
-    return cooked_showdown
+    #Need to add a way to add "oembed" class to all links.  
+    #NotImplementedYet
+    oembedded = cooked_showdown.replace(/(\s|>|^)(https?:[^\s<]*)/igm,'$1<div><a href="$2" class="oembed">$2</a></div>')
+    oembedded = oembedded.replace(/(\s|>|^)(mailto:[^\s<]*)/igm,'$1<div><a href="$2" class="oembed">$2</a></div>')
+    return oembedded
+  run_oembed: ->
+    Meteor.defer( -> $('a.oembed').oembed().removeClass('oembed') )
+    return "";
   identifier: -> @_id
   link_href: ->
     return "/#{ @_id }"
