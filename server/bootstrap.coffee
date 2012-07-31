@@ -9,7 +9,7 @@ Meteor.startup( ->
     
     users = [
       {
-        email: 'test0@example.com'
+        email: 'test0@localhost'
         experience: {
           'tag': 2
           'tag2': 3
@@ -20,14 +20,14 @@ Meteor.startup( ->
         }
       },
       {
-        email: 'test1@example.com'
+        email: 'test1@localhost'
         experience: {
           'one': 3
           'two': 3
         }
       },
       {
-        email: 'test2@example.com'
+        email: 'test2@localhost'
         experience: {
           'two': 7
         }

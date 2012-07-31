@@ -3,7 +3,7 @@ _.extend( Template.instance,
     instance = Session.get('instance_id')
     if instance? and ![null]
       return true
-      
+  ###
   #perform checks, 
   set_instance: ->
     current_url = window.location.host
@@ -14,4 +14,12 @@ _.extend( Template.instance,
       else tron.log('One or more checks failed - cannot create new instance')
     )
   
+  check_instance: ->
+    Meteor.call('get_instance_id', current_url, (error, instance_id) ->
+      if instance_id? #...and then set the session variable 
+        Session.set('instance_id', instance_id)
+      else
+        tron.log('Invalid URL or URL not in db')
+    )
+    ###
 )

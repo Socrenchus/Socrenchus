@@ -50,24 +50,62 @@ Meteor.methods(
       return instance._id
     else
       tron.log("Method get_instance_id: instance \"#{url}\" does not exist")
-
+    
+  create_instance: (args...) ->
+    url = args[0]
+    user_id = args[1]
+    #get instance id...
+    instance = Instances.findOne({domain: url})
+    if instance?
+      tron.log 'instance id: ', instance._id
+      Session.set('instance_id', instance._id)
+      instance_exists = true
+    else
+      tron.log("Method get_instance_id: instance \"#{url}\" does not exist")
+      instance_exists = false
+    #end
+    if !instance_exists
+      #confirm instance dns...
+      dns_match = false
+      socrenchus_ip = '192.168.1.110' #<-private ip; will eventually change...
+      #TODO: Perform DNS Lookup on supplied URL, compare to socrenchus IP addr
+      #         still have no idea how to do this...
+      if true
+        dns_match = true
+      else
+        tron.log('DNS confirmation failed')
+        dns_match = false
+      #end
+      #check email domain
+      email_match = false
+      if dns_match
+        current_user_id = Meteor.call('get_user_id')
+        email_addr = Users.findOne( _id: current_user_id ).email
+        [host, domain] = email_addr.split("@")
+        if domain is url
+          email_match = true #success - email address matches url
+        else
+          tron.log('Email domain does not match requested instance domain')
+          #should return false #mismatch - don't allow
+          email_match = false #temporary for localhost use
+      #end
+      if email_match
+        tron.log('create_instance: Creating new instance')
+        #Insert new instance info in db...
+        Instances.insert({
+          admin_id: user_id,
+          domain: domain
+        })
+        #...and then set the instance_id session variable to the new instance
+        Meteor.call('get_instance_id', url, (error, instance_id) ->
+          Session.set('instance_id', instance_id)
+        )
+      
+  #don't remember why I needed this...
   get_all_instance_domains: ->
     all_instances = Instances.find().fetch()
     for instance in all_instances
       null
-    
-  create_instance: (args...) ->
-    domain = args[0]
-    user_id = args[1]
-    tron.log('create_instance: Creating new instance')
-    #Insert new instance info in db...
-    Instances.insert({
-      admin_id: user_id,
-      domain: domain
-    })
-    #...and then set the instance_id session variable to the new instance
-    Meteor.call('get_instance_id', current_url, (error, instance_id) ->
-      Session.set('instance_id', instance_id)
-    )
+
 )
 
