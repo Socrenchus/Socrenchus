@@ -29,12 +29,10 @@ class Tests
     #and tag it again. this should cause the tag to graduate.
     client_post = new ClientPost( server_post )
     client_post.my_tags = { '_gen' : 1 }
-    console.log server_post
   
   
   #check if a tag/user_id exists for a given post
   check_add_tag: (server_post, tag, user_id) ->
-    tron.log 'check_add_tag'
     if false
       throw 'check_add_tag manual fail'
     #check if tag is present for post
@@ -46,7 +44,6 @@ class Tests
   
   #check if user has exp for a tag
   check_if_user_exp: (user_id, tag, previous_exp) ->
-    #tron.log 'check_if_user_exp'
     tron_user = Users.findOne( user_id )
     if false
       throw 'check if user exp, manual error'
@@ -57,15 +54,12 @@ class Tests
   
   #check if a post inserted properly - works
   check_post_insert: ( id, expected_content ) ->
-    tron.log 'check_post_insert'
     post = Posts.findOne({'_id': id, 'content': expected_content})
     unless post?
       throw( 'post not found in mongo' )
       
   #check if points were awarded properly
   check_award_points: ( tag, user ) ->
-    tron.error 'check_award_points', tag, user
-    tron.error 'exp.keys:', _.keys(user.experience) 
     unless tag in _.keys( user.experience ) && user.experience[tag]?
     #unless true
       throw ( "user does not have experience for #{tag} at the end of add_tag")

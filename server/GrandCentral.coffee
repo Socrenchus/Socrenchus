@@ -25,7 +25,6 @@ class GrandCentral
         insert: =>
           args[0] = new ServerPost( args[0] )
         update: =>
-          console.log( 'posts/update' )
           [selector, modifier] = args
           doc = Posts.findOne( selector._id )
           doc = new ClientPost( doc )

@@ -36,8 +36,6 @@ class ClientPost extends SharedPost
 
 class ServerPost extends SharedPost
   constructor: ( client ) ->
-    console.log 'serverPost costructor'
-
     # define the server schema
     _.extend( @,
       instance_id: ''
@@ -69,7 +67,6 @@ class ServerPost extends SharedPost
           @add_tag( tag, user_id )
   
   add_tag: ( tag, user_id ) =>
-    console.log( 'add_tag', tag, user_id)
     # check if already graduated
     already_graduated = @is_graduated( tag )
     # add the tag
@@ -93,7 +90,6 @@ class ServerPost extends SharedPost
     return @tags[tag].weight > 1
   
   get_user_post_experience: ( user_id ) =>
-    console.log 'get_user_post_exp', user_id
     weights = {}
     weight_total = 0
     # loop through tags in post (aka this)
@@ -118,7 +114,6 @@ class ServerPost extends SharedPost
     else return 1 # TODO: Default to some function of experience
   
   award_points: ( users, tag ) =>
-    console.log('award_points')
     reward = @tags[tag].weight / users.length
     tron.test( 'check_number', reward )
     
@@ -141,7 +136,7 @@ class ServerPost extends SharedPost
         past_exp = exp_obj[tag]
       exp_obj[tag] = reward + past_exp
       q['$set']['experience'] = exp_obj
-      console.log 'the query:', q
+      #console.log 'the query:', q
       #previous_exp = Users.findOne(user_id).experience[tag]
       Users.update( {'_id': user_doc._id}, q )
       tron.test( 'check_if_user_exp', user_id, tag, past_exp )
