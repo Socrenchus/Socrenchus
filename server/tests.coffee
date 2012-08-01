@@ -3,7 +3,7 @@ class Tests
   try_nothing: ->
     tron.info( 'a dummy try function' )
   
-  ###
+  
   #try creating and updating a post.
   try_server_post: ->
 
@@ -30,7 +30,7 @@ class Tests
     client_post = new ClientPost( server_post )
     client_post.my_tags = { '_gen' : 1 }
     console.log server_post
-  ###
+  
   
   #check if a tag/user_id exists for a given post
   check_add_tag: (server_post, tag, user_id) ->
@@ -61,5 +61,17 @@ class Tests
     post = Posts.findOne({'_id': id, 'content': expected_content})
     unless post?
       throw( 'post not found in mongo' )
-  
+      
+  #check if points were awarded properly
+  check_award_points: ( tag, user ) ->
+    tron.error 'check_award_points', tag, user
+    tron.error 'exp.keys:', _.keys(user.experience) 
+    unless tag in _.keys( user.experience ) && user.experience[tag]?
+    #unless true
+      throw ( "user does not have experience for #{tag} at the end of add_tag")
+  #check if a variable is a number
+  check_number: ( num ) ->
+    unless _.isNumber( num )
+      throw( 'not a number' )
+
 tron.test( new Tests() )

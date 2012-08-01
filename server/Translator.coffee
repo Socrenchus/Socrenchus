@@ -84,14 +84,7 @@ class ServerPost extends SharedPost
       @award_points( @tags[tag].users, tag )
       user = Users.findOne('_id': user_id)
       #console.log 'the user:', user
-      tron.test( ->
-        #check if the user has some experience for the tags
-        #tron.info( 'after award_points user:', user )
-        unless tag in _.keys( user.experience ) && user.experience[tag].weight?
-        #unless true
-          tron.error( "user does not have experience for #{tag} at the end of add_tag")
-        
-      )
+      tron.test( 'check_award_points', tag, user ) 
     tron.test( 'check_add_tag', @, tag, user_id)
   
   
@@ -127,5 +120,32 @@ class ServerPost extends SharedPost
   award_points: ( users, tag ) =>
     console.log('award_points')
     reward = @tags[tag].weight / users.length
+    tron.test( 'check_number', reward )
     
+    for user_id in users  
+      user_doc = Users.findOne( user_id )
+      # add reward to user for tag
+      q = {
+        '$set':
+          {'experience': {}}
+      }
+      #console.log "user_doc.['_id']", user_doc['_id']
+      exp_obj = {}
+      #copy existing tag exp
+      for u_tag, exp of user_doc.experience
+        #exp_obj['$set'][u_tag] = exp
+        exp_obj[u_tag] = exp
+      #the new tag exp, increment/insert
+      past_exp = 0
+      if exp_obj[tag]?
+        past_exp = exp_obj[tag]
+      exp_obj[tag] = reward + past_exp
+      q['$set']['experience'] = exp_obj
+      console.log 'the query:', q
+      #previous_exp = Users.findOne(user_id).experience[tag]
+      Users.update( {'_id': user_doc._id}, q )
+      tron.test( 'check_if_user_exp', user_id, tag, past_exp )
       
+Meteor.startup( ->
+  tron.test()
+)
