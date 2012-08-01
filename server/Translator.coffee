@@ -62,7 +62,7 @@ class ServerPost extends SharedPost
       _.extend( @, post )
 
       # check if user added a new tag
-      for tag of client.my_tags
+      for tag, weight of client.my_tags
         @tags[tag] ?= { weight: 0 }
         @tags[tag].users ?= []
         unless user_id in @tags[tag].users
@@ -79,20 +79,20 @@ class ServerPost extends SharedPost
     @tags[tag].weight += @get_user_post_experience( user_id )
     # check if graduated
     graduated = @is_graduated( tag )
-    if not already_graduated and graduated
+    if true
+    #if not already_graduated and graduated
       #if true
       @award_points( @tags[tag].users, tag )
       user = Users.findOne('_id': user_id)
       #console.log 'the user:', user
-      ###
       tron.test( ->
         #check if the user has some experience for the tags
-        tron.info( 'after award_points user:', user )
+        #tron.info( 'after award_points user:', user )
         unless tag in _.keys( user.experience ) && user.experience[tag].weight?
         #unless true
           tron.error( "user does not have experience for #{tag} at the end of add_tag")
         
-      )###
+      )
     tron.test( 'check_add_tag', @, tag, user_id)
   
   
@@ -101,6 +101,7 @@ class ServerPost extends SharedPost
     return @tags[tag].weight > 1
   
   get_user_post_experience: ( user_id ) =>
+    console.log 'get_user_post_exp', user_id
     weights = {}
     weight_total = 0
     # loop through tags in post (aka this)
@@ -115,19 +116,23 @@ class ServerPost extends SharedPost
         user = Users.findOne('_id': user_id)
         # multiply normalize tag weight by user's tag experience
         # sum all those up
-        users_post_experience += weights[tag] * user.experience[tag]
+        if user.experience[tag]?
+          user_exp = user.experience[tag]
+        else
+          user_exp = 0  #defaults to 0
+        users_post_experience += weights[tag] * user_exp
       # return the sum
       return users_post_experience
     else return 1 # TODO: Default to some function of experience
   
   award_points: ( users, tag ) =>
-    tron.log( 'award_points' )
+    console.log('award_points')
     reward = @tags[tag].weight / users.length
     
     tron.test( check_reward: ->
       console.log 'checking reward'
-      unless _.isNumber(reward) is number
-        tron.error( 'reward is not a number' )
+      unless _.isNumber(reward)
+        throw( 'reward is not a number' )
     )
     
     for user_id in users  
@@ -146,13 +151,13 @@ class ServerPost extends SharedPost
       #the new tag exp, increment/insert
       past_exp = 0
       if exp_obj[tag]?
-        exp = exp_obj[tag]
-      exp_obj[tag] = reward + exp
+        past_exp = exp_obj[tag]
+      exp_obj[tag] = reward + past_exp
       q['$set']['experience'] = exp_obj
-  
-      previous_exp = Users.findOne(user_id).experience[tag]
+      console.log 'the query:', q
+      #previous_exp = Users.findOne(user_id).experience[tag]
       Users.update( {'_id': user_doc._id}, q )
-      tron.test( 'check_if_user_exp', user_id, tag, previous_exp )
+      tron.test( 'check_if_user_exp', user_id, tag, past_exp )
   
     
 Meteor.startup( ->
