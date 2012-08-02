@@ -1,0 +1,26 @@
+<template name="chunk">
+  {{#if not_root}}
+    <div>
+      {{#each groups}}
+        {{#both ../this}}
+          <button name='group' class='{{cur}}'>{{cur}}</button>
+        {{/both}}
+      {{/each}}
+    </div>
+    <div>
+      {{#each vis_posts}}
+        {{#both ../this}}
+          <button name='post' class='{{cur}}'>{{cur}}</button>
+        {{/both}}
+      {{/each}}
+    </div>
+  {{/if}}
+  
+  {{> post}}
+  
+  {{#if reply.exists}}
+    {{#with reply.post}}
+      {{> chunk}}
+    {{/with}}
+  {{/if}}
+</template>

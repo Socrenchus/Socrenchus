@@ -1,12 +1,9 @@
 <template name="popup_post">
   {{#if show_post}}
-    <a id="dimmer_link" href="/"><div id="dimmer" class="dimmer"></div></a>
-    
     <div class="popup_post">
-      {{#with showing_post}} 
-        {{> post}}
+      {{#with root_post}}
+        {{> chunk}}
       {{/with}}
     </div>
- 
   {{/if}}
 </template>
