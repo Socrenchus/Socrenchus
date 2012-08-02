@@ -2,21 +2,21 @@
 <template name="post">
   {{init}}
   <div class="row">
-    <div class="span6">
+    <div class="span10 offset1">
       <div class="well">
         <div class="row"><!--Post head-->
-          <div class="span6">
+          <div class="span10">
             <span class="label"><i class="icon-user"></i> {{author_short}}</span>
             <span class="label"><i class="icon-time"></i> {x hours ago}</span><!--Make this switch to icon-calendar when it's older.-->
           </div>
         </div>
         <div class="row"><!--Post body-->
-          <div class="span6">
+          <div class="span10">
             {{{content}}}
           </div>
         </div>
         <div class="row"><!--Post foot-->
-          <div class="span6">
+          <div class="span10">
             <span class="label reply_count">{<em>x</em> replies.}</span>
             <button class="btn" name="reply">Reply</button>
           </div>  
