@@ -1,7 +1,24 @@
-.post {
+.post-top {
   border: 1px solid #000000;
+  border-bottom: 0;
   background-color: #ffffff;
+  padding: 2px;
 }
+.post-middle {
+  border: 1px solid #000000;
+  border-top: 0;
+  border-bottom: 0;
+  background-color: #ffffff;
+  padding: 2px;
+}
+.post-bottom {
+  border: 1px solid #000000;
+  border-top: 0;
+  background-color: #ffffff;
+  padding: 2px;
+}
+
+
 
 .panel.selected {
   color: blue; /*not permanent, just an indicator temporarily*/  

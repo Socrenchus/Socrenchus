@@ -3,20 +3,24 @@
   {{init}}
   <div class="row">
     <div class="span10 offset1">
-      <div class="post">
-        <div class="row"><!--Post head-->
-          <div class="span10">
+      <div class="row"><!--Post head-->
+        <div class="span10">
+          <div class="post-top">
             <span><i class="icon-user"></i> {{author_short}}</span>
             <span class="pull-right"><i class="icon-time"></i> {x hours ago}</span><!--Make this switch to icon-calendar when it's older.-->
           </div>
         </div>
-        <div class="row"><!--Post body-->
-          <div class="span10">
+      </div>
+      <div class="row"><!--Post body-->
+        <div class="span10">
+          <div class="post-middle">
             {{{content}}}
           </div>
         </div>
-        <div class="row"><!--Post foot-->
-          <div class="span10">
+      </div>
+      <div class="row"><!--Post foot-->
+        <div class="span10">
+          <div class="post-bottom">
             <span class="reply_count">{<em>x</em> replies.}</span>
             <button class="btn btn-mini pull-right" name="reply">Reply</button>
           </div>
