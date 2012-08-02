@@ -1,7 +1,8 @@
 _.extend( Template.chunk,
   not_root: -> @parent_id?
   groups: ->
-    groups = ['all']
+    #groups = ['all'] #Not needed, this is added in through html in another group.
+    groups = []
     for post in Posts.find( 'parent_id': @parent_id ).fetch()
       tags = (tag for tag of post.tags)
       for tag in tags
