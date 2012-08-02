@@ -6,8 +6,8 @@
       <div class="post">
         <div class="row"><!--Post head-->
           <div class="span10">
-            <span class="label"><i class="icon-user"></i> {{author_short}}</span>
-            <span class="label"><i class="icon-time"></i> {x hours ago}</span><!--Make this switch to icon-calendar when it's older.-->
+            <span><i class="icon-user"></i> {{author_short}}</span>
+            <span class="pull-right"><i class="icon-time"></i> {x hours ago}</span><!--Make this switch to icon-calendar when it's older.-->
           </div>
         </div>
         <div class="row"><!--Post body-->
@@ -17,20 +17,21 @@
         </div>
         <div class="row"><!--Post foot-->
           <div class="span10">
-            <span class="label reply_count">{<em>x</em> replies.}</span>
-            <button class="btn" name="reply">Reply</button>
-          </div>  
+            <span class="reply_count">{<em>x</em> replies.}</span>
+            <button class="btn btn-mini pull-right" name="reply">Reply</button>
+          </div>
         </div>
       </div>
     </div>
     
   </div>
   
-  
-  
-
   {{#if composing_reply}}
-    {{> reply_box}}
+    <div class="row">
+      <div class="span10 offset1">
+        {{> reply_box}}
+      </div>
+    </div>
   {{/if}}
   
 </template>
