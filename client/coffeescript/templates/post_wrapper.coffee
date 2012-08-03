@@ -27,7 +27,7 @@ _.extend( Template.post_wrapper,
     #this_post = Posts.findOne( _id: @cur )
     #return this_post.author_id
     
-    return ":)"
+    return "@"
     
   email_hash: ->
     #When the db is ready...
