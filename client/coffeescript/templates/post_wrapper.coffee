@@ -16,10 +16,6 @@ _.extend( Template.post_wrapper,
     for post in Posts.find( 'parent_id': @parent_id ).fetch()
       if selected_group == 'all' || selected_group of post.tags
         posts.push(post._id)
-    ###If the currently showing post is not in this group, show one that is
-    if posts.length > 0
-      Session.set("reply_#{@_id}", posts[0])
-    ###
     return posts
   
   reply: ->
