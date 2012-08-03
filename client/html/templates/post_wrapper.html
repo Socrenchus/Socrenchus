@@ -1,4 +1,4 @@
-<template name="chunk">
+<template name="post_wrapper">
   {{#if not_root}}
       <div class="row">
       <div class="span10 offset1">
@@ -14,7 +14,7 @@
         </div>
         <div class="row">
           <div class="span10">
-            {{#each vis_posts}}
+            {{#each group_posts}}
               {{#both ../this}}
                 <button name='post' class='{{cur}}'><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=30&d=identicon" />{{author_email}}</button>
               {{/both}}
@@ -29,7 +29,7 @@
   
   {{#if reply.exists}}
     {{#with reply.post}}
-      {{> chunk}}
+      {{> post_wrapper}}
     {{/with}}
   {{/if}}
 </template>

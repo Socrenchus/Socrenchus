@@ -1,4 +1,4 @@
-_.extend( Template.chunk,
+_.extend( Template.post_wrapper,
   not_root: -> @parent_id?
   groups: ->
     #groups = ['all']
@@ -9,7 +9,7 @@ _.extend( Template.chunk,
         groups.push(tag) unless tag in groups
     return groups
   
-  vis_posts: ->
+  group_posts: ->
     selected_group = Session.get("group_#{@parent_id}")
     unless selected_group?
       selected_group = 'all'
