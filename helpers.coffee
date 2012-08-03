@@ -4,7 +4,12 @@ Remove an item e from an array.
 Array::remove = (e) -> @[t..t] = [] if (t = @indexOf(e)) > -1
 
 ###
-Pass a string 'trigger' where the callback should go and this 
+Clone an array
+###
+Array::clone = -> this[..]
+
+###
+Pass a string 'trigger' where the callback should go and this
 should wait for the callback and returning its arguments.
 ###
 Function::wait = (args...) ->
