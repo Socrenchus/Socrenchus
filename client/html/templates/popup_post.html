@@ -1,15 +1,9 @@
 <template name="popup_post">
   {{#if show_post}}
     <div class="popup_post">
-      {{#each ancestors}}
+      {{#with root_post}}
         {{> chunk}}
-      {{/each}}
-      {{#with showing_post}}
-        {{> chunk}} <!--TODO: scroll to this post-->
       {{/with}}
-      {{#each descendants}}
-        {{> chunk}}
-      {{/each}}
     </div>
   {{/if}}
 </template>

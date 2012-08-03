@@ -24,7 +24,12 @@
       </div>
     </div>
   {{/if}}
-  {{#with reply}}
-    {{> post}}
-  {{/with}}
+  
+  {{> post}}
+  
+  {{#if reply.exists}}
+    {{#with reply.post}}
+      {{> chunk}}
+    {{/with}}
+  {{/if}}
 </template>
