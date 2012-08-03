@@ -24,6 +24,8 @@ _.extend( Template.chunk,
       post = Posts.findOne( _id: reply )
     else
       post = Posts.findOne( parent_id: @_id )
+      if post?
+        Session.set("reply_#{@_id}", post._id)
     
     return {exists: post?, post: post}
   

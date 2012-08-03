@@ -8,10 +8,10 @@ Meteor.publish("instance", (hostname) ->
   instance_query = Instances.find({domain: hostname})
   instance = instance_query.fetch()[0]
   if instance?
-    tron.log('instance id: ', instance._id)
+    #tron.log('instance id: ', instance._id)
     Session.set('instance_id', instance._id)
   else
-    tron.log("Method get_instance_id: instance \"#{hostname}\" does not exist")
+    #tron.log("Method get_instance_id: instance \"#{hostname}\" does not exist")
     #confirm instance dns...
     dns_match = false
     socrenchus_ip = '192.168.1.110' #<-private ip; will eventually change...
@@ -20,7 +20,7 @@ Meteor.publish("instance", (hostname) ->
     if true
       dns_match = true
     else
-      tron.log('DNS confirmation failed')
+      #tron.log('DNS confirmation failed')
       dns_match = false
     #check email domain
     email_match = false
@@ -31,11 +31,11 @@ Meteor.publish("instance", (hostname) ->
       if domain is hostname
         email_match = true #success - email address matches hostname
       else
-        tron.log('Email domain does not match requested instance domain')
+        #tron.log('Email domain does not match requested instance domain')
         email_match = false #mismatch - don't allow
     #create new instance
     if email_match
-      tron.log('create_instance: Creating new instance')
+      #tron.log('create_instance: Creating new instance')
       #Insert new instance info in db...
       id = Instances.insert({
         admin_id: current_user_id,
