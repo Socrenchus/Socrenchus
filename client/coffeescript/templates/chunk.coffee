@@ -19,6 +19,10 @@ _.extend( Template.chunk,
         posts.push(post._id)
     return posts
   
+  author_of_vis_post: ->
+    this_post = Posts.findOne( _id: @cur )
+    return this_post.author_id
+  
   reply: ->
     reply = Session.get("reply_#{@_id}")
     if reply?
