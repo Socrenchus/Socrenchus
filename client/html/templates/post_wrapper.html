@@ -4,10 +4,10 @@
       <div class="span10 offset1">
         <div class="row">
           <div class="span10">
-            <button name='group' class='all'>All<br />Posts</button>
+            <button name='all' class='group'>All<br />Posts</button>
             {{#each groups}}
               {{#both ../this}}
-                <button name='group' class='{{cur}}'>Tagged as<br />'{{cur}}'</button>
+                <button name='{{cur}}' class='group {{cur}}'>Tagged as<br />'{{cur}}'</button>
               {{/both}}
             {{/each}}
           </div>
@@ -16,7 +16,7 @@
           <div class="span10">
             {{#each group_posts}}
               {{#both ../this}}
-                <button name='post' class='{{cur}}'><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=30&d=identicon" />{{author_email}}</button>
+                <button name='{{cur}}' class='post {{cur}}'><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=30&d=identicon" />{{author_email}}</button>
               {{/both}}
             {{/each}}
           </div>

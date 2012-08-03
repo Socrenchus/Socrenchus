@@ -46,17 +46,17 @@ _.extend( Template.post_wrapper,
     return {exists: post?, post: post}
   
   events: {
-    "click button[name='group']": (event) ->
+    "click button.group": (event) ->
       if not event.isPropagationStopped()
-        Session.set("group_#{@parent_id}", event.target.className)
+        Session.set("group_#{@parent_id}", event.target.getAttribute('name'))
         event.stopPropagation()
     
-    "click button[name='post']": (event) ->
+    "click button.post": (event) ->
       if not event.isPropagationStopped()
         elem = event.target
         while(elem.nodeName.toLowerCase() isnt 'button')
           elem = elem.parentNode #bubble up
-        Session.set("reply_#{@parent_id}", elem.className)
+        Session.set("reply_#{@parent_id}", elem.getAttribute('name'))
         event.stopPropagation()
           
   }
