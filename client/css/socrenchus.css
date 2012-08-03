@@ -21,3 +21,10 @@
 .panel.selected {
   color: blue; /*not permanent, just an indicator temporarily*/  
 }
+
+.nodrag {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  /* this will work for QtWebKit in future */
+  -webkit-user-drag: none;
+}
