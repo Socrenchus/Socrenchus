@@ -8,7 +8,7 @@ _.extend( Template.post_wrapper,
         groups.push(tag) unless tag in groups
     return groups
   
-  vis_posts: ->
+  group_posts: ->
     selected_group = Session.get("group_#{@parent_id}")
     unless selected_group?
       selected_group = 'all'
@@ -16,6 +16,10 @@ _.extend( Template.post_wrapper,
     for post in Posts.find( 'parent_id': @parent_id ).fetch()
       if selected_group == 'all' || selected_group of post.tags
         posts.push(post._id)
+    ###If the currently showing post is not in this group, show one that is
+    if posts.length > 0
+      Session.set("reply_#{@_id}", posts[0])
+    ###
     return posts
   
   reply: ->
