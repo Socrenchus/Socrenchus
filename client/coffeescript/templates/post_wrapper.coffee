@@ -1,4 +1,4 @@
-_.extend( Template.chunk,
+_.extend( Template.post_wrapper,
   not_root: -> @parent_id?
   groups: ->
     groups = ['all']
