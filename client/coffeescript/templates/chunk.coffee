@@ -1,7 +1,8 @@
 _.extend( Template.chunk,
   not_root: -> @parent_id?
   groups: ->
-    groups = ['all']
+    #groups = ['all']
+    groups = []
     for post in Posts.find( 'parent_id': @parent_id ).fetch()
       tags = (tag for tag of post.tags)
       for tag in tags
@@ -9,7 +10,6 @@ _.extend( Template.chunk,
     return groups
   
   vis_posts: ->
-    console.log(@parent_id)
     selected_group = Session.get("group_#{@parent_id}")
     unless selected_group?
       selected_group = 'all'
@@ -19,9 +19,22 @@ _.extend( Template.chunk,
         posts.push(post._id)
     return posts
   
-  author_of_vis_post: ->
+  author_email: ->
+    #When the db is ready...
+    #this_post = Posts.findOne( _id: @cur )
+    #return Users.findOne( _id: this_post.author_id ).email
+    
+    #this_post = Posts.findOne( _id: @cur )
+    #return this_post.author_id
+    
+    return ":)"
+    
+  email_hash: ->
+    #When the db is ready...
+    #this_post = Posts.findOne( _id: @cur )
+    #return Users.findOne( _id: this_post.author_id ).email.md5()
     this_post = Posts.findOne( _id: @cur )
-    return this_post.author_id
+    return this_post.author_id.md5()
   
   reply: ->
     reply = Session.get("reply_#{@_id}")
@@ -40,7 +53,11 @@ _.extend( Template.chunk,
     
     "click button[name='post']": (event) ->
       if not event.isPropagationStopped()
-        Session.set("reply_#{@parent_id}", event.target.className)
+        elem = event.target
+        while(elem.nodeName.toLowerCase() isnt 'button')
+          elem = elem.parentNode #bubble up
+        Session.set("reply_#{@parent_id}", elem.className)
         event.stopPropagation()
+          
   }
 )

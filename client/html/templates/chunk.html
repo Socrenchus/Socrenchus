@@ -16,7 +16,7 @@
           <div class="span10">
             {{#each vis_posts}}
               {{#both ../this}}
-                <button name='post' class='{{cur}}'>{{author_of_vis_post}}</button>
+                <button name='post' class='{{cur}}'><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=20&d=identicon" />{{author_email}}</button>
               {{/both}}
             {{/each}}
           </div>
