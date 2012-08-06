@@ -1,4 +1,4 @@
-<template name="chunk">
+<template name="post_wrapper">
   {{#if not_root}}
     <div>
       <button name='carousel'>CAROUSEL</button>
@@ -9,7 +9,7 @@
       {{/each}}
     </div>
     <div>
-      {{#each vis_posts}}
+      {{#each group_posts}}
         {{#both ../this}}
           <button name='post' class='{{cur}}'>{{cur}}</button>
         {{/both}}
@@ -21,7 +21,7 @@
   
   {{#if reply.exists}}
     {{#with reply.post}}
-      {{> chunk}}
+      {{> post_wrapper}}
     {{/with}}
   {{/if}}
 </template>

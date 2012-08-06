@@ -10,7 +10,7 @@ carousel = ->
         idx = (i + 1) % all_replies.length
     Session.set("reply_#{parent._id}", all_replies[idx]._id)
 
-_.extend( Template.popup_post,
+_.extend( Template.conversation,
   show_post: ->
     not Session.equals('showing_post', undefined)
     
