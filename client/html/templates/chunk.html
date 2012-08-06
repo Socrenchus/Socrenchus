@@ -1,6 +1,7 @@
 <template name="chunk">
   {{#if not_root}}
     <div>
+      <button name='carousel'>CAROUSEL</button>
       {{#each groups}}
         {{#both ../this}}
           <button name='group' class='{{cur}}'>{{cur}}</button>

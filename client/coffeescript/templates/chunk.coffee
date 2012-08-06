@@ -17,7 +17,10 @@ _.extend( Template.chunk,
       if selected_group == 'all' || selected_group of post.tags
         posts.push(post._id)
     return posts
-  
+"click button[name='post']": (event) ->
+      if not event.isPropagationStopped()
+        Session.set("reply_#{@parent_id}", event.target.className)
+        event.stopPropagation()  
   reply: ->
     reply = Session.get("reply_#{@_id}")
     if reply?
@@ -39,5 +42,20 @@ _.extend( Template.chunk,
       if not event.isPropagationStopped()
         Session.set("reply_#{@parent_id}", event.target.className)
         event.stopPropagation()
+        
+    "click button[name='carousel']": (event) ->
+      if not event.isImmediatePropagationStopped()
+        console.log('restart')
+        #Session.set('carousel_parent', Posts.find(_id: @parent_id))
+        carousel_handle = Meteor.setInterval(carousel, 3000)
+        Meteor.clearInterval(Session.get('carousel_handle'))
+        Session.set('carousel_handle', carousel_handle)
+        event.stopImmediatePropagation()
+    
+    'click': (event) ->
+      parent = Session.get('carousel_parent')
+      if parent?._id == @parent_id
+        console.log('STOP')
+        Meteor.clearInterval(Session.get('carousel_handle'))
   }
 )

@@ -1,26 +1,28 @@
+carousel = ->
+  parent = Session.get('carousel_parent')
+  cur_reply = Session.get("reply_#{parent._id}")
+  if parent? && cur_reply?
+    console.log('TICK')
+    all_replies = Posts.find( parent_id: parent._id ).fetch()
+    idx = 0
+    for reply, i in all_replies
+      if reply._id == cur_reply
+        idx = (i + 1) % all_replies.length
+    Session.set("reply_#{parent._id}", all_replies[idx]._id)
+
 _.extend( Template.popup_post,
   show_post: ->
     not Session.equals('showing_post', undefined)
     
   root_post: ->
-    posts = []
     cur_post = Session.get('showing_post')
     
+    #Carousel implementation
     Session.set('carousel_parent', cur_post)
+    carousel_handle = Meteor.setInterval(carousel, 3000)
+    Session.set('carousel_handle', carousel_handle)
     
-    func = ->
-      parent = Session.get('carousel_parent')
-      cur_reply = Session.get("reply_#{parent._id}")
-      if cur_reply?
-        console.log('TICK')
-        all_replies = Posts.find( parent_id: parent._id ).fetch()
-        idx = (all_replies.indexOf(cur_reply) + 1) % all_replies.length
-        console.log(idx, all_replies[idx])
-        Session.set("reply_#{parent._id}", all_replies[idx])
-    
-    Meteor.setInterval(func, 3000)
-    
-    
+    posts = []
     posts.push(cur_post)
     
     #Get ancestors of selected post
