@@ -57,11 +57,17 @@ class ServerPost extends SharedPost
       @author_id = user_id
     else
       _.extend( @, post )
-
+      #_.extend( @, _.pick( _.keys( post ) ) )
+      #console.log 'just extended everything: ', this
+      
       # check if user added a new tag
       for tag, weight of client.my_tags
         @tags[tag] ?= { weight: 0 }
         @tags[tag].users ?= []
+        if user_id in @tags[tag].users
+          console.log '@server_post constructor -> user already listed, tag will NOT be applied'
+        else
+          console.log '@server_post constructor -> new user for this tag, tag will be applied'
         unless user_id in @tags[tag].users
           # apply the tag
           @add_tag( tag, user_id )
@@ -70,14 +76,22 @@ class ServerPost extends SharedPost
     # check if already graduated
     already_graduated = @is_graduated( tag )
     # add the tag
-    @tags[tag].users.push( user_id ) 
+    if not @tags[tag]?
+      @tags[tag] = {
+        users: []
+        weight: 0
+      }
+    @tags[tag].users.push( user_id )
+    
     # add user's post experience to the tag
     @tags[tag].weight += @get_user_post_experience( user_id )
     # check if graduated
     graduated = @is_graduated( tag )
-    if true
-    #if not already_graduated and graduated
-      #if true
+    #if true
+    console.log 'already_graduated:', already_graduated
+    console.log 'graduated: ', graduated
+    
+    if not already_graduated and graduated
       @award_points( @tags[tag].users, tag )
       user = Users.findOne('_id': user_id)
       #console.log 'the user:', user
@@ -87,8 +101,13 @@ class ServerPost extends SharedPost
   
   is_graduated: ( tag ) =>
     # TODO: Improve this function
-    return @tags[tag].weight > 1
-  
+    grad = false
+    if @tags[tag]?
+      grad = @tags[tag].users.length > 1
+    else grad = false
+    return grad
+
+    
   get_user_post_experience: ( user_id ) =>
     weights = {}
     weight_total = 0

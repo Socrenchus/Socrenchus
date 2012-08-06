@@ -23,7 +23,7 @@ class ClientTests
     )
     #tron.log('Inserting randomized post with content:\n', content)
     #hits check_post_insert in the server side.
-    #TODO remove the post
+    #TODO remove the post, this is not allwed by GC.
   
   #try to insert a tag
   try_client_insert_tag: ->
@@ -33,44 +33,24 @@ class ClientTests
     q['$set']["my_tags.#{tag_text}"] = 1
     Posts.update({ '_id': post_id}, q)
     #hits check_add_tag on server side.
-    
+    #TODO remove tag
   
 
   #try to update a tag
   try_client_update_tag: ->
     #tron.log 'try_client_update_tag'
     #find a post with tag
-    post = {}
-    cur = Posts.find()
-    cur.forEach(
-      (p) ->
-        if _.keys(p.tags).length > 0
-          post = p
-    )
+    #post = Posts.findOne({content: 'whattsup'})
+    post = Posts.findOne()
     #tag it as a different user
       #this should also graduate the tag until the graduation function is updated.
-    tag = _.keys(post.tags)[0]
+    tag = 'tron'
     q = {'$set': {}}
     q['$set']["my_tags.#{tag}"] = 1
     Posts.update({'_id': post._id}, q)
     #check_add_tag should be hit by this.
     #TODO remove tag at the end.
     #TODO this is not truly using a different user id, 
-    
-  ###
-  #try to gain points from tagging
-  try_client_gain_points: ->
-    tron.info( 'coming soon' )
-    #TODO find a tag that has exactly one user listed, that is not me.
-    cur = Posts.find()
-    #TODO the cursor has posts inserted above, nothing else.
-    cur.forEach(
-      (p) ->
-        tron.error p
-    )
-    tron.error Posts.find().fetch()
-    #TODO tag
-    #TODO check_if_user_exp should be hit by this.
-  ###
 
+    
 tron.test( new ClientTests() )
