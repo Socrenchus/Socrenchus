@@ -6,11 +6,11 @@ Instances = new Meteor.Collection("instances")
 # Subscriptions
 Meteor.subscribe( "my_posts" )
 Meteor.subscribe( "assigned_posts" )
-Meteor.subscribe( 'instance', window.location.host )
 
 # Backbone router
 class Router extends Backbone.Router
   routes:
+    "i/*domain": "use_instance"
     ":post_id": "show_post"
     "new" : "new"
 
@@ -19,6 +19,9 @@ class Router extends Backbone.Router
       Session.set('showing_post', result)
       console.log(Session.get('showing_post'))
     )
+
+  use_instance: (domain) ->
+    Meteor.subscribe( 'instance', domain )
 
 Router = new Router()
 Meteor.startup( ->
