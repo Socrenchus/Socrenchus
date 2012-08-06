@@ -17,4 +17,9 @@ _.extend( Template.conversation,
       Session.set("reply_#{post._id}", posts[i+1]?._id) if post?
     
     return posts[0]
+    
+  scroll_into_view: ->
+    post = $('#'+Session.get('showing_post')._id)
+    console.log(post)
+    #$("##{Session.get('showing_post')._id}").scrollIntoView()
 )

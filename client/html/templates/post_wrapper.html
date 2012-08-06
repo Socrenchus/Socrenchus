@@ -16,7 +16,9 @@
     </div>
   {{/if}}
   
-  {{> post}}
+  <div id='{{_id}}'>
+    {{> post}}
+  </div>
   
   {{#if reply.exists}}
     {{#with reply.post}}
