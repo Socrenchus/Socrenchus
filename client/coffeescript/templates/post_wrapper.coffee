@@ -18,7 +18,7 @@ _.extend( Template.post_wrapper,
         posts.push(post._id)
     
     #If the currently showing post is not in this group, show one that is
-    if posts.length > 0 && not (Session.get("reply_#{@parent_id}") in posts)
+    if posts.length > 0 and not (Session.get("reply_#{@parent_id}") in posts)
       Session.set("reply_#{@parent_id}", posts[0])
     
     return posts
