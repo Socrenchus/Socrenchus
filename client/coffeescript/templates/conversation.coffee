@@ -2,7 +2,6 @@ carousel = ->
   parent = Session.get('carousel_parent')
   cur_reply = Session.get("reply_#{parent._id}")
   if parent? && cur_reply?
-    console.log('TICK')
     all_replies = Posts.find( parent_id: parent._id ).fetch()
     idx = 0
     for reply, i in all_replies
@@ -19,7 +18,7 @@ _.extend( Template.conversation,
     
     #Carousel implementation
     Session.set('carousel_parent', cur_post)
-    carousel_handle = Meteor.setInterval(carousel, 3000)
+    carousel_handle = Meteor.setInterval(carousel, 5000)
     Session.set('carousel_handle', carousel_handle)
     
     posts = []
