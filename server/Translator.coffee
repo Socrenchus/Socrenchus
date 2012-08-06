@@ -23,7 +23,7 @@ class ClientPost extends SharedPost
     user_id = Meteor.call('get_user_id')
     
     super(server)
-
+    
     for tag of server.tags
       @tags[tag] = server.tags[tag].weight
       users = server.tags[tag].users
@@ -64,5 +64,3 @@ class ServerPost extends SharedPost
         unless user_id in @tags[tag].users
           # apply the tag
           @tags[tag].users.push( user_id )
-    
-      
