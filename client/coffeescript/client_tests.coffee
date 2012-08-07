@@ -1,6 +1,7 @@
 class ClientTests
-  test_id = ''                                          #the id of the test post
-  test_content = 'gen by client side tron tests'        #the content of test post
+  #use one post for all 'trys'
+  test_id = ''
+  test_content = 'gen by client side tron tests'
   
   try_client_insert_post: ->
     @test_id = Posts.insert(
@@ -22,7 +23,7 @@ class ClientTests
         }
       }
     )
-    tron.test( 'check_post_insert', @test_id, @test_content ) 
+    tron.test( 'check_post_insert', @test_id, @test_content )
   
   try_client_insert_tag: ->
     q = {'$set': {}}

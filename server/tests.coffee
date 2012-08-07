@@ -1,10 +1,10 @@
 class Tests
-  test_user_id = '' 
+  test_user_id = ''
   test_post_id = ''
   
   try_insert_user: ->
-    @test_user_id = Users.insert( 
-      'email': 'tron@socrench.us' 
+    @test_user_id = Users.insert(
+      'email': 'tron@socrench.us'
       'experience': {
         'tron_tag': 0
       }

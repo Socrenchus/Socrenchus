@@ -85,7 +85,7 @@ class ServerPost extends SharedPost
     if not already_graduated and graduated
       @award_points( @tags[tag].users, tag )
       user = Users.findOne('_id': user_id)
-      tron.test( 'check_award_points', tag, user ) 
+      tron.test( 'check_award_points', tag, user )
     tron.test( 'check_add_tag', @, tag, user_id)
   
   
@@ -103,7 +103,7 @@ class ServerPost extends SharedPost
     weight_total = 0
     # loop through tags in post (aka this)
     for tag, obj of @tags
-      weights[tag] = obj.weight 
+      weights[tag] = obj.weight
       weight_total += obj.weight
     unless weight_total is 0
       users_post_experience = 0
@@ -126,7 +126,7 @@ class ServerPost extends SharedPost
     reward = @tags[tag].weight / users.length
     tron.test( 'check_number', reward )
     
-    for user_id in users  
+    for user_id in users
       user_doc = Users.findOne( user_id )
       # add reward to user for tag
       q = {
