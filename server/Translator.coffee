@@ -57,17 +57,11 @@ class ServerPost extends SharedPost
       @author_id = user_id
     else
       _.extend( @, post )
-      #_.extend( @, _.pick( _.keys( post ) ) )
-      #console.log 'just extended everything: ', this
       
       # check if user added a new tag
       for tag, weight of client.my_tags
         @tags[tag] ?= { weight: 0 }
         @tags[tag].users ?= []
-        if user_id in @tags[tag].users
-          console.log '@server_post constructor -> user already listed, tag will NOT be applied'
-        else
-          console.log '@server_post constructor -> new user for this tag, tag will be applied'
         unless user_id in @tags[tag].users
           # apply the tag
           @add_tag( tag, user_id )
@@ -87,14 +81,10 @@ class ServerPost extends SharedPost
     @tags[tag].weight += @get_user_post_experience( user_id )
     # check if graduated
     graduated = @is_graduated( tag )
-    #if true
-    console.log 'already_graduated:', already_graduated
-    console.log 'graduated: ', graduated
     
     if not already_graduated and graduated
       @award_points( @tags[tag].users, tag )
       user = Users.findOne('_id': user_id)
-      #console.log 'the user:', user
       tron.test( 'check_award_points', tag, user ) 
     tron.test( 'check_add_tag', @, tag, user_id)
   
@@ -143,7 +133,6 @@ class ServerPost extends SharedPost
         '$set':
           {'experience': {}}
       }
-      #console.log "user_doc.['_id']", user_doc['_id']
       exp_obj = {}
       #copy existing tag exp
       for u_tag, exp of user_doc.experience
@@ -155,8 +144,6 @@ class ServerPost extends SharedPost
         past_exp = exp_obj[tag]
       exp_obj[tag] = reward + past_exp
       q['$set']['experience'] = exp_obj
-      #console.log 'the query:', q
-      #previous_exp = Users.findOne(user_id).experience[tag]
       Users.update( {'_id': user_doc._id}, q )
       tron.test( 'check_if_user_exp', user_id, tag, past_exp )
       

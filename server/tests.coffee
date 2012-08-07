@@ -25,7 +25,6 @@ class Tests
       }
     )
     post = Posts.findOne( post_id )
-    console.log 'try add tag to post:', post
     server_post = new ServerPost( post )
     user_id = Users.findOne()._id
     #add a new tag
