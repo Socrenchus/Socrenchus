@@ -15,11 +15,11 @@ class GrandCentral
     {
       users: {
         insert: =>
-          error_list.push('not implemented yet')
+          error_list.push('users/insert not implemented yet')
         update: =>
-          error_list.push('not implemented yet')
+          error_list.push('users/update not implemented yet')
         remove: =>
-          error_list.push('not implemented yet')
+          error_list.push('users/remove not implemented yet')
       }
       posts: {
         insert: =>
@@ -32,21 +32,21 @@ class GrandCentral
           result = new ServerPost( doc )
           args[1] = result
         remove: (args...) =>
-          error_list.push('not implemented yet')
+          error_list.push('posts/remove not implemented yet')
       }
       instances: {
         insert: =>
-          error_list.push('not implemented yet')
+          error_list.push('instances/insert not implemented yet')
         update: =>
-          error_list.push('not implemented yet')
+          error_list.push('instances/update not implemented yet')
         remove: =>
-          error_list.push('not implemented yet')
+          error_list.push('instances/remove not implemented yet')
       }
     }[@collection][@method]()
     if (error_list.length is 0 or @_debug)
       @default.apply(@, args)
     if (error_list.length>0)
-      console.error(error_list)
+      console.error( error_list )
     #console.info 'GrandCentral is operational!!'
     error_list = []
    

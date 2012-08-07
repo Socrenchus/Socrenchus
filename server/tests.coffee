@@ -1,21 +1,20 @@
 class Tests
-  #dummy
+  test_user_id = '' 
+  test_post_id = ''
+  
   try_insert_user: ->
-    user_email = 'tron@socrench.us'
-    Users.insert( 
-      'email': user_email 
+    @test_user_id = Users.insert( 
+      'email': 'tron@socrench.us' 
       'experience': {
         'tron_tag': 0
       }
     )
-    tron.test( 'check_user', user_email )
+    tron.test( 'check_user', @test_user_id )
     
-  check_user: ( user_email ) ->
-    unless Users.findOne( 'email': user_email )?
-      throw 'user not found'
+
   
   try_add_tag: ->
-    post_id = Posts.insert(
+    @test_post_id = Posts.insert(
       'content': 'tron'
       'tags': {
         'tron_tag': {
@@ -24,7 +23,7 @@ class Tests
         }
       }
     )
-    post = Posts.findOne( post_id )
+    post = Posts.findOne( @test_post_id )
     server_post = new ServerPost( post )
     user_id = Users.findOne()._id
     #add a new tag
@@ -35,10 +34,15 @@ class Tests
     for tag in tags
       if not server_post.is_graduated( tag )
         grad_this_tag = tag
-    #TODO make sure different user
     server_post.add_tag( grad_this_tag, user_id )
-    Posts.remove( post_id )
-    Users.remove( 'email': 'try-insert-user@socrench.us' )
+
+    
+  try_clean_up: ->
+    Posts.remove( @test_post_id )
+    Users.remove( @test_user_id )
+    tron.test( 'check_post_remove', @test_post_id )
+    tron.test( 'check_user_remove', @test_user_id )
+    
     
   #check if a tag/user_id exists for a given post
   check_add_tag: (server_post, tag, user_id) ->
@@ -59,14 +63,26 @@ class Tests
   
 
       
-  #check if points were awarded properly
+  #check if user has experience for a tag
   check_award_points: ( tag, user ) ->
     unless tag in _.keys( user.experience ) && user.experience[tag]?
     #unless true
       throw ( "user does not have experience for #{tag} at the end of add_tag")
-  #check if a variable is a number
+  
   check_number: ( num ) ->
     unless _.isNumber( num )
       throw( 'not a number' )
       
+  check_user: ( user_id ) ->
+    unless Users.findOne( user_id )?
+      throw 'user not found'
+      
+  check_post_remove: ( post_id ) ->
+    if Posts.findOne( post_id )?
+      throw 'post not removed in mongo'
+      
+  check_user_remove: ( user_id ) ->
+    if Users.findOne( user_id )?
+      throw 'user not removed in mongo'
+    
 tron.test( new Tests() )
