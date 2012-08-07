@@ -63,6 +63,7 @@ _.extend( Template.reply_box,
             }
           )
           console.log('ID of new post: '+reply_id)
+          tron.test( 'check_post_insert', reply_id, reply_content )
           Session.set('composing', undefined) #the clean up.
         event.stopImmediatePropagation()
      

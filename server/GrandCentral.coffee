@@ -45,8 +45,6 @@ class GrandCentral
     }[@collection][@method]()
     if (error_list.length is 0 or @_debug)
       @default.apply(@, args)
-      if @collection is 'posts' and @method is 'insert'
-        tron.test( 'check_post_insert', args[0]._id, args[0].content )
     if (error_list.length>0)
       console.error(error_list)
     #console.info 'GrandCentral is operational!!'

@@ -50,7 +50,13 @@ class ClientTests
     Posts.update({'_id': post._id}, q)
     #check_add_tag should be hit by this.
     #TODO remove tag at the end.
-    #TODO this is not truly using a different user id, 
+    #TODO this is not truly using a different user id,
+    
+  #check if a post inserted properly - works
+  check_post_insert: ( id, expected_content ) ->
+    post = Posts.findOne({'_id': id, 'content': expected_content})
+    unless post?
+      throw( 'post not found in mongo' )
 
     
 tron.test( new ClientTests() )

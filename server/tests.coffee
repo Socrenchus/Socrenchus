@@ -1,13 +1,14 @@
 class Tests
   #dummy
   try_insert_user: ->
+    user_email = 'tron@socrench.us'
     Users.insert( 
-      'email': 'tron@socrench.us'
+      'email': user_email 
       'experience': {
         'tron_tag': 0
       }
     )
-    tron.test( 'check_user', 'tron@socrench.us' )
+    tron.test( 'check_user', user_email )
     
   check_user: ( user_email ) ->
     unless Users.findOne( 'email': user_email )?
@@ -38,6 +39,7 @@ class Tests
     #TODO make sure different user
     server_post.add_tag( grad_this_tag, user_id )
     Posts.remove( post_id )
+    Users.remove( 'email': 'try-insert-user@socrench.us' )
     
   #check if a tag/user_id exists for a given post
   check_add_tag: (server_post, tag, user_id) ->
@@ -56,11 +58,7 @@ class Tests
     unless tron_user.experience[tag] > previous_exp
       throw( 'user expected to gain points for tag' )
   
-  #check if a post inserted properly - works
-  check_post_insert: ( id, expected_content ) ->
-    post = Posts.findOne({'_id': id, 'content': expected_content})
-    unless post?
-      throw( 'post not found in mongo' )
+
       
   #check if points were awarded properly
   check_award_points: ( tag, user ) ->
