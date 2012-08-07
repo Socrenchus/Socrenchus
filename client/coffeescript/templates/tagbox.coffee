@@ -2,15 +2,17 @@ _.extend( Template.tagbox,
   classes: ->
     classes = ['tag']
     classes.push('grad') if @tags[@cur]?
-    classes.push('mytag') if @cur in @my_tags
+    if @my_tags?
+      classes.push('mytag') if @cur in @my_tags
     formatted_classes = classes.join(' ')
     return formatted_classes
 
   displayed_tags: ->
     visible = (tag for tag of @tags)
-    for tag in @my_tags
-      if not (tag in visible)
-        visible.push(tag)
+    if @my_tags?
+      for tag in @my_tags
+        if not (tag in visible)
+          visible.push(tag)
     return visible
     
   suggested_tags: ->
