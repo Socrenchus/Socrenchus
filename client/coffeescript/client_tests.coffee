@@ -29,7 +29,7 @@ tron.test(
     Posts.remove( test_id )
   
   try_client_insert_tag: ->
-    test_id = Posts.insert( 
+    test_id = Posts.insert(
       'content': 'tron'
       'tags':{
         'tron_tag': {
@@ -46,7 +46,7 @@ tron.test(
     Posts.remove( test_id )
     
   try_client_update_tag: ->
-    test_id = Posts.insert( 
+    test_id = Posts.insert(
       'content': 'tron'
       'tags':{
         'tron_tag': {

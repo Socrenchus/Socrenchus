@@ -41,8 +41,6 @@ tron.test(
     unless tron_user.experience[tag] > previous_exp
       throw( 'user expected to gain points for tag' )
   
-
-      
   #check if user has experience for a tag
   check_award_points: ( tag, user ) ->
     unless tag in _.keys( user.experience ) && user.experience[tag]?
