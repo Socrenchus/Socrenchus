@@ -1,7 +1,8 @@
-class Tests
-  test_user_id = ''
-  test_post_id = ''
-  
+#test_user_id = ''
+#test_post_id = ''
+
+tron.test(
+  ###
   try_insert_user: ->
     @test_user_id = Users.insert(
       'email': 'tron@socrench.us'
@@ -9,12 +10,11 @@ class Tests
         'tron_tag': 0
       }
     )
-    tron.test( 'check_user', @test_user_id )
-    
-
+    tron.test( 'check_user', test_user_id )
+  ###
   
   try_add_tag: ->
-    @test_post_id = Posts.insert(
+    test_post_id = Posts.insert(
       'content': 'tron'
       'tags': {
         'tron_tag': {
@@ -23,7 +23,7 @@ class Tests
         }
       }
     )
-    post = Posts.findOne( @test_post_id )
+    post = Posts.findOne(  )
     server_post = new ServerPost( post )
     user_id = Users.findOne()._id
     #add a new tag
@@ -36,12 +36,13 @@ class Tests
         grad_this_tag = tag
     server_post.add_tag( grad_this_tag, user_id )
 
-    
+  ###
   try_clean_up: ->
-    Posts.remove( @test_post_id )
-    Users.remove( @test_user_id )
-    tron.test( 'check_post_remove', @test_post_id )
-    tron.test( 'check_user_remove', @test_user_id )
+    Posts.remove( test_post_id )
+    Users.remove( test_user_id )
+    tron.test( 'check_post_remove', test_post_id )
+    tron.test( 'check_user_remove', test_user_id )
+  ###
     
     
   #check if a tag/user_id exists for a given post
@@ -72,7 +73,8 @@ class Tests
   check_number: ( num ) ->
     unless _.isNumber( num )
       throw( 'not a number' )
-      
+  
+  ###  
   check_user: ( user_id ) ->
     unless Users.findOne( user_id )?
       throw 'user not found'
@@ -84,5 +86,5 @@ class Tests
   check_user_remove: ( user_id ) ->
     if Users.findOne( user_id )?
       throw 'user not removed in mongo'
-    
-tron.test( new Tests() )
+  ###
+)

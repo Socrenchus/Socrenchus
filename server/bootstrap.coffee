@@ -222,4 +222,6 @@ Meteor.startup( ->
         id_maps[key]?()
 
       post_ids.push(Posts.insert(post))
+      
+  tron.test()
 )

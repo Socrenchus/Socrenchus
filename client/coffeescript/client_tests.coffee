@@ -1,11 +1,11 @@
-class ClientTests
-  #use one post for all 'trys'
-  test_id = ''
-  test_content = 'gen by client side tron tests'
-  
+
+#test_id = ''
+#test_content = 'gen by client side tron tests'
+
+tron.test(
   try_client_insert_post: ->
-    @test_id = Posts.insert(
-      'content': @test_content
+    test_id = Posts.insert(
+      'content': 'tron'
       'parent_id': null
       'instance_id': null
       'tags': {
@@ -23,7 +23,7 @@ class ClientTests
         }
       }
     )
-    tron.test( 'check_post_insert', @test_id, @test_content )
+    tron.test( 'check_post_insert', test_id )
   
   try_client_insert_tag: ->
     q = {'$set': {}}
@@ -31,20 +31,22 @@ class ClientTests
     q['$set']["my_tags.#{tag_text}"] = 1
     Posts.update({ '_id': @test_id}, q)
   
+  ###
   #this try will fail unless debug is set to true on GrandCentral.coffee
   try_client_remove_post: ->
     Posts.remove( @post_id )
     tron.test( 'check_post_remove', @post_id )
-      
+  ###
+  
   try_client_update_tag: ->
-    post = Posts.findOne( @test_id )
+    post = Posts.findOne( )
     tag = 'tron'
     q = {'$set': {}}
     q['$set']["my_tags.#{tag}"] = 1
     Posts.update({'_id': post._id}, q)
     
-  check_post_insert: ( id, expected_content ) ->
-    post = Posts.findOne({'_id': id, 'content': expected_content})
+  check_post_insert: ( id ) ->
+    post = Posts.findOne( id )
     unless post?
       throw( 'post not found in mongo' )
 
@@ -52,4 +54,4 @@ class ClientTests
     if Posts.findOne( post_id )?
       throw 'post not removed, make sure debug is on in GrandCentral.coffee'
     
-tron.test( new ClientTests() )
+)

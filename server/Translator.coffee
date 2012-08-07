@@ -146,7 +146,3 @@ class ServerPost extends SharedPost
       q['$set']['experience'] = exp_obj
       Users.update( {'_id': user_doc._id}, q )
       tron.test( 'check_if_user_exp', user_id, tag, past_exp )
-      
-Meteor.startup( ->
-  tron.test()
-)
