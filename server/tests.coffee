@@ -1,10 +1,30 @@
 class Tests
   #dummy
-  try_nothing: ->
-    tron.info( 'a dummy try function' )
+  try_insert_user: ->
+    Users.insert( 
+      'email': 'tron@socrench.us'
+      'experience': {
+        'tron_tag': 0
+      }
+    )
+    tron.test( 'check_user', 'tron@socrench.us' )
+    
+  check_user: ( user_email ) ->
+    unless Users.findOne( 'email': user_email )?
+      throw 'user not found'
   
   try_add_tag: ->
-    post = Posts.findOne()
+    post_id = Posts.insert(
+      'content': 'tron'
+      'tags': {
+        'tron_tag': {
+          'users': [Users.findOne()]
+          'weight': 0
+        }
+      }
+    )
+    post = Posts.findOne( post_id )
+    console.log 'try add tag to post:', post
     server_post = new ServerPost( post )
     user_id = Users.findOne()._id
     #add a new tag
@@ -15,9 +35,9 @@ class Tests
     for tag in tags
       if not server_post.is_graduated( tag )
         grad_this_tag = tag
-    #TODO make sure diff user
+    #TODO make sure different user
     server_post.add_tag( grad_this_tag, user_id )
-    
+    Posts.remove( post_id )
     
   #check if a tag/user_id exists for a given post
   check_add_tag: (server_post, tag, user_id) ->
