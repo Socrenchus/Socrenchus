@@ -53,7 +53,11 @@ _.extend( Template.post_wrapper,
     
     'click': (event) ->
       parent = Session.get('carousel_parent')
-      if parent?._id == @parent_id
+      ancestors = [(cur = @).parent_id]
+      while cur?.parent_id?
+        cur = Posts.findOne( _id: cur.parent_id )
+        ancestors.push(cur.parent_id)
+      if parent._id in ancestors
         Meteor.clearInterval(Session.get('carousel_handle'))
         Session.set('carousel_handle', null)
   }
