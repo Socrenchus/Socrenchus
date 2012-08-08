@@ -87,7 +87,10 @@ _.extend( Template.tagbox,
       if not event.isImmediatePropagationStopped()
         Session.set('tagging', true)
         Session.set('current_post', @_id)
-        Session.set('suggested_tags', @suggested_tags)
+        if @suggested_tags?
+          Session.set('suggested_tags', @suggested_tags)
+        else
+          Session.set('suggested_tags', [])
         Session.set('filter_text', '')
         event.stopImmediatePropagation()
         
