@@ -19,10 +19,9 @@ _.extend( Template.conversation,
     return posts[0]
     
   scroll_into_view: ->
-    func = ->
+    Meteor.defer( ->
       post = $('#'+Session.get('showing_post')._id)[0]
       post?.scrollIntoView()
-      
-    Meteor.setTimeout(func, 500)
+    )
     return ''
 )
