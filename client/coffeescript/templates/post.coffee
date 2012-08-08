@@ -23,10 +23,18 @@ _.extend( Template.post,
     return oembedded
   identifier: -> @_id
   link_href: ->
-    return "/#{ @_id }"
+    #for main socrenchus instance:
+    if window.instance is undefined
+      return "/p/#{ @_id }"
+    else #give full "instanced" link if not on main
+      return "/i/#{window.instance}/p/#{ @_id }"
   parent_href: ->
     if @parent_id?
-      return "/#{ @parent_id }"
+        #for main socrenchus instance:
+      if window.instance is undefined
+        return "/p/#{ @parent_id }"
+      else #give full "instanced" link if not on main
+        return "/i/#{window.instance}/p/#{ @parent_id }"
     else
       return false
 )
