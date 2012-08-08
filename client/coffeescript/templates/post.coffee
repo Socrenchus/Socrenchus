@@ -5,7 +5,7 @@ _.extend( Template.post,
     2. Raw input converted using Showdown.
     3. Output of step 2 is subjected to Whitelist.
     4. Links are made ready for oembed.
-    ###
+    
     #1. @content contains the raw input.
     raw_input = @content
     #2. Convert raw input using Showdown.
@@ -21,6 +21,8 @@ _.extend( Template.post,
     oembedded = oembedded.replace(/(\s|>|^)(mailto:[^\s<]*)/igm, replacement)
     Meteor.defer( -> $('a.oembed').oembed().removeClass('oembed') )
     return oembedded
+    ###
+    return @content
   identifier: -> @_id
   link_href: ->
     return "/#{ @_id }"
