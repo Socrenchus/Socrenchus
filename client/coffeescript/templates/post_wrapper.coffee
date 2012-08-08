@@ -1,6 +1,8 @@
 _.extend( Template.post_wrapper,
   not_root: -> @parent_id?
   
+  show_carousel: -> Session.equals('carousel_handle', null)
+  
   groups: ->
     groups = ['all']
     for post in Posts.find( 'parent_id': @parent_id ).fetch()
@@ -45,7 +47,7 @@ _.extend( Template.post_wrapper,
       if not event.isImmediatePropagationStopped()
         Session.set('carousel_parent', Posts.findOne(_id: @parent_id))
         Meteor.clearInterval(Session.get('carousel_handle'))
-        carousel_handle = Meteor.setInterval(carousel, 3000)
+        carousel_handle = Meteor.setInterval(start_carousel, 3000)
         Session.set('carousel_handle', carousel_handle)
         event.stopImmediatePropagation()
     
@@ -53,5 +55,6 @@ _.extend( Template.post_wrapper,
       parent = Session.get('carousel_parent')
       if parent?._id == @parent_id
         Meteor.clearInterval(Session.get('carousel_handle'))
+        Session.set('carousel_handle', null)
   }
 )

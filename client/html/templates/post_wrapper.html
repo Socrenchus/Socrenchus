@@ -1,7 +1,11 @@
 <template name="post_wrapper">
   {{#if not_root}}
+    {{#if show_carousel}}
+      <div>
+        <button name='carousel'>CAROUSEL</button>
+      </div>
+    {{/if}}
     <div>
-      <button name='carousel'>CAROUSEL</button>
       {{#each groups}}
         {{#both ../this}}
           <button name='group' class='{{cur}}'>{{cur}}</button>
