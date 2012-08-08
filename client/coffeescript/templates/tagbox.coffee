@@ -35,7 +35,7 @@ _.extend( Template.tagbox,
           when 74 #J/Check
             Template.tagbox.add_tag(@_id, tag_text)
           when 75 #K/Kill
-            #WORKAROUND.  Session is not yet reactive with arrays or objects.
+            #XXX Session is not yet reactive with arrays or objects.
             temp = Session.get('suggested_tags')
             temp.remove(tag_text)
             Session.set('suggested_tags',temp.clone())
@@ -61,7 +61,7 @@ _.extend( Template.tagbox,
               Template.tagbox.add_tag(@_id, suggested_tag)
           when 39 #Right-arrow: REMOVE SUGGESTED TAG
             if event.ctrlKey
-              #WORKAROUND.  Session is not yet reactive with arrays or objects.
+              #XXX Session is not yet reactive with arrays or objects.
               temp = Session.get('suggested_tags')
               temp.remove(suggested_tag)
               Session.set('suggested_tags',temp.clone())
@@ -108,7 +108,7 @@ _.extend( Template.tagbox,
       q = {'$set': {}}
       q['$set']["my_tags.#{tag_text}"] = 1
       Posts.update({ '_id': id}, q)
-      #WORKAROUND.  Session is not yet reactive with arrays or objects.
+      #XXX Session is not yet reactive with arrays or objects.
       temp = Session.get('suggested_tags')
       temp.remove(tag_text)
       Session.set('suggested_tags',temp.clone())
