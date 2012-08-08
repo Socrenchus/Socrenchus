@@ -52,10 +52,11 @@ _.extend( Template.tagbox,
         
         #Get first filtered suggestion
         suggested_tags = Session.get('suggested_tags')
-        for tag in suggested_tags?
-          if tag.search(Session.get('filter_text')) != -1
-            suggested_tag = tag
-            break
+        if suggested_tags?
+          for tag in suggested_tags
+            if tag.search(Session.get('filter_text')) != -1
+              suggested_tag = tag
+              break
         
         switch event.keyCode
           when 13 #Enter: ADD ENTERED TEXT
