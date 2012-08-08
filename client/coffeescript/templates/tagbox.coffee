@@ -2,22 +2,26 @@ _.extend( Template.tagbox,
   classes: ->
     classes = ['tag']
     classes.push('grad') if @tags[@cur]?
-    classes.push('mytag') if @cur in @my_tags
+    if @my_tags?
+      classes.push('mytag') if @cur in @my_tags
     formatted_classes = classes.join(' ')
     return formatted_classes
 
   displayed_tags: ->
     visible = (tag for tag of @tags)
-    for tag in @my_tags
-      if not (tag in visible)
-        visible.push(tag)
+    if @my_tags?
+      for tag in @my_tags
+        if not (tag in visible)
+          visible.push(tag)
     return visible
     
   suggested_tags: ->
     filtered = []
-    for tag in Session.get('suggested_tags')
-      if tag? && tag.search(Session.get('filter_text')) != -1
-        filtered.push(tag)
+    suggested_tags = Session.get('suggested_tags')
+    if suggested_tags?
+      for tag in suggested_tags
+        if tag? && tag.search(Session.get('filter_text')) != -1
+          filtered.push(tag)
     return filtered
 
   tagging_post: ->
@@ -47,10 +51,12 @@ _.extend( Template.tagbox,
         entered_text = event.target.value
         
         #Get first filtered suggestion
-        for tag in Session.get('suggested_tags')
-          if tag.search(Session.get('filter_text')) != -1
-            suggested_tag = tag
-            break
+        suggested_tags = Session.get('suggested_tags')
+        if suggested_tags?
+          for tag in suggested_tags
+            if tag.search(Session.get('filter_text')) != -1
+              suggested_tag = tag
+              break
         
         switch event.keyCode
           when 13 #Enter: ADD ENTERED TEXT
@@ -109,7 +115,8 @@ _.extend( Template.tagbox,
       Posts.update({ '_id': id}, q)
       #WORKAROUND.  Session is not yet reactive with arrays or objects.
       temp = Session.get('suggested_tags')
-      temp.remove(tag_text)
-      Session.set('suggested_tags',temp.clone())
+      if temp?
+        temp.remove(tag_text)
+        Session.set('suggested_tags',temp.clone())
     Meteor.flush()
 )

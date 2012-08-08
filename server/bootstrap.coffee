@@ -24,6 +24,7 @@ Meteor.startup( ->
         experience: {
           'one': 3
           'two': 3
+          'tron': 1
         }
       },
       {
@@ -178,7 +179,12 @@ Meteor.startup( ->
         instance_id: 0
         author_id: 0
         content: 'whattsup'
-        tags:{}
+        tags:{
+          'tron':{
+            users: [2]
+            weight: 1
+          }
+        }
         votes:{
             'up': {
               users: []
@@ -216,4 +222,6 @@ Meteor.startup( ->
         id_maps[key]?()
 
       post_ids.push(Posts.insert(post))
+      
+  tron.test()
 )
