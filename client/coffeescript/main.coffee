@@ -10,8 +10,8 @@ Meteor.subscribe( "assigned_posts" )
 # Backbone router
 class Router extends Backbone.Router
   routes:
-    "i/*domain": "use_instance"
-    ":post_id": "show_post"
+    "i/*args": "use_instance"
+    "p/:post_id": "show_post"
     "new" : "new"
 
   show_post: (post_id) ->
@@ -20,8 +20,20 @@ class Router extends Backbone.Router
       console.log(Session.get('showing_post'))
     )
 
-  use_instance: (domain) ->
+  use_instance: (args) ->
+    args = args.split( '/' )
+    domain = args[0]
+    window.instance = domain
+    other = args[1..].join( '/' )
     Meteor.subscribe( 'instance', domain )
+    l = $( "<link/>" )
+    l.attr( 'type', 'text/css' )
+    l.attr( 'rel', 'stylesheet' )
+    l.attr( 'href', "//#{domain}/style.css" )
+    $('head').append( l )
+    if other?
+      Backbone.history.navigate("/#{other}", trigger: true)
+      @navigate("/i/#{domain}/#{other}")
 
 Router = new Router()
 Meteor.startup( ->
