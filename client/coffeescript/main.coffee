@@ -30,7 +30,6 @@ class Router extends Backbone.Router
     domain = args[0]
     window.instance = domain
     other = args[1..].join( '/' )
-    Meteor.subscribe( 'instance', domain )
     l = $( "<link/>" )
     l.attr( 'type', 'text/css' )
     l.attr( 'rel', 'stylesheet' )
@@ -42,8 +41,8 @@ class Router extends Backbone.Router
 
   link: (url) ->
     unless window.instance?
-      return url
-    return "/i/#{window.instance}#{url}"
+      return "#{window.location.host}#{url}"
+    return "#{window.instance}#{url}"
 
 Router = new Router()
 Meteor.startup( ->
@@ -51,7 +50,7 @@ Meteor.startup( ->
   Meteor.call('get_user_id', (err, res) ->
     Session.set('user_id', res)
   )
-
+  
   Backbone.history.start( pushState: true ) #!SUPPRESS no_headless_camel_case
 )
 

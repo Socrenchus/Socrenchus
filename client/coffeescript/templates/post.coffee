@@ -24,9 +24,4 @@ _.extend( Template.post,
   identifier: -> @_id
   link_href: ->
     return Router.link("/p/#{ @_id }")
-  parent_href: ->
-    if @parent_id?
-      return Router.link("/p/#{ @parent_id }")
-    else
-      return false
 )
