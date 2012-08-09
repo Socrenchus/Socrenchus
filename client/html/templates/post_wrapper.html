@@ -1,6 +1,9 @@
 <template name="post_wrapper">
   {{#if not_root}}
     <div>
+      <button name='carousel'>CAROUSEL</button>
+    </div>
+    <div>
       {{#each groups}}
         {{#both ../this}}
           <button name='group' class='{{cur}}'>{{cur}}</button>
@@ -16,7 +19,9 @@
     </div>
   {{/if}}
   
-  {{> post}}
+  <div id='{{_id}}'>
+    {{> post}}
+  </div>
   
   {{#if reply.exists}}
     {{#with reply.post}}
