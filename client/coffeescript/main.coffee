@@ -39,17 +39,11 @@ class Router extends Backbone.Router
     return "#{window.instance}#{url}"
 
 Router = new Router()
-###
-@addthis_config =
-{
-   // ... members go here
-}
-###
 Meteor.startup( ->
   # Get User ID
   Meteor.call('get_user_id', (err, res) ->
     Session.set('user_id', res)
-  )  
+  )
   
   Backbone.history.start( pushState: true ) #!SUPPRESS no_headless_camel_case
 )
