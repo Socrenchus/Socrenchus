@@ -1,6 +1,9 @@
 <template name="session_bar">
   <div id='session-bar'>
     <span id='login-status'>You are logged in as <span class="sessionBarUserName">{{username}}</span>. </span>
+      <span id='login-button'>
+        <a id='login-link' onClick="window.open('http://localhost:3000','windowname',' width=400,height=200')">Login</a>
+      </span>
       <span id='logout-button'>
         <a id='logout-link' href="">Logout</a>
       </span>
