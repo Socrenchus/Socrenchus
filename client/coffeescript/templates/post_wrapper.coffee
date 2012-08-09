@@ -1,6 +1,8 @@
 _.extend( Template.post_wrapper,
 
   group_class: ->
+    #alert(@cur)
+    #alert(Session.get("group_#{@parent_id}"))
     if Session.get("group_#{@parent_id}") is @cur
       return ' selected'
   reply_class: ->
