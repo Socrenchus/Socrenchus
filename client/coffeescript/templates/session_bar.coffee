@@ -7,5 +7,6 @@ _.extend( Template.logout_button_top_right,
   events: {
     'click a.logout_top_right': (event) ->
       Meteor.logout()
+      window.location = '#'
   }
 )
