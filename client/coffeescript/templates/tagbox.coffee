@@ -7,12 +7,12 @@ _.extend( Template.tagbox,
     return formatted_classes
 
   displayed_tags: ->
-    visible = (tag for tag of @tags)
+    tags = (tag for tag of @tags)
     if @my_tags?
       for tag in @my_tags
         if not (tag in visible)
-          visible.push(tag)
-    return visible
+          tags.push(tag)
+    return tags
     
   suggested_tags: ->
     filtered = []
