@@ -77,12 +77,13 @@ Meteor.publish("my_posts", ->
     )
     
     @onStop( =>
-      posts = q.fetch()
-      handle.stop()
-      for post in posts
-        fields = (key for key of ClientPost)
-        @unset( "my_posts", post._id, fields )
-      @flush()
+      if q?
+        posts = q.fetch()
+        handle.stop()
+        for post in posts
+          fields = (key for key of ClientPost)
+          @unset( "my_posts", post._id, fields )
+        @flush()
     )
 
 
