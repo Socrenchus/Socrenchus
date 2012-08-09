@@ -2,7 +2,7 @@ _.extend( Template.tagbox,
   classes: ->
     classes = ['tag']
     classes.push('grad') if @tags[@cur]?
-    classes.push('mytag') if @my_tags? && @cur in @my_tags
+    classes.push('mytag') if @my_tags? and @cur in @my_tags
     formatted_classes = classes.join(' ')
     return formatted_classes
 
@@ -17,12 +17,12 @@ _.extend( Template.tagbox,
   suggested_tags: ->
     filtered = []
     for tag in Session.get('suggested_tags')
-      if tag? && tag.indexOf(Session.get('filter_text')) != -1
+      if tag? and tag.indexOf(Session.get('filter_text')) != -1
         filtered.push(tag)
     return filtered
 
   tagging_post: ->
-    Session.equals('tagging', true) && Session.equals('current_post', @_id)
+    Session.equals('tagging', true) and Session.equals('current_post', @_id)
   
   events: {
     
@@ -57,7 +57,7 @@ _.extend( Template.tagbox,
           when 13 #Enter: ADD ENTERED TEXT
             Template.tagbox.add_tag(@_id, entered_text)
           when 37 #Left-arrow: ADD SUGGESTED TAG
-            if event.ctrlKey && suggested_tag?
+            if event.ctrlKey and suggested_tag?
               Template.tagbox.add_tag(@_id, suggested_tag)
           when 39 #Right-arrow: REMOVE SUGGESTED TAG
             if event.ctrlKey
