@@ -3,8 +3,12 @@ _.extend( Template.conversation,
     not Session.equals('showing_post', undefined)
     
   root_post: ->
-    posts = []
     cur_post = Session.get('showing_post')
+    
+    #Carousel implementation
+    Template.post_wrapper.start_carousel(cur_post)
+    
+    posts = []
     posts.push(cur_post)
     
     #Get ancestors of selected post
