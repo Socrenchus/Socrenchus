@@ -1,4 +1,24 @@
 _.extend( Template.post,
+  parent: ->
+    parent = Posts.findOne(_id: @parent_id)
+    return {exists: parent?, post: parent}
+
+  #QQQ
+  init: ->
+    #function runs on initialization of post
+    #takes care of dependencies
+    if Session.equals('current_post', undefined)
+      Session.set('current_post', @_id)  #volunteer
+    if Session.equals('tagging', undefined)
+      Session.set('tagging', false)
+    if Session.equals('suggested_tags', undefined)
+      Session.set('suggested_tags', [])
+    return ""
+    
+  avatar: ->
+    hash = hex_md5("#{@_id}@example.com")
+    return "http://www.gravatar.com/avatar/#{hash}"
+    
   content: ->
     ###
     1. Raw input is assumed in Content.

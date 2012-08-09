@@ -8,9 +8,13 @@ backbone
 coffeescript
 jquery
 showdown
-less
+<<<<<<< HEAD
 accounts
 accounts-ui
 accounts-facebook
 accounts-google
 tron
+=======
+less
+tron
+>>>>>>> desup_styling_thu

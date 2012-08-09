@@ -9,12 +9,34 @@
             <span><i class="icon-user"></i> {{author_short}}</span>
             <span class="pull-right"><i class="icon-time"></i> {x hours ago}</span><!--Make this switch to icon-calendar when it's older.-->
           </div>
+<<<<<<< HEAD
+          <div class="tr post_top_part">
+            <div class="td vote_cell">
+              {{#with this}}
+                {{> votebox}}
+              {{/with}}
+            </div>
+            <div class="td content_cell">
+              <div class="post_content">
+                <div class="post_info">
+<a href="http://www.addthis.com/bookmark.php?v=250&url={{link_href}}">Share</a> - User
+                </div>
+                <div class="in_post">
+                  {{{content}}}
+                </div>
+              </div>
+            </div>
+            <div class="td tag_cell">
+              
+            </div>
+=======
         </div>
       </div>
       <div class="row"><!--Post body-->
         <div class="span10">
           <div class="post-middle">
             {{{content}}}
+>>>>>>> desup_styling_thu
           </div>
         </div>
       </div>
@@ -33,4 +55,7 @@
   {{#if composing_reply}}
     {{> reply_box}}
   {{/if}}
+  
+  <!--Button temporarily out of service.-->
+  <!--<button name="goto-parent">Parent</button>-->
 </template>

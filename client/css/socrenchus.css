@@ -1,0 +1,30 @@
+.post-top {
+  border: 1px solid #000000;
+  border-bottom: 0;
+  background-color: #ffffff;
+  padding: 2px;
+}
+.post-middle {
+  border: 1px solid #000000;
+  border-top: 0;
+  border-bottom: 0;
+  background-color: #ffffff;
+  padding: 2px;
+}
+.post-bottom {
+  border: 1px solid #000000;
+  border-top: 0;
+  background-color: #ffffff;
+  padding: 2px;
+}
+
+.selected {
+  color: blue; /*not permanent, just an indicator temporarily*/  
+}
+
+.nodrag {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  /* this will work for QtWebKit in future */
+  -webkit-user-drag: none;
+}

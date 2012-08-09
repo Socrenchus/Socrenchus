@@ -1,7 +1,18 @@
 _.extend( Template.post_wrapper,
+
+  group_class: ->
+    #alert(@cur)
+    #alert(Session.get("group_#{@parent_id}"))
+    if Session.get("group_#{@parent_id}") is @cur
+      return ' selected'
+  reply_class: ->
+    if Session.get("reply_#{@parent_id}") is @cur
+      return ' selected'
+
   not_root: -> @parent_id?
   groups: ->
-    groups = ['all']
+    #groups = ['all']
+    groups = []
     for post in Posts.find( 'parent_id': @parent_id ).fetch()
       tags = (tag for tag of post.tags)
       for tag in tags
@@ -23,6 +34,23 @@ _.extend( Template.post_wrapper,
     
     return posts
   
+  author_email: ->
+    #When the db is ready...
+    #this_post = Posts.findOne( _id: @cur )
+    #return Users.findOne( _id: this_post.author_id ).email
+    
+    #this_post = Posts.findOne( _id: @cur )
+    #return this_post.author_id
+    
+    return "@"
+    
+  email_hash: ->
+    #When the db is ready...
+    #this_post = Posts.findOne( _id: @cur )
+    #return Users.findOne( _id: this_post.author_id ).email.md5()
+    this_post = Posts.findOne( _id: @cur )
+    return this_post.author_id.md5()
+  
   reply: ->
     reply = Session.get("reply_#{@_id}")
     if reply?
@@ -33,14 +61,18 @@ _.extend( Template.post_wrapper,
     return {exists: post?, post: post}
   
   events: {
-    "click button[name='group']": (event) ->
+    "click button.group": (event) ->
       if not event.isPropagationStopped()
-        Session.set("group_#{@parent_id}", event.target.className)
+        Session.set("group_#{@parent_id}", event.target.getAttribute('name'))
         event.stopPropagation()
     
-    "click button[name='post']": (event) ->
+    "click button.post": (event) ->
       if not event.isPropagationStopped()
-        Session.set("reply_#{@parent_id}", event.target.className)
+        elem = event.target
+        while(elem.nodeName.toLowerCase() isnt 'button')
+          elem = elem.parentNode #bubble up
+        Session.set("reply_#{@parent_id}", elem.getAttribute('name'))
         event.stopPropagation()
+          
   }
 )

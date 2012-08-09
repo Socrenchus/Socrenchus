@@ -1,13 +1,27 @@
 <template name="reply_box">
 
-  <div class="your-reply">
+  <div class="reply-box">
     {{#if is_candidate}}
       <button name="start_reply" type="button">Reply to this! <span class="large_icon">✍</span></button>
     {{else}}
-      <textarea name="reply_text" cols="70" rows="7">{{reply_box_content}}</textarea>
-      <div>
-        <button name="reply_submit" type="button">Post Reply! <span class="large_icon">✔</span></button>
-        <button name="reply_cancel" type="button">Discard <span class="large_icon">✘</span></button>
+      
+      <div class="row">
+        <div class="span10 offset1">
+          <textarea class="span10" name="reply_text" cols="70" rows="7">{{reply_box_content}}</textarea>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="span10 offset1">
+          <div class="pull-right">
+            <button class="btn btn-warning" name="reply_submit" type="button">
+              <i class="icon-comment"></i> Post Reply!
+            </button>
+            <button class="btn btn-danger" name="reply_cancel" type="button">
+              <i class="icon-remove"></i> Discard
+            </button>
+          </div>
+        </div>
       </div>
     {{/if}}
   </div>

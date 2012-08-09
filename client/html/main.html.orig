@@ -1,10 +1,21 @@
 <head>
+  <!--
+  <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Economica' rel='stylesheet' type='text/css'>
+  --><!--Pretend we don't need these for now.-->
   <title>Socrenchus</title>
-  <!--Attribution: For icons, we use:-->
+  <!--For icons, we use:-->
   <!--Font Awesome - http://fortawesome.github.com/Font-Awesome-->
 </head>
 
 <body>
+<<<<<<< HEAD
+  <div id='main'>
+    <div id='instance-bar'>
+      <div id='instance-logo'></div>
+      <!--Inline style: this should go in css.-->
+=======
   <!--http://twitter.github.com/bootstrap/components.html-->
   <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
@@ -40,6 +51,7 @@
           
         </div>
       </div>
+>>>>>>> desup_styling_thu
     </div>
   </div>
   
@@ -51,10 +63,10 @@
           {{> session_bar}}
         </div>  
       </div>
-      {{> conversation }}
       <div id='page-footer'>
         {{> loginButtons}}
       </div>
     </div>
+    {{> conversation }}
   </div>
 </body>
