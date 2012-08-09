@@ -35,7 +35,8 @@ class ClientPost extends SharedPost
         @suggested_tags.push( key ) unless key in @my_tags
     
     author = Meteor.users.findOne( '_id': server.author_id )
-    @author = _.pick( author, '_id', 'emails', 'name' )    
+    if author?
+      @author = _.pick( author, '_id', 'emails', 'name' )    
 
 class ServerPost extends SharedPost
   constructor: ( client ) ->
