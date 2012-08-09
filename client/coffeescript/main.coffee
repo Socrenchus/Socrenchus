@@ -12,7 +12,6 @@ class Router extends Backbone.Router
   routes:
     "i/*args": "use_instance"
     "p/:post_id": "show_post"
-    "new" : "new"
 
   show_post: (post_id) ->
     Meteor.call('get_post_by_id', post_id, (error, result) ->
@@ -34,6 +33,11 @@ class Router extends Backbone.Router
     if other?
       Backbone.history.navigate("/#{other}", trigger: true)
       @navigate("/i/#{domain}/#{other}")
+
+  link: (url) ->
+    unless window.instance?
+      return url
+    return "/i/#{window.instance}#{url}"
 
 Router = new Router()
 Meteor.startup( ->
