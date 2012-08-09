@@ -42,14 +42,11 @@ Meteor.publish("instance", (hostname) ->
   return instance_query
 )
 
-Meteor.publish("my_user", (user_id) ->
-  return Users.find( _id: user_id )
-)
-
 Meteor.publish("my_posts", ->
   user_id = @userId()
   if user_id?
     handle = null
+    q = null
     first_action = (item, idx) =>
       # gather ids of my posts and posts i've replied to
       ids = []
@@ -68,23 +65,24 @@ Meteor.publish("my_posts", ->
         client_post = new ClientPost( doc )
         @set("posts", client_post._id, client_post)
         @flush()
+      
+      my_posts_query = q
 
       handle = q.observe(
         added: action
         changed: action
       )
       
-
-    
     Posts.find( author_id: user_id ).observe(
       added: first_action
       changed: first_action
     )
     
-    @onStop( ->
+    @onStop( =>
+      posts = q.fetch()
       handle.stop()
-      for post in q.fetch()
-        fields = (key for key of Translator.client)
+      for post in posts
+        fields = (key for key of ClientPost)
         @unset( "client_posts", post._id, fields )
       @flush()
     )
@@ -121,25 +119,3 @@ Meteor.publish("current_posts", (post_id) ->
     in_ids = { '$in': ids }
     return Posts.find( '_id': in_ids )
 )
-
-
-Meteor.publish( "client_users", ->
-  ###
-  q = Meteor.users.find()
-  action = ( doc, idx ) =>
-    #@set( "users_proto", idx, doc )
-    @set( "users_proto", doc._id, { email: doc.email } )
-    @flush()
-  handle = q.observe(
-    added: action
-    changed: action
-  )
-  @onStop( ->
-    handle.stop()
-    for user in q.fetch()
-      @unset( "users_proto", user )
-    @flush()
-  )
-  ###
-)
-

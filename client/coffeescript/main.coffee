@@ -1,10 +1,8 @@
 # Collections
 Posts = new Meteor.Collection("posts")
-Users = new Meteor.Collection("users_proto")
 Instances = new Meteor.Collection("instances")
 
 # Subscriptions
-Meteor.subscribe( "client_users" )
 Meteor.subscribe( "my_posts" )
 
 # Backbone router
@@ -16,14 +14,8 @@ class Router extends Backbone.Router
   show_post: (post_id) ->
     Meteor.call('get_post_by_id', post_id, (error, result) ->
       Session.set('showing_post', result)
-      console.log(Session.get('showing_post'))
     )
     Meteor.subscribe( "current_posts", post_id )
-    l = {}
-    for p in Posts.find().fetch()
-      l[p.author_id] = 0
-    l = ( k for k,v of l )
-    Meteor.subscribe( "client_users", l )
 
   use_instance: (args) ->
     args = args.split( '/' )
