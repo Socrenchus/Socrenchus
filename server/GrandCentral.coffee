@@ -49,6 +49,9 @@ class GrandCentral
       console.error(error_list)
     #console.info 'GrandCentral is operational!!'
     error_list = []
+  
+  # XXX fix for a bug when the method 'userId' is not found while inserting a post.
+  userId: -> Meteor.call('get_user_id')
    
 
 
