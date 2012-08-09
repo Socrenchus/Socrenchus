@@ -121,7 +121,8 @@ Meteor.publish("current_posts", (post_id) ->
       @set("posts", client_post._id, client_post)
       @flush()
     
-    handle = Posts.find( '_id': in_ids ).observe(
+    q = Posts.find( '_id': in_ids )
+    handle = q.observe(
       added: action
       changed: action
     )
