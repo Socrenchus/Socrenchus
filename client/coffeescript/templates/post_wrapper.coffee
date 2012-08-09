@@ -1,4 +1,12 @@
 _.extend( Template.post_wrapper,
+
+  group_class: ->
+    if Session.get("group_#{@parent_id}") is @cur
+      return ' selected'
+  reply_class: ->
+    if Session.get("reply_#{@parent_id}") is @cur
+      return ' selected'
+
   not_root: -> @parent_id?
   groups: ->
     #groups = ['all']

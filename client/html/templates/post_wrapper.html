@@ -7,7 +7,8 @@
             <button name='all' class='group'>All<br />Posts</button>
             {{#each groups}}
               {{#both ../this}}
-                <button name='{{cur}}' class='group {{cur}}'>Tagged as<br />'{{cur}}'</button>
+                <button name='{{cur}}' class='group{{group_class}}'>Tagged as<br />'{{cur}}'</button>
+                {{debug}}
               {{/both}}
             {{/each}}
           </div>
@@ -16,7 +17,7 @@
           <div class="span10">
             {{#each group_posts}}
               {{#both ../this}}
-                <button name='{{cur}}' class='post {{cur}}'><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=30&d=identicon" class='nodrag' />{{author_email}}</button>
+                <button name='{{cur}}' class='post{{reply_class}}'><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=30&d=identicon" class='nodrag' />{{author_email}}</button>
               {{/both}}
             {{/each}}
           </div>
