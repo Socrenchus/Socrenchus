@@ -5,6 +5,7 @@ Instances = new Meteor.Collection("instances")
 
 # Subscriptions
 Meteor.subscribe( "client_users" )
+Meteor.subscribe( "my_posts" )
 
 # Backbone router
 class Router extends Backbone.Router
