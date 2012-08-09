@@ -96,14 +96,14 @@ Meteor.publish("current_posts", (post_id) ->
 
   user_id = @userId()
   if user_id? 
-  #all the parents and clindren if you have replied.
+  #all the parents of the post
     ids = []
     ids.push( post_id )
     this_post = post_id
     while Posts.findOne( this_post ).parent_id?
-      this_post = Posts.findOne( post_id ).parent_id
+      this_post = Posts.findOne( this_post ).parent_id
       if this_post not in ids
-        ids.push( parent_id )
+        ids.push( this_post )
     
     #also add child posts if user has replied
     children = Posts.find( 'parent_id': post_id ).fetch()
