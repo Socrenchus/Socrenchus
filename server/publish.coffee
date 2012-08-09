@@ -66,8 +66,6 @@ Meteor.publish("my_posts", ->
         @set("posts", client_post._id, client_post)
         @flush()
       
-      my_posts_query = q
-
       handle = q.observe(
         added: action
         changed: action
@@ -83,7 +81,7 @@ Meteor.publish("my_posts", ->
       handle.stop()
       for post in posts
         fields = (key for key of ClientPost)
-        @unset( "client_posts", post._id, fields )
+        @unset( "my_posts", post._id, fields )
       @flush()
     )
 
@@ -117,5 +115,23 @@ Meteor.publish("current_posts", (post_id) ->
           if child_post._id not in ids
             ids.push( child_post._id )
     in_ids = { '$in': ids }
-    return Posts.find( '_id': in_ids )
+    
+    action = (doc, idx) =>
+      client_post = new ClientPost( doc )
+      @set("posts", client_post._id, client_post)
+      @flush()
+    
+    handle = Posts.find( '_id': in_ids ).observe(
+      added: action
+      changed: action
+    )
+    
+    @onStop( =>
+      posts = q.fetch()
+      handle.stop()
+      for post in posts
+        fields = (key for key of ClientPost)
+        @unset( "client_posts", post._id, fields )
+      @flush()
+    )
 )
