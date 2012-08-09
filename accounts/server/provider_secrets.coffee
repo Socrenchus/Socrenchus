@@ -1,2 +1,2 @@
-Meteor.accounts.google.setSecret "LeeZILT05svXh5PvNi7PrkrJ"
-Meteor.accounts.facebook.setSecret "b367d5310e20d877be768f000d61d7b9"
+Meteor.accounts.google.setSecret "E3qfhdn-_0oyetC1TGRV4DSv"
+Meteor.accounts.facebook.setSecret "e12a0e452638d3d64bd251c64152e1b0"
