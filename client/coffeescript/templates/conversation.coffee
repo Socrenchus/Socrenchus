@@ -6,9 +6,7 @@ _.extend( Template.conversation,
     cur_post = Session.get('showing_post')
     
     #Carousel implementation
-    Session.set('carousel_parent', cur_post)
-    carousel_handle = Meteor.setInterval(start_carousel, 3000)
-    Session.set('carousel_handle', carousel_handle)
+    Template.post_wrapper.start_carousel(cur_post)
     
     posts = []
     posts.push(cur_post)
