@@ -1,22 +1,24 @@
-Array.prototype.clone = ->
-  return this.slice(0)
-
 _.extend( Template.tagbox,
+  classes: ->
+    classes = ['tag']
+    classes.push('grad') if @tags[@cur]?
+    classes.push('mytag') if @cur in @my_tags
+    formatted_classes = classes.join(' ')
+    return formatted_classes
 
   displayed_tags: ->
-    @my_tags ?= []                    #TODO: REMOVE on schema change
     visible = (tag for tag of @tags)
     for tag in @my_tags
       if not (tag in visible)
         visible.push(tag)
-    return { suggested: false, tags: visible }
+    return visible
     
   suggested_tags: ->
     filtered = []
     for tag in Session.get('suggested_tags')
       if tag? && tag.search(Session.get('filter_text')) != -1
         filtered.push(tag)
-    return { suggested: true, tags: filtered }
+    return filtered
 
   tagging_post: ->
     Session.equals('tagging', true) && Session.equals('current_post', @_id)
@@ -30,7 +32,7 @@ _.extend( Template.tagbox,
         
         switch event.keyCode
           when 74 #J/Check
-            Template.tagbox.add_tag(@_id, @my_tags, tag_text)
+            Template.tagbox.add_tag(@_id, tag_text)
           when 75 #K/Kill
             #WORKAROUND.  Session is not yet reactive with arrays or objects.
             temp = Session.get('suggested_tags')
@@ -44,6 +46,7 @@ _.extend( Template.tagbox,
       if not event.isImmediatePropagationStopped()
         entered_text = event.target.value
         
+        #Get first filtered suggestion
         for tag in Session.get('suggested_tags')
           if tag.search(Session.get('filter_text')) != -1
             suggested_tag = tag
@@ -51,10 +54,10 @@ _.extend( Template.tagbox,
         
         switch event.keyCode
           when 13 #Enter: ADD ENTERED TEXT
-            Template.tagbox.add_tag(@_id, @my_tags, entered_text)
+            Template.tagbox.add_tag(@_id, entered_text)
           when 37 #Left-arrow: ADD SUGGESTED TAG
             if event.ctrlKey && suggested_tag?
-              Template.tagbox.add_tag(@_id, @my_tags, suggested_tag)
+              Template.tagbox.add_tag(@_id, suggested_tag)
           when 39 #Right-arrow: REMOVE SUGGESTED TAG
             if event.ctrlKey
               #WORKAROUND.  Session is not yet reactive with arrays or objects.
@@ -83,15 +86,13 @@ _.extend( Template.tagbox,
       if not event.isImmediatePropagationStopped()
         Session.set('tagging', true)
         Session.set('current_post', @_id)
-        @suggestions ?= []    #TODO: REMOVE after schema change
-        Session.set('suggested_tags', @suggestions)
+        Session.set('suggested_tags', @suggested_tags)
         Session.set('filter_text', '')
         event.stopImmediatePropagation()
         
     "click button[name='enter_tag']": (event) ->
       if not event.isImmediatePropagationStopped()
-        Template.tagbox.add_tag(@_id, @my_tags,
-          Session.get('filter_text'))
+        Template.tagbox.add_tag(@_id, Session.get('filter_text'))
       return false
         
     "click button[name='done_tagging']": (event) ->
@@ -100,31 +101,15 @@ _.extend( Template.tagbox,
       return false
   }
   
-  add_tag: (id, my_tags, tag_text) ->
+  add_tag: (id, tag_text) ->
     Session.set('filter_text', '')
-    if tag_text != '' && not (tag_text in my_tags)
+    if tag_text != ''
       q = {'$set': {}}
       q['$set']["my_tags.#{tag_text}"] = 1
-      tron.log(q)
       Posts.update({ '_id': id}, q)
-      @suggestions?.remove(tag_text)
+      #WORKAROUND.  Session is not yet reactive with arrays or objects.
+      temp = Session.get('suggested_tags')
+      temp.remove(tag_text)
+      Session.set('suggested_tags',temp.clone())
     Meteor.flush()
 )
-
-# TODO: Remove this helper ASAP, handle bar helper abuse is bad and ugly.
-#   The point of templates is so that we don't generate HTML in our script
-#   files, if I wanted to do this I would have kept the old app engine
-#   system.
-Handlebars.registerHelper('tags', (context, object) ->
-  @my_tags ?= []          #TODO: REMOVE
-  ret = ''
-  for tag in context.tags
-    ret += if context.suggested then "<div tabindex='0'" else '<div'
-    ret += " class='tag"
-    ret += ' grad' if @tags[tag]?
-    ret += ' mytag' if tag in @my_tags
-    ret += ' suggested' if context.suggested
-    ret += "'>" + tag + '</div>'
-  return ret
-)
-
