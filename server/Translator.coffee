@@ -3,12 +3,12 @@ class SharedPost
     # define the shared client-server schema
     _.extend( @,
       _id: ''
-      author_id: ''
       parent_id: undefined
       content: ''
+      instance_id: ''
     )
     
-    for key in [ '_id', 'author_id', 'parent_id', 'content' ]
+    for key in [ '_id', 'parent_id', 'content', 'instance_id' ]
       @[key] = either[key] if either[key]?
        
 class ClientPost extends SharedPost
@@ -23,7 +23,7 @@ class ClientPost extends SharedPost
     user_id = Meteor.call('get_user_id')
     
     super(server)
-
+    
     for tag of server.tags
       @tags[tag] = server.tags[tag].weight
       users = server.tags[tag].users
@@ -33,6 +33,9 @@ class ClientPost extends SharedPost
     for post in Posts.find( 'parent_id': server.parent_id ).fetch()
       for key of post.tags
         @suggested_tags.push( key ) unless key in @my_tags
+    
+    author = Meteor.users.findOne( '_id': server.author_id )
+    @author = _.pick( author, '_id', 'emails', 'name' )    
 
 class ServerPost extends SharedPost
   constructor: ( client ) ->
@@ -64,5 +67,3 @@ class ServerPost extends SharedPost
         unless user_id in @tags[tag].users
           # apply the tag
           @tags[tag].users.push( user_id )
-    
-      
