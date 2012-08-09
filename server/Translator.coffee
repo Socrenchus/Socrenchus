@@ -6,9 +6,10 @@ class SharedPost
       author_id: ''
       parent_id: undefined
       content: ''
+      instance_id: ''
     )
     
-    for key in [ '_id', 'author_id', 'parent_id', 'content' ]
+    for key in [ '_id', 'author_id', 'parent_id', 'content', 'instance_id' ]
       @[key] = either[key] if either[key]?
        
 class ClientPost extends SharedPost

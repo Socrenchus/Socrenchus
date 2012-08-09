@@ -23,10 +23,10 @@ _.extend( Template.post,
     return oembedded
   identifier: -> @_id
   link_href: ->
-    return "/#{ @_id }"
+    return Router.link("/p/#{ @_id }")
   parent_href: ->
     if @parent_id?
-      return "/#{ @parent_id }"
+      return Router.link("/p/#{ @parent_id }")
     else
       return false
 )
