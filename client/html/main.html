@@ -5,52 +5,11 @@
 </head>
 
 <body>
-  <!--http://twitter.github.com/bootstrap/components.html-->
-  <div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-      <div class="container">
-        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
-        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </a>
-        
-        <a class="brand" href="#">
-          Socrenchus
-        </a>
-        <ul class="nav">
-          <li>{{> notifications}}</li>
-        </ul>
-        
-        <!-- Everything we want hidden at 940px or less, place within here -->
-        <div class="nav-collapse">
-          <!-- .nav, .navbar-search, .navbar-form, etc -->
-          <ul class="nav">
-            <li class="active">
-              <a href="#"><i class="icon-home"></i> Home</a>
-            </li>
-            <li><a href="#"><i class="icon-tag"></i>Tag Game</a></li>
-          </ul>
-          <ul class="nav pull-right">
-            <li class="divider-vertical"></li>
-            <li>{{> logout_button_top_right}}</li>
-          </ul>
-          
-          
-        </div>
-      </div>
-    </div>
-  </div>
+  {{> session_bar}}
   
   <div class="container">
     
     <div class="row">
-      <div class="span12">
-        <div class="alert alert-info">
-          {{> session_bar}}
-        </div>  
-      </div>
       {{> conversation }}
       <div id='page-footer'>
         {{> loginButtons}}
