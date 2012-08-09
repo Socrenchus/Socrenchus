@@ -36,15 +36,3 @@ Meteor.startup( ->
 Handlebars.registerHelper('both', (context, options) ->
   return options.fn(_.extend(context ? {}, {cur:@}))
 )
-
-# Function to be called every time a post's replies start to cycle
-start_carousel = ->
-  parent = Session.get('carousel_parent')
-  cur_reply = Session.get("reply_#{parent._id}")
-  if parent? and cur_reply?
-    all_replies = Posts.find( parent_id: parent._id ).fetch()
-    idx = 0
-    for reply, i in all_replies
-      if reply._id is cur_reply
-        idx = (i + 1) % all_replies.length
-    Session.set("reply_#{parent._id}", all_replies[idx]._id)
