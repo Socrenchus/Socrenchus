@@ -1,0 +1,9 @@
+<template name="conversation">
+  {{#if show_post}}
+    <div class="popup_post">
+      {{#with root_post}}
+        {{> post_wrapper}}
+      {{/with}}
+    </div>
+  {{/if}}
+</template>

@@ -6,7 +6,7 @@
 <body>
   <div id='main'>
     <div id='instance-bar'>
-      <img id='instance-logo' src='/images/logo.png' onclick='location.href="/"' style="cursor:pointer">
+      <div id='instance-logo'></div>
       <!--Inline style: this should go in css.-->
     </div>
     {{> session_bar}}
@@ -14,9 +14,7 @@
       <div id='page-header'></div>
       <div id='page-body'>
         {{> notifications}}
-        {{> popup_post }}
-        {{> reply_box }}
-        {{> stream}}
+        {{> conversation }}
       </div>
       <div id='page-footer'>
         {{> loginButtons}}
