@@ -1,6 +1,13 @@
-Users = new Meteor.Collection("users_proto")
-Posts = new Meteor.Collection("posts")
-Instances = new Meteor.Collection("instances")
+Users = new Meteor.Collection( "users_proto" )
+Posts = new Meteor.Collection( "posts" )
+Instances = new Meteor.Collection( "instances" )
+
+Posts.allow?(
+  insert: -> true
+  update: -> true
+  remove: -> false
+  fetch: []
+)
 
 Meteor.publish("instance", (hostname) ->
   user_id = Session.get('user_id')
@@ -35,39 +42,80 @@ Meteor.publish("instance", (hostname) ->
   return instance_query
 )
 
-Meteor.publish("my_user", (user_id) ->
-  return Users.find( _id: user_id )
-)
-
 Meteor.publish("my_posts", ->
-  user_id = Meteor.call('get_user_id')
+  user_id = @userId()
   if user_id?
-    # gather ids of my posts and posts i've replied to
-    ids = []
-    for item in Posts.find( author_id: user_id ).fetch()
+    handle = null
+    q = null
+    first_action = (item, idx) =>
+      # gather ids of my posts and posts i've replied to
+      ids = []
       ids.push( item['parent_id'] ) if 'parent_id' of item
       ids.push( item['_id'] )
-    # query for posts or children of my posts or parents
-    in_ids = { '$in': ids }
-    in_or_child_of_ids = { '$or': [ {_id: in_ids}, {parent_id: in_ids} ] }
-    q = Posts.find( in_or_child_of_ids )
+      
+      # query for posts or children of my posts or parents
+      in_ids = { '$in': ids }
+      in_or_child_of_ids = { '$or': [ {_id: in_ids}, {parent_id: in_ids} ] }
+      q = Posts.find( in_or_child_of_ids )
+      
+      if handle?
+        handle.stop()
 
-    action = (doc, idx) =>
-      client_post = new ClientPost( doc )
-      @set("posts", client_post._id, client_post)
-      @flush()
+      action = (doc, idx) =>
+        client_post = new ClientPost( doc )
+        @set("posts", client_post._id, client_post)
+        @flush()
+      
+      my_posts_query = q
 
-    handle = q.observe(
-      added: action
-      changed: action
+      handle = q.observe(
+        added: action
+        changed: action
+      )
+      
+    Posts.find( author_id: user_id ).observe(
+      added: first_action
+      changed: first_action
     )
     
-    @onStop( ->
+    @onStop( =>
+      posts = q.fetch()
       handle.stop()
-      for post in q.fetch()
-        fields = (key for key of Translator.client)
+      for post in posts
+        fields = (key for key of ClientPost)
         @unset( "client_posts", post._id, fields )
       @flush()
     )
+
+
 )
 
+Meteor.publish("current_posts", (post_id) ->
+
+  user_id = @userId()
+  if user_id? 
+  #all the parents and clindren if you have replied.
+    ids = []
+    ids.push( post_id )
+    this_post = post_id
+    while Posts.findOne( this_post ).parent_id?
+      this_post = Posts.findOne( post_id ).parent_id
+      if this_post not in ids
+        ids.push( parent_id )
+    
+    #also add child posts if user has replied
+    children = Posts.find( 'parent_id': post_id ).fetch()
+    replied = false
+    for child_post in children
+      if child_post.author_id = user_id
+        replied = true
+    if replied
+      child_posts = Posts.find( 'parent_id': post_id ).fetch()
+      while Posts.findOne( 'parent_id':{'$in': child_posts } )?
+        child_posts =  Posts.findOne( 'parent_id':{'$in': child_posts } )
+        for child_post in child_posts
+          if child_post._id not in ids
+            ids.push( child_post._id )
+    in_ids = { '$in': ids }
+    return Posts.find( '_id': in_ids )
+)
