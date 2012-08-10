@@ -47,9 +47,9 @@ Meteor.publish("my_posts", ->
   if user_id?
     handle = null
     q = null
+    ids = []
     first_action = (item, idx) =>
       # gather ids of my posts and posts i've replied to
-      ids = []
       ids.push( item['parent_id'] ) if 'parent_id' of item
       ids.push( item['_id'] )
       
@@ -66,8 +66,6 @@ Meteor.publish("my_posts", ->
         @set("posts", client_post._id, client_post)
         @flush()
       
-      my_posts_query = q
-
       handle = q.observe(
         added: action
         changed: action
@@ -79,12 +77,13 @@ Meteor.publish("my_posts", ->
     )
     
     @onStop( =>
-      posts = q.fetch()
-      handle.stop()
-      for post in posts
-        fields = (key for key of ClientPost)
-        @unset( "client_posts", post._id, fields )
-      @flush()
+      if q?
+        posts = q.fetch()
+        handle.stop()
+        for post in posts
+          fields = (key for key of ClientPost)
+          @unset( "my_posts", post._id, fields )
+        @flush()
     )
 
 
@@ -94,14 +93,14 @@ Meteor.publish("current_posts", (post_id) ->
 
   user_id = @userId()
   if user_id? 
-  #all the parents and clindren if you have replied.
+  #all the parents of the post
     ids = []
     ids.push( post_id )
     this_post = post_id
     while Posts.findOne( this_post ).parent_id?
-      this_post = Posts.findOne( post_id ).parent_id
+      this_post = Posts.findOne( this_post ).parent_id
       if this_post not in ids
-        ids.push( parent_id )
+        ids.push( this_post )
     
     #also add child posts if user has replied
     children = Posts.find( 'parent_id': post_id ).fetch()
@@ -117,5 +116,24 @@ Meteor.publish("current_posts", (post_id) ->
           if child_post._id not in ids
             ids.push( child_post._id )
     in_ids = { '$in': ids }
-    return Posts.find( '_id': in_ids )
+    
+    action = (doc, idx) =>
+      client_post = new ClientPost( doc )
+      @set("posts", client_post._id, client_post)
+      @flush()
+    
+    q = Posts.find( '_id': in_ids )
+    handle = q.observe(
+      added: action
+      changed: action
+    )
+    
+    @onStop( =>
+      posts = q.fetch()
+      handle.stop()
+      for post in posts
+        fields = (key for key of ClientPost)
+        @unset( "client_posts", post._id, fields )
+      @flush()
+    )
 )

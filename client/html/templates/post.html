@@ -1,55 +1,49 @@
-
-  <!-- 
-  Philip's New Post Style 6/12/12
-  
-  Design goals: 
-  Clarity of structure
-  -Recursive properties of posts evident in the visible structure.        
-  Readability of elements
-  Helpfulness to posters
-    -->
-
+<!--Newpost, Created July 19, 2012-->
 <template name="post">
-  <div class="post_container">
-    <div class="table post">
-      <div class="colgroup">
-        <div class="col"></div>
-      </div>
-      <div class="tr post_top_part">
-        <div class="table post_top_part">
-          <div class="colgroup">
-            <div class="col vote_col"></div>
-            <div class="col content_col"></div>
-            <div class="col tag_col"></div>
-          </div>
-          <div class="tr post_top_part">
-            <div class="td vote_cell">
-              {{#with this}}
-                {{> votebox}}
-              {{/with}}
-            </div>
-            <div class="td content_cell">
-              <div class="post_content">
-                <div class="post_info">
-<a href="http://www.addthis.com/bookmark.php?v=250&url={{link_href}}">Share</a> - User
-                </div>
-                <div class="in_post">
-                  {{{content}}}
-                </div>
-              </div>
-            </div>
-            <div class="td tag_cell">
-              
-            </div>
+  {{init}}
+  <div class="row">
+    <div class="{{post_span}} offset1">
+      <div class="row">
+        <div class="{{post_span}}">
+          <div class="post-top">
+            <span><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=30&d=identicon" height='16' width='16' class='nodrag' /> {{author_name}}</span>
+            <span class="pull-right">
+              <i class="icon-time"></i> {x hours ago}<!--Make this switch to icon-calendar when it's older.-->
+              <a href="http://www.addthis.com/bookmark.php?v=250&url={{link_href}}">Share</a>
+              <button class="btn btn-mini toggle-tagbox"><i class="icon-tags"></i></button>
+              {{#if parent.exists}}
+                <button class="btn btn-mini" {{#if is_cycling}} style="color: red;" {{else}} name='carousel' {{/if}}>
+                  <i class="icon-certificate"></i>
+                </button>
+              {{/if}}
+            </span>
           </div>
         </div>
       </div>
-      <div class="tr post_reply_part">
-        {{> reply_box}}
+      <div class="row">
+        <div class="{{post_span}}">
+          <div class="post-middle">
+            {{{content}}}
+          </div>
+        </div>
+      </div>
+      <div class="row"><!--Post foot-->
+        <div class="{{post_span}}">
+          <div class="post-bottom">
+            <span class="reply_count">{{reply_count}}</span>
+            <button class="btn btn-mini pull-right" name="reply">Reply</button>
+          </div>
+        </div>
       </div>
     </div>
+    {{#if tag_on}}
+      <div class="span3">
+         {{> tagbox}}
+      </div>
+    {{/if}}
   </div>
   
-  <!--Button temporarily out of service.-->
-  <!--<button name="goto-parent">Parent</button>-->
+  {{#if composing_reply}}
+    {{> reply_box}}
+  {{/if}}
 </template>
