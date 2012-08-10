@@ -64,6 +64,8 @@ _.extend( Template.post_wrapper,
       post = Posts.findOne( _id: reply )
     else
       post = Posts.findOne( parent_id: @_id )
+      if post?
+        Session.set("reply_#{@_id}", post._id)
     
     return {exists: post?, post: post}
   
@@ -80,6 +82,20 @@ _.extend( Template.post_wrapper,
           elem = elem.parentNode #bubble up
         Session.set("reply_#{@parent_id}", elem.getAttribute('name'))
         event.stopPropagation()
-          
   }
+  
+  start_carousel: (parent_post) ->
+    Session.set('carousel_parent', parent_post)
+    carousel_handle = Meteor.setInterval( ->
+      parent = Session.get('carousel_parent')
+      cur_reply = Session.get("reply_#{parent._id}")
+      if parent? and cur_reply?
+        all_replies = Posts.find( parent_id: parent._id ).fetch()
+        idx = 0
+        for reply, i in all_replies
+          if reply._id is cur_reply
+            idx = (i + 1) % all_replies.length
+        Session.set("reply_#{parent._id}", all_replies[idx]._id)
+    , 3000)
+    Session.set('carousel_handle', carousel_handle)
 )

@@ -1,6 +1,9 @@
 <template name="post_wrapper">
   {{#if not_root}}
-      <div class="row">
+    <div>
+      <button name='carousel'>CAROUSEL</button>
+    </div>
+    <div class="row">
       <div class="span10 offset1">
         <div class="row">
           <div class="span10">
@@ -30,7 +33,9 @@
     </div>
   {{/if}}
   
-  {{> post}}
+  <div id='{{_id}}'>
+    {{> post}}
+  </div>
   
   {{#if reply.exists}}
     {{#with reply.post}}

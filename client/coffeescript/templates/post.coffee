@@ -41,6 +41,7 @@ _.extend( Template.post,
     oembedded = oembedded.replace(/(\s|>|^)(mailto:[^\s<]*)/igm, replacement)
     Meteor.defer( -> $('a.oembed').oembed().removeClass('oembed') )
     return oembedded
+    
   identifier: -> @_id
   link_href: ->
     return Router.link("/p/#{ @_id }")

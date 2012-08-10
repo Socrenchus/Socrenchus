@@ -8,7 +8,7 @@ _.extend( Template.reply_box,
   events: {
     #start composing
     "click button[name='start_reply']": (event) ->
-      if not event.isImmediatePropagationStopped()
+      if not event.isPropagationStopped()
         discard = true
         if Session.get('composing')? && Session.get('composing') != ''
           discard = confirm('You are currently replying to another post.'+
@@ -16,7 +16,7 @@ _.extend( Template.reply_box,
         if discard
           Session.set('current_post', @_id)
           Session.set('composing', '')
-        event.stopImmediatePropagation()
+        event.stopPropagation()
       
     ###
     "load textarea[name='reply_text']": (event) ->
