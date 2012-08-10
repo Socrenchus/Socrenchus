@@ -2,9 +2,9 @@
 <template name="post">
   {{init}}
   <div class="row">
-    <div class="span10 offset1">
-      <div class="row"><!--Post head-->
-        <div class="span10">
+    <div class="{{post_span}} offset1">
+      <div class="row">
+        <div class="{{post_span}}">
           <div class="post-top">
             <span><i class="icon-user"></i> {{author_short}}</span>
             <span class="pull-right">
@@ -18,15 +18,15 @@
           </div>
         </div>
       </div>
-      <div class="row"><!--Post body-->
-        <div class="span10">
+      <div class="row">
+        <div class="{{post_span}}">
           <div class="post-middle">
             {{{content}}}
           </div>
         </div>
       </div>
       <div class="row"><!--Post foot-->
-        <div class="span10">
+        <div class="{{post_span}}">
           <div class="post-bottom">
             <span class="reply_count">{<em>x</em> replies.} </span>
             <button class="btn btn-mini pull-right" name="reply">Reply</button>
@@ -34,7 +34,11 @@
         </div>
       </div>
     </div>
-    
+    {{#if tag_on}}
+      <div class="span3">
+         SDFSDFLKJ
+      </div>
+    {{/if}}
   </div>
   
   {{#if composing_reply}}

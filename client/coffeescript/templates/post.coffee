@@ -1,4 +1,12 @@
 _.extend( Template.post,
+  post_span: ->
+    #Returns span10 or span7, depending on whether tagbox is visible.
+    if Session.equals('tagging', true) and Session.equals('current_post', @_id)
+      return 'span7'
+    else
+      return 'span10'
+
+
   parent: ->
     parent = Posts.findOne(_id: @parent_id)
     return {exists: parent?, post: parent}

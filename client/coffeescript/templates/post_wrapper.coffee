@@ -47,7 +47,7 @@ _.extend( Template.post_wrapper,
     
     return "@"
     
-  email_hash: ->
+  email_hash: ->  
     #When the db is ready...
     #this_post = Posts.findOne( _id: @cur )
     #return Users.findOne( _id: this_post.author_id ).email.md5()
