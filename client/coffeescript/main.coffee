@@ -52,3 +52,14 @@ Meteor.startup( ->
 Handlebars.registerHelper('both', (context, options) ->
   return options.fn(_.extend(context ? {}, {cur:@}))
 )
+
+#http://thinkvitamin.com/code/handlebars-js-part-3-tips-and-tricks/
+Handlebars.registerHelper('debug', (optionalValue) ->
+  console.log "Current Context"
+  console.log "===================="
+  console.log this
+  if optionalValue
+    console.log "Value"
+    console.log "===================="
+    console.log optionalValue
+)

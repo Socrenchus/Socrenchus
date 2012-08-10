@@ -8,7 +8,7 @@ _.extend( Template.reply_box,
   events: {
     #start composing
     "click button[name='start_reply']": (event) ->
-      if not event.isImmediatePropagationStopped()
+      if not event.isPropagationStopped()
         discard = true
         if Session.get('composing')? && Session.get('composing') != ''
           discard = confirm('You are currently replying to another post.'+
@@ -16,14 +16,7 @@ _.extend( Template.reply_box,
         if discard
           Session.set('current_post', @_id)
           Session.set('composing', '')
-        event.stopImmediatePropagation()
-      
-    ###
-    "load textarea[name='reply_text']": (event) ->
-      if not event.isImmediatePropagationStopped()
-        event.target.focus()
-        event.stopImmediatePropagation()
-    ###
+        event.stopPropagation()
     
     #editing
     """
@@ -65,6 +58,7 @@ _.extend( Template.reply_box,
           console.log('ID of new post: '+reply_id)
           Session.set('composing', undefined) #the clean up.
         event.stopImmediatePropagation()
+        Meteor.flush()
      
     #cancel a reply
     "click button[name='reply_cancel']": (event) ->

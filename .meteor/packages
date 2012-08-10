@@ -7,10 +7,11 @@ underscore
 backbone
 coffeescript
 jquery
-stylus
 showdown
+less
 accounts
 accounts-ui
 accounts-facebook
 accounts-google
 tron
+accounts-passwords
