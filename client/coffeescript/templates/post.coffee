@@ -1,4 +1,12 @@
 _.extend( Template.post,
+  post_span: ->
+    #Returns span10 or span7, depending on whether tagbox is visible.
+    if Session.equals('tagging', true) and Session.equals('current_post', @_id)
+      return 'span7'
+    else
+      return 'span10'
+
+
   parent: ->
     parent = Posts.findOne(_id: @parent_id)
     return {exists: parent?, post: parent}
@@ -45,6 +53,20 @@ _.extend( Template.post,
   identifier: -> @_id
   link_href: -> Router.link("/p/#{ @_id }")
   
+  author_name: -> @author.name
+  
+  #a similar function exists in post_wrapper --phil
+  email_hash: ->
+    this_post = Posts.findOne( _id: @_id )
+    author = this_post.author
+    if author?
+      if author.emails? and author.emails.length? and author.emails.length>0
+        return author.emails[0].md5()
+      else if author._id?
+        return author._id.md5()
+    else
+      return "NO AUTHOR".md5()
+  
   author: -> @author_id
   author_short: -> 
     if typeof @author_id is "string" and @author_id.length>5
@@ -62,6 +84,16 @@ _.extend( Template.post,
     return Session.equals('current_post', @_id) and
       not Session.equals('composing', undefined)
   composing_any_reply: -> not Session.equals('composing', undefined)
+  
+  reply_count: ->
+    ct = Posts.findOne(_id: @_id).reply_count
+    if ct is 1
+      return '1 reply'
+    else
+      return "#{ct} replies"
+  
+  is_cycling: ->
+    return Session.get('carousel_parent')._id is @parent_id
   events: { # July 19
     "click button.toggle-tagbox": (event) ->
       if not event.isImmediatePropagationStopped()
@@ -80,9 +112,17 @@ _.extend( Template.post,
           #console.log("Started tagging on post #{@_id}")
         event.stopImmediatePropagation()
     "click button[name='reply']": (event) ->
-      if not event.isImmediatePropagationStopped()
+      if not event.isPropagationStopped()
         Session.set('current_post', @_id)
         Session.set('composing', '')
+        #give the reply text area focus
+        Meteor.defer(-> $("#reply_text").focus())
+        event.stopPropagation()
+    
+    "click button[name='carousel']": (event) ->
+      if not event.isImmediatePropagationStopped()
+        Meteor.clearInterval(Session.get('carousel_handle'))
+        Template.post_wrapper.start_carousel(Posts.findOne(_id: @parent_id))
         event.stopImmediatePropagation()
   }
   

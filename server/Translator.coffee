@@ -17,6 +17,7 @@ class ClientPost extends SharedPost
     _.extend( @,
       tags: {} # tag: weight
       my_tags: {} # same as tags
+      reply_count: 0
       suggested_tags: []
     )
 
@@ -36,7 +37,9 @@ class ClientPost extends SharedPost
     
     author = Meteor.users.findOne( '_id': server.author_id )
     if author?
-      @author = _.pick( author, '_id', 'emails', 'name' )    
+      @author = _.pick( author, '_id', 'emails', 'name' )
+      
+    @reply_count = Posts.find({parent_id: server._id}).count()
 
 class ServerPost extends SharedPost
   constructor: ( client ) ->

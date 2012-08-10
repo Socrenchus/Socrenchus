@@ -1,8 +1,17 @@
 _.extend( Template.post,
+  post_span: ->
+    #Returns span10 or span7, depending on whether tagbox is visible.
+    if Session.equals('tagging', true) and Session.equals('current_post', @_id)
+      return 'span7'
+    else
+      return 'span10'
+
+
   parent: ->
     parent = Posts.findOne(_id: @parent_id)
     return {exists: parent?, post: parent}
 
+  #QQQ
   init: ->
     #function runs on initialization of post
     #takes care of dependencies
@@ -40,17 +49,10 @@ _.extend( Template.post,
     oembedded = oembedded.replace(/(\s|>|^)(mailto:[^\s<]*)/igm, replacement)
     Meteor.defer( -> $('a.oembed').oembed().removeClass('oembed') )
     return oembedded
+    
   identifier: -> @_id
-  link_href: ->
-<<<<<<< HEAD
-    return Router.link("/p/#{ @_id }")
-=======
-    return "/#{ @_id }"
-  parent_href: ->
-    if @parent_id?
-      return "/#{ @parent_id }"
-    else
-      return false
+  link_href: -> Router.link("/p/#{ @_id }")
+  
   author: -> @author_id
   author_short: -> 
     if typeof @author_id is "string" and @author_id.length>5
@@ -59,22 +61,28 @@ _.extend( Template.post,
       @author_id
     #hack to get a short author name.  remove
     #  when we have access to usernames.  
-  
   tag_on: ->  # July 19
     return Session.equals('tagging', true) and 
       Session.equals('current_post', @_id)
-  
   has_replied: ->
     Posts.findOne( {'parent_id': @_id, 'author_id': Session.get('user_id')} ) isnt undefined
-  
   composing_reply: ->
     return Session.equals('current_post', @_id) and
       not Session.equals('composing', undefined)
-  
   composing_any_reply: -> not Session.equals('composing', undefined)
   
+<<<<<<< HEAD
+  reply_count: ->
+    Meteor.call('get_reply_count', @_id, (err, res) ->
+      return res
+    )
+  
+=======
+  is_cycling: ->
+    return Session.get('carousel_parent')._id is @parent_id
+>>>>>>> 828031fe3f44eef303a5f05243167f1f5bc00291
   events: { # July 19
-    "click button[name='see_tags']": (event) ->
+    "click button.toggle-tagbox": (event) ->
       if not event.isImmediatePropagationStopped()
         #TODO: Turn these commented-out console.logs 
         #      into their proper tron actions.  
@@ -89,16 +97,20 @@ _.extend( Template.post,
           Session.set('tagging', true)
           Session.set('current_post', @_id)
           #console.log("Started tagging on post #{@_id}")
-        
         event.stopImmediatePropagation()
-    
     "click button[name='reply']": (event) ->
-      if not event.isImmediatePropagationStopped()
+      if not event.isPropagationStopped()
         Session.set('current_post', @_id)
         Session.set('composing', '')
-        event.stopImmediatePropagation()
-        
+        #give the reply text area focus
+        Meteor.defer(-> $("#reply_text").focus())
+        event.stopPropagation()
     
+    "click button[name='carousel']": (event) ->
+      if not event.isImmediatePropagationStopped()
+        Meteor.clearInterval(Session.get('carousel_handle'))
+        Template.post_wrapper.start_carousel(Posts.findOne(_id: @parent_id))
+        event.stopImmediatePropagation()
   }
->>>>>>> desup_styling_thu
+  
 )

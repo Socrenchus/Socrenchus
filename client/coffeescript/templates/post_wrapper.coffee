@@ -1,13 +1,14 @@
 _.extend( Template.post_wrapper,
 
+  allbutton_class: ->
+    if not Session.get("group_#{@parent_id}")?
+      return ' btn-inverse'
   group_class: ->
-    #alert(@cur)
-    #alert(Session.get("group_#{@parent_id}"))
-    if Session.get("group_#{@parent_id}") is @cur
-      return ' selected'
+    if Session.get("group_#{@parent_id}") is @cur.toString()
+      return ' btn-inverse'
   reply_class: ->
-    if Session.get("reply_#{@parent_id}") is @cur
-      return ' selected'
+    if Session.get("reply_#{@parent_id}") is @cur.toString()
+      return ' btn-inverse'#selected
 
   not_root: -> @parent_id?
   groups: ->
@@ -35,20 +36,26 @@ _.extend( Template.post_wrapper,
     return posts
   
   author_email: ->
-    #When the db is ready...
-    #this_post = Posts.findOne( _id: @cur )
-    #return Users.findOne( _id: this_post.author_id ).email
-    
-    #this_post = Posts.findOne( _id: @cur )
-    #return this_post.author_id
-    
-    return "@"
+    this_post = Posts.findOne( _id: @cur )
+    author = this_post.author
+    if author? and author.emails? and author.emails.length? and author.emails.length>0
+      return author.emails[0]
     
   email_hash: ->
+    this_post = Posts.findOne( _id: @cur )
+    author = this_post.author
+    if author?
+      if author.emails? and author.emails.length? and author.emails.length>0
+        return author.emails[0].md5()
+      else if author._id?
+        return author._id.md5()
+    else
+      return "NO AUTHOR".md5()
+    
     #When the db is ready...
     #this_post = Posts.findOne( _id: @cur )
     #return Users.findOne( _id: this_post.author_id ).email.md5()
-    this_post = Posts.findOne( _id: @cur )
+    
     #Need to safify this.
     ###
     if this_post.author?.emails?.length>0
@@ -56,7 +63,6 @@ _.extend( Template.post_wrapper,
     else
       return this_post.author._id.md5()
     ###
-    return "NOOOOOOO"
       
   reply: ->
     reply = Session.get("reply_#{@_id}")
@@ -70,18 +76,33 @@ _.extend( Template.post_wrapper,
     return {exists: post?, post: post}
   
   events: {
-    "click button.group": (event) ->
+    "mousedown button.allbutton": (event) ->
+      if not event.isPropagationStopped()
+        Session.set("group_#{@parent_id}", null)
+        event.stopPropagation()
+    
+    "mousedown button.group": (event) ->
       if not event.isPropagationStopped()
         Session.set("group_#{@parent_id}", event.target.getAttribute('name'))
         event.stopPropagation()
     
-    "click button.post": (event) ->
+    "mousedown button.post": (event) ->
       if not event.isPropagationStopped()
         elem = event.target
         while(elem.nodeName.toLowerCase() isnt 'button')
           elem = elem.parentNode #bubble up
         Session.set("reply_#{@parent_id}", elem.getAttribute('name'))
         event.stopPropagation()
+    
+    'click': (event) ->
+      parent = Session.get('carousel_parent')
+      ancestors = [(cur = @).parent_id]
+      while cur?.parent_id?
+        cur = Posts.findOne( _id: cur.parent_id )
+        ancestors.push(cur.parent_id)
+      if parent._id in ancestors && not Session.equals('carousel_handle',null)
+        Meteor.clearInterval(Session.get('carousel_handle'))
+        Template.post_wrapper.start_carousel(@)
   }
   
   start_carousel: (parent_post) ->
