@@ -4,8 +4,6 @@ _.extend( Template.post_wrapper,
     if not Session.get("group_#{@parent_id}")?
       return ' btn-inverse'
   group_class: ->
-    #alert(@cur)
-    #alert(Session.get("group_#{@parent_id}"))
     if Session.get("group_#{@parent_id}") is @cur.toString()
       return ' btn-inverse'
   reply_class: ->
