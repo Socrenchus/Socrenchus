@@ -92,6 +92,9 @@ _.extend( Template.post,
     else
       return "#{ct} replies"
   
+  time: ->
+    return (new Date(@time)).relative()
+  
   is_cycling: ->
     return Session.get('carousel_parent')._id is @parent_id
   events: { # July 19
