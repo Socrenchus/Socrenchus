@@ -43,8 +43,7 @@ _.extend( Template.post,
     return oembedded
     
   identifier: -> @_id
-  link_href: ->
-    return Router.link("/p/#{ @_id }")
+  link_href: -> Router.link("/p/#{ @_id }")
   
   author: -> @author_id
   author_short: -> 
@@ -64,7 +63,7 @@ _.extend( Template.post,
       not Session.equals('composing', undefined)
   composing_any_reply: -> not Session.equals('composing', undefined)
   events: { # July 19
-    "click button[name='see_tags']": (event) ->
+    "click button.toggle-tagbox": (event) ->
       if not event.isImmediatePropagationStopped()
         #TODO: Turn these commented-out console.logs 
         #      into their proper tron actions.  
