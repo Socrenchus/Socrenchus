@@ -62,6 +62,12 @@ _.extend( Template.post,
     return Session.equals('current_post', @_id) and
       not Session.equals('composing', undefined)
   composing_any_reply: -> not Session.equals('composing', undefined)
+  
+  reply_count: ->
+    Meteor.call('get_reply_count', @_id, (err, res) ->
+      return res
+    )
+  
   events: { # July 19
     "click button.toggle-tagbox": (event) ->
       if not event.isImmediatePropagationStopped()
