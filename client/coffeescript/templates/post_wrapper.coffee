@@ -4,8 +4,6 @@ _.extend( Template.post_wrapper,
     if not Session.get("group_#{@parent_id}")?
       return ' btn-inverse'
   group_class: ->
-    #alert(@cur)
-    #alert(Session.get("group_#{@parent_id}"))
     if Session.get("group_#{@parent_id}") is @cur.toString()
       return ' btn-inverse'
   reply_class: ->
@@ -47,7 +45,7 @@ _.extend( Template.post_wrapper,
     
     return "@"
     
-  email_hash: ->
+  email_hash: ->  
     #When the db is ready...
     #this_post = Posts.findOne( _id: @cur )
     #return Users.findOne( _id: this_post.author_id ).email.md5()
@@ -90,12 +88,6 @@ _.extend( Template.post_wrapper,
           elem = elem.parentNode #bubble up
         Session.set("reply_#{@parent_id}", elem.getAttribute('name'))
         event.stopPropagation()
-    
-    "click button[name='carousel']": (event) ->
-      if not event.isImmediatePropagationStopped()
-        Meteor.clearInterval(Session.get('carousel_handle'))
-        Template.post_wrapper.start_carousel(Posts.findOne(_id: @parent_id))
-        event.stopImmediatePropagation()
     
     'click': (event) ->
       parent = Session.get('carousel_parent')

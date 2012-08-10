@@ -2,28 +2,33 @@
 <template name="post">
   {{init}}
   <div class="row">
-    <div class="span10 offset1">
-      <div class="row"><!--Post head-->
-        <div class="span10">
+    <div class="{{post_span}} offset1">
+      <div class="row">
+        <div class="{{post_span}}">
           <div class="post-top">
             <span><i class="icon-user"></i> {{author_short}}</span>
             <span class="pull-right">
               <i class="icon-time"></i> {x hours ago}<!--Make this switch to icon-calendar when it's older.-->
               <a href="http://www.addthis.com/bookmark.php?v=250&url={{link_href}}">Share</a>
               <button class="btn btn-mini toggle-tagbox"><i class="icon-tags"></i></button>
+              {{#if parent.exists}}
+                <button class="btn btn-mini" {{#if is_cycling}} style="color: red;" {{else}} name='carousel' {{/if}}>
+                  <i class="icon-certificate"></i>
+                </button>
+              {{/if}}
             </span>
           </div>
         </div>
       </div>
-      <div class="row"><!--Post body-->
-        <div class="span10">
+      <div class="row">
+        <div class="{{post_span}}">
           <div class="post-middle">
             {{{content}}}
           </div>
         </div>
       </div>
       <div class="row"><!--Post foot-->
-        <div class="span10">
+        <div class="{{post_span}}">
           <div class="post-bottom">
             <span class="reply_count">{{reply_count}} replies </span>
             <button class="btn btn-mini pull-right" name="reply">Reply</button>
@@ -31,7 +36,11 @@
         </div>
       </div>
     </div>
-    
+    {{#if tag_on}}
+      <div class="span3">
+         {{> tagbox}}
+      </div>
+    {{/if}}
   </div>
   
   {{#if composing_reply}}

@@ -1,4 +1,12 @@
 _.extend( Template.post,
+  post_span: ->
+    #Returns span10 or span7, depending on whether tagbox is visible.
+    if Session.equals('tagging', true) and Session.equals('current_post', @_id)
+      return 'span7'
+    else
+      return 'span10'
+
+
   parent: ->
     parent = Posts.findOne(_id: @parent_id)
     return {exists: parent?, post: parent}
@@ -64,10 +72,10 @@ _.extend( Template.post,
   composing_any_reply: -> not Session.equals('composing', undefined)
   
   reply_count: ->
-    Meteor.call('get_reply_count', @_id, (err, res) ->
-      return res
-    )
+    return Posts.findOne(_id: @_id).reply_count
   
+  is_cycling: ->
+    return Session.get('carousel_parent')._id is @parent_id
   events: { # July 19
     "click button.toggle-tagbox": (event) ->
       if not event.isImmediatePropagationStopped()
@@ -92,6 +100,12 @@ _.extend( Template.post,
         #give the reply text area focus
         Meteor.defer(-> $("#reply_text").focus())
         event.stopPropagation()
+    
+    "click button[name='carousel']": (event) ->
+      if not event.isImmediatePropagationStopped()
+        Meteor.clearInterval(Session.get('carousel_handle'))
+        Template.post_wrapper.start_carousel(Posts.findOne(_id: @parent_id))
+        event.stopImmediatePropagation()
   }
   
 )

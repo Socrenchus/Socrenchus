@@ -8,9 +8,5 @@ Meteor.methods(
   
   get_post_by_id: (post_id) ->
     return Posts.findOne(post_id)
-
-  get_reply_count: (parent_id) ->
-    i = 0
-    i = Posts.find({parent_id: parent_id}).count()
-    return i
+ 
 )
