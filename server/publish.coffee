@@ -42,9 +42,9 @@ Meteor.publish("my_posts", ->
   if user_id?
     handle = null
     q = null
+    ids = []
     first_action = (item, idx) =>
       # gather ids of my posts and posts i've replied to
-      ids = []
       ids.push( item['parent_id'] ) if 'parent_id' of item
       ids.push( item['_id'] )
       
