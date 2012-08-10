@@ -80,10 +80,12 @@ _.extend( Template.post,
           #console.log("Started tagging on post #{@_id}")
         event.stopImmediatePropagation()
     "click button[name='reply']": (event) ->
-      if not event.isImmediatePropagationStopped()
+      if not event.isPropagationStopped()
         Session.set('current_post', @_id)
         Session.set('composing', '')
-        event.stopImmediatePropagation()
+        #give the reply text area focus
+        Meteor.defer(-> $("#reply_text").focus())
+        event.stopPropagation()
   }
   
 )
