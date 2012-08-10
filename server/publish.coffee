@@ -135,12 +135,13 @@ Meteor.publish("my_posts", ->
     )
     
     @onStop( =>
-      posts = q.fetch()
-      handle.stop()
-      for post in posts
-        fields = (key for key of ClientPost)
-        @unset( "my_posts", post._id, fields )
-      @flush()
+      if q?
+        posts = q.fetch()
+        handle.stop()
+        for post in posts
+          fields = (key for key of ClientPost)
+          @unset( "my_posts", post._id, fields )
+        @flush()
     )
 
 
@@ -179,7 +180,8 @@ Meteor.publish("current_posts", (post_id) ->
       @set("posts", client_post._id, client_post)
       @flush()
     
-    handle = Posts.find( '_id': in_ids ).observe(
+    q = Posts.find( '_id': in_ids )
+    handle = q.observe(
       added: action
       changed: action
     )
