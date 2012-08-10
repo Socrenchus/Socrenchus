@@ -17,14 +17,8 @@ _.extend( Template.reply_box,
           Session.set('current_post', @_id)
           Session.set('composing', '')
         #give the reply text area focus
+        Meteor.defer(-> $("#reply_text").focus())
         event.stopPropagation()
-      
-    ###
-    "load textarea[name='reply_text']": (event) ->
-      if not event.isImmediatePropagationStopped()
-        event.target.focus()
-        event.stopImmediatePropagation()
-    ###
     
     #editing
     """
