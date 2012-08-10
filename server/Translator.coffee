@@ -8,7 +8,7 @@ class SharedPost
       content: ''
     )
     
-    for key in [ '_id', 'author_id', 'parent_id', 'content' ]
+    for key in [ '_id', 'parent_id', 'content', 'instance_id', 'time' ]
       @[key] = either[key] if either[key]?
        
 class ClientPost extends SharedPost
@@ -18,6 +18,7 @@ class ClientPost extends SharedPost
       tags: {} # tag: weight
       my_tags: {} # same as tags
       suggested_tags: []
+      reply_count: 0
     )
 
     user_id = Session.get('user_id')
