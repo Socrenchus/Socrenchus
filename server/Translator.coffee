@@ -27,6 +27,7 @@ class ClientPost extends SharedPost
       @tags[tag] = server.tags[tag].weight
       users = server.tags[tag].users
       if users? and user_id in users
+        console.log 'adding to my_tags'
         @my_tags[tag] = server.tags[tag].weight
     
     for post in Posts.find( 'parent_id': server.parent_id ).fetch()
@@ -42,7 +43,6 @@ class ServerPost extends SharedPost
     )
     
     user_id = Meteor.call('get_user_id')
-    console.log 'the user here is:', user_id
     
     super(client)
     
@@ -98,7 +98,6 @@ class ServerPost extends SharedPost
 
     
   get_user_post_experience: ( user_id ) =>
-    console.log 'get user post exp:', user_id, Users.findOne(user_id)
     weights = {}
     weight_total = 0
     # loop through tags in post (aka this)
