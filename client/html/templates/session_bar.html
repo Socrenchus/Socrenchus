@@ -27,15 +27,29 @@
             <!--<li><a href="#"><i class="icon-tag"></i>Tag Game</a></li>-->
           </ul>
           <ul class="nav pull-right">
-            <li><p class="navbar-text">{{username}}</p></li>
-            <li class="divider-vertical"></li>
-            <li><a href="#" class="logout_top_right"><i class="icon-off"></i> Logout</a></li>
+            {{#if currentUser}}
+              <li>
+                <p class="navbar-text">
+                {{#if currentUser}}
+                  {{#if currentUser.name}}
+                    {{currentUser.name}}
+                  {{else}}
+                    {{currentUser.username}}
+                  {{/if}}
+                {{/if}}
+                </p>
+              </li>
+              <li class="divider-vertical"></li>
+              <li>
+                <a href="#" class="logout_top_right"><i class="icon-off"></i> Logout</a>
+              </li>
+            {{else}}
+              <li class="divider-vertical"></li>
+              <li><div class='sign-in-button'>{{> loginButtons}}</div></li>
+            {{/if}}
           </ul>
-          
-          
         </div>
       </div>
     </div>
   </div>
-  {{> loginButtons}}
 </template>

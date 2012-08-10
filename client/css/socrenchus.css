@@ -28,3 +28,18 @@
   /* this will work for QtWebKit in future */
   -webkit-user-drag: none;
 }
+
+a.login-link-text {
+  text-decoration: none !important;
+  font-size: 13px !important;
+  color: #999 !important;
+  display: block !important;
+  -webkit-margin-before: 1em !important;
+  -webkit-margin-after: 1em !important;
+  -webkit-margin-start: 0px !important;
+  -webkit-margin-end: 0px !important;
+}
+
+a.login-link-text:hover {
+  color: white !important;
+}
