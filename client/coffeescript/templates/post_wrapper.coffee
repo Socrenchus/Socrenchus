@@ -49,8 +49,15 @@ _.extend( Template.post_wrapper,
     #this_post = Posts.findOne( _id: @cur )
     #return Users.findOne( _id: this_post.author_id ).email.md5()
     this_post = Posts.findOne( _id: @cur )
-    return this_post.author_id.md5()
-  
+    #Need to safify this.
+    ###
+    if this_post.author?.emails?.length>0
+      return this_post.author.emails[0].md5()
+    else
+      return this_post.author._id.md5()
+    ###
+    return "NOOOOOOO"
+      
   reply: ->
     reply = Session.get("reply_#{@_id}")
     if reply?
