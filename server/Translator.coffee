@@ -3,7 +3,6 @@ class SharedPost
     # define the shared client-server schema
     _.extend( @,
       _id: ''
-      author_id: ''
       parent_id: undefined
       content: ''
       instance_id: ''
@@ -67,7 +66,7 @@ class ServerPost extends SharedPost
       _.extend( @, post )
 
       # check if user added a new tag
-      for tag, weight of client.my_tags
+      for tag of client.my_tags
         @tags[tag] ?= { weight: 0 }
         @tags[tag].users ?= []
         unless user_id in @tags[tag].users

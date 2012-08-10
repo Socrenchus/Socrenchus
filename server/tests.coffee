@@ -1,29 +1,5 @@
 tron.test(
-  ###
-  try_add_tag: ->
-    test_post_id = Posts.insert(
-      'content': 'tron'
-      'tags': {
-        'tron_tag': {
-          'users': [Users.findOne()]
-          'weight': 0
-        }
-      }
-    )
-    post = Posts.findOne( test_post_id )
-    server_post = new ServerPost( post )
-    user_id = Users.findOne()._id
-    #add a new tag
-    server_post.add_tag( 'tron', user_id )
-    #add an existing tag
-    grad_this_tag = 'try_add_tag'
-    tags = _.keys( server_post.tags )
-    for tag in tags
-      if not server_post.is_graduated( tag )
-        grad_this_tag = tag
-    server_post.add_tag( grad_this_tag, user_id )
-    Posts.remove( test_post_id )
-  ###
+
     
   #check if a tag/user_id exists for a given post
   check_add_tag: (server_post, tag, user_id) ->

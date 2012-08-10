@@ -1,4 +1,3 @@
-#Users = new Meteor.Collection( "users_proto" )
 Users = Meteor.users
 Posts = new Meteor.Collection( "posts" )
 Instances = new Meteor.Collection( "instances" )
