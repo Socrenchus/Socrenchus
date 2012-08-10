@@ -86,6 +86,12 @@ _.extend( Template.post,
         #give the reply text area focus
         Meteor.defer(-> $("#reply_text").focus())
         event.stopPropagation()
+    
+    "click button[name='carousel']": (event) ->
+      if not event.isImmediatePropagationStopped()
+        Meteor.clearInterval(Session.get('carousel_handle'))
+        Template.post_wrapper.start_carousel(Posts.findOne(_id: @parent_id))
+        event.stopImmediatePropagation()
   }
   
 )

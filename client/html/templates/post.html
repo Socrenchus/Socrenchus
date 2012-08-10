@@ -11,6 +11,9 @@
               <i class="icon-time"></i> {x hours ago}<!--Make this switch to icon-calendar when it's older.-->
               <a href="http://www.addthis.com/bookmark.php?v=250&url={{link_href}}">Share</a>
               <button class="btn btn-mini toggle-tagbox"><i class="icon-tags"></i></button>
+              {{#if parent.exists}}
+              <button class="btn btn-mini" name='carousel'><i class="icon-certificate"></i></button>
+              {{/if}}
             </span>
           </div>
         </div>

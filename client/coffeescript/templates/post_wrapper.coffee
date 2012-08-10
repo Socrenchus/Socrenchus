@@ -83,12 +83,6 @@ _.extend( Template.post_wrapper,
         Session.set("reply_#{@parent_id}", elem.getAttribute('name'))
         event.stopPropagation()
     
-    "click button[name='carousel']": (event) ->
-      if not event.isImmediatePropagationStopped()
-        Meteor.clearInterval(Session.get('carousel_handle'))
-        Template.post_wrapper.start_carousel(Posts.findOne(_id: @parent_id))
-        event.stopImmediatePropagation()
-    
     'click': (event) ->
       parent = Session.get('carousel_parent')
       ancestors = [(cur = @).parent_id]
