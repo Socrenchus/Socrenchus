@@ -21,7 +21,6 @@ class ClientPost extends SharedPost
     )
 
     user_id = Meteor.call('get_user_id')
-    
     super(server)
     
     for tag of server.tags
@@ -29,7 +28,7 @@ class ClientPost extends SharedPost
       users = server.tags[tag].users
       if users? and user_id in users
         @my_tags[tag] = server.tags[tag].weight
-        
+    
     for post in Posts.find( 'parent_id': server.parent_id ).fetch()
       for key of post.tags
         @suggested_tags.push( key ) unless key in @my_tags
@@ -43,6 +42,7 @@ class ServerPost extends SharedPost
     )
     
     user_id = Meteor.call('get_user_id')
+    console.log 'the user here is:', user_id
     
     super(client)
     
@@ -98,6 +98,7 @@ class ServerPost extends SharedPost
 
     
   get_user_post_experience: ( user_id ) =>
+    console.log 'get user post exp:', user_id, Users.findOne(user_id)
     weights = {}
     weight_total = 0
     # loop through tags in post (aka this)
@@ -110,6 +111,8 @@ class ServerPost extends SharedPost
         # normalize tag weights
         weights[tag] /= weight_total
         user = Users.findOne('_id': user_id)
+        if not user.experience?
+          user.experience = {}
         # multiply normalize tag weight by user's tag experience
         # sum all those up
         if user.experience[tag]?

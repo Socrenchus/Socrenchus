@@ -1,13 +1,8 @@
-Users = new Meteor.Collection( "users_proto" )
+#Users = new Meteor.Collection( "users_proto" )
+Users = Meteor.users
 Posts = new Meteor.Collection( "posts" )
 Instances = new Meteor.Collection( "instances" )
 
-Posts.allow?(
-  insert: -> true
-  update: -> true
-  remove: -> false
-  fetch: []
-)
 
 Meteor.publish("instance", (hostname) ->
   user_id = Session.get('user_id')
