@@ -3,11 +3,11 @@ _.extend( Template.post_wrapper,
   group_class: ->
     #alert(@cur)
     #alert(Session.get("group_#{@parent_id}"))
-    if Session.get("group_#{@parent_id}") is @cur
-      return ' selected'
+    if Session.get("group_#{@parent_id}") is @cur.toString()
+      return ' btn-inverse'
   reply_class: ->
-    if Session.get("reply_#{@parent_id}") is @cur
-      return ' selected'
+    if Session.get("reply_#{@parent_id}") is @cur.toString()
+      return ' btn-inverse'#selected
 
   not_root: -> @parent_id?
   groups: ->
