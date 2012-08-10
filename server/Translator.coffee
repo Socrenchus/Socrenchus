@@ -6,9 +6,10 @@ class SharedPost
       parent_id: undefined
       content: ''
       instance_id: ''
+      time: ''
     )
     
-    for key in [ '_id', 'parent_id', 'content', 'instance_id' ]
+    for key in [ '_id', 'parent_id', 'content', 'instance_id', 'time' ]
       @[key] = either[key] if either[key]?
        
 class ClientPost extends SharedPost
@@ -61,6 +62,7 @@ class ServerPost extends SharedPost
     if is_new
       _.extend( @, _.pick( client, 'content', 'parent_id' ) )
       @author_id = user_id
+      @time = new Date()
     else
       _.extend( @, post )
 
