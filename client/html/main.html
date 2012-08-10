@@ -1,21 +1,16 @@
 <head>
-  <link href='http://fonts.googleapis.com/css?family=PT+Sans' rel='stylesheet' type='text/css'>
   <title>Socrenchus</title>
+  <!--Attribution: For icons, we use:-->
+  <!--Font Awesome - http://fortawesome.github.com/Font-Awesome-->
 </head>
 
 <body>
-  <div id='main'>
-    <div id='instance-bar'>
-      <div id='instance-logo'></div>
-      <!--Inline style: this should go in css.-->
-    </div>
-    {{> session_bar}}
-    <div id='page'>
-      <div id='page-header'></div>
-      <div id='page-body'>
-        {{> notifications}}
-        {{> conversation }}
-      </div>
+  {{> session_bar}}
+  
+  <div class="container">
+    
+    <div class="row">
+      {{> conversation }}
       <div id='page-footer'>
         
       </div>
