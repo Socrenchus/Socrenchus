@@ -71,17 +71,17 @@ _.extend( Template.post_wrapper,
     return {exists: post?, post: post}
   
   events: {
-    "click button.allbutton": (event) ->
+    "mousedown button.allbutton": (event) ->
       if not event.isPropagationStopped()
         Session.set("group_#{@parent_id}", null)
         event.stopPropagation()
     
-    "click button.group": (event) ->
+    "mousedown button.group": (event) ->
       if not event.isPropagationStopped()
         Session.set("group_#{@parent_id}", event.target.getAttribute('name'))
         event.stopPropagation()
     
-    "click button.post": (event) ->
+    "mousedown button.post": (event) ->
       if not event.isPropagationStopped()
         elem = event.target
         while(elem.nodeName.toLowerCase() isnt 'button')
