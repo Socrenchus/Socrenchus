@@ -36,20 +36,26 @@ _.extend( Template.post_wrapper,
     return posts
   
   author_email: ->
-    #When the db is ready...
-    #this_post = Posts.findOne( _id: @cur )
-    #return Users.findOne( _id: this_post.author_id ).email
+    this_post = Posts.findOne( _id: @cur )
+    author = this_post.author
+    if author? and author.emails? and author.emails.length? and author.emails.length>0
+      return author.emails[0]
     
-    #this_post = Posts.findOne( _id: @cur )
-    #return this_post.author_id
+  email_hash: ->
+    this_post = Posts.findOne( _id: @cur )
+    author = this_post.author
+    if author?
+      if author.emails? and author.emails.length? and author.emails.length>0
+        return author.emails[0].md5()
+      else if author._id?
+        return author._id.md5()
+    else
+      return "NO AUTHOR".md5()
     
-    return "@"
-    
-  email_hash: ->  
     #When the db is ready...
     #this_post = Posts.findOne( _id: @cur )
     #return Users.findOne( _id: this_post.author_id ).email.md5()
-    this_post = Posts.findOne( _id: @cur )
+    
     #Need to safify this.
     ###
     if this_post.author?.emails?.length>0
@@ -57,7 +63,6 @@ _.extend( Template.post_wrapper,
     else
       return this_post.author._id.md5()
     ###
-    return "NOOOOOOO"
       
   reply: ->
     reply = Session.get("reply_#{@_id}")
