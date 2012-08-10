@@ -22,7 +22,7 @@ class ClientPost extends SharedPost
       suggested_tags: []
     )
 
-    user_id = Meteor.call('get_user_id')
+    user_id = Session.get('user_id')
     
     super(server)
     
@@ -31,7 +31,7 @@ class ClientPost extends SharedPost
       users = server.tags[tag].users
       if users? and user_id in users
         @my_tags[tag] = server.tags[tag].weight
-        
+    
     for post in Posts.find( 'parent_id': server.parent_id ).fetch()
       for key of post.tags
         @suggested_tags.push( key ) unless key in @my_tags
@@ -50,7 +50,7 @@ class ServerPost extends SharedPost
       tags: {} # tag: {users:[], weight:#}
     )
     
-    user_id = Meteor.call('get_user_id')
+    user_id = Session.get('user_id')
     
     super(client)
     
@@ -62,7 +62,6 @@ class ServerPost extends SharedPost
     if is_new
       _.extend( @, _.pick( client, 'content', 'parent_id' ) )
       @author_id = user_id
-      @time = new Date()
     else
       _.extend( @, post )
 
@@ -72,4 +71,35 @@ class ServerPost extends SharedPost
         @tags[tag].users ?= []
         unless user_id in @tags[tag].users
           # apply the tag
-          @tags[tag].users.push( user_id )
+          @add_tag( tag, user_id )
+  
+  add_tag: ( tag, user_id ) =>
+    # check if already graduated
+    already_graduated = @is_graduated( tag )
+    # add the tag
+    if not @tags[tag]?
+      @tags[tag] = {
+        users: []
+        weight: 0
+      }
+    @tags[tag].users.push( user_id )
+    
+    # add user's post experience to the tag
+    @tags[tag].weight += @get_user_post_experience( user_id )
+    # check if graduated
+    graduated = @is_graduated( tag )
+    
+    if not already_graduated and graduated
+      @award_points( @tags[tag].users, tag )
+      user = Users.findOne('_id': user_id)
+      tron.test( 'check_award_points', tag, user )
+    tron.test( 'check_add_tag', @, tag, user_id)
+  
+  
+  is_graduated: ( tag ) =>
+    # TODO: Improve this function
+    grad = false
+    if @tags[tag]?
+      grad = @tags[tag].users.length > 1
+    else grad = false
+    return grad

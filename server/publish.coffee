@@ -1,16 +1,11 @@
-Users = new Meteor.Collection( "users_proto" )
+Users = Meteor.users
 Posts = new Meteor.Collection( "posts" )
 Instances = new Meteor.Collection( "instances" )
 
-Posts.allow?(
-  insert: -> true
-  update: -> true
-  remove: -> false
-  fetch: []
-)
 
 Meteor.publish("instance", (hostname) ->
-  user_id = Session.get('user_id')
+  user_id = @userId()
+  Session.set('user_id', user_id)
   #get instance id...
   instance_query = Instances.find({domain: hostname})
   instance = instance_query.fetch()[0]
@@ -21,7 +16,7 @@ Meteor.publish("instance", (hostname) ->
     tron.log("Method get_instance_id: instance \"#{hostname}\" does not exist")
     #check email domain
     email_match = false
-    current_user_id = Meteor.call('get_user_id')
+    current_user_id = user_id
     email_addr = Users.findOne( _id: current_user_id ).email
     [host, domain] = email_addr.split("@")
     if domain is hostname
@@ -44,6 +39,7 @@ Meteor.publish("instance", (hostname) ->
 
 Meteor.publish("my_posts", ->
   user_id = @userId()
+  Session.set('user_id', user_id)
   if user_id?
     handle = null
     q = null
@@ -90,9 +86,9 @@ Meteor.publish("my_posts", ->
 )
 
 Meteor.publish("current_posts", (post_id) ->
-
   user_id = @userId()
-  if user_id? 
+  Session.set('user_id', user_id)
+  if user_id?
   #all the parents of the post
     ids = []
     ids.push( post_id )

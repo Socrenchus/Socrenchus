@@ -53,7 +53,7 @@ _.extend( Template.post,
   identifier: -> @_id
   link_href: -> Router.link("/p/#{ @_id }")
   
-  author_name: -> @author.name
+  author_name: -> @author?.name
   
   #a similar function exists in post_wrapper --phil
   email_hash: ->
