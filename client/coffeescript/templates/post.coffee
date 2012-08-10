@@ -74,6 +74,9 @@ _.extend( Template.post,
   reply_count: ->
     return Posts.findOne(_id: @_id).reply_count
   
+  time: ->
+    return (new Date(@time)).relative()
+  
   is_cycling: ->
     return Session.get('carousel_parent')._id is @parent_id
   events: { # July 19
