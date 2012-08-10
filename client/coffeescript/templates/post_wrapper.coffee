@@ -1,13 +1,16 @@
 _.extend( Template.post_wrapper,
 
+  allbutton_class: ->
+    if not Session.get("group_#{@parent_id}")?
+      return ' btn-inverse'
   group_class: ->
     #alert(@cur)
     #alert(Session.get("group_#{@parent_id}"))
-    if Session.get("group_#{@parent_id}") is @cur
-      return ' selected'
+    if Session.get("group_#{@parent_id}") is @cur.toString()
+      return ' btn-inverse'
   reply_class: ->
-    if Session.get("reply_#{@parent_id}") is @cur
-      return ' selected'
+    if Session.get("reply_#{@parent_id}") is @cur.toString()
+      return ' btn-inverse'#selected
 
   not_root: -> @parent_id?
   groups: ->
@@ -70,6 +73,11 @@ _.extend( Template.post_wrapper,
     return {exists: post?, post: post}
   
   events: {
+    "click button.allbutton": (event) ->
+      if not event.isPropagationStopped()
+        Session.set("group_#{@parent_id}", null)
+        event.stopPropagation()
+    
     "click button.group": (event) ->
       if not event.isPropagationStopped()
         Session.set("group_#{@parent_id}", event.target.getAttribute('name'))
