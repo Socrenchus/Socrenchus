@@ -20,20 +20,20 @@ class ClientPost extends SharedPost
       suggested_tags: []
     )
 
-    user_id = Meteor.call('get_user_id')
+    user_id = Session.get('user_id')
+    
     super(server)
     
     for tag of server.tags
       @tags[tag] = server.tags[tag].weight
       users = server.tags[tag].users
       if users? and user_id in users
-        console.log 'adding to my_tags'
         @my_tags[tag] = server.tags[tag].weight
     
     for post in Posts.find( 'parent_id': server.parent_id ).fetch()
       for key of post.tags
         @suggested_tags.push( key ) unless key in @my_tags
-
+    
 class ServerPost extends SharedPost
   constructor: ( client ) ->
     # define the server schema
@@ -42,7 +42,7 @@ class ServerPost extends SharedPost
       tags: {} # tag: {users:[], weight:#}
     )
     
-    user_id = Meteor.call('get_user_id')
+    user_id = Session.get('user_id')
     
     super(client)
     
