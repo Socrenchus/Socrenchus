@@ -12,7 +12,7 @@
               <a href="http://www.addthis.com/bookmark.php?v=250&url={{link_href}}">Share</a>
               <button class="btn btn-mini toggle-tagbox"><i class="icon-tags"></i></button>
               {{#if parent.exists}}
-                <button class="btn btn-mini" name='carousel' {{#if is_cycling}}style="color: red;"{{/if}}>
+                <button class="btn btn-mini" {{#if is_cycling}} style="color: red;" {{else}} name='carousel' {{/if}}>
                   <i class="icon-certificate"></i>
                 </button>
               {{/if}}
