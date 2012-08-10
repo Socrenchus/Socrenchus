@@ -89,7 +89,7 @@ Meteor.publish("my_posts", ->
 Meteor.publish("current_posts", (post_id) ->
   user_id = @userId()
   Session.set('user_id', user_id)
-  if user_id? 
+  if user_id?
   #all the parents of the post
     ids = []
     ids.push( post_id )
