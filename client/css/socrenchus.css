@@ -68,3 +68,13 @@ a.login-link-text {
 a.login-link-text:hover {
   color: white !important;
 }
+
+.conversation-footer {
+  background-color: black;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+  filter: alpha(opacity=50);
+  opacity: .5;
+  
+  position: fixed;
+  height: 100%;
+}
