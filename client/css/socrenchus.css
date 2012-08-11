@@ -1,21 +1,26 @@
-.post-top {
-  border: 1px solid #000000;
-  border-bottom: 0;
-  background-color: #ffffff;
-  padding: 2px;
+html {
+  background-image: url('/images/bg.svg');
+  background-size: 12px;
 }
-.post-middle {
-  border: 1px solid #000000;
-  border-top: 0;
-  border-bottom: 0;
-  background-color: #ffffff;
-  padding: 2px;
+body {
+  background: transparent;  
 }
-.post-bottom {
-  border: 1px solid #000000;
-  border-top: 0;
-  background-color: #ffffff;
-  padding: 2px;
+.belt {
+  background: rgba(255,255,255,.3);
+}
+.tag-select-bar{
+  display: none; /*Temporary hiding, to be fixed by Adam*/
+}
+.btn-group.post-select-buttons{
+  margin: 3px;
+}
+.post-encompasser {
+  background: #FFFFFF;
+  -webkit-box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, .1);
+  box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, .1);
+}
+.belt, .post-encompasser {
+  outline: 1px solid black;
 }
 
 .selected {
@@ -29,17 +34,41 @@
   -webkit-user-drag: none;
 }
 
+.btn.post
+{
+  padding: 1px;
+}
+.btn.post > img
+{
+  border-radius: 2px;
+}
+.btn.post.faded-img > img
+{
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+  filter: alpha(opacity=50);
+  opacity: .5;
+}
+  
 a.login-link-text {
   text-decoration: none !important;
   font-size: 13px !important;
   color: #999 !important;
   display: block !important;
-  -webkit-margin-before: 1em !important;
-  -webkit-margin-after: 1em !important;
-  -webkit-margin-start: 0px !important;
-  -webkit-margin-end: 0px !important;
+  margin: 0;
+  padding: 10px 10px 10px 5px;
 }
 
 a.login-link-text:hover {
   color: white !important;
+}
+
+.conversation-footer {
+  background-color: black;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+  filter: alpha(opacity=50);
+  opacity: .5;
+  
+  position: fixed;
+  height: 100%;
+  outline: 1px solid black;
 }

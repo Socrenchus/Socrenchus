@@ -3,10 +3,11 @@ class SharedPost
     # define the shared client-server schema
     _.extend( @,
       _id: ''
+      author_id: ''
       parent_id: undefined
       content: ''
       instance_id: ''
-      time: ''
+      time: new Date()
     )
     
     for key in [ '_id', 'parent_id', 'content', 'instance_id', 'time' ]
@@ -18,8 +19,8 @@ class ClientPost extends SharedPost
     _.extend( @,
       tags: {} # tag: weight
       my_tags: {} # same as tags
-      reply_count: 0
       suggested_tags: []
+      reply_count: 0
     )
 
     user_id = Session.get('user_id')
@@ -35,13 +36,13 @@ class ClientPost extends SharedPost
     for post in Posts.find( 'parent_id': server.parent_id ).fetch()
       for key of post.tags
         @suggested_tags.push( key ) unless key in @my_tags
-    
+        
     author = Meteor.users.findOne( '_id': server.author_id )
     if author?
       @author = _.pick( author, '_id', 'emails', 'name' )
       
     @reply_count = Posts.find({parent_id: server._id}).count()
-
+    
 class ServerPost extends SharedPost
   constructor: ( client ) ->
     # define the server schema
@@ -64,9 +65,9 @@ class ServerPost extends SharedPost
       @author_id = user_id
     else
       _.extend( @, post )
-
+      
       # check if user added a new tag
-      for tag of client.my_tags
+      for tag, weight of client.my_tags
         @tags[tag] ?= { weight: 0 }
         @tags[tag].users ?= []
         unless user_id in @tags[tag].users
@@ -103,3 +104,55 @@ class ServerPost extends SharedPost
       grad = @tags[tag].users.length > 1
     else grad = false
     return grad
+
+    
+  get_user_post_experience: ( user_id ) =>
+    weights = {}
+    weight_total = 0
+    # loop through tags in post (aka this)
+    for tag, obj of @tags
+      weights[tag] = obj.weight
+      weight_total += obj.weight
+    unless weight_total is 0
+      users_post_experience = 0
+      for tag, weight of weights
+        # normalize tag weights
+        weights[tag] /= weight_total
+        user = Users.findOne('_id': user_id)
+        if not user.experience?
+          user.experience = {}
+        # multiply normalize tag weight by user's tag experience
+        # sum all those up
+        if user.experience[tag]?
+          user_exp = user.experience[tag]
+        else
+          user_exp = 0  #defaults to 0
+        users_post_experience += weights[tag] * user_exp
+      # return the sum
+      return users_post_experience
+    else return 1 # TODO: Default to some function of experience
+  
+  award_points: ( users, tag ) =>
+    reward = @tags[tag].weight / users.length
+    tron.test( 'check_number', reward )
+    
+    for user_id in users
+      user_doc = Users.findOne( user_id )
+      # add reward to user for tag
+      q = {
+        '$set':
+          {'experience': {}}
+      }
+      exp_obj = {}
+      #copy existing tag exp
+      for u_tag, exp of user_doc.experience
+        #exp_obj['$set'][u_tag] = exp
+        exp_obj[u_tag] = exp
+      #the new tag exp, increment/insert
+      past_exp = 0
+      if exp_obj[tag]?
+        past_exp = exp_obj[tag]
+      exp_obj[tag] = reward + past_exp
+      q['$set']['experience'] = exp_obj
+      Users.update( {'_id': user_doc._id}, q )
+      tron.test( 'check_if_user_exp', user_id, tag, past_exp )

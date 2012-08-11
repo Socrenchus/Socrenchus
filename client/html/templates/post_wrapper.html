@@ -1,8 +1,8 @@
 <template name="post_wrapper">
   {{#if not_root}}
     <div class="row">
-      <div class="span10 offset1">
-        <div class="row">
+      <div class="span10 offset1 belt">
+        <div class="row tag-select-bar">
           <div class="span10">
             {{#if groups.visible}}
             <div class="btn-group">
@@ -19,10 +19,10 @@
         </div>
         <div class="row">
           <div class="span10">
-            <div class="btn-group">
+            <div class="btn-group post-select-buttons">
               {{#each group_posts}}
                 {{#both ../this}}
-                  <button name='{{cur}}' class='btn post{{reply_class}}'><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=30&d=identicon" height='30' width='30' class='nodrag' /></button>
+                  <button name='{{cur}}' class='btn post{{reply_class}}'><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=60&d=identicon" height='30' width='30' class='nodrag' /></button>
                 {{/both}}
               {{/each}}
             </div>

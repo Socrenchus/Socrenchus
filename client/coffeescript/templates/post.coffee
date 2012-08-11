@@ -21,6 +21,9 @@ _.extend( Template.post,
       Session.set('tagging', false)
     if Session.equals('suggested_tags', undefined)
       Session.set('suggested_tags', [])
+    Meteor.defer( ->
+      $('.new_post').waypoint( -> @click() ).removeClass('new_post')
+    )
     return ""
     
   avatar: ->
