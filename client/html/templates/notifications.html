@@ -1,14 +1,12 @@
 <template name="notifications">
-  <h3 id='notification-counter' class="unselectable">{{count}}</h3>
+  <h3 id='notification-counter' class="unselectable">{{notifications.length}}</h3>
   {{#if show}}
     <div id='notification-box'>
       <!--ul-->
         {{#each notifications}}
           <!--li-->
             <div class='notify-message'>
-              {{message.points}}
-              {{message.link_text}}
-              {{message.message}}
+              {{message}}
               <br>
               <abbr title='{{timestamp.full}}'>{{timestamp.relative}}</abbr>
             </div>

@@ -65,7 +65,7 @@ class ServerPost extends SharedPost
       
       #Alert post author that his post was replied to
       Notifications.insert( {
-        user: Posts.find(_id: @parent_id).author_id
+        user: Posts.findOne(_id: @parent_id)?.author_id
         type: 0
         post: @_id
         other_user: @author_id
