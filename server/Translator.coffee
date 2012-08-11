@@ -62,6 +62,17 @@ class ServerPost extends SharedPost
     if is_new
       _.extend( @, _.pick( client, 'content', 'parent_id' ) )
       @author_id = user_id
+      
+      #Alert post author that his post was replied to
+      Notifications.insert( {
+        user: Posts.findOne(_id: @parent_id)?.author_id
+        type: 0
+        post: @_id
+        other_user: @author_id
+        points: 0
+        tag: tag
+        timestamp: new Date()
+      } )
     else
       _.extend( @, post )
       
@@ -135,6 +146,16 @@ class ServerPost extends SharedPost
     reward = @tags[tag].weight / users.length
     tron.test( 'check_number', reward )
     
+    #Alert post author that a tag graduated on his post
+    Notifications.insert( {
+      user: @author_id
+      type: 2
+      post: @_id
+      points: reward
+      tag: tag
+      timestamp: new Date()
+    } )
+    
     for user_id in users
       user_doc = Users.findOne( user_id )
       # add reward to user for tag
@@ -155,3 +176,14 @@ class ServerPost extends SharedPost
       q['$set']['experience'] = exp_obj
       Users.update( {'_id': user_doc._id}, q )
       tron.test( 'check_if_user_exp', user_id, tag, past_exp )
+      
+      #Alert taggers that their tag graduated
+      Notifications.insert( {
+        user: @author_id
+        type: 1
+        post: @_id
+        points: reward
+        tag: tag
+        timestamp: new Date()
+      } )
+      

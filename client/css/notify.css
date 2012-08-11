@@ -3,7 +3,7 @@
  
  */
 
-#notification-box {  
+#notification-box {
   position: absolute;
   z-index: 100;
   height: 250px;

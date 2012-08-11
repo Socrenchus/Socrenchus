@@ -1,7 +1,15 @@
 Users = Meteor.users
 Posts = new Meteor.Collection( "posts" )
 Instances = new Meteor.Collection( "instances" )
+Notifications = new Meteor.Collection("notifications")
 
+
+Meteor.publish("my_notifs", ->
+  user_id = @userId()
+  Session.set('user_id', user_id)
+  if user_id?
+    return Notifications.find( user: user_id )
+)
 
 Meteor.publish("instance", (hostname) ->
   user_id = @userId()
