@@ -9,6 +9,8 @@ _.extend( Template.post_wrapper,
   reply_class: ->
     if Session.get("reply_#{@parent_id}") is @cur.toString()
       return ' btn-inverse'#selected
+    else
+      return ' faded-img'
 
   not_root: -> @parent_id?
   groups: ->

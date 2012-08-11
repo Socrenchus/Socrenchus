@@ -29,6 +29,21 @@
   -webkit-user-drag: none;
 }
 
+.btn.post
+{
+  padding: 1px;
+}
+.btn.post > img
+{
+  border-radius: 2px;
+}
+.btn.post.faded-img > img
+{
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+  filter: alpha(opacity=50);
+  opacity: .5;
+}
+  
 a.login-link-text {
   text-decoration: none !important;
   font-size: 13px !important;
