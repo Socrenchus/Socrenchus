@@ -18,7 +18,7 @@ _.extend( Template.post_wrapper,
       tags = (tag for tag of post.tags)
       for tag in tags
         groups.push(tag) unless tag in groups
-    return groups
+    return {groups: groups, visible: (groups.length > 5)}
   
   group_posts: ->
     selected_group = Session.get("group_#{@parent_id}")

@@ -4,15 +4,17 @@
       <div class="span10 offset1">
         <div class="row">
           <div class="span10">
+            {{#if groups.visible}}
             <div class="btn-group">
               <button class='btn allbutton group{{allbutton_class}}'>All<br />Posts</button>
-              {{#each groups}}
+              {{#each groups.groups}}
                 {{#both ../this}}
                   <button name='{{cur}}' class='btn group{{group_class}}'>Tagged as<br />'{{cur}}'</button>
                   {{debug}}
                 {{/both}}
               {{/each}}
             </div>
+            {{/if}}
           </div>
         </div>
         <div class="row">

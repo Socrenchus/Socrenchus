@@ -27,4 +27,16 @@ _.extend( Template.conversation,
     )
     
     return posts[0]
+  
+  composing_reply: -> Session.equals('current_post', undefined)
+    
+  events: {
+    "click button[name='root']": ->
+      if not event.isPropagationStopped()
+        Session.set('current_post', undefined)
+        Session.set('composing', '')
+        #give the reply text area focus
+        Meteor.defer(-> $("#reply_text").focus())
+        event.stopPropagation()
+  }
 )
