@@ -11,7 +11,7 @@
                   {{#if group_selected}}
                     {{#each group_posts}}
                       {{#both ../this}}
-                        <button name='{{cur}}' class='btn post{{reply_class}}'><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=60&d=identicon" height='30' width='30' class='nodrag' /></button>
+                        <button name='{{cur}}' class='btn post{{reply_class}}' title="Tagged as '{{selected_group}}'"><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=60&d=identicon" height='30' width='30' class='nodrag' /></button>
                       {{/both}}
                     {{/each}}
                   

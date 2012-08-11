@@ -5,6 +5,9 @@ _.extend( Template.post_wrapper,
     s ?= 'all'
     return s is @cur.name.toString()
   
+  selected_group: ->
+    return Session.get("group_#{@parent_id}")
+  
   reply_class: ->
     if Session.get("reply_#{@parent_id}") is @cur.toString()
       return ''#selected
