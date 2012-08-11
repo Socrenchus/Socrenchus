@@ -112,7 +112,6 @@ _.extend( Template.post_wrapper,
   
   start_carousel: (parent_post) ->
     Session.set('carousel_parent', parent_post)
-    console.log("before:", window.carousel_handle)
     Meteor.clearInterval(window.carousel_handle)
     window.carousel_handle = Meteor.setInterval( ->
       parent = Session.get('carousel_parent')
@@ -125,5 +124,4 @@ _.extend( Template.post_wrapper,
             idx = (i + 1) % all_replies.length
         Session.set("reply_#{parent._id}", all_replies[idx]._id)
     , 3000)
-    console.log("after:", window.carousel_handle)
 )
