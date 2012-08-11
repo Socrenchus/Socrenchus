@@ -1,3 +1,8 @@
+/*
+ TODO: Make this match with the rest of the client.
+ 
+ */
+
 #notification-box {
   position: absolute;
   z-index: 100;
@@ -28,14 +33,14 @@
   margin-bottom: 0px;
   text-align: left;
   list-style: none;
-  background: rgb(255,255,255); ///* Old browsers */
-  background: -moz-linear-gradient(left, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%); ///* FF3.6+ */
-  background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(255,255,255,1)), color-stop(47%,rgba(246,246,246,1)), color-stop(100%,rgba(237,237,237,1))); ///* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(left, rgba(255,255,255,1) 0%,rgba(246,246,246,1) 47%,rgba(237,237,237,1) 100%); ///* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(left, rgba(255,255,255,1) 0%,rgba(246,246,246,1) 47%,rgba(237,237,237,1) 100%); ///* Opera 11.10+ */
-  background: -ms-linear-gradient(left, rgba(255,255,255,1) 0%,rgba(246,246,246,1) 47%,rgba(237,237,237,1) 100%); ///* IE10+ */
-  background: linear-gradient(left, rgba(255,255,255,1) 0%,rgba(246,246,246,1) 47%,rgba(237,237,237,1) 100%); ///* W3C */
-  //filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ededed',GradientType=1 ); 
+  background: rgb(255,255,255); /* Old browsers */
+  background: -moz-linear-gradient(left, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(255,255,255,1)), color-stop(47%,rgba(246,246,246,1)), color-stop(100%,rgba(237,237,237,1))); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(left, rgba(255,255,255,1) 0%,rgba(246,246,246,1) 47%,rgba(237,237,237,1) 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(left, rgba(255,255,255,1) 0%,rgba(246,246,246,1) 47%,rgba(237,237,237,1) 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(left, rgba(255,255,255,1) 0%,rgba(246,246,246,1) 47%,rgba(237,237,237,1) 100%); /* IE10+ */
+  background: linear-gradient(left, rgba(255,255,255,1) 0%,rgba(246,246,246,1) 47%,rgba(237,237,237,1) 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ededed',GradientType=1 ); 
   width: 259px;
   height: 50px;
   padding-left: 2px;
@@ -47,8 +52,7 @@
 }
 
 #notification-counter {
-  display: inline-block;
-  padding: 5px;
+  padding: 7px;
   margin: 0px;
   color: #666;
   font-family: Arial,sans-serif;
@@ -61,6 +65,6 @@
   background-image: linear-gradient(top,white,#ECECEC);
   border-color: #C6C6C6;
   text-align: center;
-  width: 20px;
-  height:20px;
+  width: 26px;
+  height:26px;
 }

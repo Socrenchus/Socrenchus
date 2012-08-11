@@ -7,3 +7,6 @@
 # Other ignorable files
 #################################
 *.js
+*_disabled
+
+*.orig

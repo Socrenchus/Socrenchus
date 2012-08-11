@@ -42,9 +42,7 @@ class Router extends Backbone.Router
 Router = new Router()
 Meteor.startup( ->
   # Get User ID
-  Meteor.call('get_user_id', (err, res) ->
-    Session.set('user_id', res)
-  )
+  Session.set('user_id', @userId)
   
   Backbone.history.start( pushState: true ) #!SUPPRESS no_headless_camel_case
 )
@@ -54,4 +52,15 @@ Meteor.startup( ->
 #   context as an additional field.
 Handlebars.registerHelper('both', (context, options) ->
   return options.fn(_.extend(context ? {}, {cur:@}))
+)
+
+#http://thinkvitamin.com/code/handlebars-js-part-3-tips-and-tricks/
+Handlebars.registerHelper('debug', (optionalValue) ->
+  console.log "Current Context"
+  console.log "===================="
+  console.log this
+  if optionalValue
+    console.log "Value"
+    console.log "===================="
+    console.log optionalValue
 )

@@ -1,7 +1,7 @@
 <template name="group">
-  <h1 name='tag-name'>{{name}}</h1>
+  <h1 name='tag-name' class="group">{{name}}</h1>
   {{#if show_replies}}
-    <ul>
+    <ul class="group">
       {{#each posts}}
         <li>{{> post}}</li>
       {{/each}}

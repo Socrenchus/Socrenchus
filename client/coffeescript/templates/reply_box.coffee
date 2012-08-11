@@ -8,7 +8,7 @@ _.extend( Template.reply_box,
   events: {
     #start composing
     "click button[name='start_reply']": (event) ->
-      if not event.isImmediatePropagationStopped()
+      if not event.isPropagationStopped()
         discard = true
         if Session.get('composing')? && Session.get('composing') != ''
           discard = confirm('You are currently replying to another post.'+
@@ -16,14 +16,7 @@ _.extend( Template.reply_box,
         if discard
           Session.set('current_post', @_id)
           Session.set('composing', '')
-        event.stopImmediatePropagation()
-      
-    ###
-    "load textarea[name='reply_text']": (event) ->
-      if not event.isImmediatePropagationStopped()
-        event.target.focus()
-        event.stopImmediatePropagation()
-    ###
+        event.stopPropagation()
     
     #editing
     """
@@ -39,8 +32,6 @@ _.extend( Template.reply_box,
     "click button[name='reply_submit']": (event) ->
       if not event.isImmediatePropagationStopped()
         reply_content = Session.get('composing') #replyTextBox.value
-        #console.log("ID of Post you're replying to: #{ @_id }")
-        #console.log("Reply content: #{replyContent}")
         if(reply_content=='')
           alert('Your reply is empty!')
         else
@@ -49,22 +40,12 @@ _.extend( Template.reply_box,
               content: reply_content,
               parent_id: @_id,
               instance_id: @instance_id
-              tags: {}
-              votes:{
-                'up': {
-                  users: []
-                  weight: 0
-                }
-                'down': {
-                  users: []
-                  weight: 0
-                }
-              }
             }
           )
           console.log('ID of new post: '+reply_id)
           Session.set('composing', undefined) #the clean up.
         event.stopImmediatePropagation()
+        Meteor.flush()
      
     #cancel a reply
     "click button[name='reply_cancel']": (event) ->
