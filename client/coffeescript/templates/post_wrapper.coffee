@@ -107,12 +107,12 @@ _.extend( Template.post_wrapper,
         cur = Posts.findOne( _id: cur.parent_id )
         ancestors.push(cur.parent_id)
       if parent._id in ancestors && not Session.equals('carousel_handle',null)
-        Meteor.clearInterval(Session.get('carousel_handle'))
         Template.post_wrapper.start_carousel(@)
   }
   
   start_carousel: (parent_post) ->
     Session.set('carousel_parent', parent_post)
+    Meteor.clearInterval(Session.get('carousel_handle'))
     carousel_handle = Meteor.setInterval( ->
       parent = Session.get('carousel_parent')
       cur_reply = Session.get("reply_#{parent._id}")
