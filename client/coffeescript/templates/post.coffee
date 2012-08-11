@@ -61,7 +61,7 @@ _.extend( Template.post,
   #a similar function exists in post_wrapper --phil
   email_hash: ->
     this_post = Posts.findOne( _id: @_id )
-    author = this_post.author
+    author = this_post?.author
     if author?
       if author.emails? and author.emails.length? and author.emails.length>0
         return author.emails[0].md5()
