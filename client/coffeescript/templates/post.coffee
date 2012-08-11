@@ -61,7 +61,7 @@ _.extend( Template.post,
   #a similar function exists in post_wrapper --phil
   email_hash: ->
     this_post = Posts.findOne( _id: @_id )
-    author = this_post.author
+    author = this_post?.author
     if author?
       if author.emails? and author.emails.length? and author.emails.length>0
         return author.emails[0].md5()
@@ -89,7 +89,7 @@ _.extend( Template.post,
   composing_any_reply: -> not Session.equals('composing', undefined)
   
   reply_count: ->
-    ct = Posts.findOne(_id: @_id).reply_count
+    ct = @reply_count
     if ct is 1
       return '1 reply'
     else
