@@ -105,6 +105,7 @@ _.extend( Template.post_wrapper,
         while(elem.nodeName.toLowerCase() isnt 'button')
           elem = elem.parentNode #bubble up
         Session.set("reply_#{@parent_id}", elem.getAttribute('name'))
+        event.target.click()
         event.stopPropagation()
     
     'click': (event) ->
