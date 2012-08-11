@@ -4,27 +4,20 @@
       <div class="span10 offset1 belt">
         <div class="row tag-select-bar">
           <div class="span10">
-            {{#if groups.visible}}
-            <div class="btn-group">
-              <button class='btn allbutton group{{allbutton_class}}'>All<br />Posts</button>
-              {{#each groups.groups}}
-                {{#both ../this}}
-                  <button name='{{cur}}' class='btn group{{group_class}}'>Tagged as<br />'{{cur}}'</button>
-                  {{debug}}
-                {{/both}}
-              {{/each}}
-            </div>
-            {{/if}}
-          </div>
-        </div>
-        <div class="row">
-          <div class="span10">
             <div class="btn-group post-select-buttons">
-              {{#each group_posts}}
-                {{#both ../this}}
-                  <button name='{{cur}}' class='btn post{{reply_class}}'><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=60&d=identicon" height='30' width='30' class='nodrag' /></button>
-                {{/both}}
-              {{/each}}
+            {{#each groups}}
+              {{#both ../this}}
+                {{#if group_selected}}
+                  {{#each group_posts}}
+                    {{#both ../this}}
+                      <button name='{{cur}}' class='btn post{{reply_class}}'><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=60&d=identicon" height='30' width='30' class='nodrag' /></button>
+                    {{/both}}
+                  {{/each}}
+                {{else}}
+                <button name='{{cur}}' class='btn group'>{{cur}}</button>
+                {{/if}}
+              {{/both}}
+            {{/each}}
             </div>
           </div>
         </div>
@@ -41,4 +34,8 @@
       {{> post_wrapper}}
     {{/with}}
   {{/if}}
+</template>
+
+<template name="post_selector">
+
 </template>

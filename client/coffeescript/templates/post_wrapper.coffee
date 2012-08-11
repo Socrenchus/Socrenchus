@@ -1,15 +1,10 @@
 _.extend( Template.post_wrapper,
 
-  allbutton_class: ->
-    if not Session.get("group_#{@parent_id}")?
-      return ''
-    else
-      return ' btn-inverse'
-  group_class: ->
-    if Session.get("group_#{@parent_id}") is @cur.toString()
-      return ''
-    else
-      return ' btn-inverse'
+  group_selected: ->
+    s = Session.get("group_#{@parent_id}")
+    s ?= 'all'
+    return s is @cur.toString()
+  
   reply_class: ->
     if Session.get("reply_#{@parent_id}") is @cur.toString()
       return ''#selected
@@ -24,12 +19,12 @@ _.extend( Template.post_wrapper,
       tags = (tag for tag of post.tags)
       for tag in tags
         groups.push(tag) unless tag in groups
-    return {groups: groups, visible: (groups.length > 5)}
+    groups.push('all')
+    return groups
   
   group_posts: ->
     selected_group = Session.get("group_#{@parent_id}")
-    unless selected_group?
-      selected_group = 'all'
+    selected_group ?= 'all'
     posts = []
     for post in Posts.find( 'parent_id': @parent_id ).fetch()
       if selected_group == 'all' || selected_group of post.tags
