@@ -11,6 +11,24 @@ body {
 .tag-select-bar{
 }
 
+.avatar-stack {
+  float: left;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  background-image: url('/images/page.svg');
+  background-size: 4px 32px;
+  height: 32px;
+  width: 0px;
+}
+
+img.avatar {
+  float: left;
+  margin: 0;
+  padding: 0;
+  border: 1px solid black;
+}
+
 .btn-group.post-select-buttons{
   margin: 3px;
 }

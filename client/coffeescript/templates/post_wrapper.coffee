@@ -32,6 +32,16 @@ _.extend( Template.post_wrapper,
       if selected_group == 'all' || selected_group of post.tags
         posts++
     return posts
+    
+  stack_width_px: ->
+    #duplicate of group_count, multiplied by four and stringified.
+    selected_group = Session.get("group_#{@parent_id}")
+    selected_group ?= 'all'
+    posts = 0
+    for post in Posts.find( 'parent_id': @parent_id ).fetch()
+      if selected_group == 'all' || selected_group of post.tags
+        posts++
+    return (posts*4)
 
 
   group_selected: ->
