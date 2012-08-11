@@ -1,5 +1,39 @@
 _.extend( Template.post_wrapper,
 
+  
+  group_first: ->
+    selected_group = Session.get("group_#{@parent_id}")
+    selected_group ?= 'all'
+    for post in Posts.find( 'parent_id': @parent_id ).fetch()
+      if selected_group == 'all' || selected_group of post.tags
+        return post._id
+
+  group_first_email_hash: ->
+    selected_group = Session.get("group_#{@parent_id}")
+    selected_group ?= 'all'
+    for post in Posts.find( 'parent_id': @parent_id ).fetch()
+      if selected_group == 'all' || selected_group of post.tags
+        this_post = Posts.findOne( _id: post._id )
+        break
+    author = this_post.author
+    if author?
+      if author.emails? and author.emails.length? and author.emails.length>0
+        return author.emails[0].md5()
+      else if author._id?
+        return author._id.md5()
+    else
+      return "NO AUTHOR".md5()
+  
+  group_count: ->
+    selected_group = Session.get("group_#{@parent_id}")
+    selected_group ?= 'all'
+    posts = 0
+    for post in Posts.find( 'parent_id': @parent_id ).fetch()
+      if selected_group == 'all' || selected_group of post.tags
+        posts++
+    return posts
+
+
   group_selected: ->
     s = Session.get("group_#{@parent_id}")
     s ?= 'all'
@@ -52,18 +86,6 @@ _.extend( Template.post_wrapper,
         return author._id.md5()
     else
       return "NO AUTHOR".md5()
-    
-    #When the db is ready...
-    #this_post = Posts.findOne( _id: @cur )
-    #return Users.findOne( _id: this_post.author_id ).email.md5()
-    
-    #Need to safify this.
-    ###
-    if this_post.author?.emails?.length>0
-      return this_post.author.emails[0].md5()
-    else
-      return this_post.author._id.md5()
-    ###
       
   reply: ->
     reply = Session.get("reply_#{@_id}")
