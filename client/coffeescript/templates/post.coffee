@@ -127,7 +127,6 @@ _.extend( Template.post,
     
     "click button[name='carousel']": (event) ->
       if not event.isImmediatePropagationStopped()
-        Meteor.clearInterval(Session.get('carousel_handle'))
         Template.post_wrapper.start_carousel(Posts.findOne(_id: @parent_id))
         event.stopImmediatePropagation()
   }
