@@ -63,7 +63,7 @@ class ServerPost extends SharedPost
       _.extend( @, _.pick( client, 'content', 'parent_id' ) )
       @author_id = user_id
       
-      #Alert post author
+      #Alert post author that his post was replied to
       Notifications.insert( {
         user: Posts.find(_id: @parent_id).author_id
         type: 0
@@ -146,7 +146,7 @@ class ServerPost extends SharedPost
     reward = @tags[tag].weight / users.length
     tron.test( 'check_number', reward )
     
-    #Alert post author
+    #Alert post author that a tag graduated on his post
     Notifications.insert( {
       user: @author_id
       type: 2
@@ -177,7 +177,7 @@ class ServerPost extends SharedPost
       Users.update( {'_id': user_doc._id}, q )
       tron.test( 'check_if_user_exp', user_id, tag, past_exp )
       
-      #Alert taggers
+      #Alert taggers that their tag graduated
       Notifications.insert( {
         user: @author_id
         type: 1
