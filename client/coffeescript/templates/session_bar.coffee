@@ -7,6 +7,7 @@ _.extend( Template.session_bar,
     
   events: {
     'click .logout_top_right': (event) ->
+      Meteor.clearInterval(window.carousel_handle)
       Meteor.logout()
   }
 )
