@@ -2,13 +2,19 @@ _.extend( Template.post_wrapper,
 
   allbutton_class: ->
     if not Session.get("group_#{@parent_id}")?
+      return ''
+    else
       return ' btn-inverse'
   group_class: ->
     if Session.get("group_#{@parent_id}") is @cur.toString()
+      return ''
+    else
       return ' btn-inverse'
   reply_class: ->
     if Session.get("reply_#{@parent_id}") is @cur.toString()
-      return ' btn-inverse'#selected
+      return ''#selected
+    else
+      return ' btn-inverse faded-img'
 
   not_root: -> @parent_id?
   groups: ->
