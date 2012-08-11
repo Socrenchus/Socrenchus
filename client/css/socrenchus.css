@@ -1,13 +1,12 @@
 html {
-  background: #336699;
+  background-image: url('/images/bg.svg');
+  background-size: 12px;
 }
 body {
   background: transparent;  
 }
 .belt {
-  background: #003366;
-  -webkit-box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, 1);
-  box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, 1);
+  background: rgba(255,255,255,.3);
 }
 .tag-select-bar{
   display: none; /*Temporary hiding, to be fixed by Adam*/
@@ -21,8 +20,7 @@ body {
   box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, .1);
 }
 .belt, .post-encompasser {
-  border-left: 2px solid black;
-  border-right: 2px solid black;
+  outline: 1px solid black;
 }
 
 .selected {
@@ -62,4 +60,15 @@ a.login-link-text {
 
 a.login-link-text:hover {
   color: white !important;
+}
+
+.conversation-footer {
+  background-color: black;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+  filter: alpha(opacity=50);
+  opacity: .5;
+  
+  position: fixed;
+  height: 100%;
+  outline: 1px solid black;
 }
