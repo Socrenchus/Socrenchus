@@ -1,21 +1,28 @@
-.post-top {
-  border: 1px solid #000000;
-  border-bottom: 0;
-  background-color: #ffffff;
-  padding: 2px;
+html {
+  background: #336699;
 }
-.post-middle {
-  border: 1px solid #000000;
-  border-top: 0;
-  border-bottom: 0;
-  background-color: #ffffff;
-  padding: 2px;
+body {
+  background: transparent;  
 }
-.post-bottom {
-  border: 1px solid #000000;
-  border-top: 0;
-  background-color: #ffffff;
-  padding: 2px;
+.belt {
+  background: #003366;
+  -webkit-box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, 1);
+  box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, 1);
+}
+.tag-select-bar{
+  display: none; /*Temporary hiding, to be fixed by Adam*/
+}
+.btn-group.post-select-buttons{
+  margin: 3px;
+}
+.post-encompasser {
+  background: #FFFFFF;
+  -webkit-box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, .1);
+  box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, .1);
+}
+.belt, .post-encompasser {
+  border-left: 2px solid black;
+  border-right: 2px solid black;
 }
 
 .selected {
