@@ -1,15 +1,10 @@
 _.extend( Template.post_wrapper,
 
-  allbutton_class: ->
-    if not Session.get("group_#{@parent_id}")?
-      return ''
-    else
-      return ' btn-inverse'
-  group_class: ->
-    if Session.get("group_#{@parent_id}") is @cur.toString()
-      return ''
-    else
-      return ' btn-inverse'
+  group_selected: ->
+    s = Session.get("group_#{@parent_id}")
+    s ?= 'all'
+    return s is @cur.toString()
+  
   reply_class: ->
     if Session.get("reply_#{@parent_id}") is @cur.toString()
       return ''#selected
@@ -17,19 +12,19 @@ _.extend( Template.post_wrapper,
       return ' btn-inverse faded-img'
 
   not_root: -> @parent_id?
+  
   groups: ->
-    #groups = ['all']
     groups = []
     for post in Posts.find( 'parent_id': @parent_id ).fetch()
       tags = (tag for tag of post.tags)
       for tag in tags
         groups.push(tag) unless tag in groups
+    groups.push('all')
     return groups
   
   group_posts: ->
     selected_group = Session.get("group_#{@parent_id}")
-    unless selected_group?
-      selected_group = 'all'
+    selected_group ?= 'all'
     posts = []
     for post in Posts.find( 'parent_id': @parent_id ).fetch()
       if selected_group == 'all' || selected_group of post.tags
@@ -106,14 +101,14 @@ _.extend( Template.post_wrapper,
       while cur?.parent_id?
         cur = Posts.findOne( _id: cur.parent_id )
         ancestors.push(cur.parent_id)
-      if parent._id in ancestors && not Session.equals('carousel_handle',null)
-        Meteor.clearInterval(Session.get('carousel_handle'))
+      if parent._id in ancestors && window.carousel_handle?
         Template.post_wrapper.start_carousel(@)
   }
   
   start_carousel: (parent_post) ->
     Session.set('carousel_parent', parent_post)
-    carousel_handle = Meteor.setInterval( ->
+    Meteor.clearInterval(window.carousel_handle)
+    window.carousel_handle = Meteor.setInterval( ->
       parent = Session.get('carousel_parent')
       cur_reply = Session.get("reply_#{parent._id}")
       if parent? and cur_reply?
@@ -124,5 +119,4 @@ _.extend( Template.post_wrapper,
             idx = (i + 1) % all_replies.length
         Session.set("reply_#{parent._id}", all_replies[idx]._id)
     , 3000)
-    Session.set('carousel_handle', carousel_handle)
 )

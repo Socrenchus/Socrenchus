@@ -61,7 +61,7 @@ _.extend( Template.post,
   #a similar function exists in post_wrapper --phil
   email_hash: ->
     this_post = Posts.findOne( _id: @_id )
-    author = this_post.author
+    author = this_post?.author
     if author?
       if author.emails? and author.emails.length? and author.emails.length>0
         return author.emails[0].md5()
@@ -127,7 +127,6 @@ _.extend( Template.post,
     
     "click button[name='carousel']": (event) ->
       if not event.isImmediatePropagationStopped()
-        Meteor.clearInterval(Session.get('carousel_handle'))
         Template.post_wrapper.start_carousel(Posts.findOne(_id: @parent_id))
         event.stopImmediatePropagation()
   }

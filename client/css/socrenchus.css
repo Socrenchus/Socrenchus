@@ -9,8 +9,8 @@ body {
   background: rgba(255,255,255,.3);
 }
 .tag-select-bar{
-  display: none; /*Temporary hiding, to be fixed by Adam*/
 }
+
 .btn-group.post-select-buttons{
   margin: 3px;
 }
