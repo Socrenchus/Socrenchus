@@ -3,7 +3,10 @@ _.extend( Template.post_wrapper,
   group_selected: ->
     s = Session.get("group_#{@parent_id}")
     s ?= 'all'
-    return s is @cur.toString()
+    return s is @cur.name.toString()
+  
+  selected_group: ->
+    return Session.get("group_#{@parent_id}")
   
   reply_class: ->
     if Session.get("reply_#{@parent_id}") is @cur.toString()
@@ -14,13 +17,30 @@ _.extend( Template.post_wrapper,
   not_root: -> @parent_id?
   
   groups: ->
-    groups = []
+    groups = {}
     for post in Posts.find( 'parent_id': @parent_id ).fetch()
       tags = (tag for tag of post.tags)
       for tag in tags
-        groups.push(tag) unless tag in groups
-    groups.push('all')
-    return groups
+        unless tag of groups
+          author = post?.author
+          hash = null
+          if author?
+            if author.emails? and author.emails.length? and author.emails.length>0
+              hash = author.emails[0].md5()
+            else if author._id?
+              hash = author._id.md5()
+          hash ?= "NO AUTHOR".md5()
+          obj =
+            name: tag
+            count: 1
+            width: 0 #Width is (count-1) * 4
+            hash: hash
+          groups[tag] = obj
+        else
+          groups[tag].count++
+          groups[tag].width += 4
+    #groups.push('all')
+    return ( v for k,v of groups )
   
   group_posts: ->
     selected_group = Session.get("group_#{@parent_id}")
@@ -52,18 +72,6 @@ _.extend( Template.post_wrapper,
         return author._id.md5()
     else
       return "NO AUTHOR".md5()
-    
-    #When the db is ready...
-    #this_post = Posts.findOne( _id: @cur )
-    #return Users.findOne( _id: this_post.author_id ).email.md5()
-    
-    #Need to safify this.
-    ###
-    if this_post.author?.emails?.length>0
-      return this_post.author.emails[0].md5()
-    else
-      return this_post.author._id.md5()
-    ###
       
   reply: ->
     reply = Session.get("reply_#{@_id}")
@@ -79,12 +87,16 @@ _.extend( Template.post_wrapper,
   events: {
     "mousedown button.allbutton": (event) ->
       if not event.isPropagationStopped()
+        elem = event.target
         Session.set("group_#{@parent_id}", null)
         event.stopPropagation()
     
     "mousedown button.group": (event) ->
       if not event.isPropagationStopped()
-        Session.set("group_#{@parent_id}", event.target.getAttribute('name'))
+        elem = event.target
+        while(elem.nodeName.toLowerCase() isnt 'button')
+          elem = elem.parentNode #bubble up
+        Session.set("group_#{@parent_id}", elem.getAttribute('name'))
         event.stopPropagation()
     
     "mousedown button.post": (event) ->
