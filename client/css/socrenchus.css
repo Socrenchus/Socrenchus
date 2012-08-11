@@ -5,9 +5,9 @@ body {
   background: transparent;  
 }
 .belt {
-  background: #003366;
-  -webkit-box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, 1);
-  box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, 1);
+  background: #484d66;
+  -webkit-box-shadow: inset 0px 0px 15px 4px rgba(0, 0, 0, .5);
+  box-shadow: inset 0px 0px 15px 4px rgba(0, 0, 0, .5);
 }
 .tag-select-bar{
   display: none; /*Temporary hiding, to be fixed by Adam*/
