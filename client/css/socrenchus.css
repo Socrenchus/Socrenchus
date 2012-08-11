@@ -29,8 +29,13 @@ img.avatar {
   border: 1px solid black;
 }
 
+.btn.group, .btn.post {
+  
+}
+
 .btn-group.post-select-buttons{
-  margin: 3px;
+  float: left;
+  margin: 2px;
 }
 .post-encompasser {
   background: #FFFFFF;

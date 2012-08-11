@@ -1,53 +1,9 @@
 _.extend( Template.post_wrapper,
 
-  
-  group_first: ->
-    selected_group = Session.get("group_#{@parent_id}")
-    selected_group ?= 'all'
-    for post in Posts.find( 'parent_id': @parent_id ).fetch()
-      if selected_group == 'all' || selected_group of post.tags
-        return post._id
-
-  group_first_email_hash: ->
-    selected_group = Session.get("group_#{@parent_id}")
-    selected_group ?= 'all'
-    for post in Posts.find( 'parent_id': @parent_id ).fetch()
-      if selected_group == 'all' || selected_group of post.tags
-        this_post = Posts.findOne( _id: post._id )
-        break
-    author = this_post.author
-    if author?
-      if author.emails? and author.emails.length? and author.emails.length>0
-        return author.emails[0].md5()
-      else if author._id?
-        return author._id.md5()
-    else
-      return "NO AUTHOR".md5()
-  
-  group_count: ->
-    selected_group = Session.get("group_#{@parent_id}")
-    selected_group ?= 'all'
-    posts = 0
-    for post in Posts.find( 'parent_id': @parent_id ).fetch()
-      if selected_group == 'all' || selected_group of post.tags
-        posts++
-    return posts
-    
-  stack_width_px: ->
-    #duplicate of group_count, multiplied by four and stringified.
-    selected_group = Session.get("group_#{@parent_id}")
-    selected_group ?= 'all'
-    posts = 0
-    for post in Posts.find( 'parent_id': @parent_id ).fetch()
-      if selected_group == 'all' || selected_group of post.tags
-        posts++
-    return (posts*4)
-
-
   group_selected: ->
     s = Session.get("group_#{@parent_id}")
     s ?= 'all'
-    return s is @cur.toString()
+    return s is @cur.name.toString()
   
   reply_class: ->
     if Session.get("reply_#{@parent_id}") is @cur.toString()
@@ -58,13 +14,30 @@ _.extend( Template.post_wrapper,
   not_root: -> @parent_id?
   
   groups: ->
-    groups = []
+    groups = {}
     for post in Posts.find( 'parent_id': @parent_id ).fetch()
       tags = (tag for tag of post.tags)
       for tag in tags
-        groups.push(tag) unless tag in groups
-    groups.push('all')
-    return groups
+        unless tag of groups
+          author = post?.author
+          hash = null
+          if author?
+            if author.emails? and author.emails.length? and author.emails.length>0
+              hash = author.emails[0].md5()
+            else if author._id?
+              hash = author._id.md5()
+          hash ?= "NO AUTHOR".md5()
+          obj =
+            name: tag
+            count: 1
+            width: 0 #Width is (count-1) * 4
+            hash: hash
+          groups[tag] = obj
+        else
+          groups[tag].count++
+          groups[tag].width += 4
+    #groups.push('all')
+    return ( v for k,v of groups )
   
   group_posts: ->
     selected_group = Session.get("group_#{@parent_id}")
@@ -111,12 +84,16 @@ _.extend( Template.post_wrapper,
   events: {
     "mousedown button.allbutton": (event) ->
       if not event.isPropagationStopped()
+        elem = event.target
         Session.set("group_#{@parent_id}", null)
         event.stopPropagation()
     
     "mousedown button.group": (event) ->
       if not event.isPropagationStopped()
-        Session.set("group_#{@parent_id}", event.target.getAttribute('name'))
+        elem = event.target
+        while(elem.nodeName.toLowerCase() isnt 'button')
+          elem = elem.parentNode #bubble up
+        Session.set("group_#{@parent_id}", elem.getAttribute('name'))
         event.stopPropagation()
     
     "mousedown button.post": (event) ->

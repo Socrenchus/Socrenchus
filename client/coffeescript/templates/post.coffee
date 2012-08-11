@@ -6,7 +6,6 @@ _.extend( Template.post,
     else
       return 'span10'
 
-
   parent: ->
     parent = Posts.findOne(_id: @parent_id)
     return {exists: parent?, post: parent}
