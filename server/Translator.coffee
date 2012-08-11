@@ -6,6 +6,8 @@ class SharedPost
       author_id: ''
       parent_id: undefined
       content: ''
+      instance_id: ''
+      time: new Date()
     )
     
     for key in [ '_id', 'parent_id', 'content', 'instance_id', 'time' ]
