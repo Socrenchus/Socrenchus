@@ -89,7 +89,7 @@ _.extend( Template.post,
   composing_any_reply: -> not Session.equals('composing', undefined)
   
   reply_count: ->
-    ct = Posts.findOne(_id: @_id).reply_count
+    ct = @reply_count
     if ct is 1
       return '1 reply'
     else
