@@ -20,6 +20,7 @@ _.extend( Template.post_wrapper,
     groups = {}
     for post in Posts.find( 'parent_id': @parent_id ).fetch()
       tags = (tag for tag of post.tags)
+      tags.push('all')
       for tag in tags
         unless tag of groups
           author = post?.author
@@ -39,7 +40,6 @@ _.extend( Template.post_wrapper,
         else
           groups[tag].count++
           groups[tag].width += 4
-    #groups.push('all')
     return ( v for k,v of groups )
   
   group_posts: ->
