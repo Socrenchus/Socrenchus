@@ -3,7 +3,6 @@ class SharedPost
     # define the shared client-server schema
     _.extend( @,
       _id: ''
-      author_id: ''
       parent_id: undefined
       content: ''
       instance_id: ''
