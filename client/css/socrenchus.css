@@ -21,8 +21,7 @@ body {
   box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, .1);
 }
 .belt, .post-encompasser {
-  border-left: 2px solid black;
-  border-right: 2px solid black;
+  outline: 2px solid black;
 }
 
 .selected {
