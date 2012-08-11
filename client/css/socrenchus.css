@@ -34,10 +34,8 @@ a.login-link-text {
   font-size: 13px !important;
   color: #999 !important;
   display: block !important;
-  -webkit-margin-before: 1em !important;
-  -webkit-margin-after: 1em !important;
-  -webkit-margin-start: 0px !important;
-  -webkit-margin-end: 0px !important;
+  margin: 0;
+  padding: 10px 10px 10px 5px;
 }
 
 a.login-link-text:hover {
