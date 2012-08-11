@@ -11,8 +11,32 @@ body {
 .tag-select-bar{
 }
 
+.avatar-stack {
+  float: left;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  background-image: url('/images/page.svg');
+  background-size: 4px 28px;
+  height: 28px;
+  width: 0px;
+}
+
+img.avatar {
+  float: left;
+  margin: 0;
+  padding: 0;
+  border: 1px solid black;
+}
+
+.btn.group, .btn.post {
+  height: 34px;
+  padding: 2px;
+}
+
 .btn-group.post-select-buttons{
-  margin: 3px;
+  float: left;
+  margin: 2px;
 }
 .post-encompasser {
   background: #FFFFFF;
@@ -43,6 +67,15 @@ body {
   border-radius: 2px;
 }
 .btn.post.faded-img > img
+{
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+  filter: alpha(opacity=50);
+  opacity: .5;
+}
+
+.btn.group.faded-inside > img, 
+.btn.group.faded-inside > div,
+.btn.group.faded-inside > span
 {
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
   filter: alpha(opacity=50);
