@@ -1,11 +1,30 @@
 _.extend( Template.tagbox,
   classes: ->
     classes = ['tag label']
-    classes.push('grad') if @tags[@cur]?  #graduated
-    classes.push('mytag label-success') if @my_tags? and @my_tags[@cur]?
+    if @my_tags? and @my_tags[@cur]?
+      classes.push('mytag')
+      if @tags[@cur]?
+        classes.push('grad label-success') #green - yours+graduated
+      else
+        classes.push('label-warning') #yellow - yours
+    else if @tags[@cur]?
+      classes.push('grad label-inverse') #black - graduated
+    else
+      classes.push('suggested label-info') #blue - suggested
     formatted_classes = classes.join(' ')
     return formatted_classes
-
+  
+  titles: ->
+    if @my_tags? and @my_tags[@cur]?
+      if @tags[@cur]?
+        return 'This graduated tag is one of yours.' #green - yours+graduated
+      else
+        return 'This is one of your tags for this post.' #yellow - yours
+    else if @tags[@cur]?
+      return 'This tag has graduated for this post.' #black - graduated
+    else
+      return "This is a suggested tag for this post." #blue - suggested
+    
   filter_text: -> 
     filter = Session.get('filter_text')
     filter ?= ''
