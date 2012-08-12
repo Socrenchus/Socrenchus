@@ -43,7 +43,7 @@ class ClientPost extends SharedPost
     
     for post in Posts.find( 'parent_id': server.parent_id ).fetch()
       for key of post.tags
-        unless key of @my_tags or key of @tags
+        unless key of @my_tags or key of @suggested_tags
           @suggested_tags.push( key )
         
     author = Meteor.users.findOne( '_id': server.author_id )
