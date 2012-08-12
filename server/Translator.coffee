@@ -11,6 +11,14 @@ class SharedPost
     
     for key in [ '_id', 'parent_id', 'content', 'instance_id', 'time' ]
       @[key] = either[key] if either[key]?
+  
+  is_graduated: ( tag ) =>
+    # TODO: Improve this function
+    grad = false
+    if @tags[tag]?
+      grad = @tags[tag].users.length > 1
+    else grad = false
+    return grad
        
 class ClientPost extends SharedPost
   constructor: ( server ) ->
@@ -27,7 +35,8 @@ class ClientPost extends SharedPost
     super(server)
     
     for tag of server.tags
-      @tags[tag] = server.tags[tag].weight
+      if @is_graduated( tag )
+        @tags[tag] = server.tags[tag].weight
       users = server.tags[tag].users
       if users? and user_id in users
         @my_tags[tag] = server.tags[tag].weight
@@ -106,15 +115,6 @@ class ServerPost extends SharedPost
       user = Users.findOne('_id': user_id)
       tron.test( 'check_award_points', tag, user )
     tron.test( 'check_add_tag', @, tag, user_id)
-  
-  
-  is_graduated: ( tag ) =>
-    # TODO: Improve this function
-    grad = false
-    if @tags[tag]?
-      grad = @tags[tag].users.length > 1
-    else grad = false
-    return grad
 
     
   get_user_post_experience: ( user_id ) =>
