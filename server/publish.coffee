@@ -82,8 +82,9 @@ Meteor.publish("my_posts", ->
     
     @onStop( =>
       if q?
-        posts = q.fetch()
         handle.stop()
+        q.rewind()
+        posts = q.fetch()
         for post in posts
           fields = (key for key of ClientPost)
           @unset( "my_posts", post._id, fields )
@@ -117,8 +118,9 @@ Meteor.publish("current_posts", (post_id) ->
   )
   
   @onStop( =>
-    posts = q.fetch()
     handle.stop()
+    q.rewind()
+    posts = q.fetch()
     for post in posts
       fields = (key for key of ClientPost)
       @unset( "client_posts", post._id, fields )
