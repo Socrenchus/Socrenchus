@@ -7,6 +7,19 @@ _.extend( Template.post_wrapper,
   
   selected_group: ->
     return Session.get("group_#{@parent_id}")
+    
+  title_current_group: ->
+    if @cur.name? and @cur.name isnt 'all'
+      return "Posts tagged as '#{@cur.name}'"
+    else
+      return "All Posts"
+    
+  title_selected_group: ->
+    group = Session.get("group_#{@parent_id}")
+    if group? and group isnt 'all'
+      return "A post tagged as '#{group}'"
+    else
+      return "A post in the 'All' group"
   
   reply_class: ->
     if Session.get("reply_#{@parent_id}") is @cur.toString()
@@ -105,7 +118,7 @@ _.extend( Template.post_wrapper,
         while(elem.nodeName.toLowerCase() isnt 'button')
           elem = elem.parentNode #bubble up
         Session.set("reply_#{@parent_id}", elem.getAttribute('name'))
-        event.target.click()
+        event.target.click?()
         event.stopPropagation()
     
     'click': (event) ->

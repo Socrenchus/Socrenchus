@@ -1,8 +1,8 @@
 _.extend( Template.tagbox,
   classes: ->
-    classes = ['tag']
-    classes.push('grad') if @tags[@cur]?
-    classes.push('mytag') if @my_tags? and @cur in @my_tags
+    classes = ['tag label']
+    classes.push('grad') if @tags[@cur]?  #graduated
+    classes.push('mytag label-success') if @my_tags? and @my_tags[@cur]?
     formatted_classes = classes.join(' ')
     return formatted_classes
 
@@ -23,6 +23,18 @@ _.extend( Template.tagbox,
 
   tagging_post: ->
     Session.equals('tagging', true) and Session.equals('current_post', @_id)
+  
+  add_tag: (id, tag_text) ->
+    Session.set('filter_text', '')
+    if tag_text != ''
+      q = {'$set': {}}
+      q['$set']["my_tags.#{tag_text}"] = 1
+      Posts.update({ '_id': id}, q)
+      #XXX Session is not yet reactive with arrays or objects.
+      temp = Session.get('suggested_tags')
+      temp.remove(tag_text)
+      Session.set('suggested_tags',temp.clone())
+    Meteor.flush()
   
   events: {
     
@@ -98,22 +110,5 @@ _.extend( Template.tagbox,
       if not event.isImmediatePropagationStopped()
         Template.tagbox.add_tag(@_id, Session.get('filter_text'))
       return false
-        
-    "click button[name='done_tagging']": (event) ->
-      if not event.isImmediatePropagationStopped()
-        Session.set('tagging', false)
-      return false
   }
-  
-  add_tag: (id, tag_text) ->
-    Session.set('filter_text', '')
-    if tag_text != ''
-      q = {'$set': {}}
-      q['$set']["my_tags.#{tag_text}"] = 1
-      Posts.update({ '_id': id}, q)
-      #XXX Session is not yet reactive with arrays or objects.
-      temp = Session.get('suggested_tags')
-      temp.remove(tag_text)
-      Session.set('suggested_tags',temp.clone())
-    Meteor.flush()
 )
