@@ -94,50 +94,34 @@ Meteor.publish("my_posts", ->
 )
 
 Meteor.publish("current_posts", (post_id) ->
-  user_id = @userId()
-  Session.set('user_id', user_id)
-  if user_id?
   #all the parents of the post
-    ids = []
-    ids.push( post_id )
-    this_post = post_id
-    while Posts.findOne( this_post ).parent_id?
-      this_post = Posts.findOne( this_post ).parent_id
-      if this_post not in ids
-        ids.push( this_post )
-    
-    #also add child posts if user has replied
-    children = Posts.find( 'parent_id': post_id ).fetch()
-    replied = false
-    for child_post in children
-      if child_post.author_id = user_id
-        replied = true
-    if replied
-      child_posts = Posts.find( 'parent_id': post_id ).fetch()
-      while Posts.findOne( 'parent_id':{'$in': child_posts } )?
-        child_posts =  Posts.findOne( 'parent_id':{'$in': child_posts } )
-        for child_post in child_posts
-          if child_post._id not in ids
-            ids.push( child_post._id )
-    in_ids = { '$in': ids }
-    
-    action = (doc, idx) =>
-      client_post = new ClientPost( doc )
-      @set("posts", client_post._id, client_post)
-      @flush()
-    
-    q = Posts.find( '_id': in_ids )
-    handle = q.observe(
-      added: action
-      changed: action
-    )
-    
-    @onStop( =>
-      posts = q.fetch()
-      handle.stop()
-      for post in posts
-        fields = (key for key of ClientPost)
-        @unset( "client_posts", post._id, fields )
-      @flush()
-    )
+  ids = []
+  ids.push( post_id )
+  this_post = post_id
+  while Posts.findOne( this_post ).parent_id?
+    this_post = Posts.findOne( this_post ).parent_id
+    if this_post not in ids
+      ids.push( this_post )
+  
+  in_ids = { '$in': ids }
+  
+  action = (doc, idx) =>
+    client_post = new ClientPost( doc )
+    @set("posts", client_post._id, client_post)
+    @flush()
+  
+  q = Posts.find( '_id': in_ids )
+  handle = q.observe(
+    added: action
+    changed: action
+  )
+  
+  @onStop( =>
+    posts = q.fetch()
+    handle.stop()
+    for post in posts
+      fields = (key for key of ClientPost)
+      @unset( "client_posts", post._id, fields )
+    @flush()
+  )
 )
