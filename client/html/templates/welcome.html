@@ -1,5 +1,6 @@
 <template name="welcome">
-  {{#unless showing_post}}
+
+  {{#if home}}
     <div class="row">
       <div class="span8 offset2 well">
         <h1>Welcome to Socrenchus!</h1>
@@ -13,5 +14,12 @@
         </div>
       </div>
     </div>
-  {{/unless}}
+  {{else}}
+    <div class="row">
+      <div class="span4 offset4 well">
+        <h1>LOADING!</h1>
+      </div>
+    </div>
+  {{/if}}
+
 </template>

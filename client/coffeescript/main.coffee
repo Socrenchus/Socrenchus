@@ -11,8 +11,12 @@ Meteor.subscribe( "my_posts" )
 # Backbone router
 class Router extends Backbone.Router
   routes:
+    "": "home"
     "i/*args": "use_instance"
     "p/:post_id": "show_post"
+   
+  home: ->
+    Session.set('home', true)
 
   show_post: (post_id) ->
     Meteor.call('get_post_by_id', post_id, (error, result) ->
