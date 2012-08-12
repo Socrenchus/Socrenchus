@@ -2,7 +2,7 @@ _.extend( Template.tagbox,
   classes: ->
     classes = ['tag label']
     classes.push('grad') if @tags[@cur]?  #graduated
-    classes.push('mytag label-success') if @my_tags? and @cur in @my_tags
+    classes.push('mytag label-success') if @my_tags? and @my_tags[@cur]?
     formatted_classes = classes.join(' ')
     return formatted_classes
 
