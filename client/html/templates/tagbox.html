@@ -4,22 +4,22 @@
       <div class="row displayed_tags">
         <div class="span3">
           {{#each displayed_tags}}
-            {{#both ../this}}<div class="{{classes}}">{{/both}}
+            {{#both ../this}}<span class="{{classes}}">{{/both}}
               {{this}}
-            </div>
+            </span>
           {{/each}}
         </div>
       </div>
       <div class="row suggestions">
         <div class="span3">
           {{#each suggested_tags}}
-            {{#both ../this}}<div tabindex='0' class="{{classes}} suggested">{{/both}}
+            {{#both ../this}}<span tabindex='0' class="{{classes}} suggested label-info">{{/both}}
               {{this}}
-            </div>
+            </span>
           {{/each}}
         </div>
       </div>
-      <div class="row tag-input">
+      <div class="row tagbox_input">
         <div class="span2">
           <textarea name="tag_text"></textarea>
         </div>
