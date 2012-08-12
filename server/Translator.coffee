@@ -148,16 +148,6 @@ class ServerPost extends SharedPost
     reward = @tags[tag].weight / users.length
     tron.test( 'check_number', reward )
     
-    #Alert post author that a tag graduated on his post
-    Notifications.insert( {
-      user: @author_id
-      type: 2
-      post: @_id
-      points: reward
-      tag: tag
-      timestamp: new Date()
-    } )
-    
     for user_id in users
       user_doc = Users.findOne( user_id )
       # add reward to user for tag
@@ -181,8 +171,8 @@ class ServerPost extends SharedPost
       
       #Alert taggers that their tag graduated
       Notifications.insert( {
-        user: @author_id
-        type: 1
+        user: user_id
+        type: unless user_id is @author_id then 1 else 2
         post: @_id
         points: reward
         tag: tag
