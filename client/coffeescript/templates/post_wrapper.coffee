@@ -59,7 +59,9 @@ _.extend( Template.post_wrapper,
     selected_group = Session.get("group_#{@parent_id}")
     selected_group ?= 'all'
     posts = []
-    for post in Posts.find( 'parent_id': @parent_id ).fetch()
+    tag_order = {}
+    tag_order["tags.#{selected_group}"] = -1
+    for post in Posts.find( { 'parent_id': @parent_id }, {sort:tag_order} ).fetch()
       if selected_group == 'all' || selected_group of post.tags
         posts.push(post._id)
     
