@@ -1,6 +1,5 @@
 _.extend( Template.conversation,
-  show_post: ->
-    not Session.equals('showing_post', undefined)
+  show_post: -> Session.get('showing_post')?
     
   root_post: ->
     cur_post = Session.get('showing_post')
