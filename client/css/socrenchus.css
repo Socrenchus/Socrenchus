@@ -105,6 +105,10 @@ a.login-link-text:hover {
 }
 
 /*Tagbox*/
-textarea.tag_text {
-  width: 100%;
+.tagbox_input textarea.tag_text {
+  max-width: 100%;
+  min-width: 100%;
+  min-height: 30px;
+  max-height: 30px;
+  resize: none;
 }
