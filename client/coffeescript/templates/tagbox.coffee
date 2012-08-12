@@ -1,10 +1,16 @@
 _.extend( Template.tagbox,
   classes: ->
     classes = ['tag label']
-    classes.push('grad') if @tags[@cur]?  #graduated
-    classes.push('mytag label-success') if @my_tags? and @my_tags[@cur]?
+    if @my_tags? and @my_tags[@cur]?
+      classes.push('mytag')
+      if @tags[@cur]?
+        classes.push('grad label-success') #green - yours+graduated
+      else
+        classes.push('label-warning') #yellow - yours
+    else if @tags[@cur]?
+      classes.push('grad label-inverse') #black - graduated
     formatted_classes = classes.join(' ')
-    return formatted_classes
+    return formatted_classes    
 
   filter_text: -> 
     filter = Session.get('filter_text')
