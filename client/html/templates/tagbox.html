@@ -4,7 +4,7 @@
       <div class="row displayed_tags">
         <div class="span3">
           {{#each displayed_tags}}
-            {{#both ../this}}<span class="{{classes}}">{{/both}}
+            {{#both ../this}}<span class="{{classes}}" title="{{titles}}">{{/both}}
               {{this}}
             </span>
           {{/each}}
@@ -13,7 +13,7 @@
       <div class="row suggestions">
         <div class="span3">
           {{#each suggested_tags}}
-            {{#both ../this}}<span tabindex='0' class="{{classes}} suggested label-info">{{/both}}
+            {{#both ../this}}<span tabindex='0' class="{{classes}}" title="{{titles}}" suggested label-info">{{/both}}
               {{this}}
             </span>
           {{/each}}
