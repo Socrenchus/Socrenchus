@@ -106,16 +106,19 @@ a.login-link-text:hover {
 
 /*Tagbox*/
 .tagbox_input textarea.tag_text {
-  max-width: 260px;
-  min-width: 260px;
-  min-height: 30px;
-  max-height: 30px;
+  max-width: 224px;
+  min-width: 224px;
+  min-height: 20px;
+  max-height: 20px;
   resize: none;
   
   margin: 0;
   position: relative;
   bottom: 0;
   right: 0;
+}
+.tag_enter_button{
+  height: 30px;
 }
 .tag {
   float: left;  

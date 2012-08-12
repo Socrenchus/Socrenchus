@@ -6,6 +6,19 @@ _.extend( Template.tagbox,
     formatted_classes = classes.join(' ')
     return formatted_classes
 
+  filter_text: -> 
+    filter = Session.get('filter_text')
+    filter ?= ''
+    return filter
+  
+  disabled_status: ->
+    filter = Session.get('filter_text')
+    filter ?= ''
+    if filter is ''
+      return "disabled='disabled'"
+    else
+      return ''
+  
   displayed_tags: ->
     tags = (tag for tag of @tags)
     if @my_tags?
