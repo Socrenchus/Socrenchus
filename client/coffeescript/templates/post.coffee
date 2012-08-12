@@ -21,7 +21,7 @@ _.extend( Template.post,
     if Session.equals('suggested_tags', undefined)
       Session.set('suggested_tags', [])
     Meteor.defer( ->
-      $('.new_post').waypoint( -> @click() ).removeClass('new_post')
+      $('.new_post').waypoint( -> @click?() ).removeClass('new_post')
     )
     return ""
     

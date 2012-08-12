@@ -8,8 +8,6 @@ body {
 .belt {
   background: rgba(255,255,255,.3);
 }
-.tag-select-bar{
-}
 
 .avatar-stack {
   float: left;
@@ -104,4 +102,13 @@ a.login-link-text:hover {
   position: fixed;
   height: 100%;
   outline: 1px solid black;
+}
+
+/*Tagbox*/
+.tagbox_input textarea.tag_text {
+  max-width: 100%;
+  min-width: 100%;
+  min-height: 30px;
+  max-height: 30px;
+  resize: none;
 }
