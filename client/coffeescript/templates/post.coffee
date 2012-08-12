@@ -30,14 +30,17 @@ _.extend( Template.post,
     return "http://www.gravatar.com/avatar/#{hash}"
     
   content: ->
+      
     ###
     1. Raw input is assumed in Content.
     2. Raw input converted using Showdown.
     3. Output of step 2 is subjected to Whitelist.
     4. Links are made ready for oembed.
     ###
+    
+    raw_input = Handlebars._escape(@content);
     #1. @content contains the raw input.
-    raw_input = @content
+    #raw_input = @content
     #2. Convert raw input using Showdown.
     showdown_converter = new Showdown.converter()
     raw_showdown = showdown_converter.makeHtml(raw_input)
@@ -51,6 +54,7 @@ _.extend( Template.post,
     oembedded = oembedded.replace(/(\s|>|^)(mailto:[^\s<]*)/igm, replacement)
     Meteor.defer( -> $('a.oembed').oembed().removeClass('oembed') )
     return oembedded
+    
     
   identifier: -> @_id
   link_href: -> Router.link("/p/#{ @_id }")
