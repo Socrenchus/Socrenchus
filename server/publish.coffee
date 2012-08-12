@@ -12,8 +12,6 @@ Meteor.publish("my_notifs", ->
 )
 
 Meteor.publish("instance", (hostname) ->
-  user_id = @userId()
-  Session.set('user_id', user_id)
   #get instance id...
   instance_query = Instances.find({domain: hostname})
   instance = instance_query.fetch()[0]
@@ -21,6 +19,8 @@ Meteor.publish("instance", (hostname) ->
     tron.log('instance id: ', instance._id)
     Session.set('instance_id', instance._id)
   else
+    user_id = @userId()
+    Session.set('user_id', user_id)
     tron.log("Method get_instance_id: instance \"#{hostname}\" does not exist")
     #check email domain
     email_match = false
@@ -98,7 +98,7 @@ Meteor.publish("current_posts", (post_id) ->
   ids = []
   ids.push( post_id )
   this_post = post_id
-  while Posts.findOne( this_post ).parent_id?
+  while Posts.findOne( this_post )?.parent_id?
     this_post = Posts.findOne( this_post ).parent_id
     if this_post not in ids
       ids.push( this_post )
