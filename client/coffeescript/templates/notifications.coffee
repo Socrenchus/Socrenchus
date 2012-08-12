@@ -1,7 +1,7 @@
 _.extend( Template.notifications,
   notifications: ->
     groups = {}
-    notifs = Notifications.find({},{order:{timestamp:-1}}).fetch()
+    notifs = Notifications.find({},{sort:{timestamp:-1}}).fetch()
     
     ###
     #Grouping code
