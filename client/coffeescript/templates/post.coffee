@@ -136,6 +136,9 @@ _.extend( Template.post,
         event.stopImmediatePropagation()
   }
   
+  login_required: ->
+    return " disabled='disabled'" unless Session.get('user_id')?
+  
   login_to: -> 'Login to ' unless Session.get('user_id')?
   
 )

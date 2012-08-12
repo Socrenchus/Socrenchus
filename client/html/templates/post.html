@@ -22,7 +22,7 @@
                 </button>
               {{/if}}
               
-              <button class="btn btn-mini toggle-tagbox"><i class="icon-tags"></i></button>
+              <button class="btn btn-mini toggle-tagbox"{{login_required}}><i class="icon-tags"></i></button>
             </span>
           </div>
         </div>
@@ -38,7 +38,7 @@
         <div class="{{post_span}}">
           <div class="post-bottom">
             <span class="reply_count">{{reply_count}}</span>
-            <button class="btn btn-mini pull-right" name="reply">{{login_to}}Reply</button>
+            <button class="btn btn-mini pull-right" name="reply"{{login_required}}>{{login_to}}Reply</button>
           </div>
         </div>
       </div>
