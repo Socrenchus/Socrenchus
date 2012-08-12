@@ -9,7 +9,7 @@ _.extend( Template.post_wrapper,
     return Session.get("group_#{@parent_id}")
     
   title_current_group: ->
-    if @cur.name?
+    if @cur.name? and @cur.name isnt 'all'
       return "Posts tagged as '#{@cur.name}'"
     else
       return "All Posts"
