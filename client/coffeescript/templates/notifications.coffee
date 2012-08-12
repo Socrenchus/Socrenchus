@@ -2,7 +2,6 @@ _.extend( Template.notifications,
   notifications: ->
     groups = {}
     notifs = Notifications.find({},{order:{timestamp:-1}}).fetch()
-    console.log(notifs)
     
     ###
     #Grouping code

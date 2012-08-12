@@ -21,7 +21,7 @@ _.extend( Template.post,
     if Session.equals('suggested_tags', undefined)
       Session.set('suggested_tags', [])
     Meteor.defer( ->
-      $('.new_post').waypoint( -> @click() ).removeClass('new_post')
+      $('.new_post').waypoint( -> @click?() ).removeClass('new_post')
     )
     return ""
     
@@ -118,10 +118,12 @@ _.extend( Template.post,
         event.stopImmediatePropagation()
     "click button[name='reply']": (event) ->
       if not event.isPropagationStopped()
-        Session.set('current_post', @_id)
-        Session.set('composing', '')
-        #give the reply text area focus
-        Meteor.defer(-> $("#reply_text").focus())
+        if Session.get('user_id')?
+          Session.set('current_post', @_id)
+          Session.set('composing', '')
+          #give the reply text area focus
+          Meteor.defer(-> $("#reply_text").focus())
+        
         event.stopPropagation()
     
     "click button[name='carousel']": (event) ->
@@ -129,5 +131,7 @@ _.extend( Template.post,
         Template.post_wrapper.start_carousel(Posts.findOne(_id: @parent_id))
         event.stopImmediatePropagation()
   }
+  
+  login_to: -> 'Login to ' unless Session.get('user_id')?
   
 )

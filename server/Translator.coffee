@@ -62,6 +62,7 @@ class ServerPost extends SharedPost
     if is_new
       _.extend( @, _.pick( client, 'content', 'parent_id' ) )
       @author_id = user_id
+      throw 'Need to be logged in to post.' unless @author_id?
       
       #Alert post author that his post was replied to
       Notifications.insert( {
