@@ -8,9 +8,8 @@
           {{#both group_message}}
             <div class='notify-message'>
               {{points}}{{link_text}}
-              {{message}}
-              <br/>
-              <abbr class='timestamp' title='{{timestamp.full}}'>{{timestamp.relative}}</abbr>
+              {{{message}}}
+              <p class='timestamp' title='{{timestamp.full}}'><i class='icon-time'></i>{{timestamp.relative}}</p>
             </div>
           <!--/li-->
           {{/both}}

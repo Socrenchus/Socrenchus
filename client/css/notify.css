@@ -68,6 +68,14 @@
   cursor: pointer;
 }
 
+.notify-message .timestamp {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  color: #888;
+  margin: 0;
+}
+
 .notify-message a {
   color: blue;
 }

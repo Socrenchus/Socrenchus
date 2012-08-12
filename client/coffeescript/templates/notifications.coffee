@@ -31,6 +31,7 @@ _.extend( Template.notifications,
     #Note: Use <abbr title='alt_text'>This tag</abbr> format
     switch first.type
       when 0
+        message += "<i class='icon-comment-alt'></i> "
         message += (if is_group then "#{@length} people " else "Someone ")
         message += "replied to your post."
       when 1
