@@ -1,35 +1,33 @@
 <template name="tagbox">
   <div class="row">
-    <div class="span2">
-      
-    </div>
-    <div class="span1">
-      
-    </div>
-  </div>
-
-  <div class="tag_box">
-    <div class="grad-tags">
-      {{#each displayed_tags}}
-        {{#both ../this}}<div class="{{classes}}">{{/both}}
-          {{this}}
+    <div class="span3">
+      <div class="row displayed_tags">
+        <div class="span3">
+          {{#each displayed_tags}}
+            {{#both ../this}}<div class="{{classes}}">{{/both}}
+              {{this}}
+            </div>
+          {{/each}}
         </div>
-      {{/each}}
-    </div>
-    <div class="add-tags">
-      {{#if tagging_post}}
-        <div class="suggestions">
+      </div>
+      <div class="row suggestions">
+        <div class="span3">
           {{#each suggested_tags}}
             {{#both ../this}}<div tabindex='0' class="{{classes}} suggested">{{/both}}
               {{this}}
             </div>
           {{/each}}
         </div>
-        <div class="tag-input">
+      </div>
+      <div class="row tag-input">
+        <div class="span2">
           <textarea name="tag_text"></textarea>
+        </div>
+        <div class="span1 offset2">
           <button name="enter_tag">-</button>
         </div>
-      {{/if}}
+      </div>
     </div>
+    
   </div>
 </template>
