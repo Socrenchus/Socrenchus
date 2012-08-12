@@ -1,6 +1,6 @@
 <template name="tagbox">
   <div class="row">
-    <div class="span3">
+    <div class="span3 tagbox">
       <div class="row displayed_tags">
         <div class="span3">
           {{#each displayed_tags}}
@@ -20,11 +20,8 @@
         </div>
       </div>
       <div class="row tagbox_input">
-        <div class="span2">
+        <div class="span3">
           <textarea class="tag_text" name="tag_text"></textarea>
-        </div>
-        <div class="span1 offset2">
-          <!--<button name="enter_tag">-</button>-->
         </div>
       </div>
     </div>
