@@ -5,12 +5,15 @@
       <!--ul-->
         {{#each notifications}}
           <!--li-->
+          {{#both group_message}}
             <div class='notify-message'>
+              {{points}}{{link_text}}
               {{message}}
-              <br>
+              <br/>
               <abbr title='{{timestamp.full}}'>{{timestamp.relative}}</abbr>
             </div>
           <!--/li-->
+          {{/both}}
         {{/each}}
       <!--/ul-->
     </div>
