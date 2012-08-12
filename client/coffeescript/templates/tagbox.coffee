@@ -9,14 +9,14 @@ _.extend( Template.tagbox,
   displayed_tags: ->
     tags = (tag for tag of @tags)
     if @my_tags?
-      for tag in @my_tags
-        if not (tag in visible)
+      for tag of @my_tags
+        if not (tag in tags)
           tags.push(tag)
     return tags
     
   suggested_tags: ->
     filtered = []
-    for tag in Session.get('suggested_tags')
+    for tag in @suggested_tags
       if tag? and tag.indexOf(Session.get('filter_text')) != -1
         filtered.push(tag)
     return filtered
