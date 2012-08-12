@@ -50,3 +50,5 @@ _.extend(Date::,
     full = "#{@toDateString()} at #{hour}:#{minutes}#{ap}"
     return full
 )
+
+tron ?= console
