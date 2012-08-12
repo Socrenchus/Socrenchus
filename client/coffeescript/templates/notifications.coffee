@@ -1,38 +1,17 @@
 _.extend( Template.notifications,
   notifications: ->
     groups = {}
-    notifs = Notifications.find({},{order:{timestamp:-1}}).fetch()
+    notifs = Notifications.find({},{sort:{timestamp:-1}}).fetch()
     
-    ###
     #Grouping code
     for doc in notifs
       groups[doc.type + doc.post] ?= []
       groups[doc.type + doc.post].push( doc )
-    ###  
     
-    return notifs
+    return ( v for k, v of groups )
+  
   post_id : -> @[0].post
   
-  message: ->
-    pts = @points
-    message = ''
-    
-    if pts > 0
-      message += '+'
-    if pts != 0
-      message += "#{Math.round(pts)} - "
-      
-    switch @type
-      when 0
-        message += "Someone replied to your post."
-      when 1
-        message += "Your tag on a post graduated."
-      when 2
-        message += "A tag graduated on your post."
-        
-    return message
-  
-  ###
   group_message: ->
     pts = 0
     points = ''
@@ -61,8 +40,7 @@ _.extend( Template.notifications,
         link_text += (if is_group then "#{@length} tags" else "A tag")
         message += " graduated on your post."
     
-    return {points: points, link_text: link_text, message: message}
-  ###
+    return {points: points, link_text: link_text, message: message, timestamp:first.timestamp}
   
   timestamp: -> 
     timestamp = new Date(@timestamp)
@@ -78,7 +56,7 @@ _.extend( Template.notifications,
         Session.set('notifications_state', 'open')
     'click .notify-message': (event) ->
       if not event.isPropagationStopped()
-        window.location ="/p/#{@post}"
+        window.location ="/p/#{@cur[0].post}"
         event.stopPropagation()
     'click': (event) ->
       event.stopPropagation()
