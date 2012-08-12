@@ -112,3 +112,6 @@ a.login-link-text:hover {
   max-height: 30px;
   resize: none;
 }
+.tag {
+  float: left;  
+}
