@@ -6,7 +6,6 @@ Notifications = new Meteor.Collection("notifications")
 
 Meteor.publish("my_notifs", ->
   user_id = @userId()
-  Session.set('user_id', user_id)
   if user_id?
     return Notifications.find( user: user_id )
 )
@@ -20,7 +19,6 @@ Meteor.publish("instance", (hostname) ->
     Session.set('instance_id', instance._id)
   else
     user_id = @userId()
-    Session.set('user_id', user_id)
     tron.log("Method get_instance_id: instance \"#{hostname}\" does not exist")
     #check email domain
     email_match = false
@@ -47,7 +45,6 @@ Meteor.publish("instance", (hostname) ->
 
 Meteor.publish("my_posts", ->
   user_id = @userId()
-  Session.set('user_id', user_id)
   if user_id?
     handle = null
     q = null
@@ -66,7 +63,7 @@ Meteor.publish("my_posts", ->
         handle.stop()
 
       action = (doc, idx) =>
-        client_post = new ClientPost( doc )
+        client_post = new ClientPost( doc, user_id )
         @set("posts", client_post._id, client_post)
         @flush()
       
@@ -107,7 +104,7 @@ Meteor.publish("current_posts", (post_id) ->
   in_ids = { '$in': ids }
   
   action = (doc, idx) =>
-    client_post = new ClientPost( doc )
+    client_post = new ClientPost( doc, @userId() )
     @set("posts", client_post._id, client_post)
     @flush()
   
