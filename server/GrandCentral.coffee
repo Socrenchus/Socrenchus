@@ -12,15 +12,15 @@ class GrandCentral
       
   error_list = []
   dispatch: (args...) =>
+    deny =
+      insert: =>
+        error_list.push('not implemented yet')
+      update: =>
+        error_list.push('not implemented yet')
+      remove: =>
+        error_list.push('not implemented yet')
     {
-      users: {
-        insert: =>
-          error_list.push('not implemented yet')
-        update: =>
-          error_list.push('not implemented yet')
-        remove: =>
-          error_list.push('not implemented yet')
-      }
+      users: deny
       posts: {
         insert: =>
           args[0] = new ServerPost( args[0] )
@@ -34,14 +34,8 @@ class GrandCentral
         remove: (args...) =>
           error_list.push('not implemented yet')
       }
-      instances: {
-        insert: =>
-          error_list.push('not implemented yet')
-        update: =>
-          error_list.push('not implemented yet')
-        remove: =>
-          error_list.push('not implemented yet')
-      }
+      instances: deny
+      notifications: deny
     }[@collection][@method]()
     if (error_list.length is 0 or @_debug)
       @default.apply(@, args)
@@ -53,7 +47,7 @@ class GrandCentral
 
 
 Meteor.startup( ->
-  for collection in ['users','posts','instances']
+  for collection in ['users','posts','instances','notifications']
     for method in ['insert','update','remove']
       gc = new GrandCentral(collection, method)
 )
