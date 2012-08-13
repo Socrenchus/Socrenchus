@@ -1,6 +1,7 @@
 Meteor.methods(
+  user_id: -> @userId()
   get_post_by_id: (post_id) ->
     p = Posts.findOne(post_id)
-    return new ClientPost( p ) if p?
+    return new ClientPost( p, @userId() ) if p?
  
 )

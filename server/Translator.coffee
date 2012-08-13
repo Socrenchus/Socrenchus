@@ -21,7 +21,7 @@ class SharedPost
     return grad
        
 class ClientPost extends SharedPost
-  constructor: ( server ) ->
+  constructor: ( server, user_id ) ->
     # define the client schema
     _.extend( @,
       tags: {} # tag: weight
@@ -29,8 +29,6 @@ class ClientPost extends SharedPost
       suggested_tags: []
       reply_count: 0
     )
-
-    user_id = Session.get('user_id')
     
     super(server)
     
@@ -53,15 +51,13 @@ class ClientPost extends SharedPost
     @reply_count = Posts.find({parent_id: server._id}).count()
     
 class ServerPost extends SharedPost
-  constructor: ( client ) ->
+  constructor: ( client, user_id ) ->
     # define the server schema
     _.extend( @,
       instance_id: ''
       tags: {} # tag: {users:[], weight:#}
     )
-    
-    user_id = Session.get('user_id')
-    
+        
     super(client)
     
     # init pre change post from server databse

@@ -12,6 +12,7 @@ class GrandCentral
       
   error_list = []
   dispatch: (args...) =>
+    user_id = Meteor.call('user_id')
     deny =
       insert: =>
         error_list.push('not implemented yet')
@@ -23,13 +24,13 @@ class GrandCentral
       users: deny
       posts: {
         insert: =>
-          args[0] = new ServerPost( args[0] )
+          args[0] = new ServerPost( args[0], user_id )
         update: =>
           [selector, modifier] = args
           doc = Posts.findOne( selector._id )
-          doc = new ClientPost( doc )
+          doc = new ClientPost( doc, user_id )
           LocalCollection._modify( doc, modifier )
-          result = new ServerPost( doc )
+          result = new ServerPost( doc, user_id )
           args[1] = result
         remove: (args...) =>
           error_list.push('not implemented yet')
@@ -43,8 +44,6 @@ class GrandCentral
       console.error(error_list)
     #console.info 'GrandCentral is operational!!'
     error_list = []
-   
-
 
 Meteor.startup( ->
   for collection in ['users','posts','instances','notifications']
