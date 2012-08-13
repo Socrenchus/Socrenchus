@@ -63,7 +63,7 @@ _.extend( Template.post,
     if @author?.name?
       return @author?.name
     else if @author?.username?
-      return @author?.username
+      return '' #@author?.username  --Usernames are still ugly. Uncomment if you disagree.
     else 
       return ''
   
