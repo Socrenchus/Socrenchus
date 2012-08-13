@@ -45,6 +45,13 @@ img.avatar {
   outline: 1px solid black;
 }
 
+.post-top, .post-bottom {
+  padding: 2px;
+}
+.post-middle {
+  padding: 8px;
+}
+
 .selected {
   color: blue; /*not permanent, just an indicator temporarily*/  
 }
