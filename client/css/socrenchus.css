@@ -42,7 +42,7 @@ img.avatar {
   box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, .1);
 }
 .belt, .post-encompasser {
-  outline: 1px solid black;
+  /*outline: 1px solid black;*/
 }
 
 .post-top, .post-bottom {
@@ -108,7 +108,7 @@ a.login-link-text:hover {
   
   position: fixed;
   height: 100%;
-  outline: 1px solid black;
+  /*outline: 1px solid black;*/
 }
 
 /*Tagbox*/
@@ -132,7 +132,7 @@ a.login-link-text:hover {
 }
 .tagbox {
   background: rgba(255,255,255,.3);
-  outline: 1px solid black;
+  /*outline: 1px solid black;*/
 }
 
  
