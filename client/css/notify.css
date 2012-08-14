@@ -27,7 +27,7 @@
   height: 250px;
   overflow: scroll;
   overflow-x: hidden;
-  outline: 2px solid black;
+  /*outline: 2px solid black;*/
   background: #FFFFFF;
   background-image: url('/images/bg.svg');
   background-size: 12px;
@@ -63,7 +63,7 @@
   width: 259px;
   height: 50px;
   padding-left: 2px;
-  outline: 1px black solid;
+  /*outline: 1px black solid;*/
   color: #333;
   cursor: pointer;
 }
