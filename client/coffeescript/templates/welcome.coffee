@@ -46,7 +46,7 @@ _.extend( Template.welcome,
           reply_id = Posts.insert(
             {
               content: reply_content,
-              instance_id: @instance_id
+              domain: window.instance
             }
           )
           Router.navigate("p/#{reply_id}", true)
