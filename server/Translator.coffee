@@ -80,6 +80,21 @@ class ServerPost extends SharedPost
         tag: tag
         timestamp: new Date()
       } )
+      
+      #if its a reply, add children_id to parent_id
+      if @parent_id?
+        parent_post = Posts.findOne( @parent_id )
+        #cids = []
+        #if parent_post.children_id?
+        #  cids = parent_post.children_id
+        #cids.push( @_id )
+        console.log Posts.findOne(@parent_id)
+        if not parent_post.children_ids?
+          Posts.update( {'_id': @parent_id}, {'$set': { 'children_ids': [] }} )
+        Posts.update( {'_id': @parent_id}, {'$addToSet': { 'children_ids': @_id }} )
+        #Posts.update('_id': @parent_id, '$set': { 'children_ids': cids } )
+        console.log Posts.findOne(@parent_id)
+        
     else
       _.extend( @, post )
       
