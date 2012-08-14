@@ -46,7 +46,7 @@ class ClientPost extends SharedPost
         
     author = Meteor.users.findOne( '_id': server.author_id )
     if author?
-      @author = _.pick( author, '_id', 'emails', 'name' )
+      @author = _.pick( author, '_id', 'emails', 'name', 'username' )
       
     @reply_count = Posts.find({parent_id: server._id}).count()
     
