@@ -32,6 +32,22 @@ img.avatar {
   padding: 2px;
 }
 
+
+.post-bottom-right {
+  padding: 2px;
+}
+
+.reply-button {
+  position: relative;
+  top: -3px;
+}
+.reply-count {
+  margin-bottom: -2px;
+}
+.float-right {
+  float: right;
+}
+
 .btn-group.post-select-buttons{
   float: left;
   margin: 2px;
@@ -46,7 +62,7 @@ img.avatar {
 }
 
 .post-top, .post-bottom {
-  padding: 2px;
+  padding: 2px 3px 2px 4px;
 }
 .post-middle {
   padding: 8px;
