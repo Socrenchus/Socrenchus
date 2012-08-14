@@ -91,7 +91,7 @@ Meteor.publish("my_posts", ->
 
 )
 
-Meteor.publish("current_posts", (post_id) ->
+Meteor.publish( "current_posts", (post_id) ->
   #all the parents of the post
   ids = []
   ids.push( post_id )
@@ -123,4 +123,44 @@ Meteor.publish("current_posts", (post_id) ->
       @unset( "client_posts", post._id, fields )
     @flush()
   )
+)
+
+Meteor.publish( "children_posts", ->
+  user_id = @userId()
+  root_posts = Posts.find({'author_id': user_id, 'parent_id': null}).fetch() 
+  if root_posts
+    for rp in root_posts
+      ch_ids = []
+      if rp.children_ids?
+        for id in rp.children_ids
+          ch_ids.push( id )
+      for cid in ch_ids
+        p = Posts.findOne( cid )
+        if p? and p.children_ids?
+          n_chids = Posts.findOne( cid ).children_ids
+          for n_chid in n_chids
+            if n_chid not in ch_ids
+              ch_ids.push( n_chid )
+      q = Posts.find( {'_id': {'$in': ch_ids}} )
+      
+    action = (doc, idx) =>
+      client_post = new ClientPost( doc, @userId() )
+      @set("posts", client_post._id, client_post)
+      @flush()
+  
+    handle = q.observe(
+      added: action
+      changed: action
+    )
+  
+    @onStop( =>
+      handle.stop()
+      q.rewind()
+      posts = q.fetch()
+      for post in posts
+        fields = (key for key of ClientPost)
+        @unset( "client_posts", post._id, fields )
+      @flush()
+    )
+  
 )

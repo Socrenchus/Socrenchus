@@ -7,6 +7,8 @@ Instances = new Meteor.Collection("instances")
 # Subscriptions
 Meteor.subscribe( "my_notifs" )
 Meteor.subscribe( "my_posts" )
+Meteor.subscribe( "current_posts" )
+Meteor.subscribe( "children_posts" )
 
 # Backbone router
 class Router extends Backbone.Router
