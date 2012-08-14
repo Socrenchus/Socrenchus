@@ -61,8 +61,18 @@ img.avatar {
   /*outline: 1px solid black;*/
 }
 
+.pad1 {
+  padding: 1px;
+}
+
+.author-info > img
+{
+  position: relative;
+  top: -2px;
+}
+
 .post-top, .post-bottom {
-  padding: 2px 3px 2px 4px;
+  padding: 3px 3px 3px 4px;
 }
 .post-middle {
   padding: 8px;
