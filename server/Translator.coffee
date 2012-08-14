@@ -9,7 +9,7 @@ class SharedPost
       time: new Date()
     )
     
-    for key in [ '_id', 'parent_id', 'content', 'instance_id', 'time' ]
+    for key in [ '_id', 'parent_id', 'content', 'instance_id', 'time', 'children_ids' ]
       @[key] = either[key] if either[key]?
   
   is_graduated: ( tag ) =>
@@ -28,6 +28,7 @@ class ClientPost extends SharedPost
       my_tags: {} # same as tags
       suggested_tags: []
       reply_count: 0
+      children_ids: []
     )
     
     super(server)
@@ -81,19 +82,12 @@ class ServerPost extends SharedPost
         timestamp: new Date()
       } )
       
-      #if its a reply, add children_id to parent_id
+      #if it is a reply, add children_id to the parent post
       if @parent_id?
         parent_post = Posts.findOne( @parent_id )
-        #cids = []
-        #if parent_post.children_id?
-        #  cids = parent_post.children_id
-        #cids.push( @_id )
-        console.log Posts.findOne(@parent_id)
         if not parent_post.children_ids?
           Posts.update( {'_id': @parent_id}, {'$set': { 'children_ids': [] }} )
         Posts.update( {'_id': @parent_id}, {'$addToSet': { 'children_ids': @_id }} )
-        #Posts.update('_id': @parent_id, '$set': { 'children_ids': cids } )
-        console.log Posts.findOne(@parent_id)
         
     else
       _.extend( @, post )
