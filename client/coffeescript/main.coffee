@@ -23,6 +23,7 @@ class Router extends Backbone.Router
       Session.set('showing_post', result)
     )
     Meteor.subscribe( "current_posts", post_id )
+    #history.replaceState(null,'Socrenchus','/')
 
   use_instance: (args) ->
     args = args.split( '/' )
@@ -34,10 +35,10 @@ class Router extends Backbone.Router
     l.attr( 'rel', 'stylesheet' )
     l.attr( 'href', "//#{domain}/style.css" )
     $('head').append( l )
+    Backbone.history.options.root = "/i/#{domain}/"
     if other?
       Backbone.history.navigate("/#{other}", trigger: true)
-      @navigate("/i/#{domain}/#{other}")
-
+  
   link: (url) ->
     unless window.instance?
       return "#{window.location.host}#{url}"
