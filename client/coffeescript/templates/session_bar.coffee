@@ -9,5 +9,7 @@ _.extend( Template.session_bar,
     'click .logout_top_right': (event) ->
       Meteor.clearInterval(window.carousel_handle)
       Meteor.logout()
+    'click .brand': (event) ->
+      Backbone.history.navigate("/", trigger: true)
   }
 )

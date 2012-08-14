@@ -5,11 +5,11 @@ class SharedPost
       _id: ''
       parent_id: undefined
       content: ''
-      instance_id: ''
+      domain: 'socrench.us'
       time: new Date()
     )
     
-    for key in [ '_id', 'parent_id', 'content', 'instance_id', 'time' ]
+    for key in [ '_id', 'parent_id', 'content', 'domain', 'time' ]
       @[key] = either[key] if either[key]?
   
   is_graduated: ( tag ) =>
@@ -54,7 +54,6 @@ class ServerPost extends SharedPost
   constructor: ( client, user_id ) ->
     # define the server schema
     _.extend( @,
-      instance_id: ''
       tags: {} # tag: {users:[], weight:#}
     )
         
