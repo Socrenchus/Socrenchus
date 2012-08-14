@@ -30,7 +30,7 @@ _.extend(Date::,
         to_string: => "#{Math.round(time_diff / 3600000)} hours ago"
       week:
         size: 604800000
-        to_string: => "on #{@days_of_week[@getDay()]}"
+        to_string: => @days_of_week[@getDay()]
         
     for k, v of time_dict
       if time_diff < v.size
