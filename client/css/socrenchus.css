@@ -1,6 +1,7 @@
 html {
   background-image: url('/images/bg.svg');
   background-size: 12px;
+  text-shadow: 1px 1px rgba(0, 0, 0, 0.1);
 }
 body {
   background: transparent;  
@@ -32,6 +33,8 @@ body {
 {
   position: relative;
   top: -2px;
+  -webkit-box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.15);
+  box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.15);
 }
 .reply-button {
   position: relative;
