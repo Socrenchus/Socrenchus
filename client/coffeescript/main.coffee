@@ -15,6 +15,7 @@ class Router extends Backbone.Router
     "p/:post_id": "show_post"
    
   home: ->
+    Session.set('showing_post', undefined)
     Session.set('home', true)
 
   show_post: (post_id) ->
