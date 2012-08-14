@@ -43,72 +43,48 @@ Meteor.publish("instance", (hostname) ->
   return instance_query
 )
 
-Meteor.publish("my_posts", ->
+
+#publish posts
+Meteor.publish( "my_posts", (post_id) ->
+  ids = []
+  #if post_id is given, publish a path to the root post.
+  if post_id?
+      ids.push( post_id )
+      this_post = post_id
+      while Posts.findOne( this_post )?.parent_id?
+        this_post = Posts.findOne( this_post ).parent_id
+        if this_post not in ids
+          ids.push( this_post )
+  
+  
+  #if author, publish the entire tree that resulted from the post.
   user_id = @userId()
   if user_id?
-    handle = null
-    q = null
-    ids = []
-    first_action = (item, idx) =>
-      # gather ids of my posts and posts i've replied to
-      ids.push( item['parent_id'] ) if 'parent_id' of item
-      ids.push( item['_id'] )
-      
-      # query for posts or children of my posts or parents
-      in_ids = { '$in': ids }
-      in_or_child_of_ids = { '$or': [ {_id: in_ids}, {parent_id: in_ids} ] }
-      q = Posts.find( in_or_child_of_ids )
-      
-      if handle?
-        handle.stop()
-
-      action = (doc, idx) =>
-        client_post = new ClientPost( doc, user_id )
-        @set("posts", client_post._id, client_post)
-        @flush()
-      
-      handle = q.observe(
-        added: action
-        changed: action
-      )
-      
-    Posts.find( author_id: user_id ).observe(
-      added: first_action
-      changed: first_action
-    )
-    
-    @onStop( =>
-      if q?
-        handle.stop()
-        q.rewind()
-        posts = q.fetch()
-        for post in posts
-          fields = (key for key of ClientPost)
-          @unset( "my_posts", post._id, fields )
-        @flush()
-    )
-
-
-)
-
-Meteor.publish( "current_posts", (post_id) ->
-  #all the parents of the post
-  ids = []
-  ids.push( post_id )
-  this_post = post_id
-  while Posts.findOne( this_post )?.parent_id?
-    this_post = Posts.findOne( this_post ).parent_id
-    if this_post not in ids
-      ids.push( this_post )
-  
-  in_ids = { '$in': ids }
+    author_posts = Posts.find({'author_id': user_id}).fetch() 
+    if author_posts
+      for ap in author_posts
+        ch_ids = []
+        if ap.children_ids?
+          for id in ap.children_ids
+            ch_ids.push( id )
+        for cid in ch_ids
+          p = Posts.findOne( cid )
+          if p? and p.children_ids?
+            n_chids = Posts.findOne( cid ).children_ids
+            for n_chid in n_chids
+              if n_chid not in ch_ids
+                ch_ids.push( n_chid )
+        for id in ch_ids
+          if id not in ids
+            ids.push( id )
+            
+  q = Posts.find( {'_id': {'$in': ids} } )
   
   action = (doc, idx) =>
-    client_post = new ClientPost( doc, @userId() )
+    client_post = new ClientPost( doc, user_id )
     @set("posts", client_post._id, client_post)
     @flush()
   
-  q = Posts.find( '_id': in_ids )
   handle = q.observe(
     added: action
     changed: action
@@ -123,44 +99,4 @@ Meteor.publish( "current_posts", (post_id) ->
       @unset( "client_posts", post._id, fields )
     @flush()
   )
-)
-
-Meteor.publish( "children_posts", ->
-  user_id = @userId()
-  root_posts = Posts.find({'author_id': user_id, 'parent_id': null}).fetch() 
-  if root_posts
-    for rp in root_posts
-      ch_ids = []
-      if rp.children_ids?
-        for id in rp.children_ids
-          ch_ids.push( id )
-      for cid in ch_ids
-        p = Posts.findOne( cid )
-        if p? and p.children_ids?
-          n_chids = Posts.findOne( cid ).children_ids
-          for n_chid in n_chids
-            if n_chid not in ch_ids
-              ch_ids.push( n_chid )
-      q = Posts.find( {'_id': {'$in': ch_ids}} )
-      
-    action = (doc, idx) =>
-      client_post = new ClientPost( doc, @userId() )
-      @set("posts", client_post._id, client_post)
-      @flush()
-  
-    handle = q.observe(
-      added: action
-      changed: action
-    )
-  
-    @onStop( =>
-      handle.stop()
-      q.rewind()
-      posts = q.fetch()
-      for post in posts
-        fields = (key for key of ClientPost)
-        @unset( "client_posts", post._id, fields )
-      @flush()
-    )
-  
 )

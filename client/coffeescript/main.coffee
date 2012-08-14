@@ -7,8 +7,6 @@ Instances = new Meteor.Collection("instances")
 # Subscriptions
 Meteor.subscribe( "my_notifs" )
 Meteor.subscribe( "my_posts" )
-Meteor.subscribe( "current_posts" )
-Meteor.subscribe( "children_posts" )
 
 # Backbone router
 class Router extends Backbone.Router
@@ -24,7 +22,7 @@ class Router extends Backbone.Router
     Meteor.call('get_post_by_id', post_id, (error, result) ->
       Session.set('showing_post', result)
     )
-    Meteor.subscribe( "current_posts", post_id )
+    Meteor.subscribe( "my_posts", post_id )
 
   use_instance: (args) ->
     args = args.split( '/' )
