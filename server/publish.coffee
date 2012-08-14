@@ -10,39 +10,6 @@ Meteor.publish("my_notifs", ->
     return Notifications.find( user: user_id )
 )
 
-Meteor.publish("instance", (hostname) ->
-  #get instance id...
-  instance_query = Instances.find({domain: hostname})
-  instance = instance_query.fetch()[0]
-  if instance?
-    tron.log('instance id: ', instance._id)
-    Session.set('instance_id', instance._id)
-  else
-    user_id = @userId()
-    tron.log("Method get_instance_id: instance \"#{hostname}\" does not exist")
-    #check email domain
-    email_match = false
-    current_user_id = user_id
-    email_addr = Users.findOne( _id: current_user_id ).email
-    [host, domain] = email_addr.split("@")
-    if domain is hostname
-      email_match = true #success - email address matches hostname
-    else
-      tron.log('Email domain does not match requested instance domain')
-      email_match = false #mismatch - don't allow
-    #create new instance
-    if email_match
-      tron.log('create_instance: Creating new instance')
-      #Insert new instance info in db...
-      id = Instances.insert({
-        admin_id: current_user_id,
-        domain: domain
-      })
-      #...and then set the instance_id session variable to the new instance
-      Session.set('instance_id', id)
-  return instance_query
-)
-
 Meteor.publish("my_posts", ->
   user_id = @userId()
   if user_id?

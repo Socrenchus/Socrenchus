@@ -2,7 +2,6 @@
 Posts = new Meteor.Collection("posts")
 Users = new Meteor.Collection("users_proto")
 Notifications = new Meteor.Collection("notifications")
-Instances = new Meteor.Collection("instances")
 
 # Subscriptions
 Meteor.subscribe( "my_notifs" )
@@ -16,6 +15,7 @@ class Router extends Backbone.Router
     "p/:post_id": "show_post"
    
   home: ->
+    Session.set('showing_post', undefined)
     Session.set('home', true)
 
   show_post: (post_id) ->
