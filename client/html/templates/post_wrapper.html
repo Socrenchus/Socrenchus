@@ -2,31 +2,33 @@
   {{#if not_root}}
     <div class="row">
       <div class="span10 offset1 belt">
-        <div class="row tag-select-bar">
-          <div class="span10">
-            {{#each groups}}
-              {{#both ../this}}
-                
-                <div class="btn-group post-select-buttons">    
-                  {{#if group_selected}}
-                    {{#each group_posts}}
-                      {{#both ../this}}
-                        <button name='{{cur}}' class='btn post{{reply_class}}' title="{{title_selected_group}}"><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=60&d=identicon" height='30' width='30' class='nodrag' /></button>
-                      {{/both}}
-                    {{/each}}
+        <div class="pad1">
+          <div class="row tag-select-bar">
+            <div class="span10">
+              {{#each groups}}
+                {{#both ../this}}
                   
-                  {{else}}
-                    <button name='{{cur.name}}' class='btn group btn-inverse faded-inside' title="{{title_current_group}}">
-                      <div>
-                        <img src="http://www.gravatar.com/avatar/{{cur.hash}}?s=52&d=identicon" height='26' width='26' class='avatar nodrag' />
-                        <span class='avatar-stack nodrag' style="width: {{cur.width}}px"></span>
-                      </div>
-                    </button>
-                  {{/if}}
-                </div>
-                
-              {{/both}}
-            {{/each}}
+                  <div class="btn-group post-select-buttons">    
+                    {{#if group_selected}}
+                      {{#each group_posts}}
+                        {{#both ../this}}
+                          <button name='{{cur}}' class='btn post{{reply_class}}' title="{{title_selected_group}}"><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=60&d=identicon" height='30' width='30' class='nodrag' /></button>
+                        {{/both}}
+                      {{/each}}
+                    
+                    {{else}}
+                      <button name='{{cur.name}}' class='btn group btn-inverse faded-inside' title="{{title_current_group}}">
+                        <div>
+                          <img src="http://www.gravatar.com/avatar/{{cur.hash}}?s=52&d=identicon" height='26' width='26' class='avatar nodrag' />
+                          <span class='avatar-stack nodrag' style="width: {{cur.width}}px"></span>
+                        </div>
+                      </button>
+                    {{/if}}
+                  </div>
+                  
+                {{/both}}
+              {{/each}}
+            </div>
           </div>
         </div>
       </div>
