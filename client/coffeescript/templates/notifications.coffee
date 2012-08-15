@@ -57,7 +57,7 @@ _.extend( Template.notifications,
         Session.set('notifications_state', 'open')
     'click .notify-message': (event) ->
       if not event.isPropagationStopped()
-        window.location ="/p/#{@cur[0].post}"
+        Backbone.history.navigate("/p/#{@cur[0].post}", trigger: true)
         event.stopPropagation()
     'click': (event) ->
       event.stopPropagation()
