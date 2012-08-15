@@ -51,14 +51,10 @@ _.extend( Template.tagbox,
     filter = Session.get('filter_text')
     filter ?= ''
     if filter is ''
-      for tag in @suggested_tags
-        if tag? 
-          filtered.push(tag)
-    else  
-      for tag in @suggested_tags
-        if tag? and tag.indexOf(filter) != -1
-          filtered.push(tag)
-    return filtered
+      filtered = @suggested_tags
+    else 
+      filtered = (tag for tag in @suggested_tags when (tag.indexOf(filter) isnt -1))    
+    return filtered.unique()
 
   tagging_post: ->
     Session.equals('tagging', true) and Session.equals('current_post', @_id)
