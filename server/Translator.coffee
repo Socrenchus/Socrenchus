@@ -12,11 +12,11 @@ class SharedPost
     for key in [ '_id', 'parent_id', 'content', 'domain', 'time' ]
       @[key] = either[key] if either[key]?
   
-  is_graduated: ( tag ) =>
+  is_graduated: ( tag, server_post ) =>
     # TODO: Improve this function
     grad = false
-    if @tags[tag]?
-      grad = @tags[tag].users.length > 1
+    if server_post.tags[tag]?
+      grad = server_post.tags[tag].users.length > 1
     else grad = false
     return grad
        
@@ -33,7 +33,7 @@ class ClientPost extends SharedPost
     super(server)
     
     for tag of server.tags
-      if @is_graduated( tag )
+      if @is_graduated( tag, server )
         @tags[tag] = server.tags[tag].weight
       users = server.tags[tag].users
       if users? and user_id in users
@@ -49,6 +49,7 @@ class ClientPost extends SharedPost
       @author = _.pick( author, '_id', 'emails', 'name', 'username' )
       
     @reply_count = Posts.find({parent_id: server._id}).count()
+  
     
 class ServerPost extends SharedPost
   constructor: ( client, user_id ) ->
@@ -92,7 +93,7 @@ class ServerPost extends SharedPost
   
   add_tag: ( tag, user_id ) =>
     # check if already graduated
-    already_graduated = @is_graduated( tag )
+    already_graduated = @is_graduated( tag, @ )
     # add the tag
     if not @tags[tag]?
       @tags[tag] = {
@@ -104,7 +105,7 @@ class ServerPost extends SharedPost
     # add user's post experience to the tag
     @tags[tag].weight += @get_user_post_experience( user_id )
     # check if graduated
-    graduated = @is_graduated( tag )
+    graduated = @is_graduated( tag, @ )
     
     if not already_graduated and graduated
       @award_points( @tags[tag].users, tag )
@@ -112,7 +113,7 @@ class ServerPost extends SharedPost
       tron.test( 'check_award_points', tag, user )
     tron.test( 'check_add_tag', @, tag, user_id)
 
-    
+  
   get_user_post_experience: ( user_id ) =>
     weights = {}
     weight_total = 0
