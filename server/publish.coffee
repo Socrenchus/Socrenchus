@@ -39,42 +39,41 @@ Meteor.publish( "current_posts", ( post_id, list ) ->
           authored.push( p._id )
               
 
-      console.log '#if authored, publish path to leaf'
       #if authored, publish path to leaf
       path_to_leaf = []
+      path_to_leaf.push( item._id )
       if authored.length > 0
-        cur_post = authored[0]
-        next_child = ''
+        cur_post_id = authored[0]
+        next_child_id = null
         done = false
         while not done
-          children = Posts.find( {'parent_id': cur_post} ).fetch()
-          if children?
+          children = Posts.find( {'parent_id': cur_post_id} ).fetch()
+          if children.length > 0
             for child in children
               if list?
-                if child in list
-                  next_child = child
-            if next_child?
-              path_to_leaf.push( next_child )
-              cur_post = next_child
+                if child._id in list
+                  next_child_id = child._id
+            if next_child_id?
+              path_to_leaf.push( next_child_id )
+              cur_post_id = next_child_id
             else
-              path_to_leaf.push( children[0] )
-              cur_post = children[0]
+              path_to_leaf.push( children[0]._id )
+              cur_post_id = children[0]._id
           else
             done = true
-      console.log 'authored:', authored
-      console.log 'path_to_leaf', path_to_leaf
+
       
       #add path_to_leaf to ids, also find if more posts are authored
-      console.log path_to_leaf
+      console.log 'path_to_leaf', path_to_leaf
       for i in path_to_leaf
-        if Posts.findOne( i ).author_id is user_id
+        if Posts.findOne( i )?.author_id is user_id
           authored.push( i )
         if i not in ids
           ids.push( i )
       
       #add all siblings of authored posts
       for i in authored
-        parent = Posts.findOne( i.parent_id )._id
+        parent = Posts.findOne( i.parent_id )?._id
         siblings = Posts.find( {'parent_id': parent} )
         for s in siblings
           if s not in ids
