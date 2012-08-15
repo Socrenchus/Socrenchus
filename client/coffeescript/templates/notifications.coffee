@@ -1,6 +1,6 @@
 _.extend( Template.notifications,
   count: -> 
-    Notifications.find( timestamp: { '$gt': Meteor.user().notify } ).count()
+    Notifications.find( timestamp: { '$gt': Meteor.user()?.notify } ).count()
   notifications: ->
     groups = {}
     notifs = Notifications.find({},{sort:{timestamp:-1}}).fetch()
