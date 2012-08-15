@@ -48,9 +48,12 @@ _.extend( Template.tagbox,
     
   suggested_tags: ->
     filtered = []
-    for tag in @suggested_tags
-      if tag? and tag.indexOf(Session.get('filter_text')) != -1
-        filtered.push(tag)
+    filter = Session.get('filter_text')
+    filter ?= ''
+    if filter is ''
+      filtered = @suggested_tags
+    else 
+      filtered = (tag for tag in @suggested_tags when (tag.indexOf(filter) isnt -1))    
     return filtered
 
   tagging_post: ->
