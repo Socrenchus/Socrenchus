@@ -12,7 +12,7 @@ Meteor.publish("my_notifs", ->
 
 Meteor.publish( "current_posts", ( post_id, list ) ->
   #list indicates the posts in the path to leaf have been clicked
-  #by the user, 
+  #by the user,
   user_id = @userId()
   if user_id?
     handle = null
@@ -64,7 +64,6 @@ Meteor.publish( "current_posts", ( post_id, list ) ->
 
       
       #add path_to_leaf to ids, also find if more posts are authored
-      console.log 'path_to_leaf', path_to_leaf
       for i in path_to_leaf
         if Posts.findOne( i )?.author_id is user_id
           authored.push( i )
