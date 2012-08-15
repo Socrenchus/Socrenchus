@@ -1,12 +1,12 @@
 <template name="notifications">
-  <h3 id='notification-counter' class="unselectable">{{notifications.length}}</h3>
+  <h3 id='notification-counter' class="{{#if count}}un{{/if}}read unselectable">{{count}}</h3>
   {{#if show}}
     <div id='notification-box'>
       <!--ul-->
         {{#each notifications}}
           <!--li-->
           {{#both group_message}}
-            <div class='notify-message'>
+            <div class='{{#unless read}}un{{/unless}}read notify-message'>
               {{points}}{{link_text}}
               {{{message}}}
               <p class='timestamp' title='{{timestamp.full}}'><i class='icon-time'></i>{{timestamp.relative}}</p>

@@ -2,6 +2,16 @@ _.extend(Array::,
   remove: (e) -> @[t..t] = [] if (t = @indexOf(e)) > -1
 
   clone: -> this[..]
+  
+  unique: ->  #http://stackoverflow.com/questions/2218999/remove-duplicates-from-an-array-of-objects-in-javascript
+    a = this.sort()
+    i = 1
+    while i < a.length
+      if a[i - 1] is a[i]
+        a.splice i, 1
+      else
+        i++
+    return a
 )
 
 _.extend(Date::,

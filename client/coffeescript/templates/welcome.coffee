@@ -59,6 +59,11 @@ _.extend( Template.welcome,
     "click button[name='reply_cancel']": (event) ->
       Session.set('composing', undefined)
       Meteor.flush()
+      
+    #XXX - route to first post -- Socrenchus only!
+    "click a.announcement-post": (event) ->
+      Router.navigate("p/52f54ffc-7e7f-4a8a-8d2e-0fc0bcc92860", true)
+    
   }
       
 )
