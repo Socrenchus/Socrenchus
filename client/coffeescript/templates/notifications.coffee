@@ -1,5 +1,6 @@
 _.extend( Template.notifications,
-  count: -> Notifications.find( timestamp: { '$gt': Meteor.user().notify } ).count()
+  count: -> 
+    Notifications.find( timestamp: { '$gt': Meteor.user().notify } ).count()
   notifications: ->
     groups = {}
     notifs = Notifications.find({},{sort:{timestamp:-1}}).fetch()
@@ -42,7 +43,13 @@ _.extend( Template.notifications,
         link_text += (if is_group then "#{@length} tags" else "A tag")
         message += " graduated on your post."
     
-    return {points: points, link_text: link_text, message: message, timestamp:first.timestamp}
+    return {
+      points: points,
+      link_text: link_text,
+      message: message,
+      timestamp: first.timestamp,
+      read: first.read
+    }
   
   timestamp: -> 
     timestamp = new Date(@timestamp)
@@ -58,6 +65,7 @@ _.extend( Template.notifications,
     'click .notify-message': (event) ->
       if not event.isPropagationStopped()
         Backbone.history.navigate("/p/#{@cur[0].post}", trigger: true)
+        Meteor.call('read_notification', @cur[0]._id, ->)
         event.stopPropagation()
     'click': (event) ->
       if Session.get('notifications_state', 'open')

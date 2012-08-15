@@ -5,5 +5,6 @@ Meteor.methods(
     return new ClientPost( p, @userId() ) if p?
   reset_notifications: ->
     Meteor.users.update( @userId(), { '$set': { notify: new Date() } } )
-    
+  read_notification: (notification_id) ->
+    Notifications.update( notification_id, '$set': { read: true } )
 )
