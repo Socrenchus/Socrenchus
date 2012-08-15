@@ -1,4 +1,5 @@
 _.extend( Template.notifications,
+  count: -> Notifications.find( timestamp: { '$gt': Meteor.user().notify } ).count()
   notifications: ->
     groups = {}
     notifs = Notifications.find({},{sort:{timestamp:-1}}).fetch()
@@ -51,15 +52,18 @@ _.extend( Template.notifications,
 
   events: {
     'click #notification-counter': (event) ->
-      if Session.equals('notifications_state', 'open')
-        Session.set('notifications_state', 'closed')
-      else
-        Session.set('notifications_state', 'open')
+      Session.set('notifications_state', 'open')
+      Meteor.call('reset_notifications')
+      event.stopImmediatePropagation()
     'click .notify-message': (event) ->
       if not event.isPropagationStopped()
         Backbone.history.navigate("/p/#{@cur[0].post}", trigger: true)
         event.stopPropagation()
     'click': (event) ->
+      if Session.get('notifications_state', 'open')
+        Session.set('notifications_state', 'closed')
+      else
+        Session.set('notifications_state', 'open')
       event.stopPropagation()
   }
 )
