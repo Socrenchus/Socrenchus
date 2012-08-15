@@ -9,16 +9,28 @@
   color: #666;
   font-family: Arial,sans-serif;
   cursor: pointer;
+  border-color: #C6C6C6;
+  text-align: center;
+  width: 26px;
+  height:26px;
+}
+
+.unread {
+  background-color: #EB8C47;
+  background-image: -webkit-linear-gradient(top,#EB8C47,#D87933);
+  background-image: -moz-linear-gradient(top,#EB8C47,#D87933);
+  background-image: -ms-linear-gradient(top,#EB8C47,#D87933);
+  background-image: -o-linear-gradient(top,#EB8C47,#D87933);
+  background-image: linear-gradient(top,#EB8C47,#D87933);
+}
+
+.read {
   background-color: #F8F8F8;
   background-image: -webkit-linear-gradient(top,white,#ECECEC);
   background-image: -moz-linear-gradient(top,white,#ECECEC);
   background-image: -ms-linear-gradient(top,white,#ECECEC);
   background-image: -o-linear-gradient(top,white,#ECECEC);
   background-image: linear-gradient(top,white,#ECECEC);
-  border-color: #C6C6C6;
-  text-align: center;
-  width: 26px;
-  height:26px;
 }
 
 #notification-box {
@@ -57,7 +69,6 @@
   margin-bottom: 0px;
   text-align: left;
   list-style: none;
-  background: #FFFFFF;
   -webkit-box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, .1);
   box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, .1);
   width: 259px;
@@ -78,4 +89,12 @@
 
 .notify-message a {
   color: blue;
+}
+
+#notification-box .read {
+  background: #FFFFFF;
+}
+
+#notification-box .unread {
+  background: #FFD7A3;
 }
