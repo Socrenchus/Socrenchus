@@ -54,7 +54,7 @@ _.extend( Template.tagbox,
       filtered = @suggested_tags
     else 
       filtered = (tag for tag in @suggested_tags when (tag.indexOf(filter) isnt -1))    
-    return filtered.unique()
+    return filtered
 
   tagging_post: ->
     Session.equals('tagging', true) and Session.equals('current_post', @_id)
