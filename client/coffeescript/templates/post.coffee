@@ -139,6 +139,8 @@ _.extend( Template.post,
     "click button[name='carousel']": (event) ->
       if not event.isImmediatePropagationStopped()
         Template.post_wrapper.start_carousel(Posts.findOne(_id: @parent_id))
+        Session.set('showing_post', Posts.findOne(_id: @parent_id))
+        
         event.stopImmediatePropagation()
   }
   
