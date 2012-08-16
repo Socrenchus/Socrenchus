@@ -37,7 +37,7 @@ _.extend( Template.post,
     3. Output of step 2 is subjected to Whitelist.
     4. Links are made ready for oembed.
     ###
-    
+    return '' unless @content?
     raw_input = Handlebars._escape(@content);
     #1. @content contains the raw input.
     #raw_input = @content
@@ -139,6 +139,8 @@ _.extend( Template.post,
     "click button[name='carousel']": (event) ->
       if not event.isImmediatePropagationStopped()
         Template.post_wrapper.start_carousel(Posts.findOne(_id: @parent_id))
+        Session.set('showing_post', Posts.findOne(_id: @parent_id))
+        
         event.stopImmediatePropagation()
   }
   
