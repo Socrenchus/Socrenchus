@@ -36,7 +36,9 @@
   {{/if}}
   
   <div id='{{_id}}'>
+    {{#if _id}}
     {{> post}}
+    {{/if}}
   </div>
   
   {{#if reply.exists}}

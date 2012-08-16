@@ -4,9 +4,6 @@ Notifications = new Meteor.Collection("notifications")
 
 # Subscriptions
 Meteor.subscribe( "my_notifs" )
-Meteor.autosubscribe( ->
-  Meteor.subscribe( "current_posts", Session.get('showing_post')?._id )
-)
 
 
 # Backbone router
@@ -23,6 +20,9 @@ class Router extends Backbone.Router
   show_post: (post_id) ->
     Meteor.call('get_post_by_id', post_id, (error, result) ->
       Session.set('showing_post', result)
+    )
+    Meteor.autosubscribe( ->
+      Meteor.subscribe( "current_posts", Session.get('showing_post')?._id )
     )
     #history.replaceState(null,'Socrenchus','/')
 

@@ -37,7 +37,7 @@ _.extend( Template.post,
     3. Output of step 2 is subjected to Whitelist.
     4. Links are made ready for oembed.
     ###
-    
+    return '' unless @content?
     raw_input = Handlebars._escape(@content);
     #1. @content contains the raw input.
     #raw_input = @content

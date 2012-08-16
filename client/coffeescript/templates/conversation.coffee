@@ -24,6 +24,5 @@ _.extend( Template.conversation,
       post = $('#'+Session.get('showing_post')._id)[0]
       post?.scrollIntoView()
     )
-    
     return posts[0]
 )

@@ -68,7 +68,6 @@ _.extend( Template.post_wrapper,
     #If the currently showing post is not in this group, show one that is
     if posts.length > 0 and not (Session.get("reply_#{@parent_id}") in posts)
       Session.set("reply_#{@parent_id}", posts[0])
-      Session.set('showing_post', posts[0])
     
     return posts
   
@@ -128,6 +127,7 @@ _.extend( Template.post_wrapper,
         ancestors.push(cur.parent_id)
       if parent._id in ancestors && window.carousel_handle?
         r = Template.post_wrapper.start_carousel(@)
+        Session.set('showing_post', @)
   }
   
   start_carousel: (parent_post) ->
