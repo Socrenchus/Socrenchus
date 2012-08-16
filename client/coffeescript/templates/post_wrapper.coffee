@@ -59,15 +59,18 @@ _.extend( Template.post_wrapper,
     selected_group = Session.get("group_#{@parent_id}")
     selected_group ?= 'all'
     posts = []
+    actual_posts = []
     tag_order = {}
     tag_order["tags.#{selected_group}"] = -1
     for post in Posts.find( { 'parent_id': @parent_id }, {sort:tag_order} ).fetch()
       if selected_group == 'all' || selected_group of post.tags
         posts.push(post._id)
+        actual_posts.push(post)
     
     #If the currently showing post is not in this group, show one that is
     if posts.length > 0 and not (Session.get("reply_#{@parent_id}") in posts)
       Session.set("reply_#{@parent_id}", posts[0])
+      Session.set('showing_post', actual_posts[0])
     
     return posts
   
