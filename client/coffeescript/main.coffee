@@ -1,11 +1,10 @@
 # Collections
 Posts = new Meteor.Collection("posts")
-Users = new Meteor.Collection("users_proto")
 Notifications = new Meteor.Collection("notifications")
 
 # Subscriptions
 Meteor.subscribe( "my_notifs" )
-Meteor.subscribe( "my_posts" )
+
 
 # Backbone router
 class Router extends Backbone.Router
@@ -22,7 +21,9 @@ class Router extends Backbone.Router
     Meteor.call('get_post_by_id', post_id, (error, result) ->
       Session.set('showing_post', result)
     )
-    Meteor.subscribe( "current_posts", post_id )
+    Meteor.autosubscribe( ->
+      Meteor.subscribe( "current_posts", Session.get('showing_post')?._id )
+    )
     #history.replaceState(null,'Socrenchus','/')
 
   use_instance: (args) ->
