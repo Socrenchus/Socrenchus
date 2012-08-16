@@ -127,7 +127,8 @@ _.extend( Template.post_wrapper,
         ancestors.push(cur.parent_id)
       if parent._id in ancestors && window.carousel_handle?
         r = Template.post_wrapper.start_carousel(@)
-        Session.set('showing_post', @)
+        unless Session.get('showing_post').parent_id is @parent_id
+          Session.set('showing_post', @)
   }
   
   start_carousel: (parent_post) ->
