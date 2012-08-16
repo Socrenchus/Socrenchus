@@ -15,6 +15,7 @@ Meteor.publish("current_posts", (post_id) ->
   
   ids = [ post_id ]
   ids.unshift( Posts.findOne( ids[0] ).parent_id ) while ids[0]?
+  ids = ids[1..]
   
   first_run = true
   visible = {}
@@ -64,7 +65,6 @@ Meteor.publish("current_posts", (post_id) ->
   @flush() if first_run
   first_run = false
   
-  ###
   @onStop( =>
     handle.stop()
     q.rewind()
@@ -74,5 +74,4 @@ Meteor.publish("current_posts", (post_id) ->
       @unset( "client_posts", post._id, fields )
     @flush()
   )
-  ###
 )
