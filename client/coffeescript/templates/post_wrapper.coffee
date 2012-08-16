@@ -68,6 +68,7 @@ _.extend( Template.post_wrapper,
     #If the currently showing post is not in this group, show one that is
     if posts.length > 0 and not (Session.get("reply_#{@parent_id}") in posts)
       Session.set("reply_#{@parent_id}", posts[0])
+      Session.set('showing_post', posts[0])
     
     return posts
   
@@ -100,25 +101,21 @@ _.extend( Template.post_wrapper,
     return {exists: post?, post: post}
   
   events: {
-    "mousedown button.allbutton": (event) ->
-      if not event.isPropagationStopped()
-        elem = event.target
-        Session.set("group_#{@parent_id}", null)
-        event.stopPropagation()
-    
     "mousedown button.group": (event) ->
       if not event.isPropagationStopped()
         elem = event.target
         while(elem.nodeName.toLowerCase() isnt 'button')
           elem = elem.parentNode #bubble up
         Session.set("group_#{@parent_id}", elem.getAttribute('name'))
+        
         event.stopPropagation()
     
     "mousedown button.post": (event) ->
       if not event.isPropagationStopped()
         elem = event.target
         while(elem.nodeName.toLowerCase() isnt 'button')
-          elem = elem.parentNode #bubble up
+          elem = elem.parentNode #bubble up  
+        Session.set('showing_post', Posts.findOne( elem.getAttribute('name') ))
         Session.set("reply_#{@parent_id}", elem.getAttribute('name'))
         event.target.click?()
         event.stopPropagation()
@@ -130,7 +127,7 @@ _.extend( Template.post_wrapper,
         cur = Posts.findOne( _id: cur.parent_id )
         ancestors.push(cur.parent_id)
       if parent._id in ancestors && window.carousel_handle?
-        Template.post_wrapper.start_carousel(@)
+        r = Template.post_wrapper.start_carousel(@)
   }
   
   start_carousel: (parent_post) ->
