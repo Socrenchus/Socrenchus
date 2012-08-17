@@ -14,21 +14,21 @@ Meteor.publish("current_posts", (post_id) ->
   user_id = @userId()
   
   ids = [ post_id ]
-  authored = -1
+  authored = 0
   while ids[0]?
     p = Posts.findOne( ids[0] )
-    if p?
+    if p.author_id is user_id
+      authored = ids.length
+    if p.parent_id?
       ids.unshift( p.parent_id )
-      if p.author_id is user_id
-        authored = (ids.length - 1)
     else
       break
   
   first_run = true
   saved = {}
   visible = {}
-  authored = ( authored - ( ids.length - 1 ) )
-  visible[ id ] = true for id in ids[0..authored]
+  authored = ( ids.length - authored )
+  visible[ id ] = true for id in ids[authored..]
   
   send = ( doc ) =>
     client_post = new ClientPost( doc, user_id )
