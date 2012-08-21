@@ -73,6 +73,11 @@ class ServerPost extends SharedPost
       _.extend( @, _.pick( client, 'content', 'parent_id' ) )
       @author_id = user_id
       throw 'Need to be logged in to post.' unless @author_id?
+      already_replied =
+        parent_id: @parent_id,
+        author_id: @author_id
+      if @parent_id? and Posts.findOne( already_replied )?
+        throw 'Can\'t reply twice to the same post.'
       
       #Alert post author that his post was replied to
       Notifications.insert( {
