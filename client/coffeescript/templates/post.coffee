@@ -25,10 +25,6 @@ _.extend( Template.post,
     )
     return ""
     
-  avatar: ->
-    hash = hex_md5("#{@_id}@example.com")
-    return "http://www.gravatar.com/avatar/#{hash}"
-    
   content: ->
       
     ###
