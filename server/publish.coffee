@@ -28,7 +28,7 @@ Meteor.publish("current_posts", (post_id) ->
   saved = {}
   visible = {}
   authored = ( ids.length - authored )
-  visible[ id ] = true for id in ids[authored..]
+  visible[ id ] = true for id in ids #ids[authored..]
   
   send = ( doc ) =>
     client_post = new ClientPost( doc, user_id )
