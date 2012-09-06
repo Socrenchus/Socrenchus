@@ -123,7 +123,7 @@ _.extend( Template.post_wrapper,
         event.stopPropagation()
     
     'click': (event) ->
-      unless Session.get('showing_post').parent_id is @parent_id
+      if Session.get('showing_post')._id is @parent_id
         Session.set('showing_post', @)
   }
 )
