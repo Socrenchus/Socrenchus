@@ -20,9 +20,6 @@ _.extend( Template.post,
       Session.set('tagging', false)
     if Session.equals('suggested_tags', undefined)
       Session.set('suggested_tags', [])
-    Meteor.defer( ->
-      $('.new_post').waypoint( -> @click?() ).removeClass('new_post')
-    )
     return ""
     
   content: ->
@@ -103,8 +100,6 @@ _.extend( Template.post,
   time: ->
     return (new Date(@time)).relative()
   
-  is_cycling: ->
-    return Session.get('carousel_parent')._id is @parent_id
   events: { # July 19
     "click button.toggle-tagbox": (event) ->
       if not event.isImmediatePropagationStopped()
@@ -131,13 +126,6 @@ _.extend( Template.post,
           Meteor.defer(-> $("#reply_text").focus())
         
         event.stopPropagation()
-    
-    "click button[name='carousel']": (event) ->
-      if not event.isImmediatePropagationStopped()
-        Template.post_wrapper.start_carousel(Posts.findOne(_id: @parent_id))
-        Session.set('showing_post', Posts.findOne(_id: @parent_id))
-        
-        event.stopImmediatePropagation()
   }
   
   login_required: ->

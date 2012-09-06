@@ -123,29 +123,7 @@ _.extend( Template.post_wrapper,
         event.stopPropagation()
     
     'click': (event) ->
-      parent = Session.get('carousel_parent')
-      ancestors = [(cur = @).parent_id]
-      while cur?.parent_id?
-        cur = Posts.findOne( _id: cur.parent_id )
-        ancestors.push(cur.parent_id)
-      if parent._id in ancestors && window.carousel_handle?
-        r = Template.post_wrapper.start_carousel(@)
-        unless Session.get('showing_post').parent_id is @parent_id
-          Session.set('showing_post', @)
+      unless Session.get('showing_post').parent_id is @parent_id
+        Session.set('showing_post', @)
   }
-  
-  start_carousel: (parent_post) ->
-    Session.set('carousel_parent', parent_post)
-    Meteor.clearInterval(window.carousel_handle)
-    window.carousel_handle = Meteor.setInterval( ->
-      parent = Session.get('carousel_parent')
-      cur_reply = Session.get("reply_#{parent._id}")
-      if parent? and cur_reply?
-        all_replies = Posts.find( parent_id: parent._id ).fetch()
-        idx = 0
-        for reply, i in all_replies
-          if reply._id is cur_reply
-            idx = (i + 1) % all_replies.length
-        Session.set("reply_#{parent._id}", all_replies[idx]._id)
-    , 3000)
 )

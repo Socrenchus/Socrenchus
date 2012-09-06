@@ -26,11 +26,6 @@ _.extend( Template.reply_box,
         if(reply_content=='')
           alert('Your reply is empty!')
         else
-          console.log {
-            content: reply_content,
-            parent_id: @_id,
-            domain: window.instance
-          }
           reply_id = Posts.insert(
             {
               content: reply_content,

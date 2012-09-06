@@ -4,9 +4,6 @@ _.extend( Template.conversation,
   root_post: ->
     cur_post = Session.get('showing_post')
     
-    #Carousel implementation
-    Template.post_wrapper.start_carousel(cur_post)
-    
     posts = []
     posts.push(cur_post)
     
