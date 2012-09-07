@@ -4,7 +4,8 @@ html {
   text-shadow: 1px 1px rgba(0, 0, 0, 0.1);
 }
 body {
-  background: transparent;  
+  background: transparent;
+  padding-top: 40px;
 }
 
 /*HacksXXX*/
@@ -12,7 +13,14 @@ a.announcement-post
 {
   cursor: pointer;
 }
-
+/* Use Fontawesome instead of bootstrap icons. */
+[class^="icon-"], [class*=" icon-"] {
+  background-image: none;
+  width: inherit;
+  height: inherit;
+  line-height: inherit;
+  vertical-align: inherit;
+}
 
 /*Post*/
 /*
