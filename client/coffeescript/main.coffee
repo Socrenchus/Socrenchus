@@ -4,7 +4,7 @@ Notifications = new Meteor.Collection("notifications")
 
 # Subscriptions
 Meteor.subscribe( "my_notifs" )
-
+Meteor.subscribe( "cover_posts" )
 
 # Backbone router
 class Router extends Backbone.Router

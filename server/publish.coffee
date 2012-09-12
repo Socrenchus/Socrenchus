@@ -10,6 +10,35 @@ Meteor.publish("my_notifs", ->
     return Notifications.find( user: user_id )
 )
 
+Meteor.publish("cover_posts", (post_id) ->
+  user_id = @userId()
+  
+  action = (doc, idx) =>
+    client_post = new ClientPost( doc, user_id )
+    @set("posts", client_post._id, client_post)
+    unless first_run
+      @flush()
+  
+  q = Posts.find()
+  handle = q.observe(
+    added: action
+    changed: action
+  )
+  
+  @flush() if first_run
+  first_run = false
+  
+  @onStop( =>
+    handle.stop()
+    q.rewind()
+    posts = q.fetch()
+    for post in posts
+      fields = (key for key of ClientPost)
+      @unset( "cover_posts", post._id, fields )
+    @flush()
+  )
+)
+
 Meteor.publish("current_posts", (post_id) ->
   user_id = @userId()
   

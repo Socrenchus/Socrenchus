@@ -8,6 +8,10 @@ body {
   padding-top: 40px;
 }
 
+body,html{
+ height:100%;
+}
+
 /*HacksXXX*/
 a.announcement-post
 {
@@ -27,9 +31,22 @@ a.announcement-post
  * 
  * 
  * */
+ 
 .post {
   text-shadow: 1px 1px rgba(0, 0, 0, 0.1);
 }
+
+.post_preview {
+  float: left;
+  background-color: white;
+  margin: 2px;
+  padding: 5px;
+}
+
+.post_preview:hover {
+  background-color: #F0F0F0;
+}
+
 .float-right {
   float: right;
 }
@@ -57,6 +74,20 @@ a.announcement-post
 }
 .reply-count {
   margin-bottom: -2px;
+}
+
+#cover {
+  margin-top: 30px;
+  position: relative;
+  width: 100%;
+}
+
+.span4 {
+  width: 100%;
+}
+
+.well {
+  padding-right: 70px;
 }
 
 /*Post Wrapper*/
@@ -166,4 +197,20 @@ a.login-link-text:hover {
   /*outline: 1px solid black;*/
 }
 
- 
+#page-footer {
+  width: 100%;
+  height:70px;
+  margin-top:-70px;
+  background-color: black;
+  color: white;
+  padding: 5px;
+}
+
+#policy {
+  margin: 10px;
+  background-color: #1F1F1F;
+}
+
+.container{
+ min-height:100%;
+}

@@ -1,4 +1,5 @@
-_.extend( Template.welcome,
+_.extend( Template.cover,
+  rendered: ->
   home: -> Session.get('home')
   login_required: -> " disabled='disabled'" unless Session.get('user_id')?
   button_message: ->
@@ -13,6 +14,8 @@ _.extend( Template.welcome,
     
   reply_box_content: ->
     Session.get('composing')
+  
+  posts: -> Posts.find({}, {sort:{'reply_count':-1}})
     
   events: {
     #start composing

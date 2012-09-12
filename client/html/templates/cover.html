@@ -1,13 +1,8 @@
-<template name="welcome">
+<template name="cover">
 
   {{#if home}}
-    <div class="row">
       <div class="span8 offset2 well">
-        <h1>Welcome to Socrenchus!</h1>
-        <div class="row">
           <div class="span4">
-            <h2>There's no front page yet,</h2>
-            <p>but you can still access any post if you have a <a class="announcement-post">link</a> to it.</p>
             <button name="start_reply" class="btn btn-primary btn-large"{{login_required}}>{{{button_message}}}</button>
             
             {{#if am_saying}}
@@ -35,17 +30,19 @@
             
             {{/if}}
             
+            <br/><br/>...or join one:
             
-            
+            <div id="cover">
+            {{#each posts}}
+              {{> post_preview}}
+            {{/each}}
+            </div>
             
             
             
             <!--<p>Submit a root post, or join an existing conversation!</p>-->
-            <p class="footer">(c) 2012 Socrenchus LLC - Find us on <a href="https://www.facebook.com/socrenchus">Facebook</a>!</p>
-          </div>
         </div>
       </div>
-    </div>
   {{/if}}
 
 </template>
