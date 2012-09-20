@@ -28,21 +28,11 @@ _.extend( Template.cover,
         if discard
           Session.set('composing', '')
         event.stopPropagation()
-    
-    #editing
-    """
-    keydown textarea[name='reply_text'],
-    keyup textarea[name='reply_text']
-    """: (event) ->
-      if not event.isImmediatePropagationStopped()
-        Session.set('composing', event.target.value)
-        Meteor.flush()
-        event.stopImmediatePropagation()
-        
     #submit a reply.
     "click button[name='reply_submit']": (event) ->
       if not event.isImmediatePropagationStopped()
-        reply_content = Session.get('composing') #replyTextBox.value
+        tmpl = $(event.target).parent().parent().parent().parent()
+        reply_content = tmpl.find('#reply_text').val()
         if(reply_content=='')
           alert('Your reply is empty!')
         else
