@@ -18,16 +18,10 @@
 
 .unread {
   background-color: #EB8C47;
-  background-image: -webkit-linear-gradient(top,#EB8C47,#D87933);
-  background-image: -moz-linear-gradient(top,#EB8C47,#D87933);
-  background-image: -ms-linear-gradient(top,#EB8C47,#D87933);
-  background-image: -o-linear-gradient(top,#EB8C47,#D87933);
-  background-image: linear-gradient(top,#EB8C47,#D87933);
 }
 
 .read {
   background-color: #DDDDDD;
-
 }
 
 #notification-box {

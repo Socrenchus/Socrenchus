@@ -43,49 +43,16 @@ Meteor.publish("current_posts", (post_id) ->
   user_id = @userId()
   
   ids = [ post_id ]
-  authored = 0
   while ids[0]?
     p = Posts.findOne( ids[0] )
-    if p.author_id is user_id
-      authored = ids.length
     if p.parent_id?
       ids.unshift( p.parent_id )
     else
       break
   
-  first_run = true
-  saved = {}
-  visible = {}
-  authored = ( ids.length - authored )
-  visible[ id ] = true for id in ids #ids[authored..]
-  
-  send = ( doc ) =>
+  action = (doc, idx) =>
     client_post = new ClientPost( doc, user_id )
     @set("posts", client_post._id, client_post)
-  
-  become_visible = ( parent_id ) =>
-    # set visible flag
-    visible[ parent_id ] = true
-    # published saved items
-    if saved[ parent_id ]?
-      for doc in saved[ parent_id ]
-        send( doc )
-      saved[ parent_id ] = []
-    
-  send_when_visible = ( doc ) =>
-    visible[ doc.parent_id ] ?= false
-    if visible[ doc.parent_id ] or doc._id in ids
-      send( doc )
-    else
-      saved[doc.parent_id] ?= []
-      saved[doc.parent_id].unshift( doc )
-    # check conditions for becoming visible
-    if doc.author_id is user_id
-      become_visible( doc.parent_id )
-    
-  
-  action = (doc, idx) =>
-    send_when_visible( doc )
     unless first_run
       @flush()
   
