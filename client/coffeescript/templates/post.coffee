@@ -64,13 +64,7 @@ _.extend( Template.post,
   email_hash: ->
     this_post = Posts.findOne( _id: @_id )
     author = this_post?.author
-    if author?
-      if author.emails? and author.emails.length? and author.emails.length>0
-        return author.emails[0].md5()
-      else if author._id?
-        return author._id.md5()
-    else
-      return "NO AUTHOR".md5()
+    return get_primary_email(author).md5()
   
   author: -> @author_id
   author_short: -> 

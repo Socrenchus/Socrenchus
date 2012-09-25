@@ -9,13 +9,13 @@ coffeescript
 jquery
 showdown
 less
-accounts
 accounts-ui
 accounts-facebook
 accounts-google
 tron
-accounts-passwords
 livedata
 jquery-waypoints
 insecure
 bootstrap
+accounts-base
+accounts-password

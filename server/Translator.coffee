@@ -88,6 +88,7 @@ class ServerPost extends SharedPost
         points: 0
         tag: tag
         timestamp: new Date()
+        seen: false
       } )
     else
       _.extend( @, post )
@@ -182,5 +183,6 @@ class ServerPost extends SharedPost
         points: reward
         tag: tag
         timestamp: new Date()
+        seen: false
       } )
       

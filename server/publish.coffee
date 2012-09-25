@@ -10,7 +10,7 @@ Meteor.publish("my_notifs", ->
     return Notifications.find( user: user_id )
 )
 
-Meteor.publish("cover_posts", (post_id) ->
+Meteor.publish("cover_posts", ->
   user_id = @userId()
   
   action = (doc, idx) =>

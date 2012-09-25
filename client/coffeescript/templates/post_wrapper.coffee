@@ -37,13 +37,7 @@ _.extend( Template.post_wrapper,
       for tag in tags
         unless tag of groups
           author = post?.author
-          hash = null
-          if author?
-            if author.emails? and author.emails.length? and author.emails.length>0
-              hash = author.emails[0].md5()
-            else if author._id?
-              hash = author._id.md5()
-          hash ?= "NO AUTHOR".md5()
+          hash = get_primary_email(author).md5()
           obj =
             name: tag
             count: 1
@@ -83,13 +77,7 @@ _.extend( Template.post_wrapper,
   email_hash: ->
     this_post = Posts.findOne( _id: @cur )
     author = this_post.author
-    if author?
-      if author.emails? and author.emails.length? and author.emails.length>0
-        return author.emails[0].md5()
-      else if author._id?
-        return author._id.md5()
-    else
-      return "NO AUTHOR".md5()
+    return get_primary_email(author).md5()
       
   reply: ->
     reply = Session.get("reply_#{@_id}")

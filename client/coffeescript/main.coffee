@@ -53,6 +53,18 @@ Meteor.startup( ->
   Backbone.history.start( pushState: true ) #!SUPPRESS no_headless_camel_case
 )
 
+get_primary_email = (author) ->
+  if author?
+    if author.emails? and author.emails.length? and author.emails.length>0
+      author = author.emails[0]
+    else if author._id?
+      author = author._id
+  else
+    author = "NO AUTHOR"
+  switch typeof author
+    when 'string' then return author
+    when 'object' then return author.email
+
 # Handlebars helper, an extension of 'with'.  'with' completely replaces the
 #   current context with the previous context, while 'both' keeps the current
 #   context as an additional field.

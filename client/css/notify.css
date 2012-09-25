@@ -4,7 +4,8 @@
  */
 
 #notification-counter {
-  padding: 7px;
+  padding-left: 7px;
+  padding-right: 7px;
   margin: 0px;
   color: #666;
   font-family: Arial,sans-serif;
@@ -12,7 +13,7 @@
   border-color: #C6C6C6;
   text-align: center;
   width: 26px;
-  height:26px;
+  height: 41px;
 }
 
 .unread {
@@ -25,12 +26,8 @@
 }
 
 .read {
-  background-color: #F8F8F8;
-  background-image: -webkit-linear-gradient(top,white,#ECECEC);
-  background-image: -moz-linear-gradient(top,white,#ECECEC);
-  background-image: -ms-linear-gradient(top,white,#ECECEC);
-  background-image: -o-linear-gradient(top,white,#ECECEC);
-  background-image: linear-gradient(top,white,#ECECEC);
+  background-color: #DDDDDD;
+
 }
 
 #notification-box {
