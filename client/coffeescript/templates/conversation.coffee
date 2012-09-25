@@ -15,11 +15,12 @@ _.extend( Template.conversation,
     #Set up reactive tree structure for post lineage
     for post,i in posts
       Session.set("reply_#{post._id}", posts[i+1]?._id) if post?
-    
+    ###
     #Scroll to the selected post
     Meteor.defer( ->
       post = $('#'+Session.get('showing_post')._id)[0]
       post?.scrollIntoView()
     )
+    ###
     return posts[0]
 )
