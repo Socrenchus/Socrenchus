@@ -11,6 +11,7 @@ Meteor.publish("my_notifs", ->
 )
 
 Meteor.publish("cover_posts", ->
+  first_run = true
   user_id = @userId()
   
   action = (doc, idx) =>
@@ -40,6 +41,7 @@ Meteor.publish("cover_posts", ->
 )
 
 Meteor.publish("current_posts", (post_id) ->
+  first_run = true
   user_id = @userId()
   
   ids = [ post_id ]

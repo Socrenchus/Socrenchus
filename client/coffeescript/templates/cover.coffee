@@ -1,5 +1,4 @@
 _.extend( Template.cover,
-  rendered: ->
   home: -> Session.get('home')
   login_required: -> " disabled='disabled'" unless Session.get('user_id')?
   button_message: ->
@@ -52,10 +51,6 @@ _.extend( Template.cover,
     "click button[name='reply_cancel']": (event) ->
       Session.set('composing', undefined)
       Meteor.flush()
-      
-    #XXX - route to first post -- Socrenchus only!
-    "click a.announcement-post": (event) ->
-      Router.navigate("p/52f54ffc-7e7f-4a8a-8d2e-0fc0bcc92860", true)
     
   }
       
