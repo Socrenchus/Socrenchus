@@ -1,0 +1,48 @@
+<template name="cover">
+
+  {{#if home}}
+      <div class="span8 offset2 well">
+          <div class="span4">
+            <button name="start_reply" class="btn btn-primary btn-large"{{login_required}}>{{{button_message}}}</button>
+            
+            {{#if am_saying}}
+            <br/><br/>
+            <div class="reply-box">
+              <div class="row">
+                <div class="span8">
+                  <textarea class="span8" name="reply_text" id="reply_text" cols="70" rows="7">{{reply_box_content}}</textarea>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="span8">
+                  <div class="pull-right">
+                    <button class="btn btn-warning" name="reply_submit" type="button">
+                      <i class="icon-comment"></i> Go!
+                    </button>
+                    <button class="btn btn-danger" name="reply_cancel" type="button">
+                      <i class="icon-remove"></i> Discard
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {{/if}}
+            
+            <br/><br/>...or join one:
+            
+            <div id="cover">
+            {{#each posts}}
+              {{> post_preview}}
+            {{/each}}
+            </div>
+            
+            
+            
+            <!--<p>Submit a root post, or join an existing conversation!</p>-->
+        </div>
+      </div>
+  {{/if}}
+
+</template>

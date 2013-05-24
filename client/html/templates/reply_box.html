@@ -1,0 +1,25 @@
+<template name="reply_box">
+
+  <div class="reply-box">
+    <div class="row">
+      <div class="span10 offset1">
+        <textarea class="span10" name="reply_text" id="reply_text" cols="70" rows="7">{{reply_box_content}}</textarea>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="span10 offset1">
+        <div class="pull-right">
+          <button class="btn btn-warning" name="reply_submit" type="button">
+            <i class="icon-comment"></i> Post Reply!
+          </button>
+          <button class="btn btn-danger" name="reply_cancel" type="button">
+            <i class="icon-remove"></i> Discard
+          </button>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+</template>
