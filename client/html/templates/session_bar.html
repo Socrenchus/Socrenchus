@@ -1,0 +1,59 @@
+<template name="session_bar">
+  <!--http://twitter.github.com/bootstrap/components.html-->
+  <div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+
+        <a class="brand" href='/'>
+          Socrenchus
+        </a>
+        <ul class="nav">
+          <li>{{> notifications}}</li>
+        </ul>
+
+        <!-- Everything we want hidden at 940px or less, place within here -->
+        <div class="nav-collapse">
+          <!-- .nav, .navbar-search, .navbar-form, etc -->
+          <ul class="nav">
+            <!--
+            <li class="active">
+              <a href="/"><i class="icon-home"></i> Home</a>
+            </li>
+            -->
+            <!--<li><a href="#"><i class="icon-tag"></i>Tag Game</a></li>-->
+          </ul>
+          <ul class="nav pull-right">
+            {{#if currentUser}}
+              <li>
+                <p class="navbar-text">
+                {{#if currentUser}}
+                  {{#if currentUser.name}}
+                    {{currentUser.name}}
+                  {{else}}
+                    {{currentUser.username}}
+                  {{/if}}
+                {{/if}}
+                </p>
+              </li>
+              <li class="divider-vertical"></li>
+              <li>
+                <a class="logout_top_right"><i class="icon-off"></i> Logout</a>
+              </li>
+            {{else}}
+              <li class="divider-vertical"></li>
+              <li>
+                <div class='sign-in-button'>{{loginButtons}}</div>
+              </li>
+            {{/if}}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

@@ -1,0 +1,31 @@
+<template name="tagbox">
+  <div class="row">
+    <div class="span3 tagbox">
+      <div class="row displayed_tags">
+        <div class="span3">
+          {{#each displayed_tags}}
+            {{#both ../this}}<span class="{{classes}}" title="{{titles}}">{{/both}}
+              {{this}}
+            </span>
+          {{/each}}
+        </div>
+      </div>
+      <div class="row suggestions">
+        <div class="span3">
+          {{#each suggested_tags}}
+            {{#both ../this}}<span tabindex='0' class="{{classes}}" title="{{titles}}" suggested label-info">{{/both}}
+              {{this}}
+            </span>
+          {{/each}}
+        </div>
+      </div>
+      <div class="row tagbox_input">
+        <div class="span3">
+          <textarea class="tag_text" title="Filter tag suggestions: Contains '{{filter_text}}'" name="tag_text"></textarea>
+          <button class="btn btn-warning tag_enter_button" {{disabled_status}} title="Add new tag '{{filter_text}}'" name="enter_tag"><i class="icon-circle-arrow-up"></i></button>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</template>

@@ -1,0 +1,216 @@
+html {
+  background-image: url('/images/bg.svg');
+  background-size: 12px;
+  text-shadow: 1px 1px rgba(0, 0, 0, 0.1);
+}
+body {
+  background: transparent;
+  padding-top: 40px;
+}
+
+body,html{
+ height:100%;
+}
+
+/*HacksXXX*/
+a.announcement-post
+{
+  cursor: pointer;
+}
+/* Use Fontawesome instead of bootstrap icons. */
+[class^="icon-"], [class*=" icon-"] {
+  background-image: none;
+  width: inherit;
+  height: inherit;
+  line-height: inherit;
+  vertical-align: inherit;
+}
+
+/*Post*/
+/*
+ * 
+ * 
+ * */
+ 
+.post {
+  text-shadow: 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.post_preview {
+  float: left;
+  background-color: white;
+  margin: 2px;
+  padding: 5px;
+}
+
+.post_preview:hover {
+  background-color: #F0F0F0;
+}
+
+.float-right {
+  float: right;
+}
+.post-encompasser {
+  background: #FFFFFF;
+  -webkit-box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, .1);
+  box-shadow: inset 0px 0px 30px 4px rgba(0, 0, 0, .1);
+}
+.post-top, .post-bottom {
+  padding: 3px 3px 3px 4px;
+}
+.post-middle {
+  padding: 8px;
+}
+.author-info > img
+{
+  position: relative;
+  top: -2px;
+  -webkit-box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.15);
+  box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.15);
+}
+.reply-button {
+  position: relative;
+  top: -3px;
+}
+.reply-count {
+  margin-bottom: -2px;
+}
+
+#cover {
+  margin-top: 30px;
+  position: relative;
+  width: 100%;
+}
+
+.span4 {
+  width: 100%;
+}
+
+.well {
+  padding-right: 70px;
+}
+
+/*Post Wrapper*/
+/*
+ * 
+ * 
+ * */
+.avatar-stack {
+  float: left;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  background-image: url('/images/page.svg');
+  background-size: 4px 28px;
+  height: 28px;
+  width: 0px;
+}
+img.avatar {
+  float: left;
+  margin: 0;
+  padding: 0;
+  border: 1px solid black;
+}
+.belt {
+  background: rgba(255,255,255,.3);
+}
+.pad1 {
+  padding: 1px;
+}
+.nodrag {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;/* this will work for QtWebKit in future */
+}
+.btn.group, .btn.post {
+  height: 34px;
+  padding: 2px;
+}
+.btn-group.post-select-buttons{
+  float: left;
+  margin: 2px;
+}
+.btn.post
+{
+  padding: 1px;
+}
+.btn.post > img
+{
+  border-radius: 2px;
+}
+.btn.post.faded-img > img
+{
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+  filter: alpha(opacity=50);
+  opacity: .5;
+}
+.btn.group.faded-inside > img, 
+.btn.group.faded-inside > div,
+.btn.group.faded-inside > span
+{
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+  filter: alpha(opacity=50);
+  opacity: .5;
+}
+
+/* Login Links
+ * 
+ * 
+ * */
+a.login-link-text {
+  text-decoration: none !important;
+  font-size: 13px !important;
+  color: #999 !important;
+  display: block !important;
+  margin: 0;
+  padding: 10px 10px 10px 5px;
+}
+a.login-link-text:hover {
+  color: white !important;
+}
+
+/*Tagbox*/
+/*
+ * 
+ * 
+ * */
+.tagbox_input textarea.tag_text {
+  max-width: 224px;
+  min-width: 224px;
+  min-height: 20px;
+  max-height: 20px;
+  resize: none;
+  
+  margin: 0;
+  position: relative;
+  bottom: 0;
+  right: 0;
+}
+.tag_enter_button{
+  height: 30px;
+}
+.tag {
+  float: left;  
+}
+.tagbox {
+  background: rgba(0,0,0,.5);
+  /*outline: 1px solid black;*/
+}
+
+#page-footer {
+  width: 100%;
+  height:70px;
+  margin-top:10px;
+  background-color: black;
+  color: white;
+  padding: 5px;
+}
+
+#policy {
+  margin: 10px;
+  background-color: #1F1F1F;
+}
+
+.container{
+ min-height:100%;
+}

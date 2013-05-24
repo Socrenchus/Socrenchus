@@ -1,0 +1,12 @@
+# Temp files created by text     #
+# editors                        #
+##################################
+*~
+*.kate-swp
+
+# Other ignorable files
+#################################
+*.js
+*_disabled
+
+*.orig
