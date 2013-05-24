@@ -1,6 +1,4 @@
 tron.test(
-
-    
   #check if a tag/user_id exists for a given post
   check_add_tag: (server_post, tag, user_id) ->
     #check if tag is present for post

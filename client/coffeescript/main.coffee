@@ -1,10 +1,10 @@
 # Collections
-Posts = new Meteor.Collection("posts")
-Notifications = new Meteor.Collection("notifications")
+@Posts = new Meteor.Collection("posts")
+@Notifications = new Meteor.Collection("notifications")
 
 # Subscriptions
 Meteor.subscribe( "my_notifs" )
-Meteor.subscribe( "cover_posts" )
+# Meteor.subscribe( "cover_posts" )
 
 # Backbone router
 class Router extends Backbone.Router

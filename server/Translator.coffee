@@ -1,4 +1,4 @@
-class SharedPost
+class @SharedPost
   constructor: ( either ) ->
     # define the shared client-server schema
     _.extend( @,
@@ -20,7 +20,7 @@ class SharedPost
     else grad = false
     return grad
        
-class ClientPost extends SharedPost
+class @ClientPost extends @SharedPost
   constructor: ( server, user_id ) ->
     # define the client schema
     _.extend( @,
@@ -31,6 +31,7 @@ class ClientPost extends SharedPost
     )
     
     super(server)
+    return unless user_id?
     
     for tag of server.tags
       if @is_graduated( tag, server )
@@ -55,7 +56,7 @@ class ClientPost extends SharedPost
     @reply_count = Posts.find({parent_id: server._id}).count()
   
     
-class ServerPost extends SharedPost
+class @ServerPost extends @SharedPost
   constructor: ( client, user_id ) ->
     # define the server schema
     _.extend( @,
