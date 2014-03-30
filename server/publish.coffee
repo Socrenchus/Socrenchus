@@ -3,27 +3,19 @@
 @Instances = new Meteor.Collection( "instances" )
 @Notifications = new Meteor.Collection("notifications")
 
-
-Meteor.publish("my_notifs", ->
-  user_id = @userId
-  if user_id?
-    return Notifications.find( user: user_id )
-)
-
-Meteor.publish("cover_posts", ->
+watchPostsAndRespond = (mongoCursor) ->
   first_run = true
-  user_id = @userId
   
-  action = (doc, idx) =>
-    client_post = new ClientPost( doc, user_id )
-    @changed("posts", client_post._id, client_post)
+  action = (idx, type) =>
+    doc = Posts.findOne(idx)
+    client_post = new ClientPost( doc, @userId )
+    @[type]("posts", client_post._id, client_post)
     unless first_run
       @ready()
   
-  q = Posts.find()
-  handle = q.observeChanges(
-    added: action
-    changed: action
+  handle = mongoCursor.observeChanges(
+    added: (idx) -> action(idx, 'added')
+    changed: (idx) -> action(idx, 'changed')
   )
   
   @ready() if first_run
@@ -31,19 +23,26 @@ Meteor.publish("cover_posts", ->
   
   @onStop( =>
     handle.stop()
-    q.rewind()
-    posts = q.fetch()
+    mongoCursor.rewind()
+    posts = mongoCursor.fetch()
     for post in posts
       fields = (key for key of ClientPost)
-      @removed( "cover_posts", post._id, fields )
+      @removed( "client_posts", post._id, fields )
     @ready()
   )
+  
+
+Meteor.publish("my_notifs", ->
+  if @userId?
+    return Notifications.find( user: @userId )
+)
+
+Meteor.publish("cover_posts", ->
+  q = Posts.find({}, limit: 10)
+  watchPostsAndRespond.call(@, q)
 )
 
 Meteor.publish("current_posts", (post_id) ->
-  first_run = true
-  user_id = @userId
-  
   ids = [ post_id ]
   while ids[0]?
     p = Posts.findOne( ids[0] )
@@ -52,30 +51,8 @@ Meteor.publish("current_posts", (post_id) ->
     else
       break
   
-  action = (doc, idx) =>
-    client_post = new ClientPost( doc, user_id )
-    @changed("posts", client_post._id, client_post)
-    unless first_run
-      @ready()
-  
   in_ids = { '$in': ids }
 
   q = Posts.find( { '$or': [{_id:in_ids},{parent_id:in_ids}] } )
-  handle = q.observeChanges(
-    added: action
-    changed: action
-  )
-  
-  @ready() if first_run
-  first_run = false
-  
-  @onStop( =>
-    handle.stop()
-    q.rewind()
-    posts = q.fetch()
-    for post in posts
-      fields = (key for key of ClientPost)
-      @removed( "client_posts", post._id, fields )
-    @ready()
-  )
+  watchPostsAndRespond.call(@, q)
 )

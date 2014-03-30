@@ -1,8 +1,8 @@
 _.extend( Template.cover,
   home: -> Session.get('home')
-  login_required: -> " disabled='disabled'" unless Session.get('user_id')?
+  login_required: -> !Meteor.userId()?
   button_message: ->
-    if Session.get('user_id')?
+    if Meteor.userId()?
       return "Start a conversation!"
     else
       return "Login to get started. <i class='icon-hand-up'></i>"
@@ -41,7 +41,7 @@ _.extend( Template.cover,
               domain: window.instance
             }
           )
-          Router.navigate("p/#{reply_id}", true)
+          window.Router.navigate("p/#{reply_id}", true)
           console.log('ID of new post: '+reply_id)
           Session.set('composing', undefined) #the clean up.
         event.stopImmediatePropagation()

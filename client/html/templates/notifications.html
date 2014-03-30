@@ -5,14 +5,15 @@
       <!--ul-->
         {{#each notifications}}
           <!--li-->
-          {{#both group_message}}
-            <div class='{{#unless read}}un{{/unless}}read notify-message'>
+          {{#with group_message}}
+          {{bindParentContext ..}}
+          <div class='{{#unless read}}un{{/unless}}read notify-message'>
               {{points}}{{link_text}}
               {{{message}}}
               <p class='timestamp' title='{{timestamp.full}}'><i class='icon-time'></i>{{timestamp.relative}}</p>
             </div>
           <!--/li-->
-          {{/both}}
+          {{/with}}
         {{/each}}
       <!--/ul-->
     </div>

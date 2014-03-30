@@ -64,7 +64,7 @@ _.extend( Template.post,
   email_hash: ->
     this_post = Posts.findOne( _id: @_id )
     author = this_post?.author
-    return get_primary_email(author).md5()
+    return window.get_primary_email(author).md5()
   
   author: -> @author_id
   author_short: -> 
@@ -78,7 +78,7 @@ _.extend( Template.post,
     return Session.equals('tagging', true) and 
       Session.equals('current_post', @_id)
   has_replied: ->
-    Posts.findOne( {'parent_id': @_id, 'author_id': Session.get('user_id')} ) isnt undefined
+    Posts.findOne( {'parent_id': @_id, 'author_id': Meteor.userId()} ) isnt undefined
   composing_reply: ->
     return Session.equals('current_post', @_id) and
       not Session.equals('composing', undefined)
@@ -113,7 +113,7 @@ _.extend( Template.post,
         event.stopImmediatePropagation()
     "click button[name='reply']": (event) ->
       if not event.isPropagationStopped()
-        if Session.get('user_id')?
+        if Meteor.userId()?
           Session.set('current_post', @_id)
           Session.set('composing', '')
           #give the reply text area focus
@@ -122,9 +122,8 @@ _.extend( Template.post,
         event.stopPropagation()
   }
   
-  login_required: ->
-    return " disabled='disabled'" unless Session.get('user_id')?
+  login_required: -> !Meteor.userId()?
   
-  login_to: -> 'Login to ' unless Session.get('user_id')?
+  login_to: -> 'Login to ' unless Meteor.userId()?
   
 )

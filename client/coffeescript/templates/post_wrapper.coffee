@@ -77,7 +77,7 @@ _.extend( Template.post_wrapper,
   email_hash: ->
     this_post = Posts.findOne( _id: @cur )
     author = this_post.author
-    return get_primary_email(author).md5()
+    return window.get_primary_email(author).md5()
       
   reply: ->
     reply = Session.get("reply_#{@_id}")
@@ -89,6 +89,10 @@ _.extend( Template.post_wrapper,
         Session.set("reply_#{@_id}", post._id)
     
     return {exists: post?, post: post}
+
+  bindParentContext: (context) ->
+    @cur = context
+    return undefined
   
   events: {
     "mousedown button.group": (event) ->

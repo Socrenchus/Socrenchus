@@ -6,16 +6,18 @@
           <div class="row tag-select-bar">
             <div class="span10">
               {{#each groups}}
-                {{#both ../this}}
-                  
-                  <div class="btn-group post-select-buttons">    
+                {{#with ..}}
+                {{bindParentContext ..}}
+
+                  <div class="btn-group post-select-buttons">
                     {{#if group_selected}}
                       {{#each group_posts}}
-                        {{#both ../this}}
+                        {{#with ..}}
+                        {{bindParentContext ..}}
                           <button name='{{cur}}' class='btn post{{reply_class}}' title="{{title_selected_group}}"><img src="http://www.gravatar.com/avatar/{{email_hash}}?s=60&d=identicon" height='30' width='30' class='nodrag' /></button>
-                        {{/both}}
+                        {{/with}}
                       {{/each}}
-                    
+
                     {{else}}
                       <button name='{{cur.name}}' class='btn group btn-inverse faded-inside' title="{{title_current_group}}">
                         <div>
@@ -25,8 +27,8 @@
                       </button>
                     {{/if}}
                   </div>
-                  
-                {{/both}}
+
+                {{/with}}
               {{/each}}
             </div>
           </div>
@@ -34,13 +36,13 @@
       </div>
     </div>
   {{/if}}
-  
+
   <div id='{{_id}}'>
     {{#if _id}}
     {{> post}}
     {{/if}}
   </div>
-  
+
   {{#if reply.exists}}
     {{#with reply.post}}
       {{> post_wrapper}}

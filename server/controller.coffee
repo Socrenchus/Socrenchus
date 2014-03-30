@@ -3,7 +3,7 @@
 #when off, db actions are blocked if any errors are encountered.
 _debug = true
 
-class GrandCentral
+class Controller
   constructor: (@collection, @method) ->
     @default =
       Meteor.default_server.method_handlers["/#{@collection}/#{@method}"]
@@ -12,7 +12,6 @@ class GrandCentral
       
   error_list = []
   dispatch: (args...) =>
-    user_id = Meteor.call('user_id')
     deny =
       insert: =>
         error_list.push('not implemented yet')
@@ -24,13 +23,13 @@ class GrandCentral
       users: deny
       posts: {
         insert: =>
-          args[0] = new ServerPost( args[0], user_id )
+          args[0] = new ServerPost( args[0], Meteor.userId() )
         update: =>
           [selector, modifier] = args
           doc = Posts.findOne( selector._id )
-          doc = new ClientPost( doc, user_id )
+          doc = new ClientPost( doc, Meteor.userId() )
           LocalCollection._modify( doc, modifier )
-          result = new ServerPost( doc, user_id )
+          result = new ServerPost( doc, Meteor.userId() )
           args[1] = result
         remove: (args...) =>
           error_list.push('not implemented yet')
@@ -42,11 +41,11 @@ class GrandCentral
       @default.apply(@, args)
     if (error_list.length>0)
       console.error(error_list)
-    #console.info 'GrandCentral is operational!!'
+    console.info 'Controller is operational!!'
     error_list = []
 
 Meteor.startup( ->
   for collection in ['users','posts','instances','notifications']
     for method in ['insert','update','remove']
-      gc = new GrandCentral(collection, method)
+      gc = new Controller(collection, method)
 )

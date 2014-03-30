@@ -57,6 +57,10 @@ _.extend( Template.notifications,
   
   show: -> Session.equals('notifications_state','open')
 
+  bindParentContext: (context) ->
+    @cur = context
+    return undefined
+
   events: {
     'click #notification-counter': (event) ->
       Session.set('notifications_state', 'open')

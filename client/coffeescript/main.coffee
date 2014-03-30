@@ -4,7 +4,7 @@
 
 # Subscriptions
 Meteor.subscribe( "my_notifs" )
-# Meteor.subscribe( "cover_posts" )
+Meteor.subscribe( "cover_posts" )
 
 # Backbone router
 class Router extends Backbone.Router
@@ -45,15 +45,12 @@ class Router extends Backbone.Router
       return "#{window.location.host}#{url}"
     return "#{window.instance}#{url}"
 
-Router = new Router()
+@Router = new Router()
 Meteor.startup( ->
-  # Get User ID
-  Session.set('user_id', @userId)
-  
   Backbone.history.start( pushState: true ) #!SUPPRESS no_headless_camel_case
 )
 
-get_primary_email = (author) ->
+@get_primary_email = (author) ->
   if author?
     if author.emails? and author.emails.length? and author.emails.length>0
       author = author.emails[0]
@@ -64,13 +61,6 @@ get_primary_email = (author) ->
   switch typeof author
     when 'string' then return author
     when 'object' then return author.email
-
-# Handlebars helper, an extension of 'with'.  'with' completely replaces the
-#   current context with the previous context, while 'both' keeps the current
-#   context as an additional field.
-Handlebars.registerHelper('both', (context, options) ->
-  return options.fn(_.extend(context ? {}, {cur:@}))
-)
 
 #http://thinkvitamin.com/code/handlebars-js-part-3-tips-and-tricks/
 Handlebars.registerHelper('debug', (optionalValue) ->

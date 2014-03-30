@@ -30,13 +30,7 @@ _.extend( Template.tagbox,
     filter ?= ''
     return filter
   
-  disabled_status: ->
-    filter = Session.get('filter_text')
-    filter ?= ''
-    if filter is ''
-      return "disabled='disabled'"
-    else
-      return ''
+  disabled_status: -> _.isEmpty(Session.get('filter_text'))
   
   displayed_tags: ->
     tags = (tag for tag of @tags)
@@ -71,6 +65,10 @@ _.extend( Template.tagbox,
       Session.set('suggested_tags',temp.clone())
     Meteor.flush()
   
+  bindParentContext: (context) ->
+    @cur = context
+    return undefined
+
   events: {
     
     #Key interaction with suggested tag items
