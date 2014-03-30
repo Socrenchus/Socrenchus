@@ -1,0 +1,15 @@
+{
+  "meteor": {},
+  "dependencies": {
+    "basePackages": {
+      "tron": {}
+    },
+    "packages": {
+      "tron": {
+        "git": "https://github.com/brysgo/tron.git",
+        "tag": "v0.0.1",
+        "commit": "5345f67fc853dfa812b21ae1c9d09462e7b22d8a"
+      }
+    }
+  }
+}
